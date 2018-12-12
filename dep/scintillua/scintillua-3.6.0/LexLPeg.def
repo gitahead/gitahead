@@ -1,0 +1,4 @@
+EXPORTS
+	GetLexerCount
+	GetLexerName
+	GetLexerFactory

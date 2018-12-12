@@ -1,0 +1,5 @@
+repo: 6ae31e000a3d5f03dfa50c585a2007e2422cdca9
+node: bd33edcbf0833157c55fa1906b3ea13a3dc62550
+branch: default
+latesttag: scintillua_3.5.7-1
+latesttagdistance: 5

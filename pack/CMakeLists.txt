@@ -1,0 +1,284 @@
+set(CONF_DIR ${CMAKE_SOURCE_DIR}/conf)
+set(RSRC_DIR ${CMAKE_SOURCE_DIR}/rsrc)
+
+set(MAC $<PLATFORM_ID:Darwin>)
+set(CONTENTS_DIR ${GITAHEAD_NAME}.app/Contents)
+
+# Install Qt plugins.
+set(QT_PLUGINS
+  QJpegPlugin
+)
+
+if(APPLE)
+  get_filename_component(QT_RPATH ${Qt5_DIR}/../.. REALPATH)
+
+  set(QT_PLUGINS
+    ${QT_PLUGINS}
+    QCocoaIntegrationPlugin
+    QMacStylePlugin
+  )
+elseif(WIN32)
+  set(QT_PLUGINS
+    ${QT_PLUGINS}
+    QWindowsIntegrationPlugin
+    QWindowsVistaStylePlugin
+  )
+else()
+  set(QT_PLUGINS
+    ${QT_PLUGINS}
+    QXcbIntegrationPlugin
+  )
+endif()
+
+foreach(QT_PLUGIN ${QT_PLUGINS})
+  get_target_property(PLUGIN Qt5::${QT_PLUGIN} LOCATION_${CMAKE_BUILD_TYPE})
+  get_filename_component(FILE_NAME ${PLUGIN} NAME)
+  get_filename_component(DIR ${PLUGIN} DIRECTORY)
+  get_filename_component(DIR_NAME ${DIR} NAME)
+  set(PLUGIN_PATH Plugins/${DIR_NAME}/${FILE_NAME})
+
+  install(FILES ${PLUGIN}
+    DESTINATION $<${MAC}:${CONTENTS_DIR}/>Plugins/${DIR_NAME}
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+      GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+    COMPONENT ${GITAHEAD_NAME}
+  )
+
+  if(APPLE)
+    # Delete rpath.
+    install(CODE
+      "execute_process(COMMAND
+        install_name_tool -delete_rpath ${QT_RPATH}
+          \${CMAKE_INSTALL_PREFIX}/${CONTENTS_DIR}/${PLUGIN_PATH}
+      )"
+      COMPONENT ${GITAHEAD_NAME}
+    )
+  elseif(WIN32)
+    # Copy into build dir.
+    execute_process(COMMAND
+      ${CMAKE_COMMAND} -E copy_if_different
+        ${PLUGIN} ${CMAKE_BINARY_DIR}/${PLUGIN_PATH}
+    )
+  else()
+    # Delete runpath.
+    install(CODE
+      "execute_process(COMMAND chrpath --delete
+        \${CMAKE_INSTALL_PREFIX}/${PLUGIN_PATH}
+      )"
+      COMPONENT ${GITAHEAD_NAME}
+    )
+  endif()
+endforeach()
+
+# Install Qt libraries.
+foreach(QT_MODULE ${QT_MODULES})
+  get_target_property(QT_LIBRARY Qt5::${QT_MODULE} LOCATION_${CMAKE_BUILD_TYPE})
+
+  if(APPLE)
+    get_filename_component(QT_FRAMEWORK ${QT_LIBRARY} DIRECTORY)
+    set(DEST_DIR ${CONTENTS_DIR}/Frameworks)
+    set(LIB_PATH ${DEST_DIR}/Qt${QT_MODULE}.framework/Qt${QT_MODULE})
+    install(DIRECTORY ${QT_FRAMEWORK}
+      DESTINATION ${DEST_DIR}
+      COMPONENT ${GITAHEAD_NAME}
+      PATTERN "*.prl" EXCLUDE
+      PATTERN "*_debug" EXCLUDE
+      PATTERN "Headers" EXCLUDE
+      PATTERN ".DS_Store" EXCLUDE
+    )
+
+    # Delete rpath.
+    install(CODE
+      "execute_process(COMMAND
+        install_name_tool -delete_rpath ${QT_RPATH}
+          \${CMAKE_INSTALL_PREFIX}/${LIB_PATH}
+      )"
+      COMPONENT ${GITAHEAD_NAME}
+    )
+  else()
+    if(WIN32)
+      get_filename_component(TARGET_NAME ${QT_LIBRARY} NAME)
+
+      # Copy into build dir.
+      execute_process(COMMAND
+        ${CMAKE_COMMAND} -E copy_if_different
+          ${QT_LIBRARY} ${CMAKE_BINARY_DIR}
+      )
+    else()
+      # Strip minor and patch version extensions.
+      get_filename_component(TARGET_NAME_WE ${QT_LIBRARY} NAME_WE)
+      set(TARGET_NAME ${TARGET_NAME_WE}.so.5)
+    endif()
+
+    install(FILES ${QT_LIBRARY}
+      DESTINATION .
+      PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+        GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+      COMPONENT ${GITAHEAD_NAME}
+      RENAME ${TARGET_NAME}
+    )
+
+    if(NOT WIN32)
+      # Delete runpath.
+      install(CODE
+        "execute_process(COMMAND chrpath --delete
+          \${CMAKE_INSTALL_PREFIX}/${TARGET_NAME}
+        )"
+        COMPONENT ${GITAHEAD_NAME}
+      )
+    endif()
+  endif()
+endforeach()
+
+# Install XcbQpa library.
+if(UNIX AND NOT APPLE)
+  set(LIB_NAME libQt5XcbQpa)
+  get_target_property(QT_CORE_LIBRARY Qt5::Core LOCATION)
+  get_filename_component(LIB_PATH ${QT_CORE_LIBRARY} PATH)
+  get_filename_component(LIB_EXT ${QT_CORE_LIBRARY} EXT)
+
+  install(FILES "${LIB_PATH}/${LIB_NAME}${LIB_EXT}"
+    DESTINATION .
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+      GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+    COMPONENT ${GITAHEAD_NAME}
+    RENAME ${LIB_NAME}.so.5
+  )
+endif()
+
+if(WIN32)
+  # Install SSL libraries.
+  set(SSL_LIB_DIR ${OPENSSL_DIR}/out32dll)
+  foreach(SSL_LIBRARY libeay32.dll ssleay32.dll)
+    # Copy into build dir.
+    execute_process(COMMAND
+      ${CMAKE_COMMAND} -E copy_if_different
+        ${SSL_LIB_DIR}/${SSL_LIBRARY} ${CMAKE_BINARY_DIR}
+    )
+
+    install(FILES ${SSL_LIB_DIR}/${SSL_LIBRARY}
+      DESTINATION .
+      COMPONENT ${GITAHEAD_NAME}
+    )
+  endforeach()
+endif()
+
+# Install config files.
+set(QT_CONF ${CONF_DIR}/qt.conf)
+install(FILES ${QT_CONF}
+  DESTINATION $<${MAC}:${CONTENTS_DIR}/Resources/>.
+  COMPONENT ${GITAHEAD_NAME}
+)
+
+if(NOT APPLE)
+  if(UNIX)
+    install(DIRECTORY ${RSRC_DIR}/GitAhead.iconset
+      DESTINATION Resources
+      COMPONENT ${GITAHEAD_NAME}
+    )
+  endif()
+endif()
+
+# Sign bundle on Mac.
+if(APPLE AND CODESIGN_IDENTITY)
+  install(CODE
+    "execute_process(COMMAND
+      codesign --deep -s \"${CODESIGN_IDENTITY}\"
+        \${CMAKE_INSTALL_PREFIX}/${GITAHEAD_NAME}.app
+    )"
+    COMPONENT ${GITAHEAD_NAME}
+  )
+endif()
+
+# Add package rule.
+if(APPLE)
+  set(CPACK_GENERATOR DragNDrop)
+  set(CPACK_DMG_VOLUME_NAME ${GITAHEAD_NAME})
+  set(CPACK_DMG_DS_STORE ${RSRC_DIR}/DS_Store)
+  set(CPACK_DMG_BACKGROUND_IMAGE ${RSRC_DIR}/background.png)
+elseif(WIN32)
+  set(CPACK_GENERATOR NSIS)
+  set(CPACK_NSIS_CREATE_ICONS_EXTRA
+    "CreateShortCut \
+    \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${GITAHEAD_NAME}.lnk\\\" \
+    \\\"$INSTDIR\\\\${GITAHEAD_NAME}.exe\\\""
+  )
+  set (CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
+  set (CPACK_NSIS_MUI_FINISHPAGE_RUN ${GITAHEAD_NAME}.exe)
+
+  if(CMAKE_CL_64)
+    install(FILES ${RSRC_DIR}/vcredist_x64.exe
+      DESTINATION .
+      COMPONENT ${GITAHEAD_NAME}
+    )
+    set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS
+      "ExecWait '\\\"$INSTDIR\\\\vcredist_x64.exe\\\" /q'"
+    )
+    set(PLATFORM "-win64")
+  else()
+    install(FILES ${RSRC_DIR}/vcredist_x86.exe
+      DESTINATION .
+      COMPONENT ${GITAHEAD_NAME}
+    )
+    set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS
+      "ExecWait '\\\"$INSTDIR\\\\vcredist_x86.exe\\\" /q'"
+    )
+    set(PLATFORM "-win32")
+  endif()
+else()
+  set(CPACK_GENERATOR STGZ)
+endif()
+
+set(PACKAGE_FILE_NAME "${GITAHEAD_NAME}${PLATFORM}-${GITAHEAD_VERSION}")
+
+set(CPACK_MONOLITHIC_INSTALL true)
+set(CPACK_INSTALL_CMAKE_PROJECTS
+  ${CMAKE_BINARY_DIR} ${GITAHEAD_NAME} ${GITAHEAD_NAME} /
+)
+
+# Add Context Menu Shortcuts
+if(WIN32)
+  set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "${CPACK_NSIS_EXTRA_INSTALL_COMMANDS}
+    WriteRegStr HKCR 'Directory\\\\Background\\\\shell\\\\GitAhead' '' 'Open with GitAhead'
+    WriteRegStr HKCR 'Directory\\\\Background\\\\shell\\\\GitAhead' 'Icon' '\\\"C:\\\\Program Files\\\\GitAhead\\\\gitahead.exe\\\"'
+    WriteRegStr HKCR 'Directory\\\\Background\\\\shell\\\\GitAhead\\\\command' '' '\\\"C:\\\\Program Files\\\\GitAhead\\\\gitahead.exe\\\" \\\"%V\\\"'
+    WriteRegStr HKCR 'Directory\\\\shell\\\\GitAhead' '' 'Open with GitAhead'
+    WriteRegStr HKCR 'Directory\\\\shell\\\\GitAhead' 'Icon' '\\\"C:\\\\Program Files\\\\GitAhead\\\\gitahead.exe\\\"'
+    WriteRegStr HKCR 'Directory\\\\shell\\\\GitAhead\\\\command' '' '\\\"C:\\\\Program Files\\\\GitAhead\\\\gitahead.exe\\\" \\\"%L\\\"'"
+  )
+  set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "${CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS}
+    DeleteRegKey HKCR 'Directory\\\\Background\\\\shell\\\\GitAhead'
+    DeleteRegKey HKCR 'Directory\\\\shell\\\\GitAhead'"
+  )
+endif(WIN32)
+
+set(CPACK_PACKAGE_FILE_NAME ${PACKAGE_FILE_NAME})
+set(CPACK_PACKAGE_INSTALL_DIRECTORY ${GITAHEAD_NAME})
+set(CPACK_PACKAGE_VENDOR "Scientific Toolworks, Inc.")
+set(CPACK_PACKAGE_VERSION_MAJOR ${GITAHEAD_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${GITAHEAD_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${GITAHEAD_VERSION_PATCH})
+
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+include(CPack)
+
+if(WIN32)
+  set(PACKAGE_DIR ${CMAKE_BINARY_DIR}/${PACKAGE_FILE_NAME})
+
+  # Add target to package and sign executable.
+  add_custom_target(deploy
+    signtool sign /v /f ${CERTIFICATE_FILE} /p ${CERTIFICATE_PASSWORD}
+      ${CMAKE_BINARY_DIR}/${PACKAGE_FILE_NAME}.exe
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${PACKAGE_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy
+      ${CMAKE_BINARY_DIR}/GitAhead.exe ${PACKAGE_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy
+      ${CMAKE_BINARY_DIR}/GitAhead.pdb ${PACKAGE_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy
+      ${CMAKE_BINARY_DIR}/indexer.exe ${PACKAGE_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy
+      ${CMAKE_BINARY_DIR}/indexer.pdb ${PACKAGE_DIR}
+  )
+
+  add_dependencies(deploy package)
+endif()

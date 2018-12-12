@@ -1,0 +1,34 @@
+//
+//          Copyright (c) 2016, Scientific Toolworks, Inc.
+//
+// This software is licensed under the MIT License. The LICENSE.md file
+// describes the conditions under which this software may be distributed.
+//
+// Author: Jason Haslam
+//
+
+#ifndef SCINTILLAIFACE_H
+#define SCINTILLAIFACE_H
+
+#include "ScintillaQt.h"
+
+#ifdef SCI_NAMESPACE
+namespace Scintilla {
+#endif
+
+class ScintillaIFace : public ScintillaQt
+{
+public:
+  ScintillaIFace(QWidget *parent = nullptr);
+
+  // The functions below are generated from Scintilla.iface.
+
+  //++FuncDef
+  //--
+};
+
+#ifdef SCI_NAMESPACE
+}
+#endif
+
+#endif

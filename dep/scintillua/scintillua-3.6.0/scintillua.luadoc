@@ -1,0 +1,170 @@
+-- Copyright 2007-2015 Mitchell mitchell.att.foicica.com. See LICENSE.
+-- This is a DUMMY FILE used for making LuaDoc for the Scintillua API.
+
+---
+-- ## Overview
+--
+-- The Scintillua Scintilla lexer has its own API to avoid any modifications to
+-- Scintilla itself. It is invoked using [`SCI_PRIVATELEXERCALL`][]. Please note
+-- that some of the names of the API calls do not make perfect sense. This is a
+-- tradeoff in order to keep Scintilla unmodified.
+--
+-- [`SCI_PRIVATELEXERCALL`]: http://scintilla.org/ScintillaDoc.html#LexerObjects
+--
+-- The following notation is used:
+--
+--     SCI_PRIVATELEXERCALL (int operation, void *pointer)
+--
+-- This means you would call Scintilla like this:
+--
+--     SendScintilla(sci, SCI_PRIVATELEXERCALL, operation, pointer);
+--
+-- ## Scintillua Usage Example
+--
+-- Here is a pseudo-code example:
+--
+--     init_app() {
+--       sci = scintilla_new()
+--       lib = "/home/mitchell/app/lexers/liblexlpeg.so"
+--       SendScintilla(sci, SCI_LOADLEXERLIBRARY, 0, lib)
+--     }
+--
+--     create_doc() {
+--       doc = SendScintilla(sci, SCI_CREATEDOCUMENT)
+--       SendScintilla(sci, SCI_SETDOCPOINTER, 0, doc)
+--       SendScintilla(sci, SCI_SETLEXERLANGUAGE, 0, "lpeg")
+--       home = "/home/mitchell/app/lexers"
+--       SendScintilla(sci, SCI_SETPROPERTY, "lexer.lpeg.home", home)
+--       SendScintilla(sci, SCI_SETPROPERTY, "lexer.lpeg.color.theme", "light")
+--       fn = SendScintilla(sci, SCI_GETDIRECTFUNCTION)
+--       SendScintilla(sci, SCI_PRIVATELEXERCALL, SCI_GETDIRECTFUNCTION, fn)
+--       psci = SendScintilla(sci, SCI_GETDIRECTPOINTER)
+--       SendScintilla(sci, SCI_PRIVATELEXERCALL, SCI_SETDOCPOINTER, psci)
+--       SendScintilla(sci, SCI_PRIVATELEXERCALL, SCI_SETLEXERLANGUAGE, "lua")
+--     }
+--
+--     set_lexer(lang) {
+--       psci = SendScintilla(sci, SCI_GETDIRECTPOINTER)
+--       SendScintilla(sci, SCI_PRIVATELEXERCALL, SCI_SETDOCPOINTER, psci)
+--       SendScintilla(sci, SCI_PRIVATELEXERCALL, SCI_SETLEXERLANGUAGE, lang)
+--     }
+module('Scintillua')
+
+---
+-- Tells Scintillua the address of the function that handles Scintilla messages.
+--
+-- Despite the name `SCI_GETDIRECTFUNCTION`, it only notifies Scintillua what
+-- the value of `SciFnDirect` obtained from [`SCI_GETDIRECTFUNCTION`][] is. It
+-- does not return anything.
+-- Use this if you would like to have the Scintillua lexer set all Lua LPeg
+-- lexer styles automatically. This is useful for maintaining a consistent color
+-- theme. Do not use this if your application maintains its own color theme.
+--
+-- If you use this call, it *must* be made *once* for each Scintilla buffer that
+-- was created using [`SCI_CREATEDOCUMENT`][]. You must also use the
+-- [`SCI_SETDOCPOINTER()`](#SCI_SETDOCPOINTER) Scintillua API call.
+--
+-- [`SCI_GETDIRECTFUNCTION`]: http://scintilla.org/ScintillaDoc.html#SCI_GETDIRECTFUNCTION
+-- [`SCI_CREATEDOCUMENT`]: http://scintilla.org/ScintillaDoc.html#SCI_CREATEDOCUMENT
+-- @param SciFnDirect The pointer returned by [`SCI_GETDIRECTFUNCTION`][].
+-- @usage fn = SendScintilla(sci, SCI_GETDIRECTFUNCTION)
+-- @usage SendScintilla(sci, SCI_PRIVATELEXERCALL, SCI_GETDIRECTFUNCTION, fn)
+-- @see SCI_SETDOCPOINTER
+-- @name SCI_GETDIRECTFUNCTION
+function SCI_PRIVATELEXERCALL(SCI_GETDIRECTFUNCTION, SciFnDirect) end
+
+---
+-- Tells Scintillua the address of the Scintilla window currently in use.
+--
+-- Despite the name `SCI_SETDOCPOINTER`, it has no relationship to Scintilla
+-- documents.
+--
+-- Use this call only if you are using the
+-- [`SCI_GETDIRECTFUNCTION()`](#SCI_GETDIRECTFUNCTION) Scintillua API call. It
+-- *must* be made *before* each call to the
+-- [`SCI_SETLEXERLANGUAGE()`](#SCI_SETLEXERLANGUAGE) Scintillua API call.
+-- @param sci The pointer returned by [`SCI_GETDIRECTPOINTER`][].
+--
+-- [`SCI_GETDIRECTPOINTER`]: http://scintilla.org/ScintillaDoc.html#SCI_GETDIRECTPOINTER
+-- @usage SendScintilla(sci, SCI_PRIVATELEXERCALL, SCI_SETDOCPOINTER, sci)
+-- @see SCI_GETDIRECTFUNCTION
+-- @see SCI_SETLEXERLANGUAGE
+-- @name SCI_SETDOCPOINTER
+function SCI_PRIVATELEXERCALL(SCI_SETDOCPOINTER, sci) end
+
+---
+-- Tells Scintillua to use `lua` as its Lua state instead of creating a separate
+-- state.
+--
+-- `lua` must have already opened the "base", "string", "table", "package", and
+-- "lpeg" libraries. If `lua` is a Lua 5.1 state, it must have also opened the
+-- "io" library.
+--
+-- Scintillua will create a single `lexer` global variable, as well as a number
+-- of other variables in the `LUA_REGISTRYINDEX` table with the "sci_" prefix.
+--
+-- Instead of including the path to Scintillua's lexers in the `package.path` of
+-- the given Lua state, set the "lexer.lpeg.home" property appropriately
+-- instead. Scintillua uses that property to find and load lexers.
+-- @param lua (`lua_State *`) The Lua state to use.
+-- @usage lua = luaL_newstate()
+-- @usage SendScintilla(sci, SCI_PRIVATELEXERCALL, SCI_CHANGELEXERSTATE, lua)
+-- @name SCI_CHANGELEXERSTATE
+function SCI_PRIVATELEXERCALL(SCI_CHANGELEXERSTATE, lua) end
+
+---
+-- Sets the current Lua LPeg lexer to `languageName`.
+--
+-- If you are having the Scintillua lexer set the Lua LPeg lexer styles
+-- automatically, make sure you call the
+-- [`SCI_SETDOCPOINTER()`](#SCI_SETDOCPOINTER) Scintillua API *first*.
+-- @param languageName (`const char*`) The name of the Lua LPeg lexer to use.
+-- @usage SendScintilla(sci, SCI_PRIVATELEXERCALL, SCI_SETLEXERLANGUAGE, "lua")
+-- @see SCI_SETDOCPOINTER
+-- @name SCI_SETLEXERLANGUAGE
+function SCI_PRIVATELEXERCALL(SCI_SETLEXERLANGUAGE, languageName) end
+
+---
+-- Returns the length of the string name of the current Lua LPeg lexer or stores
+-- the name into the given buffer. If the buffer is long enough, the name is
+-- terminated by a `0` character.
+--
+-- For parent lexers with embedded children or child lexers embedded into
+-- parents, the name is in "lexer/current" format, where "lexer" is the actual
+-- lexer's name and "current" is the parent or child lexer at the current caret
+-- position. In order for this to work, you must have called
+-- [`SCI_GETDIRECTFUNCTION`](#SCI_GETDIRECTFUNCTION) and
+-- [`SCI_SETDOCPOINTER`](#SCI_SETDOCPOINTER).
+-- @param languageName (`char *`) If `0`, returns the length that should be
+--   allocated to store the string Lua LPeg lexer name. Otherwise fills the
+--   buffer with the name.
+-- @name SCI_GETLEXERLANGUAGE
+function SCI_PRIVATELEXERCALL(SCI_GETLEXERLANGUAGE, languageName) end
+
+---
+-- Depending on the sign of `styleNum`, returns the length of the associated
+-- string for the given style number or stores the string into the given buffer.
+-- If the buffer is long enough, the string is terminated by a `0` character.
+--
+-- For negative `styleNum`, the associated string is a SciTE-formatted style
+-- definition. Otherwise, the associated string is the name of the token for the
+-- given style number.
+--
+-- Please see the [SciTE documentation][] for the style definition format
+-- specified by `style.*.stylenumber`. You can parse these definitions to set
+-- Lua LPeg lexer styles manually if you chose not to have them set
+-- automatically using the [`SCI_GETDIRECTFUNCTION()`](#SCI_GETDIRECTFUNCTION)
+-- and [`SCI_SETDOCPOINTER()`](#SCI_SETDOCPOINTER) Scintillua API calls.
+--
+-- [SciTE documentation]: http://scintilla.org/SciTEDoc.html
+-- @param styleNum (`int`) For the range `-STYLE_MAX <= styleNum < 0`, uses the
+--   Scintilla style number `-styleNum - 1` for returning SciTE-formatted style
+--   definitions. (Style `0` would be `-1`, style `1` would be `-2`, and so on.)
+--   For the range `0 <= styleNum < STYLE_MAX`, uses the normal Scintilla style
+--   number for returning token names.
+-- @param style (`char *`) If `0`, returns the length that should be allocated
+--   to store the associated string. Otherwise fills the buffer with the string.
+-- @usage style = SendScintilla(sci, SCI_GETSTYLEAT, pos)
+-- @usage SendScintilla(sci, SCI_PRIVATELEXERCALL, style, token)
+-- @usage // token now contains the name of the style at pos
+function SCI_PRIVATELEXERCALL(styleNum, style) end
