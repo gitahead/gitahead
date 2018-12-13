@@ -43,7 +43,8 @@
 namespace {
 
 const QString kTemplateFmt = "%1-XXXXXX.%2";
-const QString kLinkFmt = "https://gitahead.com/downloads/v%1/GitAhead%2-%3.%4";
+const QString kLinkFmt =
+  "https://github.com/gitahead/gitahead/releases/download/v%1/GitAhead%2-%3.%4";
 const QString kChangelogUrl =
   "https://raw.githubusercontent.com/gitahead/gitahead/master/doc/changelog.md";
 
