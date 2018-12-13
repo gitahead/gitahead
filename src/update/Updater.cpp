@@ -182,7 +182,13 @@ Updater::DownloadRef Updater::download(const QString &link)
     return DownloadRef();
   }
 
-  QNetworkReply *reply = mMgr.get(QNetworkRequest(link));
+  // Follow redirects.
+  QNetworkRequest request(link);
+  request.setAttribute(
+    QNetworkRequest::RedirectPolicyAttribute,
+    QNetworkRequest::NoLessSafeRedirectPolicy);
+
+  QNetworkReply *reply = mMgr.get(request);
   connect(reply, &QNetworkReply::finished, [this, errorText, download] {
     // Destroy the reply later.
     QNetworkReply *reply = download->reply();
