@@ -1,3 +1,11 @@
+### v2.5.0 - 2018-12-13
+
+#### Changed
+
+* GitAhead is now open source and free for everybody! See the new gitahead.com for details.
+
+----
+
 ### v2.4.7 - 2018-11-20
 
 #### Added
