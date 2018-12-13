@@ -106,7 +106,9 @@ your contributions under the terms of the license.
 Contribute by following the typical
 [GitHub workflow](https://guides.github.com/introduction/flow/index.html)
 for pull requests. Fork the repository and make changes on a new named
-branch. Create pull requests against the `master` branch.
+branch. Create pull requests against the `master` branch. Follow the 
+[seven guidlines](https://chris.beams.io/posts/git-commit/) to writing a great 
+commit message.
 
 License
 -------
