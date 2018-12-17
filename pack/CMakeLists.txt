@@ -212,7 +212,7 @@ elseif(WIN32)
       COMPONENT ${GITAHEAD_NAME}
     )
     set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS
-      "ExecWait '\\\"$INSTDIR\\\\vcredist_x64.exe\\\" /q'"
+      "ExecWait '\\\"$INSTDIR\\\\vcredist_x64.exe\\\" /q /norestart'"
     )
     set(PLATFORM "-win64")
   else()
@@ -221,7 +221,7 @@ elseif(WIN32)
       COMPONENT ${GITAHEAD_NAME}
     )
     set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS
-      "ExecWait '\\\"$INSTDIR\\\\vcredist_x86.exe\\\" /q'"
+      "ExecWait '\\\"$INSTDIR\\\\vcredist_x86.exe\\\" /q /norestart'"
     )
     set(PLATFORM "-win32")
   endif()
