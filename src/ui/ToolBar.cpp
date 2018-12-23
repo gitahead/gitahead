@@ -277,7 +277,7 @@ public:
       painter.setFont(font);
 #endif
 
-      QString text = QString::number(mBadge);
+      QString text = (mBadge > 999) ? tr("999+") : QString::number(mBadge);
       QFontMetrics fm = painter.fontMetrics();
 
       int w = fm.width(text) + 8;

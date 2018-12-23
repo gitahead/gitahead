@@ -43,7 +43,7 @@ NSImage *image(const QString &path, int badge = -1)
     painter.setFont(font);
     QFontMetrics fm = painter.fontMetrics();
 
-    QString text = QString::number(badge);
+    QString text = (badge > 999) ? "999+" : QString::number(badge);
     int width = fm.width(text) + 8;
     QRect rect(kMaxIconSize - width, 4, width, fm.lineSpacing() + 2);
 
