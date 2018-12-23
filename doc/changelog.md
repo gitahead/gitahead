@@ -1,3 +1,17 @@
+### v2.5.1 - 2018-12-22
+
+#### Fixed
+
+* (Win) Restored license agreement to the installer.
+* (Win) Avoid restart after the VS redistributable is installed.
+* (Mac) Fixed failure to launch on macOS 10.12 and 10.13.
+
+#### Changed
+
+* Truncate tool bar badge numbers at 999.
+
+----
+
 ### v2.5.0 - 2018-12-13
 
 #### Changed
