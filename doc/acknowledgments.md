@@ -4,8 +4,6 @@ The Qt Toolkit is Copyright (C) 2015 The Qt Company Ltd.
 
 [Qt](https://github.com/stinb/qt5) is used under the terms of the
 [LGPLv3](https://raw.githubusercontent.com/stinb/qt5/gitahead/LICENSE.LGPLv3).
-Follow these [directions](https://github.com/stinb/qt5/wiki/Build-Qt-for-GitAhead)
-to replace Qt libraries with your own build of Qt.
 
 ----
 
