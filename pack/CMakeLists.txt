@@ -240,11 +240,11 @@ set(CPACK_INSTALL_CMAKE_PROJECTS
 if(WIN32)
   set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "${CPACK_NSIS_EXTRA_INSTALL_COMMANDS}
     WriteRegStr HKCR 'Directory\\\\Background\\\\shell\\\\GitAhead' '' 'Open with GitAhead'
-    WriteRegStr HKCR 'Directory\\\\Background\\\\shell\\\\GitAhead' 'Icon' '\\\"C:\\\\Program Files\\\\GitAhead\\\\gitahead.exe\\\"'
-    WriteRegStr HKCR 'Directory\\\\Background\\\\shell\\\\GitAhead\\\\command' '' '\\\"C:\\\\Program Files\\\\GitAhead\\\\gitahead.exe\\\" \\\"%V\\\"'
+    WriteRegStr HKCR 'Directory\\\\Background\\\\shell\\\\GitAhead' 'Icon' '\\\"$INSTDIR\\\\gitahead.exe\\\"'
+    WriteRegStr HKCR 'Directory\\\\Background\\\\shell\\\\GitAhead\\\\command' '' '\\\"$INSTDIR\\\\gitahead.exe\\\" \\\"%V\\\"'
     WriteRegStr HKCR 'Directory\\\\shell\\\\GitAhead' '' 'Open with GitAhead'
-    WriteRegStr HKCR 'Directory\\\\shell\\\\GitAhead' 'Icon' '\\\"C:\\\\Program Files\\\\GitAhead\\\\gitahead.exe\\\"'
-    WriteRegStr HKCR 'Directory\\\\shell\\\\GitAhead\\\\command' '' '\\\"C:\\\\Program Files\\\\GitAhead\\\\gitahead.exe\\\" \\\"%L\\\"'"
+    WriteRegStr HKCR 'Directory\\\\shell\\\\GitAhead' 'Icon' '\\\"$INSTDIR\\\\gitahead.exe\\\"'
+    WriteRegStr HKCR 'Directory\\\\shell\\\\GitAhead\\\\command' '' '\\\"$INSTDIR\\\\gitahead.exe\\\" \\\"%L\\\"'"
   )
   set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "${CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS}
     DeleteRegKey HKCR 'Directory\\\\Background\\\\shell\\\\GitAhead'
