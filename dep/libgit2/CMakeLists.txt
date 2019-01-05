@@ -7,7 +7,7 @@ set(STATIC_CRT OFF CACHE BOOL "" FORCE)
 set(USE_SSH OFF CACHE BOOL "" FORCE)
 
 if(WIN32)
-  # Disable search.
+  # Disable search for OpenSSL.
   set(USE_OPENSSL OFF CACHE BOOL "" FORCE)
 
   # Set variables manually.
@@ -17,6 +17,9 @@ if(WIN32)
     ${OPENSSL_DIR}/out32dll/libeay32.lib
     ${OPENSSL_DIR}/out32dll/ssleay32.lib
   )
+
+  # Disable nanosecond precision.
+  set(USE_NSEC OFF CACHE BOOL "" FORCE)
 endif()
 
 add_subdirectory(libgit2)
