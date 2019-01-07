@@ -1,3 +1,12 @@
+### v2.5.2 - 2019-01-06
+
+#### Fixed
+
+* (Win) Fixed status diff performance regression on indexes built with older versions of GitAhead.
+* (Win) Fixed installer shortcuts to be relative to the actual install location instead of hard coded to the default location.
+
+----
+
 ### v2.5.1 - 2018-12-22
 
 #### Fixed
