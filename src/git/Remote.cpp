@@ -33,19 +33,23 @@ namespace git {
 namespace {
 
 const QString kLogKey = "remote/log";
+const QStringList kKeyKinds = {"ed25519", "rsa", "dsa"};
 
-bool keyFile(const QString &kind, QString &key)
+bool keyFile(QString &key)
 {
   QDir dir = QDir::home();
   if (!dir.cd(".ssh"))
     return false;
 
-  QString tmp = QString("id_%1").arg(kind);
-  if (!dir.exists(tmp))
-    return false;
+  foreach (const QString &kind, kKeyKinds) {
+    QString name = QString("id_%1").arg(kind);
+    if (dir.exists(name)) {
+      key = dir.absoluteFilePath(name);
+      return true;
+    }
+  }
 
-  key = dir.absoluteFilePath(tmp);
-  return true;
+  return false;
 }
 
 QString hostName(const QString &url)
@@ -266,7 +270,7 @@ int Remote::Callbacks::credentials(
         giterr_set_str(GITERR_NET, err.toUtf8());
         return -1;
       }
-    } else if (!keyFile("rsa", key) && !keyFile("dsa", key)) {
+    } else if (!keyFile(key)) {
       giterr_set_str(GITERR_NET, "failed to find SSH identity file");
       return -1;
     }
@@ -283,12 +287,15 @@ int Remote::Callbacks::credentials(
     }
 
     QTextStream in(&file);
-    in.readLine(); // -----BEGIN RSA PRIVATE KEY-----
+    in.readLine(); // -----BEGIN PRIVATE KEY-----
     QString line = in.readLine();
-    if (!line.startsWith("Proc-Type:") || !line.endsWith("ENCRYPTED"))
-      return git_cred_ssh_key_new(out, name,
-        !pub.isEmpty() ? pub.toLocal8Bit().constData() : nullptr,
-        key.toLocal8Bit(), nullptr);
+    if (!line.startsWith("Proc-Type:") || !line.endsWith("ENCRYPTED")) {
+      QByteArray base64 = QByteArray::fromBase64(line.toLocal8Bit());
+      if (!base64.contains("aes256-ctr") || !base64.contains("bcrypt"))
+        return git_cred_ssh_key_new(out, name,
+          !pub.isEmpty() ? pub.toLocal8Bit().constData() : nullptr,
+          key.toLocal8Bit(), nullptr);
+    }
 
     // Prompt for passphrase to decrypt key.
     QString passphrase;
