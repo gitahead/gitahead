@@ -35,9 +35,8 @@ Dependencies
 ------------
 
 External dependencies can be satisfied by system libraries or installed
-separately. Included dependencies are included as submodules of this
-repository. Some of the submodules are optional or may also be satisfied
-by system libraries.
+separately. Included dependencies are submodules of this repository. Some
+submodules are optional or may also be satisfied by system libraries.
 
 **External Dependencies**
 
@@ -72,12 +71,12 @@ Win:
 
 Mac:
 
-    ./Configure darwin64-x86_64-cc
+    ./Configure darwin64-x86_64-cc no-shared
     make
 
 Linux:
 
-    ./config -fPIC
+    ./config no-shared -fPIC
     make
 
 **Configure Build**
