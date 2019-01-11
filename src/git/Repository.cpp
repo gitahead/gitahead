@@ -133,7 +133,11 @@ Repository::Data::Data(git_repository *repo)
   if (!file.open(QIODevice::ReadOnly))
     return;
 
-  foreach (const QByteArray &id, file.readAll().split('\n'))
+  QByteArray ids = file.readAll();
+  if (ids.isEmpty())
+    return;
+
+  foreach (const QByteArray &id, ids.split('\n'))
     starredCommits.insert(QByteArray::fromHex(id));
 }
 
