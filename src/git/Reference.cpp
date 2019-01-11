@@ -136,8 +136,9 @@ Reference Reference::setTarget(const Commit &commit, const QString &msg) const
 AnnotatedCommit Reference::annotatedCommit() const
 {
   git_annotated_commit *commit = nullptr;
-  git_annotated_commit_from_ref(&commit, d.data());
-  return AnnotatedCommit(commit, git_reference_owner(d.data()));
+  git_repository *repo = git_reference_owner(d.data());
+  git_annotated_commit_from_ref(&commit, repo, d.data());
+  return AnnotatedCommit(commit, repo);
 }
 
 bool Reference::isNameValid(const QString &name)
