@@ -1,3 +1,15 @@
+### v2.5.3 - 2019-01-24
+
+#### Added
+
+* Added support for ed25519 SSH identity files.
+
+#### Fixed
+
+* Fixed possible crash after starred commits have been added and removed.
+
+----
+
 ### v2.5.2 - 2019-01-06
 
 #### Fixed
