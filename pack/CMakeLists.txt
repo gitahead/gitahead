@@ -146,15 +146,24 @@ if(UNIX AND NOT APPLE)
   )
 endif()
 
-if(WIN32)
-  # Install SSL libraries.
-  set(SSL_LIB_DIR ${OPENSSL_DIR}/out32dll)
-  foreach(SSL_LIBRARY libeay32.dll ssleay32.dll)
-    # Copy into build dir.
-    execute_process(COMMAND
-      ${CMAKE_COMMAND} -E copy_if_different
-        ${SSL_LIB_DIR}/${SSL_LIBRARY} ${CMAKE_BINARY_DIR}
-    )
+# Install SSL libraries.
+if(NOT APPLE)
+  if(WIN32)
+    set(SSL_LIB_DIR ${OPENSSL_DIR}/out32dll)
+    set(SSL_LIBRARIES libeay32.dll ssleay32.dll)
+  else()
+    set(SSL_LIB_DIR ${OPENSSL_DIR})
+    set(SSL_LIBRARIES libcrypto.so.1.1 libssl.so.1.1)
+  endif()
+
+  foreach(SSL_LIBRARY ${SSL_LIBRARIES})
+    if(WIN32)
+      # Copy into build dir.
+      execute_process(COMMAND
+        ${CMAKE_COMMAND} -E copy_if_different
+          ${SSL_LIB_DIR}/${SSL_LIBRARY} ${CMAKE_BINARY_DIR}
+      )
+    endif()
 
     install(FILES ${SSL_LIB_DIR}/${SSL_LIBRARY}
       DESTINATION .
