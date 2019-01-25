@@ -66,8 +66,7 @@ How to Build
 Win:
 
     perl Configure VC-WIN64A
-    ms\do_win64a
-    nmake -f ms\ntdll.mak
+    nmake
 
 Mac:
 
@@ -76,7 +75,7 @@ Mac:
 
 Linux:
 
-    ./config no-shared -fPIC
+    ./config -fPIC
     make
 
 **Configure Build**
