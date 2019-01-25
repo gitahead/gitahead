@@ -159,7 +159,7 @@ if(NOT APPLE)
   endif()
 
   foreach(SSL_LIB_NAME ssl crypto)
-    set(SSL_LIB "${OPENSSL_LIB}/lib${SSL_LIB_NAME}${SSL_LIB_SUFFIX}")
+    set(SSL_LIB "${OPENSSL_DIR}/lib${SSL_LIB_NAME}${SSL_LIB_SUFFIX}")
 
     if(WIN32)
       # Copy into build dir.
