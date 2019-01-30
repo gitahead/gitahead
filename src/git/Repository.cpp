@@ -509,7 +509,7 @@ TagRef Repository::createTag(
 Blob Repository::lookupBlob(const Id &id) const
 {
   git_object *obj = nullptr;
-  git_object_lookup(&obj, d->repo, id, GIT_OBJ_BLOB);
+  git_object_lookup(&obj, d->repo, id, GIT_OBJECT_BLOB);
   return Blob(reinterpret_cast<git_blob *>(obj));
 }
 
@@ -1023,8 +1023,8 @@ bool Repository::clean(const QString &name)
 
 int Repository::lastErrorKind()
 {
-  const git_error *err = giterr_last();
-  return err ? err->klass : GITERR_NONE;
+  const git_error *err = git_error_last();
+  return err ? err->klass : GIT_ERROR_NONE;
 }
 
 QString Repository::lastError(const QString &defaultError)
@@ -1032,7 +1032,7 @@ QString Repository::lastError(const QString &defaultError)
   if (!defaultError.isEmpty())
     return defaultError;
 
-  const git_error *err = giterr_last();
+  const git_error *err = git_error_last();
   return err ? err->message : tr("Unknown error");
 }
 
@@ -1103,7 +1103,7 @@ QByteArray Repository::lfsExecute(
   QString path = QStandardPaths::findExecutable("git-lfs");
   if (path.isEmpty()) {
     emit d->notifier->lfsNotFound();
-    giterr_set_str(GITERR_INVALID, tr("git-lfs not found").toUtf8());
+    git_error_set_str(GIT_ERROR_INVALID, tr("git-lfs not found").toUtf8());
     return QByteArray();
   }
 
@@ -1117,7 +1117,7 @@ QByteArray Repository::lfsExecute(
 
   process.waitForFinished();
   if (process.exitCode() != 0) {
-    giterr_set_str(GITERR_INVALID, process.readAllStandardError());
+    git_error_set_str(GIT_ERROR_INVALID, process.readAllStandardError());
     return QByteArray();
   }
 

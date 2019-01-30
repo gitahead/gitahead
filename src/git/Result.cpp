@@ -15,7 +15,7 @@ namespace git {
 Result::Result(int error)
   : mError(error)
 {
-  const git_error *err = giterr_last();
+  const git_error *err = git_error_last();
   mErrorString = err ? err->message : QString();
 }
 

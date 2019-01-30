@@ -32,7 +32,7 @@ Repository Object::repo() const
   return git_object_owner(d.data());
 }
 
-git_otype Object::type() const
+git_object_t Object::type() const
 {
   return git_object_type(d.data());
 }

@@ -148,7 +148,7 @@ bool RemoteCallbacks::credentials(
 
   // Set error on the thread that requested credentials.
   if (!error.isEmpty())
-    giterr_set_str(GITERR_NET, error.toUtf8());
+    git_error_set_str(GIT_ERROR_NET, error.toUtf8());
 
   return error.isEmpty();
 }
@@ -215,7 +215,7 @@ bool RemoteCallbacks::negotiation(
   QString bash = git::Command::bashPath();
   if (bash.isEmpty()) {
     QString error = tr("failed to execute pre-push hook: bash not found");
-    giterr_set_str(GITERR_NET, error.toUtf8());
+    git_error_set_str(GIT_ERROR_NET, error.toUtf8());
     return false;
   }
 
@@ -249,7 +249,7 @@ bool RemoteCallbacks::negotiation(
       error = process.errorString();
 
     QString text = tr("failed to execute pre-push hook: %1").arg(error);
-    giterr_set_str(GITERR_NET, text.toUtf8());
+    git_error_set_str(GIT_ERROR_NET, text.toUtf8());
 
     return false;
   }

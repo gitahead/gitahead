@@ -20,7 +20,7 @@ Tree::Tree()
 Tree::Tree(const Object &rhs)
   : Object(rhs)
 {
-  if (isValid() && type() != GIT_OBJ_TREE)
+  if (isValid() && type() != GIT_OBJECT_TREE)
     d.clear();
 }
 

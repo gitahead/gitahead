@@ -110,7 +110,7 @@ int Reference::difference(const Reference &ref) const
 Commit Reference::target() const
 {
   git_object *obj = nullptr;
-  git_reference_peel(&obj, d.data(), GIT_OBJ_COMMIT);
+  git_reference_peel(&obj, d.data(), GIT_OBJECT_COMMIT);
   return Commit(reinterpret_cast<git_commit *>(obj));
 }
 

@@ -428,7 +428,7 @@ Id Index::workdirId(const QString &path, uint32_t *mode) const
 
   git_oid id;
   if (int error = git_repository_hashfile(
-        &id, repo, path.toUtf8(), GIT_OBJ_BLOB, nullptr))
+        &id, repo, path.toUtf8(), GIT_OBJECT_BLOB, nullptr))
     return (error == GIT_EUSER) ? Id::invalidId() : Id();
 
   if (mode) {

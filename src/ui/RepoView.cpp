@@ -1225,7 +1225,7 @@ void RepoView::merge(
     // Add stash hint if the failure was because of uncommitted changes.
     QString msg = git::Repository::lastError();
     int kind = git::Repository::lastErrorKind();
-    if (kind == GITERR_MERGE && msg.contains("overwritten by merge")) {
+    if (kind == GIT_ERROR_MERGE && msg.contains("overwritten by merge")) {
       QString text =
         tr("You may be able to rebase by <a href='action:stash'>stashing</a> "
            "before trying to <a href='action:merge'>merge</a>. Then "
@@ -1351,7 +1351,7 @@ void RepoView::rebase(
     // Add stash hint if the failure was because of uncommitted changes.
     QString msg = git::Repository::lastError();
     int kind = git::Repository::lastErrorKind();
-    if (kind == GITERR_REBASE && msg.contains("changes exist")) {
+    if (kind == GIT_ERROR_REBASE && msg.contains("changes exist")) {
       QString text =
         tr("You may be able to rebase by <a href='action:stash'>stashing</a> "
            "before trying to <a href='action:rebase'>rebase</a>. Then "

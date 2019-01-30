@@ -19,7 +19,7 @@ Tag::Tag()
 Tag::Tag(const Object &rhs)
   : Object(rhs)
 {
-  if (isValid() && type() != GIT_OBJ_TAG)
+  if (isValid() && type() != GIT_OBJECT_TAG)
     d.clear();
 }
 

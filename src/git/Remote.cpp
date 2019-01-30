@@ -209,8 +209,8 @@ int Remote::Callbacks::credentials(
   void *payload)
 {
   // FIXME: Should libgit2 really continue to prompt after this error?
-  const git_error *error = giterr_last();
-  if (error && error->klass == GITERR_SSH &&
+  const git_error *error = git_error_last();
+  if (error && error->klass == GIT_ERROR_SSH &&
       QByteArray(error->message).endsWith("combination invalid"))
     return -1;
 
@@ -267,11 +267,11 @@ int Remote::Callbacks::credentials(
     if (!key.isEmpty()) {
       if (!QFile::exists(key)) {
         QString err = QString("identity file not found: %1").arg(key);
-        giterr_set_str(GITERR_NET, err.toUtf8());
+        git_error_set_str(GIT_ERROR_NET, err.toUtf8());
         return -1;
       }
     } else if (!keyFile(key)) {
-      giterr_set_str(GITERR_NET, "failed to find SSH identity file");
+      git_error_set_str(GIT_ERROR_NET, "failed to find SSH identity file");
       return -1;
     }
 
@@ -282,7 +282,7 @@ int Remote::Callbacks::credentials(
     // Check if the private key is encrypted.
     QFile file(key);
     if (!file.open(QFile::ReadOnly)) {
-      giterr_set_str(GITERR_NET, "failed to open SSH identity file");
+      git_error_set_str(GIT_ERROR_NET, "failed to open SSH identity file");
       return -1;
     }
 
@@ -339,7 +339,7 @@ int Remote::Callbacks::certificate(
   if (!config.value<bool>("http.sslVerify", true))
     return 0;
 
-  giterr_set_str(GITERR_SSL, "invalid certificate");
+  git_error_set_str(GIT_ERROR_SSL, "invalid certificate");
   return -1;
 }
 

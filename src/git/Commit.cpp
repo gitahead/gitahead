@@ -195,7 +195,7 @@ QList<Reference> Commit::refs() const
   const git_oid *id = git_object_id(d.data());
   while (!git_reference_next(&ref, it)) {
     git_object *obj = nullptr;
-    if (!git_reference_peel(&obj, ref, GIT_OBJ_COMMIT) &&
+    if (!git_reference_peel(&obj, ref, GIT_OBJECT_COMMIT) &&
         git_oid_equal(git_object_id(obj), id)) {
       refs.append(Reference(ref));
     } else {

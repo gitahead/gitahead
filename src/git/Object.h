@@ -26,7 +26,7 @@ public:
 
   Repository repo() const;
 
-  git_otype type() const;
+  git_object_t type() const;
 
   Id id() const;
   QString shortId() const;

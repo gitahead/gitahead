@@ -18,7 +18,7 @@ Blob::Blob()
 Blob::Blob(const Object &rhs)
   : Object(rhs)
 {
-  if (isValid() && type() != GIT_OBJ_BLOB)
+  if (isValid() && type() != GIT_OBJECT_BLOB)
     d.clear();
 }
 

@@ -69,7 +69,7 @@ int apply(
   process.closeWriteChannel();
 
   if (!process.waitForFinished() || process.exitCode()) {
-    giterr_set_str(GITERR_FILTER, process.readAllStandardError());
+    git_error_set_str(GIT_ERROR_FILTER, process.readAllStandardError());
     return info->required ? GIT_EUSER : GIT_PASSTHROUGH;
   }
 

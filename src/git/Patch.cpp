@@ -157,7 +157,7 @@ Blob Patch::blob(Diff::File file) const
   const git_oid &id = (file == Diff::NewFile) ? dd->new_file.id : dd->old_file.id;
 
   git_object *obj = nullptr;
-  git_object_lookup(&obj, repo, &id, GIT_OBJ_BLOB);
+  git_object_lookup(&obj, repo, &id, GIT_OBJECT_BLOB);
   return Blob(reinterpret_cast<git_blob *>(obj));
 }
 
