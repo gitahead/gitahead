@@ -21,6 +21,23 @@
 #include <QMessageBox>
 #include <QPushButton>
 
+namespace {
+
+void warnRevisionNotFound(
+  QWidget *parent,
+  const QString &fragment,
+  const QString &file)
+{
+  QString title = FileContextMenu::tr("Revision Not Found");
+  QString text = FileContextMenu::tr(
+    "The selected file doesn't have a %1 revision.").arg(fragment);
+  QMessageBox msg(QMessageBox::Warning, title, text, QMessageBox::Ok, parent);
+  msg.setInformativeText(file);
+  msg.exec();
+}
+
+} // anon. namespace
+
 FileContextMenu::FileContextMenu(
   RepoView *view,
   const QStringList &files,
@@ -277,17 +294,21 @@ FileContextMenu::FileContextMenu(
     // Navigate
     QMenu *navigate = addMenu(tr("Navigate to"));
     QAction *nextAct = navigate->addAction(tr("Next Revision"));
-    git::Commit next = view->nextRevision(file);
-    nextAct->setEnabled(next.isValid());
-    connect(nextAct, &QAction::triggered, [view, file, next] {
-      view->selectCommit(next, file);
+    connect(nextAct, &QAction::triggered, [view, file] {
+      if (git::Commit next = view->nextRevision(file)) {
+        view->selectCommit(next, file);
+      } else {
+        warnRevisionNotFound(view, tr("next"), file);
+      }
     });
 
     QAction *prevAct = navigate->addAction(tr("Previous Revision"));
-    git::Commit prev = view->previousRevision(file);
-    prevAct->setEnabled(prev.isValid());
-    connect(prevAct, &QAction::triggered, [view, file, prev] {
-      view->selectCommit(prev, file);
+    connect(prevAct, &QAction::triggered, [view, file] {
+      if (git::Commit prev = view->previousRevision(file)) {
+        view->selectCommit(prev, file);
+      } else {
+        warnRevisionNotFound(view, tr("previous"), file);
+      }
     });
 
     if (index.isValid() && index.isStaged(file)) {
