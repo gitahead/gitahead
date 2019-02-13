@@ -100,7 +100,7 @@ RepositoryWatcher::RepositoryWatcher(
 {
   init(repo);
   connect(d, &RepositoryWatcherPrivate::notificationReceived,
-          &mTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+          &mTimer, QOverload<>::of(&QTimer::start));
 }
 
 RepositoryWatcher::~RepositoryWatcher() {}

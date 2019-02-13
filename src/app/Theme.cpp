@@ -261,10 +261,8 @@ QString Theme::styleSheet() const
     "}"
 
     "QMenu::item {"
-    "  background: #6C6C6C"
-    "}"
-    "QMenu::item:selected {"
-    "  color: white"
+    "  selection-background-color: #6C6C6C;"
+    "  selection-color: white"
     "}";
 #endif
 
