@@ -306,7 +306,7 @@ MenuBar::MenuBar(QWidget *parent)
   QMenu *viewMenu = addMenu(tr("View"));
 
   mRefresh = viewMenu->addAction(tr("Refresh"));
-  mRefresh->setShortcut(tr("Ctrl+R"));
+  mRefresh->setShortcut(QKeySequence::Refresh);
   connect(mRefresh, &QAction::triggered, [this] {
     view()->refresh();
   });
