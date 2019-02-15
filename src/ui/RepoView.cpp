@@ -1833,6 +1833,34 @@ void RepoView::checkout(
     return;
   }
 
+  if (ref.isRemoteBranch() && mRepo.lookupBranch(local, GIT_BRANCH_LOCAL)) {
+
+    QString title = tr("Overwrite local branch?");
+    QString text =
+      tr("There is already a local branch called '%1'. Do you want to reset "
+         "that branch to this commit or do you want to check out a detached "
+         "head from this commit?");
+    QMessageBox *dialog = new QMessageBox(
+      QMessageBox::Question, title, text.arg(local),
+      QMessageBox::Cancel, this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+
+    QPushButton *createButton =
+      dialog->addButton(tr("Reset local branch"), QMessageBox::AcceptRole);
+    connect(createButton, &QPushButton::clicked, [this, ref, local] {
+      createBranch(local, ref.target(), ref, true);
+    });
+
+    QPushButton *checkoutButton =
+      dialog->addButton(tr("Checkout detached head"), QMessageBox::DestructiveRole);
+    connect(checkoutButton, &QPushButton::clicked, [this, ref, detach] {
+      checkout(ref.target(), ref, detach);
+    });
+
+    dialog->open();
+    return;
+  }
+
   checkout(ref.target(), ref, detach);
 }
 
