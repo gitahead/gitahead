@@ -786,10 +786,11 @@ void MenuBar::updateFind()
 {
   MainWindow *win = qobject_cast<MainWindow *>(window());
   EditorWindow *editor = qobject_cast<EditorWindow *>(window());
+  RepoView *view = win ? win->currentView() : nullptr;
   bool empty = FindWidget::text().isEmpty();
-  mFind->setEnabled(win || editor);
-  mFindNext->setEnabled((win || editor) && !empty);
-  mFindPrevious->setEnabled((win || editor) && !empty);
+  mFind->setEnabled(view || editor);
+  mFindNext->setEnabled((view || editor) && !empty);
+  mFindPrevious->setEnabled((view || editor) && !empty);
 }
 
 void MenuBar::updateView()
