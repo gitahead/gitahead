@@ -1797,23 +1797,46 @@ void RepoView::checkout(
 {
   Q_ASSERT(ref.isValid());
 
+  if (!ref.isRemoteBranch()) {
+    checkout(ref.target(), ref, detach);
+    return;
+  }
+
   // Prompt to create a new local branch instead
   // of checking out a remote tracking branch.
+  QMessageBox *dialog = new QMessageBox(this);
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+  dialog->setIcon(QMessageBox::Question);
+  dialog->setStandardButtons(QMessageBox::Cancel);
+  dialog->setWindowTitle(tr("Checkout Detached HEAD?"));
+
+  QPushButton *checkoutButton =
+    dialog->addButton(tr("Checkout Detached HEAD"), QMessageBox::DestructiveRole);
+  connect(checkoutButton, &QPushButton::clicked, [this, ref, detach] {
+    checkout(ref.target(), ref, detach);
+  });
+
   QString name = ref.name();
   QString local = name.section('/', 1);
-  if (ref.isRemoteBranch() && !mRepo.lookupBranch(local, GIT_BRANCH_LOCAL)) {
-    QString title = tr("Checkout Remote Branch?");
-    QString text =
-      tr("Do you really want to check out the remote tracking branch '%1', or "
-         "do you want to create a new local branch called '%2' to track it?");
-    QMessageBox *dialog = new QMessageBox(
-      QMessageBox::Question, title, text.arg(name, local),
-      QMessageBox::Cancel, this);
-    dialog->setAttribute(Qt::WA_DeleteOnClose);
+  if (mRepo.lookupBranch(local, GIT_BRANCH_LOCAL)) {
+    dialog->setText(
+      tr("Checking out remote branch '%1' will result in a detached HEAD "
+         "state. Do you want to reset the existing local branch '%2' to "
+         "this commit instead?").arg(name, local));
 
+    QPushButton *resetButton =
+      dialog->addButton(tr("Reset Local Branch"), QMessageBox::AcceptRole);
+    connect(resetButton, &QPushButton::clicked, [this, ref, local] {
+      createBranch(local, ref.target(), ref, true, true);
+    });
+  } else {
+    dialog->setText(
+      tr("Checking out remote branch '%1' will result in a detached HEAD "
+         "state. Do you want to create a new local branch called '%2' to "
+         "track it instead?").arg(name, local));
     dialog->setInformativeText(
       tr("Create a local branch to start tracking remote changes and make "
-         "new commits. Check out the remote branch to temporarily put your "
+         "new commits. Check out the detached HEAD to temporarily put your "
          "working directory into the state of the remote branch."));
 
     QPushButton *createButton =
@@ -1821,19 +1844,9 @@ void RepoView::checkout(
     connect(createButton, &QPushButton::clicked, [this, ref, local] {
       createBranch(local, ref.target(), ref, true);
     });
-
-    QString checkoutText = tr("Checkout Remote Branch");
-    QPushButton *checkoutButton =
-      dialog->addButton(checkoutText, QMessageBox::DestructiveRole);
-    connect(checkoutButton, &QPushButton::clicked, [this, ref, detach] {
-      checkout(ref.target(), ref, detach);
-    });
-
-    dialog->open();
-    return;
   }
 
-  checkout(ref.target(), ref, detach);
+  dialog->open();
 }
 
 void RepoView::checkout(
@@ -1896,10 +1909,11 @@ git::Branch RepoView::createBranch(
   const QString &name,
   const git::Commit &target,
   const git::Branch &upstream,
-  bool checkout)
+  bool checkout,
+  bool force)
 {
   LogEntry *entry = addLogEntry(name, tr("New Branch"));
-  git::Branch branch = mRepo.createBranch(name, target);
+  git::Branch branch = mRepo.createBranch(name, target, force);
   if (!branch.isValid()) {
     error(entry, tr("create new branch"), name);
     return git::Branch();

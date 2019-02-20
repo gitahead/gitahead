@@ -225,7 +225,8 @@ public:
     const QString &name,
     const git::Commit &target,
     const git::Branch &upstream = git::Branch(),
-    bool checkout = false);
+    bool checkout = false,
+    bool force = false);
 
   // stash
   void promptToStash();

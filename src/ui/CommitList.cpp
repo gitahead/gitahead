@@ -1343,6 +1343,7 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
   }
 
   QMenu menu;
+  menu.setToolTipsVisible(true);
 
   // stash
   git::Reference ref = static_cast<CommitModel *>(mModel)->reference();
@@ -1440,6 +1441,23 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
             head.isValid() &&
             head.qualifiedName() != ref.qualifiedName() &&
             !view->repo().isBare());
+        } else if (ref.isRemoteBranch()) {
+          QAction *checkout = menu.addAction(tr("Checkout %1").arg(ref.name()),
+          [view, ref] {
+            view->checkout(ref);
+          });
+
+          // Calculate local branch name in the same way as checkout() does
+          QString local = ref.name().section('/', 1);
+          if (!head.isValid()) { // I'm not sure when this can happen
+            checkout->setEnabled(false);
+          } else if (head.name() == local) {
+            checkout->setEnabled(false);
+            checkout->setToolTip(tr("Local branch is already checked out"));
+          } else if (view->repo().isBare()) {
+            checkout->setEnabled(false);
+            checkout->setToolTip(tr("This is a bare repository"));
+          }
         }
       }
 

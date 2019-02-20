@@ -423,7 +423,10 @@ Branch Repository::lookupBranch(const QString &name, git_branch_t flags) const
   return Branch(branch);
 }
 
-Branch Repository::createBranch(const QString &name, const Commit &target)
+Branch Repository::createBranch(
+  const QString &name,
+  const Commit &target,
+  bool force)
 {
   Commit commit = target;
   if (!commit.isValid()) {
@@ -439,7 +442,7 @@ Branch Repository::createBranch(const QString &name, const Commit &target)
   emit d->notifier->referenceAboutToBeAdded(name);
 
   git_reference *ref = nullptr;
-  git_branch_create(&ref, d->repo, name.toUtf8(), commit, false);
+  git_branch_create(&ref, d->repo, name.toUtf8(), commit, force);
 
   // We have to notify even if creation failed and the branch is invalid.
   // Clients can check the argument to see if a branch was really added.

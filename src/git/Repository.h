@@ -119,7 +119,10 @@ public:
   Branch lookupBranch(
     const QString &name,
     git_branch_t flags = GIT_BRANCH_ALL) const;
-  Branch createBranch(const QString &name, const Commit &target = Commit());
+  Branch createBranch(
+    const QString &name,
+    const Commit &target = Commit(),
+    bool force = false);
 
   // tag
   QList<TagRef> tags() const;
