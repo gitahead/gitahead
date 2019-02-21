@@ -39,6 +39,11 @@ struct FilterInfo
   QByteArray attributes;
 };
 
+QString quote(const QString &path)
+{
+  return QString("\"%1\"").arg(path);
+}
+
 int apply(
   git_filter *self,
   void **payload,
@@ -51,7 +56,7 @@ int apply(
   QString command = (mode == GIT_FILTER_SMUDGE) ? info->smudge : info->clean;
 
   // Substitute path.
-  command.replace("%f", git_filter_source_path(src));
+  command.replace("%f", quote(git_filter_source_path(src)));
 
   QString bash = Command::bashPath();
   if (bash.isEmpty())
