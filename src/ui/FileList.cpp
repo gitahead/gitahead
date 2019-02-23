@@ -232,25 +232,62 @@ FileList::FileList(const git::Repository &repo, QWidget *parent)
   mSortMenu = menu->addMenu(tr("Sort By"));
   mSelectMenu = menu->addMenu(tr("Select"));
 
+  Settings *settings = Settings::instance();
+
+  QAction *mStagedName = mSortMenu->addAction(tr("Staged First"), [this] {
+    Settings *settings = Settings::instance();
+    bool stagedFirst = !settings->value(settings->SORT_STAGED).toBool();
+    settings->setValue(settings->SORT_STAGED, stagedFirst);
+    emit sortRequested();
+  });
+  mStagedName->setCheckable(true);
+  mStagedName->setChecked(settings->value(settings->SORT_STAGED).toBool());
+
+  mSortMenu->addSeparator();
+
+  QAction *mDirectoryName = mSortMenu->addAction(tr("Directory First"), [this] {
+    Settings *settings = Settings::instance();
+    bool directoryFirst = !settings->value(settings->SORT_NAME_DIR).toBool();
+    settings->setValue(settings->SORT_NAME_DIR, directoryFirst);
+    if (settings->value(settings->SORT_ROLE).toInt() == git::Diff::NameRole) {
+      emit sortRequested();
+    }
+  });
+  mDirectoryName->setCheckable(true);
+  mDirectoryName->setChecked(settings->value(settings->SORT_NAME_DIR).toBool());
+
+  QAction *mCaseName = mSortMenu->addAction(tr("Case Sensitive"), [this] {
+    Settings *settings = Settings::instance();
+    bool caseInsensitive = !settings->value(settings->SORT_NAME_CASE).toBool();
+    settings->setValue(settings->SORT_NAME_CASE, caseInsensitive);
+    if (settings->value(settings->SORT_ROLE).toInt() == git::Diff::NameRole) {
+      emit sortRequested();
+    }
+  });
+  mCaseName->setCheckable(true);
+  mCaseName->setChecked(!settings->value(settings->SORT_NAME_CASE).toBool());
+
   mSortName = mSortMenu->addAction(tr("Name"), [this] {
     Settings *settings = Settings::instance();
     Qt::SortOrder order = Qt::AscendingOrder;
-    if (settings->value("sort/role").toInt() == git::Diff::NameRole &&
-        settings->value("sort/order").toInt() == Qt::AscendingOrder)
+    if (settings->value(settings->SORT_ROLE).toInt() == git::Diff::NameRole &&
+        settings->value(settings->SORT_ORDER).toInt() == Qt::AscendingOrder)
       order = Qt::DescendingOrder;
-    settings->setValue("sort/order", order);
-    settings->setValue("sort/role", git::Diff::NameRole);
+    settings->setValue(settings->SORT_ORDER, order);
+    settings->setValue(settings->SORT_ROLE, git::Diff::NameRole);
     emit sortRequested();
   });
+
+  mSortMenu->addSeparator();
 
   mSortStatus = mSortMenu->addAction(tr("Status"), [this] {
     Settings *settings = Settings::instance();
     Qt::SortOrder order = Qt::AscendingOrder;
-    if (settings->value("sort/role").toInt() == git::Diff::StatusRole &&
-        settings->value("sort/order").toInt() == Qt::AscendingOrder)
+    if (settings->value(settings->SORT_ROLE).toInt() == git::Diff::StatusRole &&
+        settings->value(settings->SORT_ORDER).toInt() == Qt::AscendingOrder)
       order = Qt::DescendingOrder;
-    settings->setValue("sort/order", order);
-    settings->setValue("sort/role", git::Diff::StatusRole);
+    settings->setValue(settings->SORT_ORDER, order);
+    settings->setValue(settings->SORT_ROLE, git::Diff::StatusRole);
     emit sortRequested();
   });
 
@@ -395,8 +432,8 @@ void FileList::updateMenu(const git::Diff &diff)
 
   // sort
   Settings *settings = Settings::instance();
-  int role = settings->value("sort/role").toInt();
-  int order = settings->value("sort/order").toInt();
+  int role = settings->value(settings->SORT_ROLE).toInt();
+  int order = settings->value(settings->SORT_ORDER).toInt();
 
   qreal dpr = window()->windowHandle()->devicePixelRatio();
   QPixmap pixmap(16 * dpr, 16 * dpr);

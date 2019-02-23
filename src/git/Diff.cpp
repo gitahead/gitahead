@@ -9,10 +9,63 @@
 
 #include "Diff.h"
 #include "Patch.h"
+#include "conf/Settings.h"
 #include "git2/patch.h"
 #include <algorithm>
 
 namespace git {
+
+namespace {
+
+bool dirCompare(const QString &lhsName, const QString &rhsName,
+                bool ascending, Qt::CaseSensitivity cs) {
+  const int lLength = lhsName.length();
+  const int rLength = rhsName.length();
+
+  for (int start = 0; ;) {
+    int lIdx = start == lLength ? -1 : lhsName.indexOf('/', start);
+    int rIdx = start == rLength ? -1 : rhsName.indexOf('/', start);
+
+    if (lIdx == -1) {
+      if (rIdx == -1) {
+        int i = QStringRef::compare(
+          QStringRef(&lhsName, start, lLength - start),
+          QStringRef(&rhsName, start, rLength - start),
+          cs
+        );
+
+        if (ascending) {
+          return i < 0;
+
+        } else {
+          return i > 0;
+        }
+      } else {
+        return false;
+      }
+    } else if (rIdx == -1) {
+      return true;
+
+    } else {
+      int i = QStringRef::compare(
+        QStringRef(&lhsName, start, lIdx - start),
+        QStringRef(&rhsName, start, rIdx - start),
+        cs
+      );
+
+      if (i < 0) {
+        return ascending;
+
+      } else if (i > 0) {
+        return !ascending;
+      }
+
+      start = lIdx + 1;
+    }
+  }
+}
+
+} // anon. namespace
 
 int Diff::Callbacks::progress(
   const git_diff *diff,
@@ -126,16 +179,46 @@ void Diff::findSimilar()
   d->resetMap();
 }
 
-void Diff::sort(SortRole role, Qt::SortOrder order)
+void Diff::sort(SortRole role, Qt::SortOrder order, const git::Index &index)
 {
+  Settings *settings = Settings::instance();
+  bool stagedFirst = settings->value(settings->SORT_STAGED).toBool();
+  bool directoryFirst = settings->value(settings->SORT_NAME_DIR).toBool();
+  Qt::CaseSensitivity cs = settings->value(settings->SORT_NAME_CASE).toBool() ?
+                           Qt::CaseInsensitive : Qt::CaseSensitive;
   bool ascending = (order == Qt::AscendingOrder);
   std::sort(d->map.begin(), d->map.end(),
-  [this, role, ascending](int lhs, int rhs) {
+  [this, stagedFirst, directoryFirst, cs, role, ascending, &index](int lhs, int rhs) {
+    QString lhsName = git_diff_get_delta(d->diff, lhs)->new_file.path;
+    QString rhsName = git_diff_get_delta(d->diff, rhs)->new_file.path;
+    if (stagedFirst && index.isValid()) {
+      git::Index::StagedState lhsStaged = index.isStaged(lhsName);
+      git::Index::StagedState rhsStaged = index.isStaged(rhsName);
+      if (lhsStaged != rhsStaged) {
+        if (lhsStaged == git::Index::Staged) {
+          return true;
+        }
+        if (rhsStaged == git::Index::Staged) {
+          return false;
+        }
+        if (lhsStaged == git::Index::PartiallyStaged) {
+          return true;
+        }
+        if (rhsStaged == git::Index::PartiallyStaged) {
+          return false;
+        }
+      }
+    }
+
     switch (role) {
       case NameRole: {
-        QString lhsName = git_diff_get_delta(d->diff, lhs)->new_file.path;
-        QString rhsName = git_diff_get_delta(d->diff, rhs)->new_file.path;
-        return ascending ? (lhsName < rhsName) : (rhsName < lhsName);
+        if (directoryFirst) {
+          return dirCompare(lhsName, rhsName, ascending, cs);
+
+        } else {
+          return ascending ? QString::compare(lhsName, rhsName, cs) < 0 :
+                             QString::compare(rhsName, lhsName, cs) < 0;
+        }
       }
 
       case StatusRole: {

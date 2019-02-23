@@ -27,6 +27,12 @@ public:
     PromptCherryPick
   };
 
+  const QString SORT_NAME_CASE = "sort/name/case";
+  const QString SORT_NAME_DIR  = "sort/name/dir";
+  const QString SORT_ORDER     = "sort/order";
+  const QString SORT_ROLE      = "sort/role";
+  const QString SORT_STAGED    = "sort/staged";
+
   QString group() const;
   void beginGroup(const QString &prefix);
   void endGroup();

@@ -508,6 +508,13 @@ void RepoView::setViewMode(ViewMode mode)
   mDetails->setViewMode(mode, true);
 }
 
+void RepoView::sort()
+{
+  if (viewMode() == ViewMode::Diff) {
+    mDetails->setDiff(diff());
+  }
+}
+
 bool RepoView::isWorkingDirectoryDirty() const
 {
   git::Diff status = mCommits->status();
