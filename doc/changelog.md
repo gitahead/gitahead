@@ -1,3 +1,24 @@
+### v2.5.4 - 2019-02-25
+
+#### Added
+
+* Allow checking out remote branches from the commit list.
+* Added option to reset remote branch to an existing local branch on checkout.
+
+#### Fixed
+
+* Quote path arguemnts to filters.
+* Fixed crash on 'Find' when no repository is open.
+* Fixed file context menu performance issue by enabling navigation items unconditionally.
+* Fixed failure to get more than 20 repositories from GitLab.
+* Work around lack of support for the 'no\_proxy' environment variable in libgit2.
+
+#### Changed
+
+* Map 'Refresh' to the platform-specific shortcut.
+
+----
+
 ### v2.5.3 - 2019-01-24
 
 #### Added
