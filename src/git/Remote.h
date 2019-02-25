@@ -13,6 +13,7 @@
 #include "Repository.h"
 #include "Result.h"
 #include "git2/net.h"
+#include "git2/proxy.h"
 #include <QSet>
 #include <QSharedPointer>
 
@@ -188,7 +189,7 @@ public:
     const QString &path,
     bool bare = false);
 
-  static QString proxyUrl(const QString &url);
+  static QByteArray proxyUrl(const QString &url, git_proxy_t &type);
 
   static bool isLoggingEnabled();
   static void setLoggingEnabled(bool enabled);

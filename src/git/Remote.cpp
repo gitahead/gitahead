@@ -484,10 +484,8 @@ Result Remote::fetch(Callbacks *callbacks, bool tags)
   opts.callbacks.url = &Remote::Callbacks::url;
   opts.callbacks.payload = callbacks;
 
-  QByteArray proxy = proxyUrl(url()).toUtf8();
+  QByteArray proxy = proxyUrl(url(), opts.proxy_opts.type);
   opts.proxy_opts.url = proxy;
-  opts.proxy_opts.type =
-    proxy.isEmpty() ? GIT_PROXY_AUTO : GIT_PROXY_SPECIFIED;
 
   if (tags)
     opts.download_tags = GIT_REMOTE_DOWNLOAD_TAGS_ALL;
@@ -513,10 +511,8 @@ Result Remote::push(Callbacks *callbacks, const QStringList &refspecs)
   opts.callbacks.push_negotiation = &push_negotiation;
   opts.callbacks.payload = callbacks;
 
-  QByteArray proxy = proxyUrl(url()).toUtf8();
+  QByteArray proxy = proxyUrl(url(), opts.proxy_opts.type);
   opts.proxy_opts.url = proxy;
-  opts.proxy_opts.type =
-    proxy.isEmpty() ? GIT_PROXY_AUTO : GIT_PROXY_SPECIFIED;
 
   QVector<char *> raw;
   QVector<QByteArray> storage;
@@ -582,29 +578,33 @@ Result Remote::clone(
   opts.fetch_opts.callbacks.payload = callbacks;
   opts.bare = bare;
 
-  QByteArray proxy = proxyUrl(url).toUtf8();
+  QByteArray proxy = proxyUrl(url, opts.fetch_opts.proxy_opts.type);
   opts.fetch_opts.proxy_opts.url = proxy;
-  opts.fetch_opts.proxy_opts.type =
-    proxy.isEmpty() ? GIT_PROXY_AUTO : GIT_PROXY_SPECIFIED;
 
   return git_clone(&repo, url.toUtf8(), path.toUtf8(), &opts);
 }
 
-QString Remote::proxyUrl(const QString &url)
+QByteArray Remote::proxyUrl(const QString &url, git_proxy_t &type)
 {
+  type = GIT_PROXY_AUTO;
+
   QUrl tmp(url);
   QNetworkProxyQuery query(tmp);
   QList<QNetworkProxy> proxies =
     QNetworkProxyFactory::systemProxyForQuery(query);
   if (proxies.isEmpty())
-    return QString();
+    return QByteArray();
 
   QNetworkProxy proxy = proxies.first();
+  if (proxy.type() == QNetworkProxy::NoProxy)
+    type = GIT_PROXY_NONE;
+
   QString host = proxy.hostName();
   if (host.isEmpty())
-    return QString();
+    return QByteArray();
 
-  return QString("http://%1:%2").arg(host).arg(proxy.port());
+  type = GIT_PROXY_SPECIFIED;
+  return QString("http://%1:%2").arg(host).arg(proxy.port()).toUtf8();
 }
 
 bool Remote::isLoggingEnabled()

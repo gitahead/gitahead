@@ -14,6 +14,8 @@
 
 namespace git {
 
+const QString kUrl = "https://gitahead.com";
+
 Submodule::Submodule() {}
 
 Submodule::Submodule(git_submodule *submodule)
@@ -132,10 +134,8 @@ Result Submodule::update(Remote::Callbacks *callbacks, bool init)
 
   // Use a fake URL. Submodule update doesn't have a way to
   // query a different proxy for each submodule remote.
-  QByteArray proxy = Remote::proxyUrl("https://gitahead.com").toUtf8();
+  QByteArray proxy = Remote::proxyUrl(kUrl, opts.fetch_opts.proxy_opts.type);
   opts.fetch_opts.proxy_opts.url = proxy;
-  opts.fetch_opts.proxy_opts.type =
-    proxy.isEmpty() ? GIT_PROXY_AUTO : GIT_PROXY_SPECIFIED;
 
   return git_submodule_update(d.data(), init, &opts);
 }
