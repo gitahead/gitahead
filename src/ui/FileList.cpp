@@ -234,18 +234,17 @@ FileList::FileList(const git::Repository &repo, QWidget *parent)
 
   Settings *settings = Settings::instance();
 
-  QAction *mStagedName = mSortMenu->addAction(tr("Staged First"), [this] {
+  mSortStaged = mSortMenu->addAction(tr("Staged First"), [this] {
     Settings *settings = Settings::instance();
     bool stagedFirst = !settings->value(settings->SORT_STAGED).toBool();
     settings->setValue(settings->SORT_STAGED, stagedFirst);
     emit sortRequested();
   });
-  mStagedName->setCheckable(true);
-  mStagedName->setChecked(settings->value(settings->SORT_STAGED).toBool());
+  mSortStaged->setCheckable(true);
 
   mSortMenu->addSeparator();
 
-  QAction *mDirectoryName = mSortMenu->addAction(tr("Directory First"), [this] {
+  mSortDirectory = mSortMenu->addAction(tr("Directory First"), [this] {
     Settings *settings = Settings::instance();
     bool directoryFirst = !settings->value(settings->SORT_NAME_DIR).toBool();
     settings->setValue(settings->SORT_NAME_DIR, directoryFirst);
@@ -253,10 +252,9 @@ FileList::FileList(const git::Repository &repo, QWidget *parent)
       emit sortRequested();
     }
   });
-  mDirectoryName->setCheckable(true);
-  mDirectoryName->setChecked(settings->value(settings->SORT_NAME_DIR).toBool());
+  mSortDirectory->setCheckable(true);
 
-  QAction *mCaseName = mSortMenu->addAction(tr("Case Sensitive"), [this] {
+  mSortCase = mSortMenu->addAction(tr("Case Sensitive"), [this] {
     Settings *settings = Settings::instance();
     bool caseInsensitive = !settings->value(settings->SORT_NAME_CASE).toBool();
     settings->setValue(settings->SORT_NAME_CASE, caseInsensitive);
@@ -264,8 +262,7 @@ FileList::FileList(const git::Repository &repo, QWidget *parent)
       emit sortRequested();
     }
   });
-  mCaseName->setCheckable(true);
-  mCaseName->setChecked(!settings->value(settings->SORT_NAME_CASE).toBool());
+  mSortCase->setCheckable(true);
 
   mSortName = mSortMenu->addAction(tr("Name"), [this] {
     Settings *settings = Settings::instance();
@@ -460,6 +457,9 @@ void FileList::updateMenu(const git::Diff &diff)
   QIcon icon;
   icon.addPixmap(pixmap);
 
+  mSortStaged->setChecked(settings->value(settings->SORT_STAGED).toBool());
+  mSortDirectory->setChecked(settings->value(settings->SORT_NAME_DIR).toBool());
+  mSortCase->setChecked(!settings->value(settings->SORT_NAME_CASE).toBool());
   mSortName->setIcon(role == git::Diff::NameRole ? icon : spacer);
   mSortStatus->setIcon(role == git::Diff::StatusRole ? icon : spacer);
 

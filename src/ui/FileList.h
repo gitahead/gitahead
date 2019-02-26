@@ -52,6 +52,9 @@ protected:
 private:
   void updateMenu(const git::Diff &diff);
 
+  QAction *mSortStaged;
+  QAction *mSortDirectory;
+  QAction *mSortCase;
   QAction *mSortName;
   QAction *mSortStatus;
   QMenu *mSelectMenu;
