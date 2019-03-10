@@ -33,6 +33,10 @@ return {
     name = "CSS",
     extensions = "css"
   },
+  erlang = {
+    name = "Erlang",
+    extensions = "erl,hrl"
+  },
   fortran = {
     name = "Fortran",
     extensions = "f,for,ftn,f77,f90,f95,f03"
@@ -117,6 +121,10 @@ return {
   scala = {
     name = "Scala",
     extensions = "scala"
+  },
+  sql = {
+    name = "Sql",
+    extensions = "sql"
   },
   swift = {
     name = "Swift",
