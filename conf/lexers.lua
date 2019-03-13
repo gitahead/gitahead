@@ -123,7 +123,7 @@ return {
     extensions = "scala"
   },
   sql = {
-    name = "Sql",
+    name = "SQL",
     extensions = "sql"
   },
   swift = {
