@@ -97,13 +97,16 @@ public:
         for (char *ptr = buf; ptr < buf + len;
              ptr += sizeof(inotify_event) + event->len) {
           event = reinterpret_cast<inotify_event *>(ptr);
-          if (event->len && !mRepo.isIgnored(event->name)) {
-            ignored = false;
+          if (event->len) {
+            QString path = mWds.value(event->wd).filePath(event->name);
+            if (!mRepo.isIgnored(path)) {
+              ignored = false;
 
-            // Start watching new directories.
-            int mask = (IN_CREATE | IN_ISDIR);
-            if ((event->mask & mask) == mask)
-              watch(mWds.value(event->wd).filePath(event->name));
+              // Start watching new directories.
+              int mask = (IN_CREATE | IN_ISDIR);
+              if ((event->mask & mask) == mask)
+                watch(path);
+            }
           }
         }
       }
