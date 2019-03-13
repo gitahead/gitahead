@@ -81,7 +81,8 @@ public:
   git::Repository repo() const { return mRepo; }
   History *history() const { return mHistory; }
   Index *index() const { return mIndex; }
-  Repository *remoteRepo() const { return mRemoteRepo; }
+
+  Repository *remoteRepo();
 
   // LFS
   void lfsInitialize();
@@ -327,6 +328,8 @@ private:
   History *mHistory;
 
   Repository *mRemoteRepo;
+  bool mRemoteRepoCached = false;
+
   ReferenceWidget *mRefs;
   PathspecWidget *mPathspec;
   CommitList *mCommits;

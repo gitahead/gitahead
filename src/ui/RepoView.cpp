@@ -154,18 +154,6 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   setHandleWidth(0);
   setAttribute(Qt::WA_DeleteOnClose);
 
-  // Look up remote account repository.
-  git::Remote remote = repo.defaultRemote();
-  mRemoteRepo = remote ? Accounts::instance()->lookup(remote.url()) : nullptr;
-
-  if (mRemoteRepo) {
-    connect(mRemoteRepo->account(), &Account::pullRequestError,
-    [this](const QString &name, const QString &message) {
-      LogEntry *parent = addLogEntry(tr("Pull Request"), tr("Create"));
-      error(parent, tr("create pull request"), name, message);
-    });
-  }
-
   // Start (or restart) indexing after any reference is updated.
   git::RepositoryNotifier *notifier = repo.notifier();
   connect(notifier, &git::RepositoryNotifier::referenceUpdated,
@@ -706,6 +694,33 @@ void RepoView::visitLink(const QString &link)
     mergeAbort();
     return;
   }
+}
+
+Repository *RepoView::remoteRepo()
+{
+  if (mRemoteRepoCached)
+    return mRemoteRepo;
+
+  // Look up remote account repository.
+  git::Remote remote = mRepo.defaultRemote();
+  mRemoteRepo = remote ? Accounts::instance()->lookup(remote.url()) : nullptr;
+  mRemoteRepoCached = true;
+
+  if (mRemoteRepo) {
+    auto err = connect(mRemoteRepo->account(), &Account::pullRequestError,
+    [this](const QString &name, const QString &message) {
+      LogEntry *parent = addLogEntry(tr("Pull Request"), tr("Create"));
+      error(parent, tr("create pull request"), name, message);
+    });
+
+    connect(mRemoteRepo, &Repository::destroyed, [this, err] {
+      disconnect(err);
+      mRemoteRepo = nullptr;
+      mRemoteRepoCached = false;
+    });
+  }
+
+  return mRemoteRepo;
 }
 
 void RepoView::lfsInitialize()
