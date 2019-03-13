@@ -206,7 +206,8 @@ void GitHub::connect(const QString &password)
   QNetworkRequest request(url() + suffix + "/user/repos");
   if (setHeaders(request, password)) {
     QNetworkReply *reply = mMgr.get(request);
-    reply->setProperty(kPasswordProperty, password);
+    reply->setProperty(kPasswordProperty,
+      !password.isEmpty() ? password : this->password());
     startProgress();
   }
 }
