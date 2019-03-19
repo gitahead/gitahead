@@ -150,6 +150,7 @@ public:
   void setCommitStarred(const Id &commit, bool starred);
 
   // submodule
+  void invalidateSubmoduleCache();
   QList<Submodule> submodules() const;
   Submodule lookupSubmodule(const QString &path) const;
 

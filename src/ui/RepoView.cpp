@@ -240,8 +240,12 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   // Select HEAD branch when it changes.
   connect(notifier, &git::RepositoryNotifier::referenceUpdated,
   [this](const git::Reference &ref) {
-    if (ref.isValid() && ref.isHead())
+    if (ref.isValid() && ref.isHead()) {
       mRefs->select(ref);
+
+      // Invalidate submodule cache when the HEAD changes.
+      mRepo.invalidateSubmoduleCache();
+    }
   });
 
   // Create pathspec chooser.

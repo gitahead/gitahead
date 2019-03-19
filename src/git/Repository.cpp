@@ -627,6 +627,12 @@ void Repository::setCommitStarred(const Id &commit, bool starred)
   file.commit();
 }
 
+void Repository::invalidateSubmoduleCache()
+{
+  d->submoduleNames.clear();
+  d->submoduleNamesCached = false;
+}
+
 QList<Submodule> Repository::submodules() const
 {
   if (!d->submoduleNamesCached) {
