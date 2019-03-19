@@ -1,3 +1,18 @@
+### v2.5.5 - 2019-03-19
+
+#### Added
+
+* Added syntax highlighting for SQL and Erlang files.
+
+#### Fixed
+
+* Reload submodules on refresh and when the HEAD changes.
+* Fixed failure to refresh GitHub accounts with more than one page of repositories.
+* (Linux) Fixed spurious refresh on modification of some ignored files.
+
+
+----
+
 ### v2.5.4 - 2019-02-25
 
 #### Added
