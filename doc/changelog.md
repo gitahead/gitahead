@@ -10,7 +10,6 @@
 * Fixed failure to refresh GitHub accounts with more than one page of repositories.
 * (Linux) Fixed spurious refresh on modification of some ignored files.
 
-
 ----
 
 ### v2.5.4 - 2019-02-25
