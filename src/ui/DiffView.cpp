@@ -202,7 +202,7 @@ public:
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     foreach (const QDateTime &key, comments.keys())
-      layout->addWidget(new Comment(key, comments.value(key)));
+      layout->addWidget(new Comment(key, comments.value(key), this));
   }
 };
 
