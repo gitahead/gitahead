@@ -139,19 +139,17 @@ ScintillaQt::ScintillaQt(QWidget *parent)
   Initialise();
 }
 
+ScintillaQt::~ScintillaQt()
+{
+  Finalise();
+}
+
 sptr_t ScintillaQt::send(
   unsigned int iMessage,
   uptr_t wParam,
   sptr_t lParam) const
 {
   return const_cast<ScintillaQt *>(this)->WndProc(iMessage, wParam, lParam);
-}
-
-ScintillaQt::~ScintillaQt()
-{
-  for (int tr = tickCaret; tr <= tickDwell; ++tr)
-    FineTickerCancel(static_cast<TickReason>(tr));
-  SetIdle(false);
 }
 
 bool ScintillaQt::event(QEvent *event)
