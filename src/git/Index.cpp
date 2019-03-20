@@ -119,7 +119,9 @@ Index::StagedState Index::isStaged(const QString &path) const
   if (!sm.isValid() && !info.isSymLink() && info.isDir())
     return d->stagedCache.insert(path, Unstaged).value();
 
-  uint32_t headMode = 0, indexMode = 0, workdirMode = 0;
+  uint32_t headMode = GIT_FILEMODE_UNREADABLE;
+  uint32_t indexMode = GIT_FILEMODE_UNREADABLE;
+  uint32_t workdirMode = GIT_FILEMODE_UNREADABLE;
   Id head = sm.isValid() ? sm.headId() : headId(path, &headMode);
   Id index = sm.isValid() ? sm.indexId() : indexId(path, &indexMode);
   Id workdir = sm.isValid() ? sm.workdirId() : workdirId(path, &workdirMode);
@@ -157,8 +159,8 @@ void Index::setStaged(const QStringList &files, bool staged, bool yieldFocus)
 
     // Get the id and mode of the file in the HEAD commit.
     Id fileId;
-    uint32_t fileMode;
     bool fileExists = false;
+    uint32_t fileMode = GIT_FILEMODE_UNREADABLE;
     if (staged) {
       fileExists = repo.workdir().exists(file);
     } else {
