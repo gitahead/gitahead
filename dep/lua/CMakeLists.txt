@@ -1,3 +1,7 @@
+IF (PKG_CONFIG_FOUND)
+  pkg_check_modules(LUA lua>=5.3)
+ENDIF()
+IF (NOT LUA_FOUND)
 set(LUA_DIR lua-5.3.4)
 
 add_library(lua
@@ -41,3 +45,6 @@ add_library(lua
 target_include_directories(lua INTERFACE
   ${CMAKE_CURRENT_SOURCE_DIR}/${LUA_DIR}/src
 )
+
+set(LUA_LIBRARIES lua CACHE INTERNAL "lua implementation" FORCE)
+ENDIF()
