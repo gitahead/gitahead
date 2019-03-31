@@ -13,7 +13,7 @@ macro(add_helper NAME)
 
   if(NOT APPLE)
     install(TARGETS ${TARGET}
-      DESTINATION .
+      DESTINATION ${CMAKE_INSTALL_LIBEXECDIR}
       COMPONENT ${GITAHEAD_NAME}
     )
   endif()

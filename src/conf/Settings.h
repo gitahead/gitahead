@@ -50,6 +50,7 @@ public:
   static QDir lexerDir();
   static QDir themesDir();
   static QDir pluginsDir();
+  static QDir helpersDir();
 
   static QDir userDir();
   static QString locate(const QString &file);

@@ -269,6 +269,7 @@ bool Updater::install(const DownloadRef &download, QString &error)
 
   // Start the relaunch helper.
   QString app = QCoreApplication::applicationFilePath();
+  QDir helpers = Settings::helpersDir();
   QString pid = QString::number(QCoreApplication::applicationPid());
   if (!QProcess::startDetached(dir.filePath("relauncher"), {app, pid})) {
     error = tr("Helper application failed to start");

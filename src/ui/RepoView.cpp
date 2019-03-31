@@ -823,7 +823,7 @@ void RepoView::startIndexing()
   if (Index::isLoggingEnabled())
     args.prepend("--log");
 
-  QDir dir(QCoreApplication::applicationDirPath());
+  QDir dir(Settings::helpersDir());
   mIndexer.start(dir.filePath("indexer"), args);
 }
 
