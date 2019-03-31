@@ -180,10 +180,15 @@ endif()
 
 if(NOT APPLE)
   if(UNIX)
-    install(DIRECTORY ${RSRC_DIR}/GitAhead.iconset
-      DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/pixmaps
-      COMPONENT ${GITAHEAD_NAME}
-    )
+    # install icons
+    foreach(SIZE 16 32 64 128 256 512)
+      set(SQUARE "${SIZE}x${SIZE}")
+      install(FILES ${RSRC_DIR}/GitAhead.iconset/icon_${SQUARE}.png
+        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/${SQUARE}/apps
+        COMPONENT ${GITAHEAD_NAME}
+        RENAME gitahead.png
+      )
+    endforeach()
   endif()
 endif()
 
