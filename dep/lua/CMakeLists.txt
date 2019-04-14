@@ -1,6 +1,9 @@
 IF (PKG_CONFIG_FOUND)
   pkg_check_modules(LUA lua>=5.3)
 ENDIF()
+IF (PKG_CONFIG_FOUND AND (NOT LUA_FOUND))
+  pkg_check_modules(LUA lua-5.3)
+ENDIF()
 IF (NOT LUA_FOUND)
 set(LUA_DIR lua-5.3.4)
 
