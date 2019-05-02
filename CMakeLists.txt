@@ -55,7 +55,6 @@ set(QT_MODULES
   Test
 )
 
-set(Qt5_DIR ${CMAKE_BINARY_DIR}/../qt/qtbase/lib/cmake/Qt5 CACHE PATH "")
 find_package(Qt5 5.9 COMPONENTS ${QT_MODULES} REQUIRED)
 
 add_subdirectory(dep)
