@@ -26,6 +26,8 @@ const QString kTempDir = "GitAhead";
 const QStandardPaths::StandardLocation kUserLocation =
   QStandardPaths::AppLocalDataLocation;
 
+const QString kIgnoreWsKey = "diff/whitespace/ignore";
+
 // Look up variant at key relative to root.
 QVariant lookup(const QVariantMap &root, const QString &key)
 {
@@ -109,19 +111,19 @@ QVariant Settings::defaultValue(const QString &key) const
   return lookup(mCurrentMap, key);
 }
 
-void Settings::setValue(const QString &key, const QVariant &value)
+void Settings::setValue(const QString &key, const QVariant &value, bool refresh)
 {
   QSettings settings;
   settings.beginGroup(group());
   if (value == defaultValue(key)) {
     if (settings.contains(key)) {
       settings.remove(key);
-      emit settingsChanged();
+      emit settingsChanged(refresh);
     }
   } else {
     if (value != settings.value(key)) {
       settings.setValue(key, value);
-      emit settingsChanged();
+      emit settingsChanged(refresh);
     }
   }
   settings.endGroup();
@@ -197,6 +199,16 @@ QString Settings::promptDescription(PromptKind kind) const
   }
 }
 
+bool Settings::isWhitespaceIgnored() const
+{
+  return value(kIgnoreWsKey).toBool();
+}
+
+void Settings::setWhitespaceIgnored(bool ignored)
+{
+  setValue(kIgnoreWsKey, ignored, true);
+}
+
 QDir Settings::appDir()
 {
   QDir dir(QCoreApplication::applicationDirPath());
@@ -257,11 +269,6 @@ QDir Settings::pluginsDir()
 QDir Settings::userDir()
 {
   return QStandardPaths::writableLocation(kUserLocation);
-}
-
-QString Settings::locate(const QString &file)
-{
-  return QStandardPaths::locate(kUserLocation, file);
 }
 
 QDir Settings::tempDir()

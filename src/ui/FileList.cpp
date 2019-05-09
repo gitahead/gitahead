@@ -254,6 +254,14 @@ FileList::FileList(const git::Repository &repo, QWidget *parent)
     emit sortRequested();
   });
 
+  menu->addSeparator();
+
+  mIgnoreWs = menu->addAction(tr("Ignore Whitespace (-w)"));
+  mIgnoreWs->setCheckable(true);
+  connect(mIgnoreWs, &QAction::triggered, [](bool checked) {
+    Settings::instance()->setWhitespaceIgnored(checked);
+  });
+
   connect(this, &FileList::doubleClicked, [this](const QModelIndex &index) {
     if (!index.isValid())
       return;
@@ -459,6 +467,9 @@ void FileList::updateMenu(const git::Diff &diff)
       selectionModel()->select(selection, QItemSelectionModel::ClearAndSelect);
     }); 
   }
+
+  // ignore whitespace
+  mIgnoreWs->setChecked(settings->isWhitespaceIgnored());
 }
 
 #include "FileList.moc"

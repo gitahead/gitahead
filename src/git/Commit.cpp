@@ -146,6 +146,8 @@ Diff Commit::diff(const git::Commit &commit, int contextLines) const
 
   git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
   opts.context_lines = contextLines;
+  if (Settings::instance()->isWhitespaceIgnored())
+    opts.flags |= GIT_DIFF_IGNORE_WHITESPACE;
 
   git_diff *diff = nullptr;
   git_repository *repo = git_object_owner(d.data());

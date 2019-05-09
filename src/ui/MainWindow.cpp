@@ -81,13 +81,19 @@ MainWindow::MainWindow(
     advancedSearch->exec(searchField, currentView()->index());
   });
 
-  // Update title when settings change.
+  // Update title and refresh when settings change.
   mFullPath = Settings::instance()->value("window/path/full").toBool();
-  connect(Settings::instance(), &Settings::settingsChanged, this, [this] {
+  connect(Settings::instance(), &Settings::settingsChanged, this,
+  [this](bool refresh) {
     bool fullPath = Settings::instance()->value("window/path/full").toBool();
     if (mFullPath != fullPath) {
       mFullPath = fullPath;
       updateWindowTitle();
+    }
+
+    if (refresh) {
+      for (int i = 0; i < count(); ++i)
+        view(i)->refresh();
     }
   });
 

@@ -33,7 +33,7 @@ public:
 
   QVariant value(const QString &key) const;
   QVariant defaultValue(const QString &key) const;
-  void setValue(const QString &key, const QVariant &value);
+  void setValue(const QString &key, const QVariant &value, bool refresh = false);
 
   // Look up lexer name by file name.
   QString lexer(const QString &filename);
@@ -44,6 +44,11 @@ public:
   void setPrompt(PromptKind kind, bool prompt);
   QString promptDescription(PromptKind kind) const;
 
+  // ignore whitespace
+  bool isWhitespaceIgnored() const;
+  void setWhitespaceIgnored(bool ignored);
+
+  // settings directories
   static QDir appDir();
   static QDir docDir();
   static QDir confDir();
@@ -52,14 +57,13 @@ public:
   static QDir pluginsDir();
 
   static QDir userDir();
-  static QString locate(const QString &file);
 
   static QDir tempDir();
 
   static Settings *instance();
 
 signals:
-  void settingsChanged();
+  void settingsChanged(bool refresh = false);
 
 private:
   Settings(QObject *parent = nullptr);

@@ -26,6 +26,7 @@
 #include "Submodule.h"
 #include "TagRef.h"
 #include "Tree.h"
+#include "conf/Settings.h"
 #include "git2/buffer.h"
 #include "git2/branch.h"
 #include "git2/checkout.h"
@@ -306,6 +307,8 @@ Diff Repository::diffTreeToIndex(const Tree &tree) const
 {
   git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
   opts.flags |= GIT_DIFF_INCLUDE_UNTRACKED;
+  if (Settings::instance()->isWhitespaceIgnored())
+    opts.flags |= GIT_DIFF_IGNORE_WHITESPACE;
 
   git_diff *diff = nullptr;
   git_diff_tree_to_index(&diff, d->repo, tree, nullptr, &opts);
@@ -316,6 +319,8 @@ Diff Repository::diffIndexToWorkdir(Diff::Callbacks *callbacks) const
 {
   git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
   opts.flags |= (GIT_DIFF_INCLUDE_UNTRACKED | GIT_DIFF_DISABLE_MMAP);
+  if (Settings::instance()->isWhitespaceIgnored())
+    opts.flags |= GIT_DIFF_IGNORE_WHITESPACE;
 
   if (callbacks) {
     opts.progress_cb = &Diff::Callbacks::progress;

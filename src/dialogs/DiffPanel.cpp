@@ -77,20 +77,30 @@ DiffPanel::DiffPanel(const git::Repository &repo, QWidget *parent)
   if (qobject_cast<ConfigDialog *>(parent))
     return;
 
+  // ignore whitespace
+  // The ignore whitespace option is global because it's
+  // not a config setting. It's a flag (-w) to git diff.
+  QCheckBox *ignoreWs = new QCheckBox(tr("Ignore Whitespace (-w)"), this);
+  ignoreWs->setChecked(Settings::instance()->isWhitespaceIgnored());
+  connect(ignoreWs, &QCheckBox::toggled, [](bool checked) {
+    Settings::instance()->setWhitespaceIgnored(checked);
+  });
+
   // auto collapse
   Settings *settings = Settings::instance();
-  QCheckBox *collapseAdded = new QCheckBox(tr("Diffs of added files"), this);
+  QCheckBox *collapseAdded = new QCheckBox(tr("Added files"), this);
   collapseAdded->setChecked(settings->value("collapse/added").toBool());
   connect(collapseAdded, &QCheckBox::toggled, [settings](bool checked) {
     settings->setValue("collapse/added", checked);
   });
 
-  QCheckBox *collapseDeleted = new QCheckBox(tr("Diffs of deleted files"), this);
+  QCheckBox *collapseDeleted = new QCheckBox(tr("Deleted files"), this);
   collapseDeleted->setChecked(settings->value("collapse/deleted").toBool());
   connect(collapseDeleted, &QCheckBox::toggled, [settings](bool checked) {
     settings->setValue("collapse/deleted", checked);
   });
 
+  layout->addRow(tr("Whitespace:"), ignoreWs);
   layout->addRow(tr("Auto Collapse:"), collapseAdded);
   layout->addRow(QString(), collapseDeleted);
 }
