@@ -22,9 +22,9 @@ public:
 
   QDir dir() const override;
   QString name() const override;
-  QPalette palette() const override;
   QStyle *style() const override;
   QString styleSheet() const override;
+  void polish(QPalette &palette) const override;
 
   QColor badge(BadgeRole role, BadgeState state) override;
   QList<QColor> branchTopologyEdges() override;

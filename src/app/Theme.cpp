@@ -21,6 +21,10 @@ namespace {
 class Style : public QProxyStyle
 {
 public:
+  Style(const Theme *theme)
+    : mTheme(theme)
+  {}
+
   void drawPrimitive(
     PrimitiveElement elem,
     const QStyleOption *option,
@@ -37,6 +41,15 @@ public:
         break;
     }
   }
+
+  void polish(QPalette &palette) override
+  {
+    baseStyle()->polish(palette);
+    mTheme->polish(palette);
+  }
+
+private:
+  const Theme *mTheme;
 };
 
 } // anon. namespace
@@ -55,16 +68,7 @@ QString Theme::name() const
 
 QStyle *Theme::style() const
 {
-  return new Style;
-}
-
-QPalette Theme::palette() const
-{
-  QPalette palette;
-  palette.setColor(QPalette::Light, "#E6E6E6");
-  palette.setColor(QPalette::BrightText, "#808080");
-  palette.setColor(QPalette::Shadow, palette.color(QPalette::Mid));
-  return palette;
+  return new Style(this);
 }
 
 QString Theme::styleSheet() const
@@ -250,22 +254,6 @@ QString Theme::styleSheet() const
     "  color: white"
     "}";
 
-#ifndef Q_OS_WIN
-  styleSheet +=
-    "QAbstractItemView {"
-    "  selection-background-color: #D4D4D4;"
-    "}"
-    "QAbstractItemView:active {"
-    "  selection-background-color: #6C6C6C;"
-    "  selection-color: white"
-    "}"
-
-    "QMenu::item {"
-    "  selection-background-color: #6C6C6C;"
-    "  selection-color: white"
-    "}";
-#endif
-
 #ifdef Q_OS_MAC
   if (QSysInfo::macVersion() >= QSysInfo::MV_YOSEMITE)
     styleSheet +=
@@ -276,6 +264,13 @@ QString Theme::styleSheet() const
 #endif
 
   return styleSheet;
+}
+
+void Theme::polish(QPalette &palette) const
+{
+  palette.setColor(QPalette::Light, "#E6E6E6");
+  palette.setColor(QPalette::BrightText, "#808080");
+  palette.setColor(QPalette::Shadow, palette.color(QPalette::Mid));
 }
 
 QColor Theme::badge(BadgeRole role, BadgeState state)
@@ -385,7 +380,7 @@ QColor Theme::heatMap(HeatMap color)
 QColor Theme::remoteComment(Comment color)
 {
   switch (color) {
-    case Comment::Background: return palette().color(QPalette::Base);
+    case Comment::Background: return QPalette().color(QPalette::Base);
     case Comment::Body:       return "#383838";
     case Comment::Author:     return "#1A76F4";
     case Comment::Timestamp:  return "#6C6C6C";

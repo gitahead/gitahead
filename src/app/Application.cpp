@@ -154,7 +154,6 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   // Initialize theme.
   mTheme.reset(Theme::create(parser.value("theme")));
   setStyle(mTheme->style());
-  setPalette(mTheme->palette());
   setStyleSheet(mTheme->styleSheet());
 
   // Enable system proxy auto-detection.

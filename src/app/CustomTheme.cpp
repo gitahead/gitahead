@@ -90,6 +90,12 @@ public:
       mTheme->polishWindow(window);
   }
 
+  void polish(QPalette &palette) override
+  {
+    baseStyle()->polish(palette);
+    mTheme->polish(palette);
+  }
+
 private:
   const CustomTheme *mTheme;
 };
@@ -122,44 +128,6 @@ QStyle *CustomTheme::style() const
   return new CustomStyle(this);
 }
 
-QPalette CustomTheme::palette() const
-{
-  QPalette palette;
-
-  QVariantMap map = mMap.value("palette").toMap();
-  setPaletteColors(palette, QPalette::Light, map.value("light"));
-  setPaletteColors(palette, QPalette::Midlight, map.value("midlight"));
-  setPaletteColors(palette, QPalette::Mid, map.value("middark"));
-  setPaletteColors(palette, QPalette::Dark, map.value("dark"));
-  setPaletteColors(palette, QPalette::Shadow, map.value("shadow"));
-
-  QVariantMap widget = mMap.value("widget").toMap();
-  setPaletteColors(palette, QPalette::Text, widget.value("text"));
-  setPaletteColors(palette, QPalette::BrightText, widget.value("bright_text"));
-  setPaletteColors(palette, QPalette::Base, widget.value("background"));
-  setPaletteColors(palette, QPalette::AlternateBase, widget.value("alternate"));
-  setPaletteColors(palette, QPalette::Highlight, widget.value("highlight"));
-  setPaletteColors(palette, QPalette::HighlightedText, widget.value("highlighted_text"));
-
-  QVariantMap window = mMap.value("window").toMap();
-  setPaletteColors(palette, QPalette::WindowText, window.value("text"));
-  setPaletteColors(palette, QPalette::Window, window.value("background"));
-
-  QVariantMap button = mMap.value("button").toMap();
-  setPaletteColors(palette, QPalette::ButtonText, button.value("text"));
-  setPaletteColors(palette, QPalette::Button, button.value("background"));
-
-  QVariantMap link = mMap.value("link").toMap();
-  setPaletteColors(palette, QPalette::Link, link.value("link"));
-  setPaletteColors(palette, QPalette::LinkVisited, link.value("link_visited"));
-
-  QVariantMap tooltip = mMap.value("tooltip").toMap();
-  setPaletteColors(palette, QPalette::ToolTipText, tooltip.value("text"));
-  setPaletteColors(palette, QPalette::ToolTipBase, tooltip.value("background"));
-
-  return palette;
-}
-
 QString CustomTheme::styleSheet() const
 {
   QString text =
@@ -167,22 +135,15 @@ QString CustomTheme::styleSheet() const
     "  border: 1px solid palette(shadow)"
     "}"
 
-    "QToolButton {"
-    "  color: %1;"
-    "  background: palette(button)"
-    "}"
-    "QToolButton:active {"
-    "  color: palette(button-text)"
-    "}"
     "QToolButton:hover {"
     "  background: palette(dark)"
     "}"
     "QToolButton:pressed {"
-    "  background: %3"
+    "  background: %1"
     "}"
 
     "AdvancedSearchWidget QLabel {"
-    "  color: %4"
+    "  color: %2"
     "}"
 
     "DetailView QTextEdit {"
@@ -203,15 +164,9 @@ QString CustomTheme::styleSheet() const
     "DiffView .QFrame {"
     "  background: palette(mid)"
     "}"
-    "DiffView QToolButton {"
-    "  color: %2"
-    "}"
-    "DiffView QToolButton:disabled {"
-    "  color: %1"
-    "}"
     "DiffView HunkWidget, DiffView HunkWidget QLabel {"
     "  background: palette(mid);"
-    "  color: %4"
+    "  color: %2"
     "}"
 
     "FileList {"
@@ -252,8 +207,8 @@ QString CustomTheme::styleSheet() const
     "}"
 
     "MenuBar {"
-    "  background: %5;"
-    "  color: %6"
+    "  background: %3;"
+    "  color: %4"
     "}"
 
     "QComboBox QListView {"
@@ -283,7 +238,7 @@ QString CustomTheme::styleSheet() const
     "  border: 1px solid palette(shadow)"
     "}"
     "ToolBar QToolButton:enabled:active:checked {"
-    "  background: %7"
+    "  background: %5"
     "}"
 
     "TreeWidget QColumnView {"
@@ -307,15 +262,48 @@ QString CustomTheme::styleSheet() const
     "}";
 
   QVariantMap button = mMap.value("button").toMap();
+  QVariantMap window = mMap.value("window").toMap();
   QVariantMap menubar = mMap.value("menubar").toMap();
   return text.arg(
-    palette().color(QPalette::Disabled, QPalette::ButtonText).name(),
-    palette().color(QPalette::Inactive, QPalette::ButtonText).name(),
     button.value("background").toMap().value("pressed").toString(),
-    mMap.value("window").toMap().value("bright_text").toString(),
+    window.value("bright_text").toString(),
     menubar.value("background").toString(),
     menubar.value("text").toString(),
     button.value("background").toMap().value("checked").toString());
+}
+
+void CustomTheme::polish(QPalette &palette) const
+{
+  QVariantMap map = mMap.value("palette").toMap();
+  setPaletteColors(palette, QPalette::Light, map.value("light"));
+  setPaletteColors(palette, QPalette::Midlight, map.value("midlight"));
+  setPaletteColors(palette, QPalette::Mid, map.value("middark"));
+  setPaletteColors(palette, QPalette::Dark, map.value("dark"));
+  setPaletteColors(palette, QPalette::Shadow, map.value("shadow"));
+
+  QVariantMap widget = mMap.value("widget").toMap();
+  setPaletteColors(palette, QPalette::Text, widget.value("text"));
+  setPaletteColors(palette, QPalette::BrightText, widget.value("bright_text"));
+  setPaletteColors(palette, QPalette::Base, widget.value("background"));
+  setPaletteColors(palette, QPalette::AlternateBase, widget.value("alternate"));
+  setPaletteColors(palette, QPalette::Highlight, widget.value("highlight"));
+  setPaletteColors(palette, QPalette::HighlightedText, widget.value("highlighted_text"));
+
+  QVariantMap window = mMap.value("window").toMap();
+  setPaletteColors(palette, QPalette::WindowText, window.value("text"));
+  setPaletteColors(palette, QPalette::Window, window.value("background"));
+
+  QVariantMap button = mMap.value("button").toMap();
+  setPaletteColors(palette, QPalette::ButtonText, button.value("text"));
+  setPaletteColors(palette, QPalette::Button, button.value("background"));
+
+  QVariantMap link = mMap.value("link").toMap();
+  setPaletteColors(palette, QPalette::Link, link.value("link"));
+  setPaletteColors(palette, QPalette::LinkVisited, link.value("link_visited"));
+
+  QVariantMap tooltip = mMap.value("tooltip").toMap();
+  setPaletteColors(palette, QPalette::ToolTipText, tooltip.value("text"));
+  setPaletteColors(palette, QPalette::ToolTipBase, tooltip.value("background"));
 }
 
 QColor CustomTheme::badge(BadgeRole role, BadgeState state)
@@ -381,7 +369,11 @@ QList<QColor> CustomTheme::branchTopologyEdges()
 
 QColor CustomTheme::buttonChecked()
 {
-  return mMap.value("button").toMap().value("text").toMap().value("checked").value<QColor>();
+  QVariantMap button = mMap.value("button").toMap();
+  QVariantMap buttonText = button.value("text").toMap();
+  if (buttonText.contains("checked"))
+    return buttonText.value("checked").value<QColor>();
+  return buttonText.value("default").value<QColor>();
 }
 
 QVariantMap CustomTheme::checkbox() const

@@ -70,9 +70,9 @@ public:
 
   virtual QDir dir() const;
   virtual QString name() const;
-  virtual QPalette palette() const;
   virtual QStyle *style() const;
   virtual QString styleSheet() const;
+  virtual void polish(QPalette &palette) const;
 
   virtual QColor badge(BadgeRole role, BadgeState state);
   virtual QList<QColor> branchTopologyEdges();

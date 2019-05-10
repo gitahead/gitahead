@@ -49,7 +49,7 @@ theme['window']    = {
 -- button colors
 -- { default, active, inactive, disabled, checked, pressed }
 theme['button']    = {
-  text             = { default = '#E1E5F2', disabled = '#555B65', checked = '#E1E5F2' },
+  text             = { default = '#E1E5F2', inactive = '#555B65', disabled = '#555B65' },
   background       = { default = '#2D2E34', checked = '#2A82DA', pressed = '#2A82DA' }
 }
 
