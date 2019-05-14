@@ -27,6 +27,7 @@ const QStandardPaths::StandardLocation kUserLocation =
   QStandardPaths::AppLocalDataLocation;
 
 const QString kIgnoreWsKey = "diff/whitespace/ignore";
+const QString kLastPathKey = "lastpath";
 
 // Look up variant at key relative to root.
 QVariant lookup(const QVariantMap &root, const QString &key)
@@ -77,6 +78,7 @@ Settings::Settings(QObject *parent)
 {
   foreach (const QFileInfo &file, confDir().entryInfoList(QStringList("*.lua")))
     mDefaults[file.baseName()] = ConfFile(file.absoluteFilePath()).parse();
+  mDefaults[kLastPathKey] = QDir::homePath();
   mCurrentMap = mDefaults;
 }
 
@@ -207,6 +209,16 @@ bool Settings::isWhitespaceIgnored() const
 void Settings::setWhitespaceIgnored(bool ignored)
 {
   setValue(kIgnoreWsKey, ignored, true);
+}
+
+QString Settings::lastPath() const
+{
+  return value(kLastPathKey).toString();
+}
+
+void Settings::setLastPath(const QString &lastPath)
+{
+  setValue(kLastPathKey, lastPath);
 }
 
 QDir Settings::appDir()

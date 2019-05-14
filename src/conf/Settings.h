@@ -48,6 +48,10 @@ public:
   bool isWhitespaceIgnored() const;
   void setWhitespaceIgnored(bool ignored);
 
+  // Last repository path
+  QString lastPath() const;
+  void setLastPath(const QString &lastPath);
+
   // settings directories
   static QDir appDir();
   static QDir docDir();
