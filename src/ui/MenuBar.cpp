@@ -109,10 +109,12 @@ MenuBar::MenuBar(QWidget *parent)
   open->setShortcut(QKeySequence::Open);
   connect(open, &QAction::triggered, [] {
     // FIXME: Filter out non-git dirs.
-    QString home = QDir::homePath();
+    Settings *settings = Settings::instance();
     QString title = tr("Open Repository");
-    MainWindow::open(QFileDialog::getExistingDirectory(
-      nullptr, title, home, QFileDialog::ShowDirsOnly));
+    QString path = QFileDialog::getExistingDirectory(
+      nullptr, title, settings->lastPath(), QFileDialog::ShowDirsOnly);
+    MainWindow::open(path);
+    settings->setLastPath(path);
   });
 
   QMenu *openRecent = file->addMenu(tr("Open Recent"));
