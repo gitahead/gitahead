@@ -10,8 +10,6 @@ set(QT_PLUGINS
 )
 
 if(APPLE)
-  get_filename_component(QT_RPATH ${Qt5_DIR}/../.. REALPATH)
-
   set(QT_PLUGINS
     ${QT_PLUGINS}
     QCocoaIntegrationPlugin
@@ -44,22 +42,13 @@ foreach(QT_PLUGIN ${QT_PLUGINS})
     COMPONENT ${GITAHEAD_NAME}
   )
 
-  if(APPLE)
-    # Delete rpath.
-    install(CODE
-      "execute_process(COMMAND
-        install_name_tool -delete_rpath ${QT_RPATH}
-          \${CMAKE_INSTALL_PREFIX}/${CONTENTS_DIR}/${PLUGIN_PATH}
-      )"
-      COMPONENT ${GITAHEAD_NAME}
-    )
-  elseif(WIN32)
+  if(WIN32)
     # Copy into build dir.
     execute_process(COMMAND
       ${CMAKE_COMMAND} -E copy_if_different
         ${PLUGIN} ${CMAKE_BINARY_DIR}/${PLUGIN_PATH}
     )
-  else()
+  elseif(NOT APPLE)
     # Delete runpath.
     install(CODE
       "execute_process(COMMAND chrpath --delete
@@ -77,7 +66,6 @@ foreach(QT_MODULE ${QT_MODULES})
   if(APPLE)
     get_filename_component(QT_FRAMEWORK ${QT_LIBRARY} DIRECTORY)
     set(DEST_DIR ${CONTENTS_DIR}/Frameworks)
-    set(LIB_PATH ${DEST_DIR}/Qt${QT_MODULE}.framework/Qt${QT_MODULE})
     install(DIRECTORY ${QT_FRAMEWORK}
       DESTINATION ${DEST_DIR}
       COMPONENT ${GITAHEAD_NAME}
@@ -85,15 +73,6 @@ foreach(QT_MODULE ${QT_MODULES})
       PATTERN "*_debug" EXCLUDE
       PATTERN "Headers" EXCLUDE
       PATTERN ".DS_Store" EXCLUDE
-    )
-
-    # Delete rpath.
-    install(CODE
-      "execute_process(COMMAND
-        install_name_tool -delete_rpath ${QT_RPATH}
-          \${CMAKE_INSTALL_PREFIX}/${LIB_PATH}
-      )"
-      COMPONENT ${GITAHEAD_NAME}
     )
   else()
     if(WIN32)

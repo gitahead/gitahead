@@ -55,6 +55,10 @@ set(QT_MODULES
   Test
 )
 
+if(APPLE)
+  set(QT_MODULES ${QT_MODULES} DBus)
+endif()
+
 find_package(Qt5 5.9 COMPONENTS ${QT_MODULES} REQUIRED)
 
 add_subdirectory(dep)
