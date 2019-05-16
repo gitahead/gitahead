@@ -1,3 +1,20 @@
+### v2.5.6 - 2019-05-16
+
+#### Added
+
+* Added option to ignore whitespace in diffs.
+* Remember previously opened repository path and use it when opening new repositories.
+
+#### Fixed
+
+* Fixed failure push a branch to a different remote when it's already up-to-date with its upstream.
+
+#### Changed
+
+* Revert to the system list view selection color in the native theme.
+
+----
+
 ### v2.5.5 - 2019-03-19
 
 #### Added
