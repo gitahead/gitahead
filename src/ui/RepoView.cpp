@@ -1553,10 +1553,14 @@ void RepoView::push(
   git::Reference ref = src.isValid() ? src : mRepo.head();
   QString refName = ref.isValid() ? ref.name() : tr("<i>no reference</i>");
 
-  git::Branch branch = ref;
-  git::Branch upstream = branch.isValid() ? branch.upstream() : git::Branch();
   git::Remote remote = rmt.isValid() ? rmt : mRepo.defaultRemote();
   QString name = remote.isValid() ? remote.name() : tr("<i>no remote</i>");
+
+  git::Branch branch = ref;
+  git::Branch upstream = branch ? branch.upstream() : git::Branch();
+  git::Remote upstreamRemote = upstream ? upstream.remote() : git::Remote();
+  if (upstreamRemote && upstreamRemote.name() != remote.name())
+    upstream = git::Branch();
 
   QString title = !force ? tr("Push") : tr("Push (Force)");
   QString text = tr("%1 to %2").arg(refName, name);
