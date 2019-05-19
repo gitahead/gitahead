@@ -12,6 +12,7 @@
 #include "DiffWidget.h"
 #include "MenuBar.h"
 #include "TreeWidget.h"
+#include "flowlayout.h"
 #include "app/Application.h"
 #include "git/Branch.h"
 #include "git/Commit.h"
@@ -130,9 +131,9 @@ public:
     mDate = new QLabel(this);
     mDate->setTextInteractionFlags(kTextFlags);
 
-    QHBoxLayout *line1 = new QHBoxLayout;
+    FlowLayout *line1 = new FlowLayout;
     line1->addWidget(mAuthor);
-    line1->addStretch();
+    line1->addItem(new QSpacerItem(0, 0));
     line1->addWidget(mDate);
 
     mHash = new QLabel(this);

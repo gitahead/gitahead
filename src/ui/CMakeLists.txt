@@ -19,6 +19,7 @@ add_library(ui
   FileContextMenu.cpp
   FileList.cpp
   FindWidget.cpp
+  flowlayout.cpp
   Footer.cpp
   History.cpp
   IndexCompleter.cpp
