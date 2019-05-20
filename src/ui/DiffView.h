@@ -33,7 +33,7 @@ public:
 
   QWidget *file(int index);
 
-  void setDiff(const git::Diff &diff, const git::Index &index);
+  void setDiff(const git::Diff &diff);
 
   bool scrollToFile(int index);
   void setFilter(const QStringList &paths);
@@ -57,7 +57,6 @@ private:
   void fetchAll(int index = -1);
 
   git::Diff mDiff;
-  git::Index mIndex;
   QMap<QString,git::Patch> mStagedPatches;
 
   QList<QWidget *> mFiles;

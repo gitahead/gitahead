@@ -605,10 +605,10 @@ public:
   {
   public:
     Header(
+      const git::Diff &diff,
       const git::Patch &patch,
       int index,
       bool lfs,
-      bool workdir,
       bool submodule,
       QWidget *parent = nullptr)
       : QWidget(parent)
@@ -663,7 +663,7 @@ public:
 
       // Add discard button.
       DiscardButton *discard = nullptr;
-      if (workdir && !submodule && !patch.isConflicted()) {
+      if (diff.isStatusDiff() && !submodule && !patch.isConflicted()) {
         discard = new DiscardButton(this);
         discard->setToolTip(tr("Discard Hunk"));
         connect(discard, &DiscardButton::clicked, [this, patch, index] {
@@ -779,10 +779,10 @@ public:
 
   HunkWidget(
     DiffView *view,
+    const git::Diff &diff,
     const git::Patch &patch,
     int index,
     bool lfs,
-    bool workdir,
     bool submodule,
     QWidget *parent = nullptr)
     : QFrame(parent), mView(view), mPatch(patch), mIndex(index)
@@ -792,7 +792,7 @@ public:
     layout->setContentsMargins(0,0,0,0);
     layout->setSpacing(4);
 
-    mHeader = new Header(patch, index, lfs, workdir, submodule, this);
+    mHeader = new Header(diff, patch, index, lfs, submodule, this);
     layout->addWidget(mHeader);
 
     mEditor = new Editor(this);
@@ -895,7 +895,8 @@ public:
     }
 
     // Hook up error margin click.
-    connect(mEditor, &TextEditor::marginClicked, [this, workdir](int pos) {
+    bool status = diff.isStatusDiff();
+    connect(mEditor, &TextEditor::marginClicked, [this, status](int pos) {
       int line = mEditor->lineFromPosition(pos);
       QList<TextEditor::Diagnostic> diags = mEditor->diagnostics(line);
       if (diags.isEmpty())
@@ -942,7 +943,7 @@ public:
         // Add fix button. Disable for deletion lines.
         QPushButton *fix = new QPushButton(tr("Fix"));
         bool deletion = (mEditor->markers(line) & (1 << TextEditor::Deletion));
-        fix->setEnabled(workdir && !deletion && !diag.replacement.isNull());
+        fix->setEnabled(status && !deletion && !diag.replacement.isNull());
         connect(fix, &QPushButton::clicked, [this, line, diag, table] {
           // Look up the actual line number from the margin.
           QRegularExpression re("\\s+");
@@ -1583,20 +1584,19 @@ public:
   {
   public:
     Header(
+      const git::Diff &diff,
       const git::Patch &patch,
-      const git::Index &index,
       bool binary,
       bool lfs,
-      bool workdir,
       bool submodule,
       QWidget *parent = nullptr)
-      : QFrame(parent), mPatch(patch), mIndex(index)
+      : QFrame(parent), mDiff(diff), mPatch(patch)
     {
       setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
       QString name = patch.name();
       mCheck = new QCheckBox(this);
-      mCheck->setVisible(workdir);
+      mCheck->setVisible(diff.isStatusDiff());
 
       char status = git::Diff::statusChar(patch.status());
       Badge *badge = new Badge({Badge::Label(QChar(status))}, this);
@@ -1661,7 +1661,7 @@ public:
       buttons->addWidget(mEdit);
 
       // Add discard button.
-      if (workdir && !submodule && !patch.isConflicted()) {
+      if (diff.isStatusDiff() && !submodule && !patch.isConflicted()) {
         DiscardButton *discard = new DiscardButton(this);
         discard->setToolTip(tr("Discard File"));
         buttons->addWidget(discard);
@@ -1721,13 +1721,13 @@ public:
       });
       buttons->addWidget(mDisclosureButton);
 
-      if (!workdir)
+      if (!diff.isStatusDiff())
         return;
 
       // Respond to check changes.
       connect(mCheck, &QCheckBox::clicked, [this](bool staged) {
         mCheck->setChecked(!staged); // Allow index to decide.
-        mIndex.setStaged({mPatch.name()}, staged);
+        mPatch.repo().index().setStaged({mPatch.name()}, staged);
       });
 
       // Respond to index changes.
@@ -1758,7 +1758,8 @@ public:
     void contextMenuEvent(QContextMenuEvent *event) override
     {
       RepoView *view = RepoView::parentView(this);
-      FileContextMenu menu(view, {mPatch.name()}, mIndex);
+      FileContextMenu menu(view, {mPatch.name()},
+        mDiff.isStatusDiff() ? view->repo().index() : git::Index());
       menu.exec(event->globalPos());
     }
 
@@ -1767,7 +1768,7 @@ public:
     {
       bool disabled = false;
       Qt::CheckState state = Qt::Unchecked;
-      switch (mIndex.isStaged(mPatch.name())) {
+      switch (mPatch.repo().index().isStaged(mPatch.name())) {
         case git::Index::Disabled:
           disabled = true;
           break;
@@ -1792,8 +1793,8 @@ public:
       mCheck->setEnabled(!disabled);
     }
 
+    git::Diff mDiff;
     git::Patch mPatch;
-    git::Index mIndex;
 
     QCheckBox *mCheck;
     QToolButton *mLfsButton = nullptr;
@@ -1803,11 +1804,11 @@ public:
 
   FileWidget(
     DiffView *view,
+    const git::Diff &diff,
     const git::Patch &patch,
     const git::Patch &staged,
-    const git::Index &index,
     QWidget *parent = nullptr)
-    : QWidget(parent), mView(view), mPatch(patch), mIndex(index)
+    : QWidget(parent), mView(view), mPatch(patch)
   {
     setObjectName("FileWidget");
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -1816,8 +1817,6 @@ public:
 
     QString name = patch.name();
     QString path = repo.workdir().filePath(name);
-
-    bool workdir = index.isValid();
     bool submodule = repo.lookupSubmodule(name).isValid();
 
     bool binary = patch.isBinary();
@@ -1832,7 +1831,7 @@ public:
 
     bool lfs = patch.isLfsPointer();
 
-    mHeader = new Header(patch, index, binary, lfs, workdir, submodule, parent);
+    mHeader = new Header(diff, patch, binary, lfs, submodule, parent);
     layout->addWidget(mHeader);
 
     DisclosureButton *disclosureButton = mHeader->disclosureButton();
@@ -1857,7 +1856,7 @@ public:
         hunk->setVisible(visible);
     });
 
-    if (workdir) {
+    if (diff.isStatusDiff()) {
       // Collapse on check.
       connect(mHeader->check(), &QCheckBox::stateChanged, [this](int state) {
         mHeader->disclosureButton()->setChecked(state != Qt::Checked);
@@ -1877,7 +1876,7 @@ public:
     // Add untracked file content.
     if (patch.isUntracked()) {
       if (!QFileInfo(path).isDir())
-        layout->addWidget(addHunk(patch, -1, lfs, workdir, submodule));
+        layout->addWidget(addHunk(diff, patch, -1, lfs, submodule));
       return;
     }
 
@@ -1891,7 +1890,7 @@ public:
     // Add diff hunks.
     int hunkCount = patch.count();
     for (int hidx = 0; hidx < hunkCount; ++hidx) {
-      HunkWidget *hunk = addHunk(patch, hidx, lfs, workdir, submodule);
+      HunkWidget *hunk = addHunk(diff, patch, hidx, lfs, submodule);
       int startLine = patch.lineNumber(hidx, 0, git::Diff::OldFile);
       hunk->header()->check()->setChecked(stagedHunks.contains(startLine));
       layout->addWidget(hunk);
@@ -1958,18 +1957,18 @@ public:
   }
 
   HunkWidget *addHunk(
+    const git::Diff &diff,
     const git::Patch &patch,
     int index,
     bool lfs,
-    bool workdir,
     bool submodule)
   {
     HunkWidget *hunk =
-      new HunkWidget(mView, patch, index, lfs, workdir, submodule, this);
+      new HunkWidget(mView, diff, patch, index, lfs, submodule, this);
 
     // Respond to check box click.
     QCheckBox *check = hunk->header()->check();
-    check->setVisible(workdir && !submodule && !patch.isConflicted());
+    check->setVisible(diff.isStatusDiff() && !submodule && !patch.isConflicted());
     connect(check, &QCheckBox::clicked, this, &FileWidget::stageHunks);
 
     // Respond to editor diagnostic signal.
@@ -1990,13 +1989,14 @@ public:
     for (int i = 0; i < mHunks.size(); ++i)
       hunks[i] = mHunks.at(i)->header()->check()->isChecked();
 
+    git::Index index = mPatch.repo().index();
     if (hunks == QBitArray(hunks.size(), true)) {
-      mIndex.setStaged({mPatch.name()}, true);
+      index.setStaged({mPatch.name()}, true);
       return;
     }
 
     if (hunks == QBitArray(hunks.size(), false)) {
-      mIndex.setStaged({mPatch.name()}, false);
+      index.setStaged({mPatch.name()}, false);
       return;
     }
 
@@ -2005,7 +2005,7 @@ public:
       return;
 
     // Add the buffer to the index.
-    mIndex.add(mPatch.name(), buffer);
+    index.add(mPatch.name(), buffer);
   }
 
 signals:
@@ -2014,7 +2014,6 @@ signals:
 private:
   DiffView *mView;
   git::Patch mPatch;
-  git::Index mIndex;
 
   Header *mHeader;
   QList<QWidget *> mImages;
@@ -2072,7 +2071,7 @@ QWidget *DiffView::file(int index)
   return mFiles.at(index);
 }
 
-void DiffView::setDiff(const git::Diff &diff, const git::Index &index)
+void DiffView::setDiff(const git::Diff &diff)
 {
   RepoView *view = RepoView::parentView(this);
   git::Repository repo = view->repo();
@@ -2089,7 +2088,6 @@ void DiffView::setDiff(const git::Diff &diff, const git::Index &index)
 
   // Set data.
   mDiff = diff;
-  mIndex = index;
 
   // Create a new widget.
   QWidget *widget = new QWidget(this);
@@ -2139,7 +2137,7 @@ void DiffView::setDiff(const git::Diff &diff, const git::Index &index)
   }
 
   // Generate a diff between the head tree and index.
-  if (index.isValid()) {
+  if (diff.isStatusDiff()) {
     if (git::Reference head = repo.head()) {
       if (git::Commit commit = head.target()) {
         git::Diff stagedDiff = repo.diffTreeToIndex(commit.tree());
@@ -2285,7 +2283,7 @@ void DiffView::fetchMore()
     }
 
     git::Patch staged = mStagedPatches.value(patch.name());
-    FileWidget *file = new FileWidget(this, patch, staged, mIndex, widget());
+    FileWidget *file = new FileWidget(this, mDiff, patch, staged, widget());
     layout->addWidget(file);
 
     mFiles.append(file);

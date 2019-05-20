@@ -36,10 +36,7 @@ public:
     QObject *parent = nullptr);
   virtual ~TreeModel();
 
-  void setTree(
-    const git::Tree &tree,
-    const git::Diff &diff,
-    const git::Index &index);
+  void setTree(const git::Tree &tree, const git::Diff &diff = git::Diff());
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -91,7 +88,6 @@ private:
   QFileIconProvider mIconProvider;
 
   git::Diff mDiff;
-  git::Index mIndex;
   git::Repository mRepo;
 };
 

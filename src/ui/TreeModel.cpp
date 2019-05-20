@@ -31,10 +31,7 @@ TreeModel::~TreeModel()
   delete mRoot;
 }
 
-void TreeModel::setTree(
-  const git::Tree &tree,
-  const git::Diff &diff,
-  const git::Index &index)
+void TreeModel::setTree(const git::Tree &tree, const git::Diff &diff)
 {
   beginResetModel();
 
@@ -42,7 +39,6 @@ void TreeModel::setTree(
   mRoot = tree.isValid() ? new Node(mRepo.workdir().path(), tree) : nullptr;
 
   mDiff = diff;
-  mIndex = index;
 
   endResetModel();
 }
@@ -107,7 +103,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
       return node->path();
 
     case Qt::CheckStateRole: {
-      if (!mDiff.isValid() || !mIndex.isValid())
+      if (!mDiff.isValid() || !mDiff.isStatusDiff())
         return QVariant();
 
       QStringList paths;
@@ -122,8 +118,9 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
       int count = 0;
+      git::Index index = mRepo.index();
       foreach (const QString &path, paths) {
-        switch (mIndex.isStaged(path)) {
+        switch (index.isStaged(path)) {
           case git::Index::Disabled:
           case git::Index::Unstaged:
           case git::Index::Conflicted:
@@ -207,7 +204,7 @@ bool TreeModel::setData(
           files.append(file);
       }
 
-      mIndex.setStaged(files, value.toBool());
+      mRepo.index().setStaged(files, value.toBool());
       emit dataChanged(index, index, {role});
       return true;
     }

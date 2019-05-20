@@ -43,13 +43,13 @@ public:
     setModel(model);
 
     if (git::Reference head = repo.head())
-      model->setTree(head.target().tree(), git::Diff(), git::Index());
+      model->setTree(head.target().tree());
 
     // Reset tree when HEAD changes.
     connect(repo.notifier(), &git::RepositoryNotifier::referenceUpdated, this,
     [model](const git::Reference &ref) {
       if (ref.isValid() && ref.isHead())
-        model->setTree(ref.target().tree(), git::Diff(), git::Index());
+        model->setTree(ref.target().tree());
     });
   }
 

@@ -32,7 +32,6 @@ public:
 
   virtual void setDiff(
     const git::Diff &diff,
-    const git::Index &index,
     const QString &file = QString(),
     const QString &pathspec = QString()) = 0;
 

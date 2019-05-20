@@ -74,7 +74,7 @@ DiffWidget::DiffWidget(const git::Repository &repo, QWidget *parent)
           this, &DiffWidget::setCurrentFile);
 
   connect(mFiles, &FileList::sortRequested, [this] {
-    setDiff(mDiff, mIndex);
+    setDiff(mDiff);
   });
 }
 
@@ -87,12 +87,10 @@ QString DiffWidget::selectedFile() const
 
 void DiffWidget::setDiff(
   const git::Diff &diff,
-  const git::Index &index,
   const QString &file,
   const QString &pathspec)
 {
   mDiff = diff;
-  mIndex = index;
 
   // Cancel find.
   mFind->hide();
@@ -110,8 +108,8 @@ void DiffWidget::setDiff(
     mDiff.sort(role, order);
   }
 
-  mDiffView->setDiff(diff, index);
-  mFiles->setDiff(diff, index, pathspec);
+  mDiffView->setDiff(diff);
+  mFiles->setDiff(diff, pathspec);
 
   // Reset find.
   mFind->reset();

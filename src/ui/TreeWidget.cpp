@@ -72,7 +72,6 @@ QString TreeWidget::selectedFile() const
 
 void TreeWidget::setDiff(
   const git::Diff &diff,
-  const git::Index &index,
   const QString &file,
   const QString &pathspec)
 {
@@ -87,7 +86,7 @@ void TreeWidget::setDiff(
   // Reset model.
   git::Tree tree = RepoView::parentView(this)->tree();
   TreeModel *model = static_cast<TreeModel *>(mView->model());
-  model->setTree(tree, diff, index);
+  model->setTree(tree, diff);
 
   // Clear editor.
   mEditor->clear();

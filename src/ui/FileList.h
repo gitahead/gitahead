@@ -10,13 +10,12 @@
 #ifndef FILELIST_H
 #define FILELIST_H
  
-#include "git/Index.h"
+#include "git/Diff.h"
 #include <QListView>
 
 class QToolButton;
 
 namespace git {
-class Diff;
 class Repository;
 }
 
@@ -27,10 +26,7 @@ class FileList : public QListView
 public:
   FileList(const git::Repository &repo, QWidget *parent = nullptr);
 
-  void setDiff(
-    const git::Diff &diff,
-    const git::Index &index = git::Index(),
-    const QString &pathspec = QString());
+  void setDiff(const git::Diff &diff, const QString &pathspec = QString());
 
   QSize sizeHint() const override;
 
@@ -60,7 +56,7 @@ private:
   QModelIndex mPressedIndex;
   QToolButton *mButton;
 
-  git::Index mIndex;
+  git::Diff mDiff;
 };
 
 #endif

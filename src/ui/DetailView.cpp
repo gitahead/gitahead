@@ -388,7 +388,7 @@ class CommitEditor : public QWidget
 {
 public:
   CommitEditor(const git::Repository &repo, QWidget *parent = nullptr)
-    : QWidget(parent)
+    : QWidget(parent), mRepo(repo)
   {
     QLabel *label = new QLabel(tr("<b>Commit Message:</b>"), this);
     mStatus = new QLabel(QString(), this);
@@ -432,7 +432,7 @@ public:
       QStringList paths;
       for (int i = 0; i < mDiff.count(); ++i)
         paths.append(mDiff.name(i));
-      mIndex.setStaged(paths, true);
+      mRepo.index().setStaged(paths, true);
     });
 
     mUnstage = new QPushButton(tr("Unstage All"), this);
@@ -440,7 +440,7 @@ public:
       QStringList paths;
       for (int i = 0; i < mDiff.count(); ++i)
         paths.append(mDiff.name(i));
-      mIndex.setStaged(paths, false);
+      mRepo.index().setStaged(paths, false);
     });
 
     mCommit = new QPushButton(tr("Commit"), this);
@@ -489,10 +489,9 @@ public:
     mMessage->selectAll();
   }
 
-  void setDiff(const git::Diff &diff, const git::Index &index)
+  void setDiff(const git::Diff &diff)
   {
     mDiff = diff;
-    mIndex = index;
     updateButtons(false);
 
     // Pre-populate commit editor with the merge message.
@@ -516,9 +515,10 @@ private:
     int partial = 0;
     int conflicted = 0;
     int count = mDiff.count();
+    git::Index index = mRepo.index();
     for (int i = 0; i < count; ++i) {
       QString name = mDiff.name(i);
-      switch (mIndex.isStaged(name)) {
+      switch (index.isStaged(name)) {
         case git::Index::Disabled:
         case git::Index::Unstaged:
           break;
@@ -613,7 +613,7 @@ private:
   }
 
   git::Diff mDiff;
-  git::Index mIndex;
+  git::Repository mRepo;
 
   QLabel *mStatus;
   QTextEdit *mMessage;
@@ -706,16 +706,14 @@ void DetailView::setDiff(
   mDetail->setCurrentIndex(commits.isEmpty() ? EditorIndex : CommitIndex);
   mDetail->setVisible(diff.isValid());
 
-  git::Index index;
   if (commits.isEmpty()) {
-    index = view->repo().index();
-    static_cast<CommitEditor *>(mDetail->currentWidget())->setDiff(diff, index);
+    static_cast<CommitEditor *>(mDetail->currentWidget())->setDiff(diff);
   } else {
     static_cast<CommitDetail *>(mDetail->currentWidget())->setCommits(commits);
   }
 
   ContentWidget *cw = static_cast<ContentWidget *>(mContent->currentWidget());
-  cw->setDiff(diff, index, file, pathspec);
+  cw->setDiff(diff, file, pathspec);
 }
 
 void DetailView::cancelBackgroundTasks()

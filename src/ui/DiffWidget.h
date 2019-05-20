@@ -21,7 +21,6 @@ class QSplitter;
 
 namespace git {
 class Diff;
-class Index;
 class Repository;
 }
 
@@ -34,7 +33,6 @@ public:
 
   void setDiff(
     const git::Diff &diff,
-    const git::Index &index,
     const QString &file = QString(),
     const QString &pathspec = QString()) override;
 
@@ -52,7 +50,6 @@ private:
   QSplitter *mSplitter;
 
   git::Diff mDiff;
-  git::Index mIndex;
 };
 
 #endif

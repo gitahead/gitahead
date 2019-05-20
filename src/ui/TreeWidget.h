@@ -17,7 +17,6 @@ class ColumnView;
 
 namespace git {
 class Diff;
-class Index;
 class Repository;
 }
 
@@ -32,7 +31,6 @@ public:
 
   void setDiff(
     const git::Diff &diff,
-    const git::Index &index,
     const QString &file = QString(),
     const QString &pathspec = QString()) override;
 

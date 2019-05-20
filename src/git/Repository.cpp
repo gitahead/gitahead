@@ -299,6 +299,7 @@ Diff Repository::status(Diff::Callbacks *callbacks) const
 
   diff.merge(workdir);
   diff.findSimilar();
+  diff.setStatusDiff(true);
 
   return diff;
 }

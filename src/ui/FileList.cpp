@@ -36,17 +36,16 @@ class FileModel : public QAbstractListModel
 
 public:
   FileModel(const git::Repository &repo, QObject *parent = nullptr)
-    : QAbstractListModel(parent)
+    : QAbstractListModel(parent), mRepo(repo)
   {
     connect(repo.notifier(), &git::RepositoryNotifier::indexChanged,
             this, &FileModel::updateCheckState);
   }
 
-  void setDiff(const git::Diff &diff, const git::Index &index)
+  void setDiff(const git::Diff &diff)
   {
     beginResetModel();
     mDiff = diff;
-    mIndex = index;
     endResetModel();
   }
 
@@ -67,11 +66,11 @@ public:
         return git::Diff::statusChar(mDiff.status(index.row()));
 
       case Qt::CheckStateRole: {
-        if (!mIndex.isValid())
+        if (!mDiff.isStatusDiff())
           return QVariant();
 
         QString name = mDiff.name(index.row());
-        switch (mIndex.isStaged(name)) {
+        switch (mRepo.index().isStaged(name)) {
           case git::Index::Disabled:
           case git::Index::Unstaged:
           case git::Index::Conflicted:
@@ -102,11 +101,11 @@ public:
     switch (role) {
       case Qt::CheckStateRole: {
         QString name = mDiff.name(index.row());
-        if (mIndex.isStaged(name) == git::Index::Conflicted &&
+        if (mRepo.index().isStaged(name) == git::Index::Conflicted &&
             mDiff.patch(index.row()).count() > 0)
           return false;
 
-        mIndex.setStaged({name}, value.toBool(), mYieldFocus);
+        mRepo.index().setStaged({name}, value.toBool(), mYieldFocus);
         emit dataChanged(index, index, {role});
         return true;
       }
@@ -132,8 +131,9 @@ private:
     }
   }
 
+  git::Repository mRepo;
   git::Diff mDiff;
-  git::Index mIndex;
+
   bool mYieldFocus = true;
 };
 
@@ -291,15 +291,12 @@ void FileList::resizeEvent(QResizeEvent *event)
   mButton->move(viewport()->width() - mButton->width() - 2, y() + 2);
 }
 
-void FileList::setDiff(
-  const git::Diff &diff,
-  const git::Index &index,
-  const QString &pathspec)
+void FileList::setDiff(const git::Diff &diff, const QString &pathspec)
 {
-  mIndex = index;
+  mDiff = diff;
 
   FileModel *model = static_cast<FileModel *>(this->model());
-  model->setDiff(diff, index);
+  model->setDiff(diff);
 
   int rows = model->rowCount();
   setVisible(rows > 0);
@@ -392,7 +389,9 @@ void FileList::contextMenuEvent(QContextMenuEvent *event)
   foreach (const QModelIndex &index, selectionModel()->selectedIndexes())
     files.append(index.data(Qt::DisplayRole).toString());
 
-  FileContextMenu menu(RepoView::parentView(this), files, mIndex);
+  RepoView *view = RepoView::parentView(this);
+  FileContextMenu menu(view, files,
+    mDiff.isStatusDiff() ? view->repo().index() : git::Index());
   menu.exec(event->globalPos());
 }
 

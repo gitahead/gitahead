@@ -70,6 +70,16 @@ bool Diff::isConflicted() const
   return false;
 }
 
+bool Diff::isStatusDiff() const
+{
+  return d->status;
+}
+
+void Diff::setStatusDiff(bool enabled)
+{
+  d->status = enabled;
+}
+
 int Diff::count() const
 {
   return git_diff_num_deltas(d->diff);

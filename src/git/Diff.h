@@ -55,6 +55,7 @@ public:
   bool isValid() const { return d; }
 
   bool isConflicted() const;
+  bool isStatusDiff() const;
 
   int count() const;
   Patch patch(int index) const;
@@ -85,11 +86,13 @@ private:
     const git_diff_delta *delta(int index) const;
 
     git_diff *diff;
+    bool status = false;
     mutable QList<int> map;
   };
 
   Diff(git_diff *diff);
   operator git_diff *() const;
+  void setStatusDiff(bool enabled);
 
   QSharedPointer<Data> d;
 
