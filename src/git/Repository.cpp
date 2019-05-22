@@ -301,7 +301,7 @@ Diff Repository::status(Diff::Callbacks *callbacks) const
   diff.findSimilar();
   diff.setStatusDiff(true);
 
-  return diff;
+  return diff.count() ? diff : Diff();
 }
 
 Diff Repository::diffTreeToIndex(const Tree &tree) const

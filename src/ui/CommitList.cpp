@@ -20,6 +20,7 @@
 #include "git/Commit.h"
 #include "git/Config.h"
 #include "git/Diff.h"
+#include "git/Index.h"
 #include "git/Patch.h"
 #include "git/RevWalk.h"
 #include "git/Signature.h"
@@ -146,12 +147,17 @@ public:
     // Cancel existing status diff.
     cancelStatus();
 
+    // Reload the index before starting the status thread. Allowing
+    // it to reload on the thread frequently corrupts the index.
+    // FIXME: There's still a race between this reload and the two
+    // checks done by status (tree-to-index and index-to-workdir).
+    mRepo.index().read();
+
     // Check for uncommitted changes asynchronously.
     mProgress = 0;
     mTimer.start(50);
     mStatus.setFuture(QtConcurrent::run([this] {
-      git::Diff status = mRepo.status(&mStatusCallbacks);
-      return (status.isValid() && status.count()) ? status : git::Diff();
+      return mRepo.status(&mStatusCallbacks);
     }));
   }
 

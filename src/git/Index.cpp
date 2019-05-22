@@ -320,6 +320,11 @@ void Index::add(const QString &path, const QByteArray &buffer)
   emit repo.notifier()->indexChanged({path});
 }
 
+void Index::read()
+{
+  git_index_read(d->index, false);
+}
+
 Tree Index::writeTree() const
 {
   // Write the index tree.

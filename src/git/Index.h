@@ -58,6 +58,7 @@ public:
 
   void add(const QString &path, const QByteArray &buffer);
 
+  void read();
   Tree writeTree() const;
 
   bool hasConflicts() const;
