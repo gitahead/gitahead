@@ -149,15 +149,14 @@ public:
 
     // Reload the index before starting the status thread. Allowing
     // it to reload on the thread frequently corrupts the index.
-    // FIXME: There's still a race between this reload and the two
-    // checks done by status (tree-to-index and index-to-workdir).
     mRepo.index().read();
 
     // Check for uncommitted changes asynchronously.
     mProgress = 0;
     mTimer.start(50);
     mStatus.setFuture(QtConcurrent::run([this] {
-      return mRepo.status(&mStatusCallbacks);
+      // Pass the repo's index to suppress reload.
+      return mRepo.status(mRepo.index(), &mStatusCallbacks);
     }));
   }
 

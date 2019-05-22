@@ -65,7 +65,7 @@ Index::Index(git_index *index)
 
 Index::operator git_index *() const
 {
-  return d->index;
+  return isValid() ? d->index : nullptr;
 }
 
 Index::Conflict Index::conflict(const QString &path) const

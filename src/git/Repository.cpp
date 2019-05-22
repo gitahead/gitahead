@@ -284,7 +284,9 @@ void Repository::setIndex(const Index &index)
   git_repository_set_index(d->repo, index);
 }
 
-Diff Repository::status(Diff::Callbacks *callbacks) const
+Diff Repository::status(
+  const Index &index,
+  Diff::Callbacks *callbacks) const
 {
   Tree tree;
   if (Reference ref = head()) {
@@ -292,8 +294,8 @@ Diff Repository::status(Diff::Callbacks *callbacks) const
       tree = commit.tree();
   }
 
-  Diff diff = diffTreeToIndex(tree);
-  Diff workdir = diffIndexToWorkdir(callbacks);
+  Diff diff = diffTreeToIndex(tree, index);
+  Diff workdir = diffIndexToWorkdir(index, callbacks);
   if (!diff.isValid() || !workdir.isValid())
     return Diff();
 
@@ -304,7 +306,9 @@ Diff Repository::status(Diff::Callbacks *callbacks) const
   return diff.count() ? diff : Diff();
 }
 
-Diff Repository::diffTreeToIndex(const Tree &tree) const
+Diff Repository::diffTreeToIndex(
+  const Tree &tree,
+  const Index &index) const
 {
   git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
   opts.flags |= GIT_DIFF_INCLUDE_UNTRACKED;
@@ -312,11 +316,13 @@ Diff Repository::diffTreeToIndex(const Tree &tree) const
     opts.flags |= GIT_DIFF_IGNORE_WHITESPACE;
 
   git_diff *diff = nullptr;
-  git_diff_tree_to_index(&diff, d->repo, tree, nullptr, &opts);
+  git_diff_tree_to_index(&diff, d->repo, tree, index, &opts);
   return Diff(diff);
 }
 
-Diff Repository::diffIndexToWorkdir(Diff::Callbacks *callbacks) const
+Diff Repository::diffIndexToWorkdir(
+  const Index &index,
+  Diff::Callbacks *callbacks) const
 {
   git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
   opts.flags |= (GIT_DIFF_INCLUDE_UNTRACKED | GIT_DIFF_DISABLE_MMAP);
@@ -329,7 +335,7 @@ Diff Repository::diffIndexToWorkdir(Diff::Callbacks *callbacks) const
   }
 
   git_diff *diff = nullptr;
-  git_diff_index_to_workdir(&diff, d->repo, nullptr, &opts);
+  git_diff_index_to_workdir(&diff, d->repo, index, &opts);
   return Diff(diff);
 }
 

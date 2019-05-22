@@ -15,6 +15,7 @@
 #include "Blob.h"
 #include "Commit.h"
 #include "Diff.h"
+#include "Index.h"
 #include "git2/checkout.h"
 #include "git2/errors.h"
 #include "git2/revwalk.h"
@@ -34,7 +35,6 @@ class Branch;
 class Config;
 class FilterList;
 class Id;
-class Index;
 class Rebase;
 class Reference;
 class Remote;
@@ -99,9 +99,15 @@ public:
   void setIndex(const Index &index);
 
   // status/diff
-  Diff status(Diff::Callbacks *callbacks) const;
-  Diff diffTreeToIndex(const Tree &tree) const;
-  Diff diffIndexToWorkdir(Diff::Callbacks *callbacks = nullptr) const;
+  Diff status(
+    const Index &index = Index(),
+    Diff::Callbacks *callbacks = nullptr) const;
+  Diff diffTreeToIndex(
+    const Tree &tree,
+    const Index &index = Index()) const;
+  Diff diffIndexToWorkdir(
+    const Index &index = Index(),
+    Diff::Callbacks *callbacks = nullptr) const;
 
   // refs
   QList<Reference> refs() const;
