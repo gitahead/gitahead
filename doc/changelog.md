@@ -1,3 +1,11 @@
+### v2.5.7 - 2019-05-22
+
+#### Fixed
+
+* Fixed possible index corruption.
+
+----
+
 ### v2.5.6 - 2019-05-16
 
 #### Added
