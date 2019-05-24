@@ -128,7 +128,7 @@ endif()
 # Install SSL libraries.
 if(NOT APPLE)
   if(WIN32)
-    if(CMAKE_CL_64)
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
       set(SSL_LIB_SUFFIX "-1_1-x64.dll")
     else()
       set(SSL_LIB_SUFFIX "-1_1.dll")
