@@ -51,6 +51,7 @@
 namespace {
 
 const int kSize = 64;
+const QString kSplitterKey = "detailSplitter";
 const char *kCacheKey = "cache_key";
 const QString kRangeFmt = "%1..%2";
 const QString kDateRangeFmt = "%1-%2";
@@ -264,6 +265,7 @@ public:
     layout->addLayout(header);
     layout->addWidget(mSeparator);
     layout->addWidget(mMessage);
+    layout->addStretch();
 
     connect(&mMgr, &QNetworkAccessManager::finished,
             this, &CommitDetail::setPicture);
@@ -936,6 +938,7 @@ public:
     buttonLayout->addWidget(mStage);
     buttonLayout->addWidget(mUnstage);
     buttonLayout->addWidget(mCommit);
+    buttonLayout->addStretch();
 
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->setContentsMargins(0,0,0,12);
@@ -1140,22 +1143,35 @@ ContentWidget::~ContentWidget() {}
 DetailView::DetailView(const git::Repository &repo, QWidget *parent)
   : QWidget(parent)
 {
-  QVBoxLayout *layout = new QVBoxLayout(this);
+  QHBoxLayout *layout = new QHBoxLayout(this);
   layout->setContentsMargins(0,0,0,0);
-  layout->setSpacing(0);
+
+  QSplitter *splitter = new QSplitter(this);
+  splitter->setHandleWidth(0);
+  connect(splitter, &QSplitter::splitterMoved, [this, splitter] {
+    QSettings().setValue(kSplitterKey, splitter->saveState());
+  });
+
+  layout->addWidget(splitter);
+  splitter->setContentsMargins(0,0,0,0);
+  splitter->setOrientation(Qt::Vertical);
 
   mDetail = new StackedWidget(this);
   mDetail->setVisible(false);
-  layout->addWidget(mDetail);
+  splitter->addWidget(mDetail);
 
   mDetail->addWidget(new CommitDetail(this));
   mDetail->addWidget(new CommitEditor(repo, this));
 
   mContent = new QStackedWidget(this);
-  layout->addWidget(mContent, 1);
+  splitter->addWidget(mContent);
 
   mContent->addWidget(new DiffWidget(repo, this));
   mContent->addWidget(new TreeWidget(repo, this));
+
+  // Restore splitter state.
+  splitter->restoreState(QSettings().value(kSplitterKey).toByteArray());
+
 }
 
 DetailView::~DetailView() {}
