@@ -14,6 +14,7 @@
 #include "app/Application.h"
 #include "app/CustomTheme.h"
 #include "conf/Settings.h"
+#include "cred/CredentialHelper.h"
 #include "git/Config.h"
 #include "log/LogEntry.h"
 #include "tools/ExternalTool.h"
@@ -164,6 +165,7 @@ public:
 
     connect(mStoreCredentials, &QCheckBox::toggled, [](bool checked) {
       Settings::instance()->setValue("credential/store", checked);
+      delete CredentialHelper::instance();
     });
   }
 

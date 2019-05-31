@@ -13,6 +13,7 @@
 #include "WinCred.h"
 #include "conf/Settings.h"
 #include <QLibrary>
+#include <QPointer>
 #include <QSettings>
 #include <QTextStream>
 #include <QTime>
@@ -26,7 +27,7 @@ const QString kStoreKey = "credential/store";
 
 CredentialHelper *CredentialHelper::instance()
 {
-  static CredentialHelper *instance = nullptr;
+  static QPointer<CredentialHelper> instance;
   if (!instance) {
     if (Settings::instance()->value(kStoreKey).toBool()) {
 #if defined(Q_OS_MAC)

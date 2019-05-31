@@ -10,12 +10,13 @@
 #ifndef CREDENTIALHELPER_H
 #define CREDENTIALHELPER_H
 
+#include <QObject>
 #include <QString>
 
 // This corresponds roughly to the git credential helper interface.
 // It is used for both authenticating git remote connections and
 // securely storing passwords associated with host accounts.
-class CredentialHelper
+class CredentialHelper : public QObject
 {
 public:
   // Username can be supplied by the caller to lookup a specific
