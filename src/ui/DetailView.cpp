@@ -34,6 +34,7 @@
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QStackedWidget>
+#include <QStyle>
 #include <QTextEdit>
 #include <QToolButton>
 #include <QUrl>
@@ -57,9 +58,7 @@ const QString kUrl = "http://www.gravatar.com/avatar/%1?s=%2&d=mm";
 const Qt::TextInteractionFlags kTextFlags =
   Qt::TextSelectableByMouse | Qt::LinksAccessibleByMouse;
 
-QString brightText(
-  QWidget *widget,
-  const QString &text)
+QString brightText(const QString &text)
 {
   return kAltFmt.arg(Application::theme()->windowBrightText().name(), text);
 }
@@ -116,12 +115,10 @@ public:
   }
 };
 
-class CommitDetail : public QWidget
+class AuthorDate : public QWidget
 {
-  Q_OBJECT
-
 public:
-  CommitDetail(QWidget *parent = nullptr)
+  AuthorDate(QWidget *parent = nullptr)
     : QWidget(parent)
   {
     mAuthor = new QLabel(this);
@@ -130,10 +127,85 @@ public:
     mDate = new QLabel(this);
     mDate->setTextInteractionFlags(kTextFlags);
 
-    QHBoxLayout *line1 = new QHBoxLayout;
-    line1->addWidget(mAuthor);
-    line1->addStretch();
-    line1->addWidget(mDate);
+    mSpacing = style()->pixelMetric(QStyle::PM_DefaultLayoutSpacing);
+  }
+
+  void moveEvent(QMoveEvent *event) override
+  {
+    updateLayout();
+  }
+
+  void resizeEvent(QResizeEvent *event) override
+  {
+    updateLayout();
+  }
+
+  QSize sizeHint() const override
+  {
+    QSize date = mDate->sizeHint();
+    QSize author = mAuthor->sizeHint();
+    int width = author.width() + date.width() + mSpacing;
+    return QSize(width, qMax(author.height(), date.height()));
+  }
+
+  QSize minimumSizeHint() const override
+  {
+    QSize date = mDate->minimumSizeHint();
+    QSize author = mAuthor->minimumSizeHint();
+    int width = qMax(author.width(), date.width());
+    return QSize(width, qMax(author.height(), date.height()));
+  }
+
+  bool hasHeightForWidth() const override { return true; }
+
+  int heightForWidth(int width) const override
+  {
+    int date = mDate->sizeHint().height();
+    int author = mAuthor->sizeHint().height();
+    bool wrapped = (width < sizeHint().width());
+    return wrapped ? (author + date + mSpacing) : qMax(author, date);
+  }
+
+  void setAuthor(const QString &author)
+  {
+    mAuthor->setText(author);
+    mAuthor->adjustSize();
+    updateGeometry();
+  }
+
+  void setDate(const QString &date)
+  {
+    mDate->setText(date);
+    mDate->adjustSize();
+    updateGeometry();
+  }
+
+private:
+  void updateLayout()
+  {
+    mAuthor->move(0, 0);
+
+    bool wrapped = (width() < sizeHint().width());
+    int x = wrapped ? 0 : width() - mDate->width();
+    int y = wrapped ? mAuthor->height() + mSpacing : 0;
+    mDate->move(x, y);
+  }
+
+  QLabel *mAuthor;
+  QLabel *mDate;
+
+  int mSpacing;
+};
+
+class CommitDetail : public QWidget
+{
+  Q_OBJECT
+
+public:
+  CommitDetail(QWidget *parent = nullptr)
+    : QWidget(parent)
+  {
+    mAuthorDate = new AuthorDate(this);
 
     mHash = new QLabel(this);
     mHash->setTextInteractionFlags(kTextFlags);
@@ -161,7 +233,7 @@ public:
 
     QVBoxLayout *details = new QVBoxLayout;
     details->setSpacing(6);
-    details->addLayout(line1);
+    details->addWidget(mAuthorDate);
     details->addLayout(line2);
     details->addLayout(line3);
     details->addStretch();
@@ -230,8 +302,8 @@ public:
   {
     // Clear fields.
     mHash->setText(QString());
-    mDate->setText(QString());
-    mAuthor->setText(QString());
+    mAuthorDate->setDate(QString());
+    mAuthorDate->setAuthor(QString());
     mParents->setText(QString());
     mMessage->setPlainText(QString());
     mPicture->setPixmap(QPixmap());
@@ -258,7 +330,7 @@ public:
       QStringList list = names.toList();
       if (list.size() > 3)
         list = list.mid(0, 3) << kBoldFmt.arg("...");
-      mAuthor->setText(list.join(", "));
+      mAuthorDate->setAuthor(list.join(", "));
 
       // Set date range.
       QDate lastDate = last.committer().date().date();
@@ -267,7 +339,7 @@ public:
       QString firstDateStr = firstDate.toString(Qt::DefaultLocaleShortDate);
       QString dateStr = (lastDate == firstDate) ? lastDateStr :
         kDateRangeFmt.arg(lastDateStr, firstDateStr);
-      mDate->setText(brightText(this, dateStr));
+      mAuthorDate->setDate(brightText(dateStr));
 
       // Set id range.
       QUrl lastUrl;
@@ -281,7 +353,7 @@ public:
       QString firstId = kLinkFmt.arg(firstUrl.toString(), first.shortId());
 
       QString range = kRangeFmt.arg(lastId, firstId);
-      mHash->setText(brightText(this, tr("Range:")) + " " + range);
+      mHash->setText(brightText(tr("Range:")) + " " + range);
 
       // Remember the range.
       mId = kRangeFmt.arg(last.id().toString(), first.id().toString());
@@ -298,9 +370,9 @@ public:
     git::Commit commit = commits.first();
     git::Signature author = commit.author();
     QDateTime date = commit.committer().date();
-    mHash->setText(brightText(this, tr("Id:")) + " " + commit.shortId());
-    mDate->setText(brightText(this, date.toString(Qt::DefaultLocaleLongDate)));
-    mAuthor->setText(kAuthorFmt.arg(author.name(), author.email()));
+    mHash->setText(brightText(tr("Id:")) + " " + commit.shortId());
+    mAuthorDate->setDate(brightText(date.toString(Qt::DefaultLocaleLongDate)));
+    mAuthorDate->setAuthor(kAuthorFmt.arg(author.name(), author.email()));
 
     QStringList parents;
     foreach (const git::Commit &parent, commit.parents()) {
@@ -312,7 +384,7 @@ public:
 
     QString initial = kItalicFmt.arg(tr("initial commit"));
     QString text = parents.isEmpty() ? initial : parents.join(", ");
-    mParents->setText(brightText(this, "Parents:") + " " + text);
+    mParents->setText(brightText("Parents:") + " " + text);
 
     QString msg = commit.message(git::Commit::SubstituteEmoji).trimmed();
     mMessage->setPlainText(msg);
@@ -371,12 +443,11 @@ public:
 private:
   Badge *mRefs;
   QLabel *mHash;
-  QLabel *mDate;
-  QLabel *mAuthor;
   QLabel *mParents;
   QLabel *mPicture;
   QFrame *mSeparator;
   QTextEdit *mMessage;
+  AuthorDate *mAuthorDate;
 
   QString mId;
   QNetworkAccessManager mMgr;
@@ -601,7 +672,7 @@ private:
       status = fragments.join(", ");
     }
 
-    mStatus->setText(brightText(this, status));
+    mStatus->setText(brightText(status));
 
     // Change commit button text for committing a merge.
     git::Repository repo = RepoView::parentView(this)->repo();
