@@ -55,14 +55,11 @@ MergeDialog::MergeDialog(
 
   QLabel *label = new QLabel(labelText(), this);
 
-  QCheckBox *noCommit = nullptr;
-  if (flags & RepoView::Merge) {
-    noCommit = new QCheckBox(tr("No commit"), this);
-    noCommit->setChecked(!Settings::instance()->value(kCommitKey).toBool());
-    connect(noCommit, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setValue(kCommitKey, !checked);
-    });
-  }
+  QCheckBox *noCommit = new QCheckBox(tr("No commit"), this);
+  noCommit->setChecked(!Settings::instance()->value(kCommitKey).toBool());
+  connect(noCommit, &QCheckBox::toggled, [](bool checked) {
+    Settings::instance()->setValue(kCommitKey, !checked);
+  });
 
   auto signal = QOverload<int>::of(&QComboBox::currentIndexChanged);
   connect(mAction, signal, [this, label, noCommit]() {
