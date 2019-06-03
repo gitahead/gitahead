@@ -61,6 +61,8 @@ MergeDialog::MergeDialog(
     Settings::instance()->setValue(kCommitKey, !checked);
   });
 
+  noCommit->setVisible(flags & RepoView::Merge);
+
   auto signal = QOverload<int>::of(&QComboBox::currentIndexChanged);
   connect(mAction, signal, [this, label, noCommit]() {
     RepoView::MergeFlags flags = this->flags();
