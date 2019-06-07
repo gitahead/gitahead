@@ -1122,11 +1122,12 @@ void RepoView::merge(
   bool ff = (analysis & GIT_MERGE_ANALYSIS_FASTFORWARD);
   bool noff = (flags & NoFastForward);
   bool ffonly = (flags & FastForward);
+  bool squashflag = (flags & Squash);
 
   // Write log entry.
   QString title = tr("Merge");
   QString textFmt = tr("%1 into %2");
-  if (ffonly || (!noff && ff)) {
+  if ((ffonly || (!noff && ff)) && !squashflag) {
     title = tr("Fast-forward");
     textFmt = tr("%2 to %1");
   } else if (flags & Rebase) {
@@ -1156,12 +1157,12 @@ void RepoView::merge(
     return;
   }
 
-  if (!ff && ffonly) {
+  if (!ff && ffonly && !squashflag) {
     entry->addEntry(LogEntry::Error, tr("Unable to fast-forward."));
     return;
   }
 
-  if (ff && !noff) {
+  if (ff && !noff && !squashflag) {
     fastForward(ref, upstream, entry, callback);
     return;
   }
@@ -1172,6 +1173,11 @@ void RepoView::merge(
 
   if (flags & Rebase) {
     rebase(upstream, entry, callback);
+    return;
+  }
+
+  if (squashflag) {
+    squash(upstream, entry);
     return;
   }
 
@@ -1417,6 +1423,38 @@ void RepoView::rebase(
   // Finalize.
   if (rebase.finish() && callback)
     callback();
+}
+
+void RepoView::squash(
+  const git::AnnotatedCommit &upstream,
+  LogEntry *parent)
+{
+    git::Branch head = mRepo.head();
+    Q_ASSERT(head.isValid());
+
+    // Try to merge.
+    if (!mRepo.merge(upstream)) {
+      LogEntry *err = error(parent, tr("squash"), head.name());
+
+      // Add stash hint if the failure was because of uncommitted changes.
+      QString msg = git::Repository::lastError();
+      int kind = git::Repository::lastErrorKind();
+      if (kind == GIT_ERROR_MERGE && msg.contains("overwritten by merge")) {
+        QString text =
+          tr("You may be able to rebase by <a href='action:stash'>stashing</a> "
+             "before trying to <a href='action:merge'>merge</a>. Then "
+             "<a href='action:unstash'>unstash</a> to restore your changes.");
+        err->addEntry(LogEntry::Hint, text);
+      }
+
+      return;
+    }
+
+    // Make squash effect.
+    mRepo.cleanupState();
+
+    // Check for conflicts.
+    checkForConflicts(parent, tr("squash"));
 }
 
 void RepoView::revert(const git::Commit &commit)
@@ -2485,10 +2523,12 @@ bool RepoView::checkForConflicts(LogEntry *parent, const QString &action)
   details->addEntry(LogEntry::Entry, commit.arg(action));
   mLogView->setEntryExpanded(details, false);
 
-  QString abort =
-    tr("You can <a href='action:abort'>abort</a> the %1 "
-       "to return the repository to its previous state.");
-  entry->addEntry(LogEntry::Hint, abort.arg(action));
+  if (action != tr("squash")) {
+    QString abort =
+      tr("You can <a href='action:abort'>abort</a> the %1 "
+         "to return the repository to its previous state.");
+    entry->addEntry(LogEntry::Hint, abort.arg(action));
+  }
 
   refresh();
   return true;

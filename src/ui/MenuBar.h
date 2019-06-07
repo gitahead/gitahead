@@ -90,6 +90,7 @@ private:
   QAction *mCheckout;
   QAction *mMerge;
   QAction *mRebase;
+  QAction *mSquash;
   QAction *mAbort;
 
   // Submodule
