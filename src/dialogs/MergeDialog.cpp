@@ -150,8 +150,6 @@ QString MergeDialog::buttonText() const
 {
   if (flags() & RepoView::Merge)
     return tr("Merge");
-  else if (flags() & RepoView::Rebase)
-    return tr("Rebase");
-  else
-    return tr("Squash");
+
+  return (flags() & RepoView::Rebase) ? tr("Rebase") : tr("Squash");
 }
