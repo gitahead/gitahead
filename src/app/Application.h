@@ -25,6 +25,7 @@ public:
 
   void autoUpdate();
   bool restoreWindows();
+  bool runSingleInstance();
 
   static Theme *theme();
 
@@ -50,5 +51,19 @@ private:
   QString mClientId;
   QNetworkAccessManager *mTrackingMgr = nullptr;
 };
+
+#ifdef Q_OS_LINUX
+class DBusGitAhead: public QObject
+{
+  Q_OBJECT
+
+public:
+  DBusGitAhead(QObject *parent = nullptr);
+
+public slots:
+  Q_SCRIPTABLE void openRepository(const QString &repo);
+  Q_SCRIPTABLE void setFocus();
+};
+#endif
 
 #endif

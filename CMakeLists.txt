@@ -55,7 +55,7 @@ set(QT_MODULES
   Test
 )
 
-if(APPLE)
+if(UNIX)
   set(QT_MODULES ${QT_MODULES} DBus)
 endif()
 

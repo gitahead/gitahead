@@ -32,13 +32,17 @@
 #include <QUrlQuery>
 #include <QUuid>
 
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_LINUX)
+#include <QtDBus/QtDBus>
+
+#elif defined(Q_OS_MAC)
 #include <unistd.h>
 
 #elif defined(Q_OS_WIN)
 #include <windows.h>
 #include <dbghelp.h>
 #include <strsafe.h>
+#include <QWindow>
 
 static LPTOP_LEVEL_EXCEPTION_FILTER defaultFilter = nullptr;
 
@@ -286,6 +290,153 @@ bool Application::restoreWindows()
   // Restore previous session.
   return MainWindow::restoreWindows();
 }
+
+#if defined(Q_OS_LINUX)
+#define DBUS_SERVICE_NAME "com.gitahead.GitAhead"
+#define DBUS_INTERFACE_NAME "com.gitahead.GitAhead.Application"
+#define DBUS_OBJECT_PATH "/com/gitahead/GitAhead/Application"
+
+DBusGitAhead::DBusGitAhead(QObject *parent): QObject(parent)
+{
+}
+
+void DBusGitAhead::openRepository(const QString &repo)
+{
+  MainWindow::open(repo, true);
+}
+
+void DBusGitAhead::setFocus()
+{
+  MainWindow::activeWindow()->activateWindow();
+}
+
+#elif defined(Q_OS_WIN)
+#define COPYDATA_WINDOW_TITLE "GitAhead WM_COPYDATA receiver 16b8b3f6-6446-4fa7-8c72-53c25b1f206c"
+enum CopyDataCommand
+{
+  Focus = 0,
+  FocusAndOpen = 1
+};
+
+namespace
+{
+  // Helper window class for receiving IPC messages
+  class CopyDataWindow: public QWindow
+  {
+  public:
+    CopyDataWindow()
+    {
+      setTitle(COPYDATA_WINDOW_TITLE);
+    }
+
+  protected:
+    virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) Q_DECL_OVERRIDE
+    {
+      MSG *msg = (MSG*) message;
+
+      if (msg->message == WM_COPYDATA) {
+        COPYDATASTRUCT *cds = (COPYDATASTRUCT*) msg->lParam;
+
+        switch (cds->dwData) {
+          case CopyDataCommand::Focus:
+            MainWindow::activeWindow()->activateWindow();
+            break;
+
+          case CopyDataCommand::FocusAndOpen:
+            if (cds->cbData % 2 == 0) {
+              QString repo = QString::fromUtf16((const char16_t*) cds->lpData, cds->cbData / 2);
+              MainWindow::open(repo, true);
+
+              MainWindow::activeWindow()->activateWindow();
+            }
+            break;
+        }
+
+        return true;
+      }
+
+      return QWindow::nativeEvent(eventType, message, result);
+    }
+  };
+}
+#endif
+
+bool Application::runSingleInstance()
+{
+  if (Settings::instance()->value("singleInstance").toBool()) {
+#if defined(Q_OS_LINUX)
+    QDBusConnection bus = QDBusConnection::sessionBus();
+
+    if (bus.isConnected()) {
+      QDBusInterface masterInstance(DBUS_SERVICE_NAME, DBUS_OBJECT_PATH, DBUS_INTERFACE_NAME, bus);
+
+      // Is another instance running on the current DBus session bus?
+      if (masterInstance.isValid()) {
+        if (!mPositionalArguments.isEmpty())
+          masterInstance.call("openRepository", mPositionalArguments.first());
+
+        masterInstance.call("setFocus");
+        return true;
+      }
+    }
+
+#elif defined(Q_OS_WIN)
+    HWND handle = FindWindowA(nullptr, COPYDATA_WINDOW_TITLE);
+    // Is another instance running in the current session?
+    if (handle != nullptr) {
+      QWindow sender;
+
+      COPYDATASTRUCT cds;
+
+      if (mPositionalArguments.isEmpty()) {
+        cds.dwData = CopyDataCommand::Focus;
+        cds.cbData = 0;
+        cds.lpData = nullptr;
+
+        SendMessage(handle, WM_COPYDATA, sender.winId(), (LPARAM) &cds);
+
+      } else {
+        QString arg = mPositionalArguments.first();
+
+        cds.dwData = CopyDataCommand::FocusAndOpen;
+        cds.cbData = arg.length() * 2;
+        cds.lpData = (LPVOID) arg.utf16();
+
+        SendMessage(handle, WM_COPYDATA, sender.winId(), (LPARAM) &cds);
+      }
+
+      return true;
+    }
+
+#endif
+  }
+
+#ifndef Q_OS_MAC
+  registerService();
+#endif
+  return false;
+}
+
+#ifndef Q_OS_MAC
+void Application::registerService()
+{
+#if defined(Q_OS_LINUX)
+  QDBusConnection bus = QDBusConnection::sessionBus();
+
+  if (!bus.isConnected())
+    return;
+
+  if (!bus.registerService(DBUS_SERVICE_NAME))
+    return;
+
+  bus.registerObject(DBUS_OBJECT_PATH, DBUS_INTERFACE_NAME, new DBusGitAhead(), QDBusConnection::ExportScriptableSlots);
+
+#elif defined(Q_OS_WIN)
+  CopyDataWindow *receiver = new CopyDataWindow();
+  receiver->winId();
+#endif
+}
+#endif
 
 Theme *Application::theme()
 {
