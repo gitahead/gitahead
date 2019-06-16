@@ -361,6 +361,14 @@ namespace
 }
 #endif
 
+static QString getAbsolutePath(QString path)
+{
+  if (QDir::isAbsolutePath(path))
+    return path;
+  
+  return QDir::cleanPath(QDir::currentPath() + '/' + path);
+}
+
 bool Application::runSingleInstance()
 {
   if (Settings::instance()->value("singleInstance").toBool()) {
@@ -373,7 +381,7 @@ bool Application::runSingleInstance()
       // Is another instance running on the current DBus session bus?
       if (masterInstance.isValid()) {
         if (!mPositionalArguments.isEmpty())
-          masterInstance.call("openRepository", mPositionalArguments.first());
+          masterInstance.call("openRepository", getAbsolutePath(mPositionalArguments.first()));
 
         masterInstance.call("setFocus");
         return true;
@@ -396,7 +404,7 @@ bool Application::runSingleInstance()
         SendMessage(handle, WM_COPYDATA, sender.winId(), (LPARAM) &cds);
 
       } else {
-        QString arg = mPositionalArguments.first();
+        QString arg = getAbsolutePath(mPositionalArguments.first());
 
         cds.dwData = CopyDataCommand::FocusAndOpen;
         cds.cbData = arg.length() * 2;
