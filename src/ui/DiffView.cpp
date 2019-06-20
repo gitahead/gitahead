@@ -54,6 +54,7 @@
 #include <QTextEdit>
 #include <QTextLayout>
 #include <QTextStream>
+#include <QTimer>
 #include <QToolButton>
 #include <QVBoxLayout>
 #include <QtMath>
@@ -1863,6 +1864,11 @@ public:
         if (state != Qt::PartiallyChecked) {
           foreach (HunkWidget *hunk, mHunks)
             hunk->header()->check()->setChecked(state == Qt::Checked);
+        }
+        Settings *settings = Settings::instance();
+        if (settings->value(settings->SORT_STAGED).toBool()) {
+          RepoView *view = RepoView::parentView(this);
+          QTimer::singleShot(0, view, &RepoView::sort);
         }
       });
     }

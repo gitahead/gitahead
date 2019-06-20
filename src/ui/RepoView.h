@@ -97,6 +97,8 @@ public:
   ViewMode viewMode() const;
   void setViewMode(ViewMode mode);
 
+  void sort();
+
   // workdir
   bool isWorkingDirectoryDirty() const;
 

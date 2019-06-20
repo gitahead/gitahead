@@ -101,11 +101,11 @@ void DiffWidget::setDiff(
     git::Diff::SortRole role = git::Diff::StatusRole;
     if (!mDiff.isConflicted()) {
       Settings *settings = Settings::instance();
-      role = static_cast<git::Diff::SortRole>(settings->value("sort/role").toInt());
-      order = static_cast<Qt::SortOrder>(settings->value("sort/order").toInt());
+      role = static_cast<git::Diff::SortRole>(settings->value(settings->SORT_ROLE).toInt());
+      order = static_cast<Qt::SortOrder>(settings->value(settings->SORT_ORDER).toInt());
     }
 
-    mDiff.sort(role, order);
+    mDiff.sort(role, order, index);
   }
 
   mDiffView->setDiff(diff);

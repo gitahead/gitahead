@@ -11,6 +11,7 @@
 #define DIFF_H
 
 #include "Id.h"
+#include "git/Index.h"
 #include "git2/diff.h"
 #include <QFlags>
 #include <QSharedPointer>
@@ -72,7 +73,7 @@ public:
   // Detect renames, copies, etc. This is expensive.
   void findSimilar();
 
-  void sort(SortRole role, Qt::SortOrder order = Qt::AscendingOrder);
+  void sort(SortRole role, Qt::SortOrder order, const git::Index &index);
 
   static char statusChar(git_delta_t status);
 
