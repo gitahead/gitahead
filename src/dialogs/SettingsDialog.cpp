@@ -52,8 +52,6 @@
 
 namespace {
 
-namespace {
-
 void populateExternalTools(QComboBox *comboBox, const QString &type)
 {
   comboBox->clear();
@@ -72,8 +70,6 @@ void populateExternalTools(QComboBox *comboBox, const QString &type)
   foreach (const QString &tool, names)
     comboBox->addItem(tool);
 }
-
-} // anon. namespace
 
 class StackedWidget : public QStackedWidget
 {

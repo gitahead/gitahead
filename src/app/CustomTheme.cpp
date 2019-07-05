@@ -86,6 +86,7 @@ public:
 
   void polish(QWidget *widget) override
   {
+    baseStyle()->polish(widget);
     if (QWindow *window = widget->windowHandle())
       mTheme->polishWindow(window);
   }
