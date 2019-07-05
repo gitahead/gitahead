@@ -25,6 +25,7 @@ else()
   set(QT_PLUGINS
     ${QT_PLUGINS}
     QXcbIntegrationPlugin
+    QComposePlatformInputContextPlugin
   )
 endif()
 
