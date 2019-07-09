@@ -47,6 +47,10 @@ public:
   // ignore whitespace
   bool isWhitespaceIgnored() const;
   void setWhitespaceIgnored(bool ignored);
+  
+  // include untracked files
+  bool isUntrackedIncluded() const;
+  void setUntrackedIncluded(bool included);
 
   // Last repository path
   QString lastPath() const;

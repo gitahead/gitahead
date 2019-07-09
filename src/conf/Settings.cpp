@@ -27,6 +27,7 @@ const QStandardPaths::StandardLocation kUserLocation =
   QStandardPaths::AppLocalDataLocation;
 
 const QString kIgnoreWsKey = "diff/whitespace/ignore";
+const QString kIncludeUtKey = "diff/untracked/include";
 const QString kLastPathKey = "lastpath";
 
 // Look up variant at key relative to root.
@@ -209,6 +210,16 @@ bool Settings::isWhitespaceIgnored() const
 void Settings::setWhitespaceIgnored(bool ignored)
 {
   setValue(kIgnoreWsKey, ignored, true);
+}
+
+bool Settings::isUntrackedIncluded() const
+{
+  return value(kIncludeUtKey).toBool();
+}
+
+void Settings::setUntrackedIncluded(bool included)
+{
+  setValue(kIncludeUtKey, included, true);
 }
 
 QString Settings::lastPath() const

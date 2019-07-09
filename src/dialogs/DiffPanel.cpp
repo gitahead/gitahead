@@ -85,6 +85,13 @@ DiffPanel::DiffPanel(const git::Repository &repo, QWidget *parent)
   connect(ignoreWs, &QCheckBox::toggled, [](bool checked) {
     Settings::instance()->setWhitespaceIgnored(checked);
   });
+  
+  // including untracked files
+  QCheckBox *includeUt = new QCheckBox(tr("Include untracked files"), this);
+  includeUt->setChecked(Settings::instance()->isUntrackedIncluded());
+  connect(includeUt, &QCheckBox::toggled, [](bool checked) {
+    Settings::instance()->setUntrackedIncluded(checked);
+  });
 
   // auto collapse
   Settings *settings = Settings::instance();
@@ -99,8 +106,11 @@ DiffPanel::DiffPanel(const git::Repository &repo, QWidget *parent)
   connect(collapseDeleted, &QCheckBox::toggled, [settings](bool checked) {
     settings->setValue("collapse/deleted", checked);
   });
+  
+  
 
   layout->addRow(tr("Whitespace:"), ignoreWs);
+  layout->addRow(tr("Untracked files:"), includeUt);
   layout->addRow(tr("Auto Collapse:"), collapseAdded);
   layout->addRow(QString(), collapseDeleted);
 }

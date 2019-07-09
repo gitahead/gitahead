@@ -311,7 +311,8 @@ Diff Repository::diffTreeToIndex(
   const Index &index) const
 {
   git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
-  opts.flags |= GIT_DIFF_INCLUDE_UNTRACKED;
+  if (Settings::instance()->isUntrackedIncluded())
+    opts.flags |= GIT_DIFF_INCLUDE_UNTRACKED;
   if (Settings::instance()->isWhitespaceIgnored())
     opts.flags |= GIT_DIFF_IGNORE_WHITESPACE;
 
@@ -325,7 +326,9 @@ Diff Repository::diffIndexToWorkdir(
   Diff::Callbacks *callbacks) const
 {
   git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
-  opts.flags |= (GIT_DIFF_INCLUDE_UNTRACKED | GIT_DIFF_DISABLE_MMAP);
+  opts.flags |= (GIT_DIFF_DISABLE_MMAP);
+  if (Settings::instance()->isUntrackedIncluded())
+    opts.flags |= GIT_DIFF_INCLUDE_UNTRACKED;
   if (Settings::instance()->isWhitespaceIgnored())
     opts.flags |= GIT_DIFF_IGNORE_WHITESPACE;
 
