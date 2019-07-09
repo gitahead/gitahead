@@ -17,6 +17,7 @@
 #include "git/Diff.h"
 #include "git/Patch.h"
 #include "git/Repository.h"
+#include "git/Config.h"
 #include "tools/ExternalTool.h"
 #include <QAbstractListModel>
 #include <QApplication>
@@ -264,10 +265,12 @@ FileList::FileList(const git::Repository &repo, QWidget *parent)
   
   mIncludeUt = menu->addAction(tr("Include untracked files"));
   mIncludeUt->setCheckable(true);
-  mIncludeUt->setChecked(Settings::instance()->isUntrackedIncluded());
-  connect(mIncludeUt, &QAction::triggered, [](bool checked) {
-    Settings::instance()->setUntrackedIncluded(checked);
-  });
+  mIncludeUt->setChecked(RepoView::parentView(parent)->repo().appConfig().value<bool>("untracked.include", Settings::instance()->isUntrackedIncluded()));
+  connect(mIncludeUt, &QAction::triggered, [parent, this](bool checked) {
+    RepoView *view = RepoView::parentView(this);
+    view->repo().appConfig().setValue("untracked.include", checked);
+    view->refresh();
+});
 
   connect(this, &FileList::doubleClicked, [this](const QModelIndex &index) {
     if (!index.isValid())
