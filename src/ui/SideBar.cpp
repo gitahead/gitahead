@@ -579,7 +579,12 @@ SideBar::SideBar(TabWidget *tabs, QWidget *parent)
       tabs->setCurrentIndex(index.row());
   });
 
-  connect(view, &QTreeView::doubleClicked, [this](const QModelIndex &index) {
+  connect(view, &QTreeView::doubleClicked, [tabs, this](const QModelIndex &index) {
+    QModelIndex parent = index.parent();
+    if (parent.isValid() && parent.row() == RepoModel::Repo) {
+      tabs->setCurrentIndex(index.row());
+      return;
+    }
     // Open existing path.
     QString path = index.data(PathRole).toString();
     if (!path.isEmpty()) {
