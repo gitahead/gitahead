@@ -261,6 +261,13 @@ FileList::FileList(const git::Repository &repo, QWidget *parent)
   connect(mIgnoreWs, &QAction::triggered, [](bool checked) {
     Settings::instance()->setWhitespaceIgnored(checked);
   });
+  
+  mIncludeUt = menu->addAction(tr("Include untracked files"));
+  mIncludeUt->setCheckable(true);
+  mIncludeUt->setChecked(Settings::instance()->isUntrackedIncluded());
+  connect(mIncludeUt, &QAction::triggered, [](bool checked) {
+    Settings::instance()->setUntrackedIncluded(checked);
+  });
 
   connect(this, &FileList::doubleClicked, [this](const QModelIndex &index) {
     if (!index.isValid())
