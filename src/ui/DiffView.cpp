@@ -1847,6 +1847,21 @@ public:
     layout->addWidget(mHeader);
 
     DisclosureButton *disclosureButton = mHeader->disclosureButton();
+    
+    // Start hidden when the file is checked or untracked
+    bool expand = (mHeader->check()->checkState() == Qt::Unchecked && !mPatch.isUntracked());
+
+    if (Settings::instance()->value("collapse/added").toBool() == true &&
+        patch.status() == GIT_DELTA_ADDED)
+      expand = false;
+
+    if (Settings::instance()->value("collapse/deleted").toBool() == true &&
+        patch.status() == GIT_DELTA_DELETED)
+      expand = false;
+
+    disclosureButton->setChecked(expand);
+
+    
     connect(disclosureButton, &DisclosureButton::toggled, [this](bool visible) {
 
       if (mHeader->lfsButton() && !visible) {
@@ -1925,19 +1940,6 @@ public:
         layout->addWidget(addImage(disclosureButton, mPatch, true));
       });
     }
-
-    // Start hidden when the file is checked.
-    bool expand = (mHeader->check()->checkState() == Qt::Unchecked);
-
-    if (Settings::instance()->value("collapse/added").toBool() == true &&
-        patch.status() == GIT_DELTA_ADDED)
-      expand = false;
-
-    if (Settings::instance()->value("collapse/deleted").toBool() == true &&
-        patch.status() == GIT_DELTA_DELETED)
-      expand = false;
-
-    disclosureButton->setChecked(expand);
   }
 
   bool isEmpty()
