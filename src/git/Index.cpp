@@ -116,7 +116,7 @@ Index::StagedState Index::isStaged(const QString &path) const
 
   // Handle untracked directories.
   QFileInfo info(repo.workdir().filePath(path));
-  if (!sm.isValid() && !info.isSymLink() && info.isDir())
+  if (!sm.isValid() && !info.isSymLink() && info.isDir() || !isTracked(path))
     return d->stagedCache.insert(path, Unstaged).value();
 
   uint32_t headMode = GIT_FILEMODE_UNREADABLE;
