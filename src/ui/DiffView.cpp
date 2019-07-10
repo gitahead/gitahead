@@ -1580,6 +1580,11 @@ class FileWidget : public QWidget
   Q_OBJECT
 
 public:
+    bool isBinary() const
+    {
+        return isReallyBinary;
+    }
+    
   class Header : public QFrame
   {
   public:
@@ -1825,16 +1830,17 @@ public:
     QString path = repo.workdir().filePath(name);
     bool submodule = repo.lookupSubmodule(name).isValid();
 
-    bool binary = patch.isBinary();
+    isReallyBinary = patch.isBinary();
     if (patch.isUntracked()) {
       QFile dev(path);
       if (dev.open(QFile::ReadOnly)) {
         QByteArray content = dev.read(1024);
         git::Buffer buffer(content.constData(), content.length());
-        binary = buffer.isBinary();
+        isReallyBinary = buffer.isBinary();
       }
     }
-
+    bool binary = isReallyBinary;
+    
     bool lfs = patch.isLfsPointer();
 
     mHeader = new Header(diff, patch, binary, lfs, submodule, parent);
@@ -2024,6 +2030,7 @@ private:
   Header *mHeader;
   QList<QWidget *> mImages;
   QList<HunkWidget *> mHunks;
+  bool isReallyBinary;
 };
 
 } // anon. namespace
