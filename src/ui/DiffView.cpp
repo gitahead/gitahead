@@ -1822,7 +1822,7 @@ public:
     : QWidget(parent), mView(view), mPatch(patch)
   {
     setObjectName("FileWidget");
-    QVBoxLayout *layout = new QVBoxLayout(this);
+    layout = new QVBoxLayout(this);
 
     git::Repository repo = RepoView::parentView(this)->repo();
 
@@ -1862,8 +1862,18 @@ public:
     disclosureButton->setChecked(expand);
 
     
-    connect(disclosureButton, &DisclosureButton::toggled, [this](bool visible) {
+    connect(disclosureButton, &DisclosureButton::toggled, [diff, this](bool visible) {
 
+      if (visible && mPatch.isUntracked() && !untrackedHunkCreated) {
+            git::Repository repo = RepoView::parentView(this)->repo();
+
+            QString name = mPatch.name();
+            QString path = repo.workdir().filePath(name);
+            bool submodule = repo.lookupSubmodule(name).isValid();
+          if (!QFileInfo(path).isDir())
+            layout->addWidget(addHunk(diff, mPatch, -1, mPatch.isLfsPointer(), submodule));
+          untrackedHunkCreated = true;
+      }
       if (mHeader->lfsButton() && !visible) {
         mHunks.first()->setVisible(false);
         if (!mImages.isEmpty())
@@ -1900,10 +1910,9 @@ public:
       return;
     }
 
-    // Add untracked file content.
+    // Manage untracked file content.
+    untrackedHunkCreated = false;
     if (patch.isUntracked()) {
-      if (!QFileInfo(path).isDir())
-        layout->addWidget(addHunk(diff, patch, -1, lfs, submodule));
       return;
     }
 
@@ -1926,7 +1935,7 @@ public:
     // LFS
     if (QToolButton *lfsButton = mHeader->lfsButton()) {
       connect(lfsButton, &QToolButton::clicked,
-      [this, layout, disclosureButton, lfsButton](bool checked) {
+      [this, disclosureButton, lfsButton](bool checked) {
         lfsButton->setText(checked ? tr("Show Pointer") : tr("Show Object"));
         mHunks.first()->setVisible(!checked);
 
@@ -2032,6 +2041,8 @@ private:
   Header *mHeader;
   QList<QWidget *> mImages;
   QList<HunkWidget *> mHunks;
+  bool untrackedHunkCreated;
+  QVBoxLayout *layout;
   bool isReallyBinary;
 };
 
@@ -2303,7 +2314,7 @@ void DiffView::fetchMore()
 
     mFiles.append(file);
 
-    if (file->isEmpty()) {
+    if (file->isEmpty() && !patch.isUntracked()) {
       DisclosureButton *button = file->header()->disclosureButton();
       button->setChecked(false);
       button->setEnabled(false);
