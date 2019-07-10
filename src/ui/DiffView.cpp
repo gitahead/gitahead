@@ -1606,7 +1606,13 @@ public:
       if (lineStats.additions > 0 || lineStats.deletions > 0)
         stats = new LineStats(lineStats, this);
 
-      FileLabel *label = new FileLabel(name, submodule, this);
+      QString displayname = QString(name);
+      if (binary) {
+          qint64 fsize = QFile(patch.repo().workdir().filePath(name)).size();
+          displayname += " (" + QString::number(fsize/1024) + " kB)";
+      }
+      
+      FileLabel *label = new FileLabel(displayname, submodule, this);
       if (patch.status() == GIT_DELTA_RENAMED)
         label->setOldName(patch.name(git::Diff::OldFile));
 
