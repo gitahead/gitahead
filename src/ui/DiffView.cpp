@@ -454,11 +454,18 @@ public:
       pixmap.load(path);
     }
 
-    if (pixmap.isNull())
-      return;
-
+        
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->setContentsMargins(6, 4, 8, 4);
+    
+    if (pixmap.isNull()) {
+        QString arg = locale().formattedDataSize(size);
+        QLabel *label = new QLabel(tr("Binary file (%1, no preview available)").arg(arg));
+        label->setAlignment(Qt::AlignCenter);
+      layout->addWidget(label);
+      return;
+    }
+
 
     int beforeSize = 0;
     QPixmap before = loadPixmap(git::Diff::OldFile, beforeSize, lfs);
@@ -1611,13 +1618,7 @@ public:
       if (lineStats.additions > 0 || lineStats.deletions > 0)
         stats = new LineStats(lineStats, this);
 
-      QString displayname = QString(name);
-      if (binary) {
-          qint64 fsize = QFile(patch.repo().workdir().filePath(name)).size();
-          displayname += " (" + QString::number(fsize/1024) + " kB)";
-      }
-      
-      FileLabel *label = new FileLabel(displayname, submodule, this);
+      FileLabel *label = new FileLabel(name, submodule, this);
       if (patch.status() == GIT_DELTA_RENAMED)
         label->setOldName(patch.name(git::Diff::OldFile));
 
@@ -1862,7 +1863,7 @@ public:
     disclosureButton->setChecked(expand);
 
     
-    connect(disclosureButton, &DisclosureButton::toggled, [diff, this](bool visible) {
+    connect(disclosureButton, &DisclosureButton::toggled, [diff, disclosureButton, this](bool visible) {
 
       if (visible && mPatch.isUntracked() && !untrackedHunkCreated) {
             git::Repository repo = RepoView::parentView(this)->repo();
@@ -1870,7 +1871,9 @@ public:
             QString name = mPatch.name();
             QString path = repo.workdir().filePath(name);
             bool submodule = repo.lookupSubmodule(name).isValid();
-          if (!QFileInfo(path).isDir())
+          if (isBinary())
+              layout->addWidget(addImage(disclosureButton, mPatch));
+          else if (!QFileInfo(path).isDir())
             layout->addWidget(addHunk(diff, mPatch, -1, mPatch.isLfsPointer(), submodule));
           untrackedHunkCreated = true;
       }
@@ -1904,11 +1907,6 @@ public:
       });
     }
 
-    // Try to load an image from the file.
-    if (binary) {
-      layout->addWidget(addImage(disclosureButton, mPatch));
-      return;
-    }
 
     // Manage untracked file content.
     untrackedHunkCreated = false;
@@ -1916,6 +1914,13 @@ public:
       return;
     }
 
+    // Try to load an image from the file.
+    if (binary) {
+      layout->addWidget(addImage(disclosureButton, mPatch));
+      return;
+    }
+    
+    
     // Generate a diff between the head tree and index.
     QSet<int> stagedHunks;
     if (staged.isValid()) {
