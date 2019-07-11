@@ -115,12 +115,6 @@ int insert_stash_id(
   return 0;
 }
 
-int append_submodule_name(git_submodule *, const char *name, void *payload)
-{
-  reinterpret_cast<QStringList *>(payload)->append(name);
-  return 0;
-}
-
 } // anon. namespace
 
 QMap<git_repository *,QWeakPointer<Repository::Data>> Repository::registry;
@@ -641,19 +635,17 @@ void Repository::setCommitStarred(const Id &commit, bool starred)
 
 void Repository::invalidateSubmoduleCache()
 {
-  d->submoduleNames.clear();
-  d->submoduleNamesCached = false;
+  git_repository_submodule_cache_clear(d->repo);
+  d->submodules.clear();
+  d->submodulesCached = false;
 }
 
 QList<Submodule> Repository::submodules() const
 {
-  if (!d->submoduleNamesCached) {
-    git_submodule_foreach(d->repo, &append_submodule_name, &d->submoduleNames);
-    d->submoduleNamesCached = true;
-  }
+  ensureSubmodulesCached();
 
   QList<Submodule> submodules;
-  foreach (const QString &name, d->submoduleNames) {
+  foreach (const QString &name, d->submodules) {
     if (Submodule submodule = lookupSubmodule(name))
       submodules.append(submodule);
   }
@@ -661,10 +653,12 @@ QList<Submodule> Repository::submodules() const
   return submodules;
 }
 
-Submodule Repository::lookupSubmodule(const QString &path) const
+Submodule Repository::lookupSubmodule(const QString &name) const
 {
+  ensureSubmodulesCached();
+
   git_submodule *submodule = nullptr;
-  git_submodule_lookup(&submodule, d->repo, path.toUtf8());
+  git_submodule_lookup(&submodule, d->repo, name.toUtf8());
   return Submodule(submodule);
 }
 
@@ -1116,6 +1110,19 @@ void Repository::shutdown()
 RepositoryNotifier::RepositoryNotifier(QObject *parent)
   : QObject(parent)
 {}
+
+void Repository::ensureSubmodulesCached() const
+{
+  if (!d->submodulesCached) {
+    d->submodulesCached = true;
+    git_submodule_foreach(d->repo,
+    [](git_submodule *, const char *name, void *payload) {
+      reinterpret_cast<QStringList *>(payload)->append(name);
+      return 0;
+    }, &d->submodules);
+    git_repository_submodule_cache_all(d->repo);
+  }
+}
 
 QByteArray Repository::lfsExecute(
   const QStringList &args,

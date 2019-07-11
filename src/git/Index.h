@@ -73,9 +73,6 @@ private:
 
     git_index *index;
 
-    QSet<QString> submodules;
-    bool submodulesCached = false;
-
     QMap<QString,StagedState> stagedCache;
   };
 
@@ -84,7 +81,6 @@ private:
 
   const git_index_entry *entry(const QString &path, int stage = 0) const;
 
-  bool isSubmodule(const QString &path) const;
   bool addDirectory(const QString &path) const;
 
   Id headId(const QString &path, uint32_t *mode = nullptr) const;

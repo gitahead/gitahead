@@ -112,7 +112,7 @@ Index::StagedState Index::isStaged(const QString &path) const
     return it.value();
 
   Repository repo(git_index_owner(d->index));
-  Submodule sm = isSubmodule(path) ? repo.lookupSubmodule(path) : Submodule();
+  Submodule sm = repo.lookupSubmodule(path);
 
   // Handle untracked directories.
   QFileInfo info(repo.workdir().filePath(path));
@@ -170,8 +170,7 @@ void Index::setStaged(const QStringList &files, bool staged, bool yieldFocus)
     }
 
     // submodule
-    if (isSubmodule(file)) {
-      Submodule submodule = repo.lookupSubmodule(file);
+    if (Submodule submodule = repo.lookupSubmodule(file)) {
       if (staged) {
         if (git_submodule_add_to_index(submodule, false))
           continue;
@@ -353,18 +352,6 @@ Index Index::create()
 const git_index_entry *Index::entry(const QString &path, int stage) const
 {
   return git_index_get_bypath(d->index, path.toUtf8(), stage);
-}
-
-bool Index::isSubmodule(const QString &path) const
-{
-  if (!d->submodulesCached) {
-    d->submodulesCached = true;
-    Repository repo(git_index_owner(d->index));
-    foreach (const Submodule &submodule, repo.submodules())
-      d->submodules.insert(submodule.path());
-  }
-
-  return d->submodules.contains(path);
 }
 
 bool Index::addDirectory(const QString &file) const
