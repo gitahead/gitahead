@@ -100,8 +100,8 @@ public:
 
   // status/diff
   Diff status(
-    const Index &index = Index(),
-    Diff::Callbacks *callbacks = nullptr) const;
+    const Index &index,
+    Diff::Callbacks *callbacks) const;
   Diff diffTreeToIndex(
     const Tree &tree,
     const Index &index = Index()) const;

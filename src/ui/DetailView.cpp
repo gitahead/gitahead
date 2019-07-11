@@ -459,7 +459,7 @@ class CommitEditor : public QWidget
 {
 public:
   CommitEditor(const git::Repository &repo, QWidget *parent = nullptr)
-    : QWidget(parent), mRepo(repo)
+    : QWidget(parent)
   {
     QLabel *label = new QLabel(tr("<b>Commit Message:</b>"), this);
     mStatus = new QLabel(QString(), this);
@@ -503,7 +503,7 @@ public:
       QStringList paths;
       for (int i = 0; i < mDiff.count(); ++i)
         paths.append(mDiff.name(i));
-      mRepo.index().setStaged(paths, true);
+      mDiff.index().setStaged(paths, true);
     });
 
     mUnstage = new QPushButton(tr("Unstage All"), this);
@@ -511,7 +511,7 @@ public:
       QStringList paths;
       for (int i = 0; i < mDiff.count(); ++i)
         paths.append(mDiff.name(i));
-      mRepo.index().setStaged(paths, false);
+      mDiff.index().setStaged(paths, false);
     });
 
     mCommit = new QPushButton(tr("Commit"), this);
@@ -586,7 +586,7 @@ private:
     int partial = 0;
     int conflicted = 0;
     int count = mDiff.count();
-    git::Index index = mRepo.index();
+    git::Index index = mDiff.index();
     for (int i = 0; i < count; ++i) {
       QString name = mDiff.name(i);
       switch (index.isStaged(name)) {
@@ -684,7 +684,6 @@ private:
   }
 
   git::Diff mDiff;
-  git::Repository mRepo;
 
   QLabel *mStatus;
   QTextEdit *mMessage;

@@ -72,12 +72,12 @@ bool Diff::isConflicted() const
 
 bool Diff::isStatusDiff() const
 {
-  return d->status;
+  return d->index.isValid();
 }
 
-void Diff::setStatusDiff(bool enabled)
+void Diff::setIndex(const Index &index)
 {
-  d->status = enabled;
+  d->index = index;
 }
 
 int Diff::count() const

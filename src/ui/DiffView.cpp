@@ -1727,7 +1727,7 @@ public:
       // Respond to check changes.
       connect(mCheck, &QCheckBox::clicked, [this](bool staged) {
         mCheck->setChecked(!staged); // Allow index to decide.
-        mPatch.repo().index().setStaged({mPatch.name()}, staged);
+        mDiff.index().setStaged({mPatch.name()}, staged);
       });
 
       // Respond to index changes.
@@ -1758,8 +1758,7 @@ public:
     void contextMenuEvent(QContextMenuEvent *event) override
     {
       RepoView *view = RepoView::parentView(this);
-      FileContextMenu menu(view, {mPatch.name()},
-        mDiff.isStatusDiff() ? view->repo().index() : git::Index());
+      FileContextMenu menu(view, {mPatch.name()}, mDiff.index());
       menu.exec(event->globalPos());
     }
 
@@ -1768,7 +1767,7 @@ public:
     {
       bool disabled = false;
       Qt::CheckState state = Qt::Unchecked;
-      switch (mPatch.repo().index().isStaged(mPatch.name())) {
+      switch (mDiff.index().isStaged(mPatch.name())) {
         case git::Index::Disabled:
           disabled = true;
           break;
@@ -1808,7 +1807,7 @@ public:
     const git::Patch &patch,
     const git::Patch &staged,
     QWidget *parent = nullptr)
-    : QWidget(parent), mView(view), mPatch(patch)
+    : QWidget(parent), mView(view), mDiff(diff), mPatch(patch)
   {
     setObjectName("FileWidget");
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -1989,7 +1988,7 @@ public:
     for (int i = 0; i < mHunks.size(); ++i)
       hunks[i] = mHunks.at(i)->header()->check()->isChecked();
 
-    git::Index index = mPatch.repo().index();
+    git::Index index = mDiff.index();
     if (hunks == QBitArray(hunks.size(), true)) {
       index.setStaged({mPatch.name()}, true);
       return;
@@ -2013,6 +2012,8 @@ signals:
 
 private:
   DiffView *mView;
+
+  git::Diff mDiff;
   git::Patch mPatch;
 
   Header *mHeader;

@@ -118,7 +118,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
       int count = 0;
-      git::Index index = mRepo.index();
+      git::Index index = mDiff.index();
       foreach (const QString &path, paths) {
         switch (index.isStaged(path)) {
           case git::Index::Disabled:
@@ -204,7 +204,7 @@ bool TreeModel::setData(
           files.append(file);
       }
 
-      mRepo.index().setStaged(files, value.toBool());
+      mDiff.index().setStaged(files, value.toBool());
       emit dataChanged(index, index, {role});
       return true;
     }

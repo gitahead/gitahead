@@ -295,7 +295,7 @@ Diff Repository::status(
 
   diff.merge(workdir);
   diff.findSimilar();
-  diff.setStatusDiff(true);
+  diff.setIndex(index);
 
   return diff.count() ? diff : Diff();
 }
