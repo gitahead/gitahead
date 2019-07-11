@@ -121,9 +121,14 @@ Index::StagedState Index::isStaged(const QString &path) const
 
   uint32_t headMode = GIT_FILEMODE_UNREADABLE;
   uint32_t indexMode = GIT_FILEMODE_UNREADABLE;
-  uint32_t workdirMode = GIT_FILEMODE_UNREADABLE;
   Id head = sm.isValid() ? sm.headId() : headId(path, &headMode);
   Id index = sm.isValid() ? sm.indexId() : indexId(path, &indexMode);
+
+  // Handle untracked files.
+  if (!head.isValid() && !index.isValid())
+    return d->stagedCache.insert(path, Unstaged).value();
+
+  uint32_t workdirMode = GIT_FILEMODE_UNREADABLE;
   Id workdir = sm.isValid() ? sm.workdirId() : workdirId(path, &workdirMode);
 
   // Handle filter callback error.
