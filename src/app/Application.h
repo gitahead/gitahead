@@ -62,6 +62,7 @@ public:
 
 public slots:
   Q_SCRIPTABLE void openRepository(const QString &repo);
+  Q_SCRIPTABLE void openAndFocusRepository(const QString &repo);
   Q_SCRIPTABLE void setFocus();
 };
 #endif

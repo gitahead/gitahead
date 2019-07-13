@@ -14,6 +14,7 @@
 #include "ui/MainWindow.h"
 #include "ui/MenuBar.h"
 #include "ui/RepoView.h"
+#include "ui/TabWidget.h"
 #include "update/Updater.h"
 #include <QCloseEvent>
 #include <QCommandLineParser>
@@ -291,6 +292,28 @@ bool Application::restoreWindows()
   return MainWindow::restoreWindows();
 }
 
+static MainWindow *openOrSwitch(QDir repo)
+{
+  repo.makeAbsolute();
+
+  QList<MainWindow *> windows = MainWindow::windows();
+  for (MainWindow *window : windows) {
+    TabWidget *tabs = window->tabWidget();
+
+    for (int i = 0; i < tabs->count(); ++i) {
+      RepoView *view = (RepoView *)tabs->widget(i);
+      QDir openRepo = QDir(view->repo().workdir().path());
+
+      if (openRepo == repo) {
+        tabs->setCurrentIndex(i);
+        return window;
+      }
+    }
+  }
+
+  return MainWindow::open(repo.path(), true);
+}
+
 #if defined(Q_OS_LINUX)
 #define DBUS_SERVICE_NAME "com.gitahead.GitAhead"
 #define DBUS_INTERFACE_NAME "com.gitahead.GitAhead.Application"
@@ -302,7 +325,12 @@ DBusGitAhead::DBusGitAhead(QObject *parent): QObject(parent)
 
 void DBusGitAhead::openRepository(const QString &repo)
 {
-  MainWindow::open(repo, true);
+  openOrSwitch(QDir(repo));
+}
+
+void DBusGitAhead::openAndFocusRepository(const QString &repo)
+{
+  openOrSwitch(QDir(repo))->activateWindow();
 }
 
 void DBusGitAhead::setFocus()
@@ -345,7 +373,7 @@ namespace
           case CopyDataCommand::FocusAndOpen:
             if (cds->cbData % 2 == 0) {
               QString repo = QString::fromUtf16((const char16_t*) cds->lpData, cds->cbData / 2);
-              MainWindow::open(repo, true);
+              openOrSwitch(QDir(repo));
 
               MainWindow::activeWindow()->activateWindow();
             }
@@ -361,14 +389,6 @@ namespace
 }
 #endif
 
-static QString getAbsolutePath(QString path)
-{
-  if (QDir::isAbsolutePath(path))
-    return path;
-  
-  return QDir::cleanPath(QDir::currentPath() + '/' + path);
-}
-
 bool Application::runSingleInstance()
 {
   if (Settings::instance()->value("singleInstance").toBool()) {
@@ -381,9 +401,7 @@ bool Application::runSingleInstance()
       // Is another instance running on the current DBus session bus?
       if (masterInstance.isValid()) {
         if (!mPositionalArguments.isEmpty())
-          masterInstance.call("openRepository", getAbsolutePath(mPositionalArguments.first()));
-
-        masterInstance.call("setFocus");
+          masterInstance.call("openAndFocusRepository", QDir(mPositionalArguments.first()).absolutePath());
         return true;
       }
     }
@@ -404,7 +422,7 @@ bool Application::runSingleInstance()
         SendMessage(handle, WM_COPYDATA, sender.winId(), (LPARAM) &cds);
 
       } else {
-        QString arg = getAbsolutePath(mPositionalArguments.first());
+        QString arg = QDir(mPositionalArguments.first()).absolutePath();
 
         cds.dwData = CopyDataCommand::FocusAndOpen;
         cds.cbData = arg.length() * 2;
