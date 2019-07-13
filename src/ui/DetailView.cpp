@@ -500,18 +500,12 @@ public:
     mStage = new QPushButton(tr("Stage All"), this);
     mStage->setObjectName("StageAll");
     connect(mStage, &QPushButton::clicked, [this] {
-      QStringList paths;
-      for (int i = 0; i < mDiff.count(); ++i)
-        paths.append(mDiff.name(i));
-      mDiff.index().setStaged(paths, true);
+      stage();
     });
 
     mUnstage = new QPushButton(tr("Unstage All"), this);
     connect(mUnstage, &QPushButton::clicked, [this] {
-      QStringList paths;
-      for (int i = 0; i < mDiff.count(); ++i)
-        paths.append(mDiff.name(i));
-      mDiff.index().setStaged(paths, false);
+      unstage();
     });
 
     mCommit = new QPushButton(tr("Commit"), this);
@@ -552,6 +546,26 @@ public:
   bool isCommitEnabled() const
   {
     return mCommit->isEnabled();
+  }
+
+  void stage()
+  {
+    mDiff.setAllStaged(true);
+  }
+
+  bool isStageEnabled() const
+  {
+    return mStage->isEnabled();
+  }
+
+  void unstage()
+  {
+    mDiff.setAllStaged(false);
+  }
+
+  bool isUnstageEnabled() const
+  {
+    return mUnstage->isEnabled();
   }
 
   void setMessage(const QString &message)
@@ -739,6 +753,32 @@ bool DetailView::isCommitEnabled() const
           static_cast<CommitEditor *>(widget)->isCommitEnabled());
 }
 
+void DetailView::stage()
+{
+  Q_ASSERT(isStageEnabled());
+  static_cast<CommitEditor *>(mDetail->currentWidget())->stage();
+}
+
+bool DetailView::isStageEnabled() const
+{
+  QWidget *widget = mDetail->currentWidget();
+  return (mDetail->currentIndex() == EditorIndex &&
+          static_cast<CommitEditor *>(widget)->isStageEnabled());
+}
+
+void DetailView::unstage()
+{
+  Q_ASSERT(isUnstageEnabled());
+  static_cast<CommitEditor *>(mDetail->currentWidget())->unstage();
+}
+
+bool DetailView::isUnstageEnabled() const
+{
+  QWidget *widget = mDetail->currentWidget();
+  return (mDetail->currentIndex() == EditorIndex &&
+          static_cast<CommitEditor *>(widget)->isUnstageEnabled());
+}
+
 RepoView::ViewMode DetailView::viewMode() const
 {
   return static_cast<RepoView::ViewMode>(mContent->currentIndex());
@@ -784,6 +824,9 @@ void DetailView::setDiff(
 
   ContentWidget *cw = static_cast<ContentWidget *>(mContent->currentWidget());
   cw->setDiff(diff, file, pathspec);
+
+  // Update menu actions.
+  MenuBar::instance(this)->updateRepository();
 }
 
 void DetailView::cancelBackgroundTasks()

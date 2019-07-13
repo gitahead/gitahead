@@ -76,6 +76,8 @@ public:
 
   void sort(SortRole role, Qt::SortOrder order = Qt::AscendingOrder);
 
+  void setAllStaged(bool staged, bool yieldFocus = true);
+
   static char statusChar(git_delta_t status);
 
 private:

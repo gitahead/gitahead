@@ -490,6 +490,26 @@ bool RepoView::isCommitEnabled() const
   return mDetails->isCommitEnabled();
 }
 
+void RepoView::stage()
+{
+  mDetails->stage();
+}
+
+bool RepoView::isStageEnabled() const
+{
+  return mDetails->isStageEnabled();
+}
+
+void RepoView::unstage()
+{
+  mDetails->unstage();
+}
+
+bool RepoView::isUnstageEnabled() const
+{
+  return mDetails->isUnstageEnabled();
+}
+
 RepoView::ViewMode RepoView::viewMode() const
 {
   return mDetails->viewMode();
