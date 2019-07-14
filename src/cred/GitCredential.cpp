@@ -75,7 +75,7 @@ bool GitCredential::get(
     }
   }
 
-  return true;
+  return !username.isEmpty() && !password.isEmpty();
 }
 
 bool GitCredential::store(
