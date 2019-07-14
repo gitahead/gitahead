@@ -62,12 +62,12 @@ bool GitCredential::get(
 
   QString output = process.readAllStandardOutput();
   foreach (const QString &line, output.split('\n')) {
-    QStringList components = line.split('=');
-    if (components.size() != 2)
+    int pos = line.indexOf('=');
+    if (pos < 0)
       continue;
 
-    QString key = components.first();
-    QString value = components.last();
+    QString key = line.left(pos);
+    QString value = line.mid(pos + 1);
     if (key == "username") {
       username = value;
     } else if (key == "password") {
