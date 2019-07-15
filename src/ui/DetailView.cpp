@@ -499,14 +499,10 @@ public:
 
     mStage = new QPushButton(tr("Stage All"), this);
     mStage->setObjectName("StageAll");
-    connect(mStage, &QPushButton::clicked, [this] {
-      stage();
-    });
+    connect(mStage, &QPushButton::clicked, this, &CommitEditor::stage);
 
     mUnstage = new QPushButton(tr("Unstage All"), this);
-    connect(mUnstage, &QPushButton::clicked, [this] {
-      unstage();
-    });
+    connect(mUnstage, &QPushButton::clicked, this, &CommitEditor::unstage);
 
     mCommit = new QPushButton(tr("Commit"), this);
     mCommit->setDefault(true);
