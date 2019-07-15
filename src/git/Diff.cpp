@@ -157,6 +157,14 @@ void Diff::sort(SortRole role, Qt::SortOrder order)
   });
 }
 
+void Diff::setAllStaged(bool staged, bool yieldFocus)
+{
+  QStringList paths;
+  for (int i = 0; i < count(); ++i)
+    paths.append(name(i));
+  index().setStaged(paths, staged);
+}
+
 char Diff::statusChar(git_delta_t status)
 {
   if (status == GIT_DELTA_CONFLICTED)

@@ -339,6 +339,20 @@ MenuBar::MenuBar(QWidget *parent)
 
   repository->addSeparator();
 
+  mStageAll = repository->addAction(tr("Stage All"));
+  mStageAll->setShortcut(tr("Ctrl++"));
+  connect(mStageAll, &QAction::triggered, [this] {
+    view()->stage();
+  });
+
+  mUnstageAll = repository->addAction(tr("Unstage All"));
+  mUnstageAll->setShortcut(tr("Ctrl+-"));
+  connect(mUnstageAll, &QAction::triggered, [this] {
+    view()->unstage();
+  });
+
+  repository->addSeparator();
+
   mCommit = repository->addAction(tr("Commit"));
   mCommit->setShortcut(tr("Ctrl+Shift+C"));
   connect(mCommit, &QAction::triggered, [this] {
@@ -817,6 +831,8 @@ void MenuBar::updateRepository()
   RepoView *view = win ? win->currentView() : nullptr;
   mConfigureRepository->setEnabled(view);
   mCommit->setEnabled(view && view->isCommitEnabled());
+  mStageAll->setEnabled(view && view->isStageEnabled());
+  mUnstageAll->setEnabled(view && view->isUnstageEnabled());
   mAmendCommit->setEnabled(view);
 
   bool lfs = view && view->repo().lfsIsInitialized();

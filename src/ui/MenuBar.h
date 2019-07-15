@@ -69,6 +69,8 @@ private:
 
   // Repository
   QAction *mConfigureRepository;
+  QAction *mStageAll;
+  QAction *mUnstageAll;
   QAction *mCommit;
   QAction *mAmendCommit;
   QAction *mLfsUnlock;

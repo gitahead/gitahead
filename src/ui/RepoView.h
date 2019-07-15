@@ -93,6 +93,12 @@ public:
   void commit();
   bool isCommitEnabled() const;
 
+  // stage / unstage
+  void stage();
+  bool isStageEnabled() const;
+  void unstage();
+  bool isUnstageEnabled() const;
+
   // mode
   ViewMode viewMode() const;
   void setViewMode(ViewMode mode);

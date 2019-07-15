@@ -54,6 +54,12 @@ public:
   void commit();
   bool isCommitEnabled() const;
 
+  // stage / unstage
+  void stage();
+  bool isStageEnabled() const;
+  void unstage();
+  bool isUnstageEnabled() const;
+
   // mode
   RepoView::ViewMode viewMode() const;
   void setViewMode(RepoView::ViewMode mode, bool spontaneous);
