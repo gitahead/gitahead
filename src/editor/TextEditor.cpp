@@ -65,6 +65,10 @@ TextEditor::TextEditor(QWidget *parent)
   setSelBack(true, palette().color(QPalette::Highlight));
   setVirtualSpaceOptions(SCVS_RECTANGULARSELECTION);
 
+  // Unset default zoom in/out shortcuts.
+  clearCmdKey(SCK_ADD + (SCI_CTRL << 16));
+  clearCmdKey(SCK_SUBTRACT + (SCI_CTRL << 16));
+
   // Set find indicators.
   indicSetStyle(FindAll, INDIC_STRAIGHTBOX);
   indicSetFore(FindAll, Qt::white);
