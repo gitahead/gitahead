@@ -1,3 +1,24 @@
+### v2.5.8 - 2019-07-17
+
+#### Added
+
+* Added menu items and keyboard shortcuts to stage and unstage all files.
+
+#### Fixed
+
+* Fixed possible crash in merge dialog on action change.
+* Fixed performance regression on viewing status diffs with large files.
+* (Linux) Fixed input of accented characters when using the compose input method.
+* (Linux) Fixed several credential helper issues.
+
+#### Changed
+
+* Double-clicking on a repo in the sidebar no longer opens a new tab if the repo is already open.
+* Apply "store credentials in secure storage" setting immediately.
+* Allow name and date to wrap when the detail view becomes too small to show them side-by-side.
+
+----
+
 ### v2.5.7 - 2019-05-22
 
 #### Fixed
