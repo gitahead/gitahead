@@ -17,6 +17,7 @@
 #include "git/Diff.h"
 #include "git/Patch.h"
 #include "git/Repository.h"
+#include "git/Config.h"
 #include "tools/ExternalTool.h"
 #include <QAbstractListModel>
 #include <QApplication>
@@ -260,6 +261,15 @@ FileList::FileList(const git::Repository &repo, QWidget *parent)
   connect(mIgnoreWs, &QAction::triggered, [](bool checked) {
     Settings::instance()->setWhitespaceIgnored(checked);
   });
+
+  mHideUt = menu->addAction(tr("Hide untracked files"));
+  mHideUt->setCheckable(true);
+  mHideUt->setChecked(RepoView::parentView(parent)->repo().appConfig().value<bool>("untracked.hide", false));
+  connect(mHideUt, &QAction::triggered, [parent, this](bool checked) {
+    RepoView *view = RepoView::parentView(this);
+    view->repo().appConfig().setValue("untracked.hide", checked);
+    view->refresh();
+});
 
   connect(this, &FileList::doubleClicked, [this](const QModelIndex &index) {
     if (!index.isValid())
