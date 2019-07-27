@@ -541,6 +541,14 @@ private:
   QIcon mErrorIcon;
 };
 
+// Does this index correspond to one of the open repositories?
+bool isRepoIndex(const QModelIndex &index)
+{
+  QModelIndex parent = index.parent();
+  return (parent.isValid() && !parent.parent().isValid() &&
+          parent.row() == RepoModel::Repo);
+}
+
 } // anon. namespace
 
 SideBar::SideBar(TabWidget *tabs, QWidget *parent)
@@ -574,14 +582,12 @@ SideBar::SideBar(TabWidget *tabs, QWidget *parent)
   });
 
   connect(view, &QTreeView::clicked, [tabs](const QModelIndex &index) {
-    QModelIndex parent = index.parent();
-    if (parent.isValid() && parent.row() == RepoModel::Repo)
+    if (isRepoIndex(index))
       tabs->setCurrentIndex(index.row());
   });
 
   connect(view, &QTreeView::doubleClicked, [tabs, this](const QModelIndex &index) {
-    QModelIndex parent = index.parent();
-    if (parent.isValid() && parent.row() == RepoModel::Repo) {
+    if (isRepoIndex(index)) {
       tabs->setCurrentIndex(index.row());
       return;
     }
