@@ -54,6 +54,7 @@ public:
   Diff();
 
   bool isValid() const { return d; }
+  explicit operator bool() const { return isValid(); }
 
   bool isConflicted() const;
   bool isStatusDiff() const;

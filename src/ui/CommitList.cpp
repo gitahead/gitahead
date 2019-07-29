@@ -1330,10 +1330,11 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
 
     // clean
     QStringList untracked;
-    git::Diff diff = status();
-    for (int i = 0; i < diff.count(); i++) {
-      if (diff.status(i) == GIT_DELTA_UNTRACKED)
-        untracked.append(diff.name(i));
+    if (git::Diff diff = status()) {
+      for (int i = 0; i < diff.count(); i++) {
+        if (diff.status(i) == GIT_DELTA_UNTRACKED)
+          untracked.append(diff.name(i));
+      }
     }
 
     QAction *clean = menu.addAction(tr("Remove Untracked Files"),
