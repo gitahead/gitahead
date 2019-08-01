@@ -52,6 +52,8 @@ namespace {
 
 const int kSize = 64;
 const QString kSplitterKey = "detailSplitter";
+const int kSplitterTop = 120;
+const int kSplitterBottom = 1000;
 const char *kCacheKey = "cache_key";
 const QString kRangeFmt = "%1..%2";
 const QString kDateRangeFmt = "%1-%2";
@@ -1170,8 +1172,14 @@ DetailView::DetailView(const git::Repository &repo, QWidget *parent)
   mContent->addWidget(new TreeWidget(repo, this));
 
   // Restore splitter state.
-  splitter->restoreState(QSettings().value(kSplitterKey).toByteArray());
-
+  if (QSettings().contains(kSplitterKey)) {
+    splitter->restoreState(QSettings().value(kSplitterKey).toByteArray());
+  } else {
+    // set a default size
+    QList<int> sizes;
+    sizes << kSplitterTop << kSplitterBottom;
+    splitter->setSizes(sizes);
+  }
 }
 
 DetailView::~DetailView() {}
