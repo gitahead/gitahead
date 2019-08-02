@@ -41,6 +41,8 @@ submodules are optional or may also be satisfied by system libraries.
 **External Dependencies**
 
 * Qt (required >= 5.9)
+* Perl
+* [NASM](https://nasm.us)   
 
 **Included Dependencies**
 
