@@ -192,6 +192,15 @@ RepoView *MainWindow::addTab(const QString &path)
   if (path.isEmpty())
     return nullptr;
 
+  TabWidget *tabs = tabWidget();
+  for (int i = 0; i < tabs->count(); i++) {
+        RepoView *view = static_cast<RepoView *>(tabs->widget(i));
+        if (path == view->repo().workdir().path()) {
+          tabs->setCurrentIndex(i);
+          return view;
+        }
+  }
+
   git::Repository repo = git::Repository::open(path, true);
   if (!repo.isValid()) {
     warnInvalidRepo(path);
@@ -207,6 +216,15 @@ RepoView *MainWindow::addTab(const git::Repository &repo)
   QDir dir = repo.workdir();
   RecentRepositories::instance()->add(dir.path());
 
+  TabWidget *tabs = tabWidget();
+  for (int i = 0; i < tabs->count(); i++) {
+        RepoView *view = static_cast<RepoView *>(tabs->widget(i));
+        if (dir.path() == view->repo().workdir().path()) {
+          tabs->setCurrentIndex(i);
+          return view;
+        }
+  }
+
   RepoView *view = new RepoView(repo, this);
   git::RepositoryNotifier *notifier = repo.notifier();
   connect(notifier, &git::RepositoryNotifier::referenceUpdated,
@@ -215,7 +233,6 @@ RepoView *MainWindow::addTab(const git::Repository &repo)
     updateWindowTitle();
   });
 
-  TabWidget *tabs = tabWidget();
   emit tabs->tabAboutToBeInserted();
   tabs->setCurrentIndex(tabs->addTab(view, dir.dirName()));
 
