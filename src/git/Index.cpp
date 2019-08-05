@@ -215,6 +215,7 @@ void Index::setStaged(const QStringList &files, bool staged, bool yieldFocus)
         }
       }
 
+      repo.invalidateSubmoduleCache();
       changedFiles.append(file);
       continue;
     }
