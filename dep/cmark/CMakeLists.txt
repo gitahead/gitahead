@@ -1,7 +1,7 @@
-IF (PKG_CONFIG_FOUND)
+if(PKG_CONFIG_FOUND)
   pkg_check_modules(LIBCMARK libcmark)
-ENDIF()
-IF (NOT LIBCMARK_FOUND)
+endif()
+if(NOT LIBCMARK_FOUND)
   set(CMARK_TESTS OFF CACHE BOOL "" FORCE)
   set(CMARK_SHARED OFF CACHE BOOL "" FORCE)
 
@@ -11,4 +11,4 @@ IF (NOT LIBCMARK_FOUND)
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/cmark/src>
   )
   set(LIBCMARK_LIBRARIES libcmark_static CACHE INTERNAL "libcmark implementation" FORCE)
-ENDIF()
+endif()
