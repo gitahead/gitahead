@@ -41,6 +41,7 @@ Bitbucket::Bitbucket(const QString &username)
       mProgress->finish();
       return;
     }
+
     QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
     QJsonObject jsonObject = doc.object();
     QJsonArray array = jsonObject["values"].toArray();
@@ -50,21 +51,23 @@ Bitbucket::Bitbucket(const QString &username)
       
       QString name = repository.value("name").toString();
       QString fullName = repository.value("full_name").toString();
+
       QUrl httpsUrl;
       httpsUrl.setHost(host());
       httpsUrl.setScheme("https");
       httpsUrl.setUserName(this->username());
       httpsUrl.setPath(QString("/%1").arg(fullName));
+
       Repository *repo = addRepository(name, fullName);
       repo->setUrl(Repository::Https, httpsUrl.toString());
       repo->setUrl(Repository::Ssh, kSshFmt.arg(fullName));
     }
 
     QString next = jsonObject["next"].toString();
-      if (next.isEmpty()) {
-        mProgress->finish();
-        return;
-      }
+    if (next.isEmpty()) {
+      mProgress->finish();
+      return;
+    }
 
     // Request next page.
     QNetworkRequest request(next);
@@ -95,7 +98,8 @@ void Bitbucket::connect(const QString &password)
 {
   clearRepos();
 
-  QNetworkRequest request(url() + "/user/permissions/repositories?sort=repository.name&pagelen=100");
+  QNetworkRequest request(url() +
+    "/user/permissions/repositories?sort=repository.name&pagelen=100");
   request.setHeader(QNetworkRequest::ContentTypeHeader, kContentType);
 
   if (setHeaders(request, password)) {
