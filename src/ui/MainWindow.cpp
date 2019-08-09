@@ -194,11 +194,11 @@ RepoView *MainWindow::addTab(const QString &path)
 
   TabWidget *tabs = tabWidget();
   for (int i = 0; i < tabs->count(); i++) {
-        RepoView *view = static_cast<RepoView *>(tabs->widget(i));
-        if (path == view->repo().workdir().path()) {
-          tabs->setCurrentIndex(i);
-          return view;
-        }
+    RepoView *view = static_cast<RepoView *>(tabs->widget(i));
+    if (path == view->repo().workdir().path()) {
+      tabs->setCurrentIndex(i);
+      return view;
+    }
   }
 
   git::Repository repo = git::Repository::open(path, true);
@@ -218,11 +218,11 @@ RepoView *MainWindow::addTab(const git::Repository &repo)
 
   TabWidget *tabs = tabWidget();
   for (int i = 0; i < tabs->count(); i++) {
-        RepoView *view = static_cast<RepoView *>(tabs->widget(i));
-        if (dir.path() == view->repo().workdir().path()) {
-          tabs->setCurrentIndex(i);
-          return view;
-        }
+    RepoView *view = static_cast<RepoView *>(tabs->widget(i));
+    if (dir.path() == view->repo().workdir().path()) {
+      tabs->setCurrentIndex(i);
+      return view;
+    }
   }
 
   RepoView *view = new RepoView(repo, this);
