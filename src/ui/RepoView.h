@@ -249,8 +249,11 @@ public:
   void promptToReset(
     const git::Commit &commit,
     git_reset_t type,
-    const QString &message = QString());
-  void reset(const git::Commit &commit, git_reset_t type);
+    const git::Commit &commitToAmend = git::Commit());
+  void reset(
+    const git::Commit &commit,
+    git_reset_t type,
+    const git::Commit &commitToAmend = git::Commit());
 
   // submodule
   void updateSubmodules(
