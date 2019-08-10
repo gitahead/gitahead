@@ -1,3 +1,20 @@
+### v2.5.9 - 2019-08-10
+
+#### Fixed
+
+* Updated Bitbucket integration to use v2.0 API.
+* Avoid opening a new tab for repositories that are already open.
+* Changed new branch dialog default start point to the HEAD instead of the first branch in the reference list.
+* Fix regression in staging submodules.
+* Fix crash on right-click on clean status diff.
+* Fix regression in double-clicking to clone a repository.
+
+#### Changed
+
+* Changed wording of prompt-to-amend dialog to clarify its purpose.
+
+----
+
 ### v2.5.8 - 2019-07-17
 
 #### Added
