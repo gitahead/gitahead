@@ -129,7 +129,7 @@ Result Submodule::update(Remote::Callbacks *callbacks, bool init)
   opts.fetch_opts.callbacks.certificate_check = &Remote::Callbacks::certificate;
   opts.fetch_opts.callbacks.transfer_progress = &Remote::Callbacks::transfer;
   opts.fetch_opts.callbacks.update_tips = &Remote::Callbacks::update;
-  opts.fetch_opts.callbacks.url = &Remote::Callbacks::url;
+  opts.fetch_opts.callbacks.resolve_url = &Remote::Callbacks::url;
   opts.fetch_opts.callbacks.payload = callbacks;
 
   // Use a fake URL. Submodule update doesn't have a way to

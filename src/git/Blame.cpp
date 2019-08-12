@@ -70,7 +70,7 @@ Signature Blame::signature(int index) const
 bool Blame::isCommitted(int index) const
 {
   const git_blame_hunk *hunk = git_blame_get_hunk_byindex(d.data(), index);
-  return !git_oid_iszero(&hunk->final_commit_id);
+  return !git_oid_is_zero(&hunk->final_commit_id);
 }
 
 Blame Blame::updated(const QByteArray &buffer) const

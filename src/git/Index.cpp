@@ -316,7 +316,7 @@ void Index::add(const QString &path, const QByteArray &buffer)
   if (!entry)
     return;
 
-  if (git_index_add_frombuffer(d->index, entry, buffer, buffer.size()))
+  if (git_index_add_from_buffer(d->index, entry, buffer, buffer.size()))
     return;
 
   git_index_write(d->index);

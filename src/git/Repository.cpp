@@ -192,7 +192,7 @@ QDir Repository::appDir() const
 Id Repository::workdirId(const QString &path) const
 {
   git_oid id;
-  if (git_blob_create_fromworkdir(&id, d->repo, path.toUtf8()))
+  if (git_blob_create_from_workdir(&id, d->repo, path.toUtf8()))
     return Id();
 
   return id;

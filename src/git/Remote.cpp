@@ -344,7 +344,7 @@ int Remote::Callbacks::certificate(
 }
 
 int Remote::Callbacks::transfer(
-  const git_transfer_progress *stats,
+  const git_indexer_progress *stats,
   void *payload)
 {
   Remote::Callbacks *cbs = reinterpret_cast<Remote::Callbacks *>(payload);
@@ -373,27 +373,24 @@ int Remote::Callbacks::update(
 
 int Remote::Callbacks::url(
   git_buf *out,
-  git_remote *remote,
-  git_direction direction,
+  const char *url,
+  int direction,
   void *payload)
 {
   Remote::Callbacks *cbs = reinterpret_cast<Remote::Callbacks *>(payload);
-  const char *fetch = git_remote_url(remote);
-  const char *push = git_remote_pushurl(remote);
-  QString url((direction == GIT_DIRECTION_FETCH || !push) ? fetch : push);
-  QString before = url;
-  if (!cbs->url(url))
+  QString resolved(url);
+  if (!cbs->url(resolved))
     return -1;
 
   // Extract hostname from SSH URL.
   QString hostName;
-  int end = url.indexOf(':');
-  int begin = url.indexOf('@') + 1;
+  int end = resolved.indexOf(':');
+  int begin = resolved.indexOf('@') + 1;
   bool sshUrl = (begin >= 0 && end >= 0 && begin < end);
   if (sshUrl) {
-    hostName = url.mid(begin, end - begin);
+    hostName = resolved.mid(begin, end - begin);
   } else {
-    QUrl tmp(url);
+    QUrl tmp(resolved);
     if (tmp.scheme() == "ssh")
       hostName = tmp.host();
   }
@@ -419,11 +416,11 @@ int Remote::Callbacks::url(
         // Replace host name.
         if (!replacement.isEmpty()) {
           if (sshUrl) {
-            url.replace(begin, end - begin, replacement);
+            resolved.replace(begin, end - begin, replacement);
           } else {
-            QUrl tmp(url);
+            QUrl tmp(resolved);
             tmp.setHost(replacement);
-            url = tmp.toString();
+            resolved = tmp.toString();
           }
 
           break;
@@ -432,9 +429,7 @@ int Remote::Callbacks::url(
     }
   }
 
-  if (url != before)
-    git_buf_set(out, url.toUtf8(), url.length());
-
+  git_buf_set(out, resolved.toUtf8(), resolved.length());
   return 0;
 }
 
@@ -481,7 +476,7 @@ Result Remote::fetch(Callbacks *callbacks, bool tags)
   opts.callbacks.certificate_check = &Remote::Callbacks::certificate;
   opts.callbacks.transfer_progress = &Remote::Callbacks::transfer;
   opts.callbacks.update_tips = &Remote::Callbacks::update;
-  opts.callbacks.url = &Remote::Callbacks::url;
+  opts.callbacks.resolve_url = &Remote::Callbacks::url;
   opts.callbacks.payload = callbacks;
 
   QByteArray proxy = proxyUrl(url(), opts.proxy_opts.type);
@@ -504,7 +499,7 @@ Result Remote::push(Callbacks *callbacks, const QStringList &refspecs)
   opts.callbacks.certificate_check = &Remote::Callbacks::certificate;
   opts.callbacks.transfer_progress = &Remote::Callbacks::transfer;
   opts.callbacks.update_tips = &Remote::Callbacks::update;
-  opts.callbacks.url = &Remote::Callbacks::url;
+  opts.callbacks.resolve_url = &Remote::Callbacks::url;
   opts.callbacks.pack_progress = &pack_progress;
   opts.callbacks.push_transfer_progress = &push_transfer_progress;
   opts.callbacks.push_update_reference = &push_update_reference;
@@ -574,7 +569,7 @@ Result Remote::clone(
   opts.fetch_opts.callbacks.certificate_check = &Remote::Callbacks::certificate;
   opts.fetch_opts.callbacks.transfer_progress = &Remote::Callbacks::transfer;
   opts.fetch_opts.callbacks.update_tips = &Remote::Callbacks::update;
-  opts.fetch_opts.callbacks.url = &Remote::Callbacks::url;
+  opts.fetch_opts.callbacks.resolve_url = &Remote::Callbacks::url;
   opts.fetch_opts.callbacks.payload = callbacks;
   opts.bare = bare;
 
