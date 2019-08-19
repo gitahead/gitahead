@@ -406,12 +406,15 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
     error(mLogRoot, "stage");
   });
 
-  connect(notifier, &git::RepositoryNotifier::lfsNotFound, this, [this] {
+  QObject *context = new QObject(this);
+  connect(notifier, &git::RepositoryNotifier::lfsNotFound,
+  context, [this, context] {
     QString text =
       tr("Git LFS was not found on the PATH. "
          "<a href='https://git-lfs.github.com'>"
          "Install Git LFS</a> to use LFS integration.");
     mLogRoot->addEntry(LogEntry::Error, text);
+    delete context; // Disconnect after the first error.
   });
 
   // Automatically hide the log when the model changes.
