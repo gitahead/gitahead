@@ -402,11 +402,11 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
     setLogVisible(false);
   });
 
-  connect(notifier, &git::RepositoryNotifier::indexStageError, [this] {
+  connect(notifier, &git::RepositoryNotifier::indexStageError, this, [this] {
     error(mLogRoot, "stage");
   });
 
-  connect(notifier, &git::RepositoryNotifier::lfsNotFound, [this] {
+  connect(notifier, &git::RepositoryNotifier::lfsNotFound, this, [this] {
     QString text =
       tr("Git LFS was not found on the PATH. "
          "<a href='https://git-lfs.github.com'>"
