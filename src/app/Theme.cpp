@@ -452,7 +452,7 @@ QColor Theme::badge(BadgeRole role, BadgeState state)
             return "#52A500";
 
           case BadgeState::Notification:
-            return "#8C2026";
+            return "#D00000";
         }
     }
   }
