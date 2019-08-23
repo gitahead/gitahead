@@ -36,8 +36,7 @@ const QString kStyleSheet =
 #ifdef Q_OS_MAC
   "  background: palette(midlight);"
 #endif
-  "  border: none;"
-  "  border-bottom: 1px solid palette(light)"
+  "  border: none"
   "}"
   "Footer {"
   "  border-left: none;"

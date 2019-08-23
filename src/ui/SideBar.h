@@ -16,6 +16,8 @@ class TabWidget;
 
 class SideBar : public QWidget
 {
+  Q_OBJECT
+
 public:
   SideBar(TabWidget *tabs, QWidget *parent = nullptr);
 

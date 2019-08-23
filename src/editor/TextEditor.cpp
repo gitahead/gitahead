@@ -107,11 +107,16 @@ TextEditor::TextEditor(QWidget *parent)
   indicSetUnder(ErrorIndicator, true);
 
   // Initialize LPeg lexer.
+  QColor base = palette().color(QPalette::Base);
+  QColor text = palette().color(QPalette::Text);
+  bool dark = (text.lightnessF() > base.lightnessF());
+
   setLexerLanguage("lpeg");
   setProperty("lexer.lpeg.lexers", Settings::lexerDir().path());
   setProperty("lexer.lpeg.themes", theme->dir().path());
-  setProperty("lexer.lpeg.color.theme", theme->name());
-  setCaretFore(palette().color(QPalette::Text));
+  setProperty("lexer.lpeg.theme", theme->name());
+  setProperty("lexer.lpeg.theme.mode", dark ? "dark" : "light");
+  setCaretFore(text);
 
   // Apply default settings.
   applySettings();

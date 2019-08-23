@@ -197,13 +197,13 @@ private:
   int mSpacing;
 };
 
-class CommitDetail : public QWidget
+class CommitDetail : public QFrame
 {
   Q_OBJECT
 
 public:
   CommitDetail(QWidget *parent = nullptr)
-    : QWidget(parent)
+    : QFrame(parent)
   {
     mAuthorDate = new AuthorDate(this);
 
@@ -455,11 +455,13 @@ private:
   QFutureWatcher<QString> mWatcher;
 };
 
-class CommitEditor : public QWidget
+class CommitEditor : public QFrame
 {
+  Q_OBJECT
+
 public:
   CommitEditor(const git::Repository &repo, QWidget *parent = nullptr)
-    : QWidget(parent)
+    : QFrame(parent)
   {
     QLabel *label = new QLabel(tr("<b>Commit Message:</b>"), this);
     mStatus = new QLabel(QString(), this);

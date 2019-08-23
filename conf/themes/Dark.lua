@@ -138,12 +138,6 @@ theme['diff']      = {
   error            = '#7E494B'  -- error background
 }
 
--- list view footer colors
--- { default, active, inactive, disabled }
-theme['footer']    = {
-  button           = { active = '#D6DAE0', disabled = '#728094' },
-}
-
 -- link colors
 -- { default, active, inactive, disabled }
 theme['link']      = {
@@ -166,7 +160,6 @@ theme['comment']   = {
 }
 
 -- star fill color
--- { default, active, inactive, disabled }
 theme['star']      = {
   fill             = '#FFFFFF'
 }

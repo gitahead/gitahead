@@ -924,10 +924,8 @@ public:
           QPointF(-xi1, yi1)
         });
 
-        if (starred) {
-          QPalette palette = Application::theme()->stars();
-          painter->setBrush(palette.color(QPalette::Base));
-        }
+        if (starred)
+          painter->setBrush(Application::theme()->star());
 
         painter->setPen(QPen(bright, 1.25));
         painter->drawPolygon(polygon.translated(x, y));

@@ -193,14 +193,13 @@ QString CustomTheme::styleSheet() const
 
     "Footer {"
     "  background: palette(button);"
-    "  border: none;"
-    "  border-right: 1px solid palette(shadow);"
-    "  border-bottom: 1px solid palette(shadow)"
+    "  border: 1px solid palette(shadow);"
+    "  border-top: none"
     "}"
     "Footer QToolButton {"
-    "  border: none;"
-    "  border-right: 1px solid palette(shadow);"
-    "  border-bottom: 1px solid palette(shadow)"
+    "  border: 1px solid palette(shadow);"
+    "  border-top: none;"
+    "  border-left: none"
     "}"
 
     "LogView {"
@@ -431,15 +430,6 @@ QPalette CustomTheme::fileList()
   return palette;
 }
 
-QPalette CustomTheme::footer()
-{
-  QVariantMap footer = mMap.value("footer").toMap();
-
-  QPalette palette;
-  setPaletteColors(palette, QPalette::ButtonText, footer.value("button"));
-  return palette;
-}
-
 QColor CustomTheme::heatMap(HeatMap color)
 {
   QVariantMap heatmap = mMap.value("blame").toMap();
@@ -466,13 +456,9 @@ QColor CustomTheme::remoteComment(Comment color)
   }
 }
 
-QPalette CustomTheme::stars()
+QColor CustomTheme::star()
 {
-  QVariantMap star = mMap.value("star").toMap();
-
-  QPalette palette;
-  setPaletteColors(palette, QPalette::Base, star.value("fill"));
-  return palette;
+  return mMap.value("star").toMap().value("fill").value<QColor>();
 }
 
 QColor CustomTheme::windowBrightText()

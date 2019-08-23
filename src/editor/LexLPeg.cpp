@@ -288,7 +288,7 @@ class LexerLPeg : public ILexer {
     char lexers[FILENAME_MAX], themes[FILENAME_MAX], theme[FILENAME_MAX];
     props.GetExpanded("lexer.lpeg.lexers", lexers);
     props.GetExpanded("lexer.lpeg.themes", themes);
-    props.GetExpanded("lexer.lpeg.color.theme", theme);
+    props.GetExpanded("lexer.lpeg.theme", theme);
     if (!*lexers || !*lexer) return false;
 
     lua_pushlightuserdata(L, reinterpret_cast<void *>(&props));
@@ -310,7 +310,12 @@ class LexerLPeg : public ILexer {
     l_setconstant(L, SC_FOLDLEVELHEADERFLAG, "FOLD_HEADER");
     l_setmetatable(L, "sci_lexer", llexer_property);
     if (*theme) {
+      char mode[FILENAME_MAX];
+      props.GetExpanded("lexer.lpeg.theme.mode", mode);
+
       lua_newtable(L);
+      lua_pushboolean(L, strcmp(mode, "dark") == 0);
+      lua_setfield(L, -2, "dark"); // system palette
       l_setmetatable(L, "sci_lexer", llexer_property);
       lua_setglobal(L, "theme");
 

@@ -676,10 +676,8 @@ public:
       QPointF(-xi1, yi1)
     });
 
-    QPalette palette = Application::theme()->stars();
-
     if (isChecked())
-      painter.setBrush(palette.color(QPalette::Base));
+      painter.setBrush(Application::theme()->star());
     painter.drawPolygon(polygon.translated(x, y));
   }
 };

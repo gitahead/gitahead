@@ -32,10 +32,9 @@ public:
   QPalette commitList() override;
   QColor diff(Diff color) override;
   QPalette fileList() override;
-  QPalette footer() override;
   QColor heatMap(HeatMap color) override;
   QColor remoteComment(Comment color) override;
-  QPalette stars() override;
+  QColor star() override;
   QColor windowBrightText() override;
 
   QVariantMap checkbox() const;
