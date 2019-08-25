@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=GitAhead
+Comment=Graphical Git client for Windows, Linux and macOS
+Exec=gitahead
+StartupWMClass=gitahead
+Icon=GitAhead
+Terminal=false
+Type=Application
+Categories=Development;
+X-Desktop-File-Install-Version=0.1
+Name[de_DE]=GitAhead
