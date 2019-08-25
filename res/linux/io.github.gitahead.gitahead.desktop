@@ -2,9 +2,9 @@
 Encoding=UTF-8
 Name=GitAhead
 Comment=Graphical Git client for Windows, Linux and macOS
-Exec=gitahead
+Exec=GitAhead
 StartupWMClass=gitahead
-Icon=GitAhead
+Icon=gitahead
 Terminal=false
 Type=Application
 Categories=Development;
