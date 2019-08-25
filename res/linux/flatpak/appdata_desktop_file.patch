@@ -1,0 +1,168 @@
+From 804ed7755e73c7a0e099769b631ea37fb3c9b7b0 Mon Sep 17 00:00:00 2001
+From: Unknown <martin.marmsoler@gmail.com>
+Date: Sun, 25 Aug 2019 11:05:20 +0200
+Subject: [PATCH 1/3] add desktop and appdata file
+
+---
+ .../io.github.gitahead.gitahead.appdata.xml   | 71 +++++++++++++++++++
+ .../io.github.gitahead.gitahead.desktop       | 12 ++++
+ 2 files changed, 83 insertions(+)
+ create mode 100644 res/linux/io.github.gitahead.gitahead.appdata.xml
+ create mode 100644 res/linux/mime/applications/io.github.gitahead.gitahead.desktop
+
+diff --git a/res/linux/io.github.gitahead.gitahead.appdata.xml b/res/linux/io.github.gitahead.gitahead.appdata.xml
+new file mode 100644
+index 0000000..2da0033
+--- /dev/null
++++ b/res/linux/io.github.gitahead.gitahead.appdata.xml
+@@ -0,0 +1,71 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<component type="desktop-application">
++  <id>io.github.gitahead.gitahead</id>
++  <metadata_license>FSFAP</metadata_license>
++  <project_license>MIT License</project_license>
++  <name>GitAhead</name>
++  <summary>Graphical Git client designed to help you understand and manage your source code history</summary>
++
++  <description>
++    <p>Features:</p>
++    <ul>
++		<li>Fast native interface designed to help you understand and manage your source code history</li>
++    </ul>
++  </description>
++
++  <launchable type="desktop-id">io.github.gitahead.gitahead.desktop</launchable>
++
++  <screenshots>
++    <screenshot type="default">
++      <caption>The main view</caption>
++        <image>https://gitahead.github.io/gitahead.com/images/dark.png</image>
++    </screenshot>
++  </screenshots>
++
++  <url type="homepage">https://gitahead.github.io/gitahead.com/</url>
++
++  <provides>
++    <binary>GitAhead</binary>
++    <id>io.github.gitahead.gitahead</id>
++  </provides>
++
++  <releases>
++    <release version="2018.03.23" date="2018-03-23">
++      <description>
++        <p>Initial Flathub release</p>
++      </description>
++    </release>
++  </releases>
++
++ <content_rating type="oars-1.1">
++    <content_attribute id="violence-cartoon">none</content_attribute>
++    <content_attribute id="violence-fantasy">none</content_attribute>
++    <content_attribute id="violence-realistic">none</content_attribute>
++    <content_attribute id="violence-bloodshed">none</content_attribute>
++    <content_attribute id="violence-sexual">none</content_attribute>
++    <content_attribute id="violence-desecration">none</content_attribute>
++    <content_attribute id="violence-slavery">none</content_attribute>
++    <content_attribute id="violence-worship">none</content_attribute>
++    <content_attribute id="drugs-alcohol">none</content_attribute>
++    <content_attribute id="drugs-narcotics">none</content_attribute>
++    <content_attribute id="drugs-tobacco">none</content_attribute>
++    <content_attribute id="sex-nudity">none</content_attribute>
++    <content_attribute id="sex-themes">none</content_attribute>
++    <content_attribute id="sex-homosexuality">none</content_attribute>
++    <content_attribute id="sex-prostitution">none</content_attribute>
++    <content_attribute id="sex-adultery">none</content_attribute>
++    <content_attribute id="sex-appearance">none</content_attribute>
++    <content_attribute id="language-profanity">none</content_attribute>
++    <content_attribute id="language-humor">none</content_attribute>
++    <content_attribute id="language-discrimination">none</content_attribute>
++    <content_attribute id="social-chat">none</content_attribute>
++    <content_attribute id="social-info">none</content_attribute>
++    <content_attribute id="social-audio">none</content_attribute>
++    <content_attribute id="social-location">none</content_attribute>
++    <content_attribute id="social-contacts">none</content_attribute>
++    <content_attribute id="money-purchasing">none</content_attribute>
++    <content_attribute id="money-gambling">none</content_attribute>
++  </content_rating>
++  
++</component>
++
+diff --git a/res/linux/mime/applications/io.github.gitahead.gitahead.desktop b/res/linux/mime/applications/io.github.gitahead.gitahead.desktop
+new file mode 100644
+index 0000000..8c71cff
+--- /dev/null
++++ b/res/linux/mime/applications/io.github.gitahead.gitahead.desktop
+@@ -0,0 +1,12 @@
++[Desktop Entry]
++Encoding=UTF-8
++Name=GitAhead
++Comment=Graphical Git client for Windows, Linux and macOS
++Exec=gitahead
++StartupWMClass=gitahead
++Icon=GitAhead
++Terminal=false
++Type=Application
++Categories=Development;
++X-Desktop-File-Install-Version=0.1
++Name[de_DE]=GitAhead
+-- 
+2.22.0
+
+
+From dd73b2f9cf75903fd036d626ed93897c9a55cd98 Mon Sep 17 00:00:00 2001
+From: Unknown <martin.marmsoler@gmail.com>
+Date: Sun, 25 Aug 2019 19:56:29 +0200
+Subject: [PATCH 2/3] update
+
+---
+ res/linux/io.github.gitahead.gitahead.appdata.xml               | 2 +-
+ .../{mime/applications => }/io.github.gitahead.gitahead.desktop | 0
+ 2 files changed, 1 insertion(+), 1 deletion(-)
+ rename res/linux/{mime/applications => }/io.github.gitahead.gitahead.desktop (100%)
+
+diff --git a/res/linux/io.github.gitahead.gitahead.appdata.xml b/res/linux/io.github.gitahead.gitahead.appdata.xml
+index 2da0033..6803024 100644
+--- a/res/linux/io.github.gitahead.gitahead.appdata.xml
++++ b/res/linux/io.github.gitahead.gitahead.appdata.xml
+@@ -25,7 +25,7 @@
+   <url type="homepage">https://gitahead.github.io/gitahead.com/</url>
+ 
+   <provides>
+-    <binary>GitAhead</binary>
++    <binary>gitahead</binary>
+     <id>io.github.gitahead.gitahead</id>
+   </provides>
+ 
+diff --git a/res/linux/mime/applications/io.github.gitahead.gitahead.desktop b/res/linux/io.github.gitahead.gitahead.desktop
+similarity index 100%
+rename from res/linux/mime/applications/io.github.gitahead.gitahead.desktop
+rename to res/linux/io.github.gitahead.gitahead.desktop
+-- 
+2.22.0
+
+
+From 46f408b9d217d81204f2e0d40e9c255636f6a4fe Mon Sep 17 00:00:00 2001
+From: Unknown <martin.marmsoler@gmail.com>
+Date: Sun, 25 Aug 2019 20:32:11 +0200
+Subject: [PATCH 3/3] change binary name
+
+---
+ res/linux/io.github.gitahead.gitahead.appdata.xml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/res/linux/io.github.gitahead.gitahead.appdata.xml b/res/linux/io.github.gitahead.gitahead.appdata.xml
+index 6803024..2da0033 100644
+--- a/res/linux/io.github.gitahead.gitahead.appdata.xml
++++ b/res/linux/io.github.gitahead.gitahead.appdata.xml
+@@ -25,7 +25,7 @@
+   <url type="homepage">https://gitahead.github.io/gitahead.com/</url>
+ 
+   <provides>
+-    <binary>gitahead</binary>
++    <binary>GitAhead</binary>
+     <id>io.github.gitahead.gitahead</id>
+   </provides>
+ 
+-- 
+2.22.0
+
