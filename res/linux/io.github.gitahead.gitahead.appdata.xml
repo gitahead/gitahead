@@ -25,7 +25,7 @@
   <url type="homepage">https://gitahead.github.io/gitahead.com/</url>
 
   <provides>
-    <binary>GitAhead</binary>
+    <binary>gitahead</binary>
     <id>io.github.gitahead.gitahead</id>
   </provides>
 
