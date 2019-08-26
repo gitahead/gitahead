@@ -45,9 +45,14 @@ public:
       Update
     };
 
-    Callbacks(const Repository &repo = Repository())
-      : mRepo(repo)
+    Callbacks(const QString &url, const Repository &repo = Repository())
+      : mUrl(url), mRepo(repo)
     {}
+
+    QString url() const
+    {
+      return mUrl;
+    }
 
     State state() const
     {
@@ -155,6 +160,7 @@ public:
       void *payload);
 
   protected:
+    QString mUrl;
     Repository mRepo;
     State mState = Transfer;
     QSet<QString> mAgentNames;

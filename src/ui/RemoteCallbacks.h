@@ -92,7 +92,6 @@ private:
 
   Kind mKind;
   LogEntry *mLog;
-  QString mUrl;
   QString mName;
 
   QTime mTime;

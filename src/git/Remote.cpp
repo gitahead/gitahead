@@ -243,8 +243,8 @@ int Remote::Callbacks::credentials(
     QString key;
     ConfigFile configFile;
     if (configFile.isValid()) {
-      // Extract hostname from SSH URL.
-      QString name = hostName(url);
+      // Extract hostname from the unresolved URL.
+      QString name = hostName(cbs->url());
       foreach (const ConfigFile::Host &host, configFile.parse()) {
         // Skip entries that don't have an identity file.
         if (host.file.isEmpty())

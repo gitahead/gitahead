@@ -90,8 +90,8 @@ RemoteCallbacks::RemoteCallbacks(
   const QString &name,
   QObject *parent,
   const git::Repository &repo)
-  : QObject(parent), git::Remote::Callbacks(repo),
-    mKind(kind), mLog(log), mUrl(url), mName(name)
+  : QObject(parent), git::Remote::Callbacks(url, repo),
+    mKind(kind), mLog(log), mName(name)
 {
   // Credentials has to block.
   connect(this, &RemoteCallbacks::queueCredentials,
