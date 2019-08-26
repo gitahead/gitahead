@@ -518,8 +518,8 @@ QPalette Theme::commitList()
 #ifdef Q_OS_WIN
   palette.setColor(QPalette::Active, QPalette::HighlightedText, Qt::black);
   palette.setColor(QPalette::Inactive, QPalette::HighlightedText, Qt::black);
-  palette.setColor(QPalette::Active, QPalette::WindowText, bright);
-  palette.setColor(QPalette::Inactive, QPalette::WindowText, bright);
+  palette.setColor(QPalette::Active, QPalette::WindowText, "#808080");
+  palette.setColor(QPalette::Inactive, QPalette::WindowText, "#808080");
 #else
   QColor inactive = mDark ? Qt::white : Qt::black;
   palette.setColor(QPalette::Active, QPalette::HighlightedText, Qt::white);
