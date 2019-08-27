@@ -549,16 +549,6 @@ public:
      */
     int whitespaceSize() const;
     /**
-     * Divide each styling byte into lexical class bits (default: 5) and indicator
-     * bits (default: 3). If a lexer requires more than 32 lexical states, then this
-     * is used to expand the possible states.
-     */
-    void setStyleBits(int bits);
-    /**
-     * Retrieve number of bits in style bytes used to hold the lexical state.
-     */
-    int styleBits() const;
-    /**
      * Used to hold extra styling information for each line.
      */
     void setLineState(int line, int state);
@@ -2762,10 +2752,6 @@ public:
      * interpreted as an int AFTER any "$()" variable replacement.
      */
     int propertyInt(const QString & key) const;
-    /**
-     * Retrieve the number of bits the current lexer needs for styling.
-     */
-    int styleBitsNeeded() const;
     /**
      * Retrieve the name of the lexer.
      * Return the length of the text.

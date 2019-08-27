@@ -39,10 +39,13 @@
 #include "LineMarker.h"
 #include "Style.h"
 #include "AutoComplete.h"
+#include "UniqueString.h"
 #include "ViewStyle.h"
 #include "CharClassify.h"
 #include "Decoration.h"
 #include "CaseFolder.h"
+#include "ILoader.h"
+#include "CharacterCategory.h"
 #include "Document.h"
 #include "Selection.h"
 #include "PositionCache.h"
@@ -147,10 +150,10 @@ private:
   void Finalise() override;
   bool DragThreshold(Point ptStart, Point ptNow) override;
   bool ValidCodePage(int codePage) const override;
-  void ScrollText(int linesToMove) override;
+  void ScrollText(Sci::Line linesToMove) override;
   void SetVerticalScrollPos() override;
   void SetHorizontalScrollPos() override;
-  bool ModifyScrollBars(int nMax, int nPage) override;
+  bool ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) override;
   void ReconfigureScrollBars() override;
   void Copy() override;
   void CopyToClipboard(const SelectionText &selectedText) override;
@@ -158,7 +161,6 @@ private:
   void ClaimSelection() override;
   void NotifyChange() override;
   void NotifyParent(SCNotification scn) override;
-  bool FineTickerAvailable() override;
   bool FineTickerRunning(TickReason reason) override;
   void FineTickerStart(TickReason reason, int millis, int tolerance) override;
   void FineTickerCancel(TickReason reason) override;

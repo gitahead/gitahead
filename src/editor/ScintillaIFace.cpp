@@ -695,16 +695,6 @@ int ScintillaIFace::whitespaceSize() const
   return (int)send(SCI_GETWHITESPACESIZE, 0, 0);
 }
 
-void ScintillaIFace::setStyleBits(int bits)
-{
-  send(SCI_SETSTYLEBITS, (uptr_t)bits, 0);
-}
-
-int ScintillaIFace::styleBits() const
-{
-  return (int)send(SCI_GETSTYLEBITS, 0, 0);
-}
-
 void ScintillaIFace::setLineState(int line, int state)
 {
   send(SCI_SETLINESTATE, (uptr_t)line, (sptr_t)state);
@@ -3368,11 +3358,6 @@ int ScintillaIFace::propertyInt(const QString & key) const
 {
   QByteArray keyUtf8 = key.toUtf8();
   return (int)send(SCI_GETPROPERTYINT, (uptr_t)keyUtf8.constData(), 0);
-}
-
-int ScintillaIFace::styleBitsNeeded() const
-{
-  return (int)send(SCI_GETSTYLEBITSNEEDED, 0, 0);
 }
 
 int ScintillaIFace::lexerLanguage(char * text) const
