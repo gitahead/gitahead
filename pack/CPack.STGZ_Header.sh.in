@@ -134,6 +134,7 @@ Name=GitAhead
 Icon=gitahead
 Terminal=false
 Exec=$SHELL -c ${toplevel}/GitAhead
+Comment=Understand your Git history
 Categories=Development;RevisionControl;
 EOF
 
