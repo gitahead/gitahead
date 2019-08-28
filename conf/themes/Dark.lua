@@ -42,7 +42,6 @@ theme['widget']    = {
 -- { default, active, inactive, disabled }
 theme['window']    = {
   text             = '#E1E5F2',
-  bright_text      = '#AAB2BE',
   background       = '#2D2E34'
 }
 

@@ -461,11 +461,6 @@ QColor CustomTheme::star()
   return mMap.value("star").toMap().value("fill").value<QColor>();
 }
 
-QColor CustomTheme::windowBrightText()
-{
-  return mMap.value("window").toMap().value("bright_text").value<QColor>();
-}
-
 #ifndef Q_OS_MAC
 void CustomTheme::polishWindow(QWindow *window) const
 {

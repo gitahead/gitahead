@@ -87,10 +87,6 @@ QString Theme::styleSheet() const
       "  border-left: 1px solid palette(light)"
       "}"
 
-      "AdvancedSearchWidget QLabel {"
-      "  color: palette(bright-text)"
-      "}"
-
       "ColumnView, ColumnView QAbstractItemView {"
       "  background: palette(base);"
       "  border-right: 1px solid palette(light)"
@@ -238,10 +234,6 @@ QString Theme::styleSheet() const
   }
 
   return
-    "AdvancedSearchWidget QLabel {"
-    "  color: #646464"
-    "}"
-
     "ColumnView, ColumnView QAbstractItemView {"
     "  background: palette(base);"
     "  border-right: 1px solid palette(light)"
@@ -416,7 +408,7 @@ QString Theme::styleSheet() const
 
 void Theme::polish(QPalette &palette) const
 {
-  palette.setColor(QPalette::BrightText, "#808080");
+  palette.setColor(QPalette::BrightText, mDark ? "#9C9C9C" : "#646464");
   palette.setColor(QPalette::Light, mDark ? "#121212" : "#E6E6E6");
   palette.setColor(QPalette::Shadow, palette.color(QPalette::Mid));
 
@@ -513,19 +505,20 @@ QColor Theme::buttonChecked()
 QPalette Theme::commitList()
 {
   QPalette palette;
+  QColor bright = palette.color(QPalette::BrightText);
 
   // highlight
 #ifdef Q_OS_WIN
   palette.setColor(QPalette::Active, QPalette::HighlightedText, Qt::black);
   palette.setColor(QPalette::Inactive, QPalette::HighlightedText, Qt::black);
-  palette.setColor(QPalette::Active, QPalette::WindowText, "#808080");
-  palette.setColor(QPalette::Inactive, QPalette::WindowText, "#808080");
+  palette.setColor(QPalette::Active, QPalette::WindowText, bright);
+  palette.setColor(QPalette::Inactive, QPalette::WindowText, bright);
 #else
   QColor inactive = mDark ? Qt::white : Qt::black;
   palette.setColor(QPalette::Active, QPalette::HighlightedText, Qt::white);
   palette.setColor(QPalette::Inactive, QPalette::HighlightedText, inactive);
   palette.setColor(QPalette::Active, QPalette::WindowText, "#C0C0C0");
-  palette.setColor(QPalette::Inactive, QPalette::WindowText, "#808080");
+  palette.setColor(QPalette::Inactive, QPalette::WindowText, bright);
 #endif
 
   return palette;
@@ -597,11 +590,6 @@ QColor Theme::remoteComment(Comment color)
 QColor Theme::star()
 {
   return "#FFCE6D";
-}
-
-QColor Theme::windowBrightText()
-{
-  return "#808080";
 }
 
 void Theme::drawCloseButton(

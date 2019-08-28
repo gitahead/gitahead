@@ -79,6 +79,8 @@ private:
 AdvancedSearchWidget::AdvancedSearchWidget(QWidget *parent)
   : QWidget(parent, Qt::Popup)
 {
+  setStyleSheet("QLabel { color: palette(bright-text) }");
+
   QFormLayout *layout = new QFormLayout(this);
   layout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
 

@@ -12,7 +12,6 @@
 #include "DiffWidget.h"
 #include "MenuBar.h"
 #include "TreeWidget.h"
-#include "app/Application.h"
 #include "git/Branch.h"
 #include "git/Commit.h"
 #include "git/Diff.h"
@@ -60,7 +59,7 @@ const Qt::TextInteractionFlags kTextFlags =
 
 QString brightText(const QString &text)
 {
-  return kAltFmt.arg(Application::theme()->windowBrightText().name(), text);
+  return kAltFmt.arg(QPalette().color(QPalette::BrightText).name(), text);
 }
 
 class MessageLabel : public QTextEdit

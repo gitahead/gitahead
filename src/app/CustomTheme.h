@@ -35,7 +35,6 @@ public:
   QColor heatMap(HeatMap color) override;
   QColor remoteComment(Comment color) override;
   QColor star() override;
-  QColor windowBrightText() override;
 
   QVariantMap checkbox() const;
   void polishWindow(QWindow *window) const;

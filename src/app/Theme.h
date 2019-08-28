@@ -84,7 +84,6 @@ public:
   virtual QColor heatMap(HeatMap color);
   virtual QColor remoteComment(Comment color);
   virtual QColor star();
-  virtual QColor windowBrightText();
 
   static void drawCloseButton(
     const QStyleOption *option,
