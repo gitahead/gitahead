@@ -10,6 +10,7 @@
 #ifndef PLATQT_H
 #define PLATQT_H
 
+#include <cstddef>
 #include <vector>
 #include "Platform.h"
 #include <QColor>
