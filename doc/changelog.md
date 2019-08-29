@@ -1,3 +1,20 @@
+### v2.5.10 - 2019-08-29
+
+#### Added
+
+* Automatically switch between light and dark mode on macOS Mojave when using the native theme.
+
+#### Fixed
+
+* Fixed stash performance issue.
+* Fixed crash on LFS-not-found error.
+* Avoid reporting the LFS-not-found error multiple times.
+* Fixed possible failure to look up the correct SSH identity file when the config file contains a 'HostName' entry.
+* Fixed failure to draw tree view badges in some cases.
+* Add missing dark mode colors for some lexers that reference colors directly (e.g. markdown).
+
+----
+
 ### v2.5.9 - 2019-08-10
 
 #### Fixed
