@@ -181,6 +181,20 @@ theme['tooltip']   = {
 -- Symbolic style names are allowed:
 --   $(style.name)
 -- http://www.scintilla.org/MyScintillaDoc.html#Styling
+
+-- colors
+theme.property['color.red']          = '#994D4D'
+theme.property['color.yellow']       = '#99994D'
+theme.property['color.green']        = '#4D994D'
+theme.property['color.teal']         = '#4D9999'
+theme.property['color.purple']       = '#994D99'
+theme.property['color.orange']       = '#E6994D'
+theme.property['color.blue']         = '#4D99E6'
+theme.property['color.black']        = '#1A1A1A'
+theme.property['color.grey']         = '#808080'
+theme.property['color.white']        = '#E6E6E6'
+
+-- styles
 theme.property['style.bracebad']     = 'fore:#CC8080'
 theme.property['style.bracelight']   = 'fore:#80CCFF'
 theme.property['style.calltip']      = 'fore:#AAB2BE,back:#333333'

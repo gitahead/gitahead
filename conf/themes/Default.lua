@@ -1,4 +1,17 @@
 if theme.dark then
+  -- colors
+  lexer.property['color.red']          = '#994D4D'
+  lexer.property['color.yellow']       = '#99994D'
+  lexer.property['color.green']        = '#4D994D'
+  lexer.property['color.teal']         = '#4D9999'
+  lexer.property['color.purple']       = '#994D99'
+  lexer.property['color.orange']       = '#E6994D'
+  lexer.property['color.blue']         = '#4D99E6'
+  lexer.property['color.black']        = '#1A1A1A'
+  lexer.property['color.grey']         = '#808080'
+  lexer.property['color.white']        = '#E6E6E6'
+
+  -- styles
   lexer.property['style.bracebad']     = 'fore:#CC8080'
   lexer.property['style.bracelight']   = 'fore:#80CCFF'
   lexer.property['style.calltip']      = 'fore:#AAB2BE,back:#333333'
