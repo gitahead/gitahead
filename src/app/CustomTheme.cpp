@@ -143,10 +143,6 @@ QString CustomTheme::styleSheet() const
     "  background: %1"
     "}"
 
-    "AdvancedSearchWidget QLabel {"
-    "  color: %2"
-    "}"
-
     "DetailView QTextEdit {"
     "  border: 1px solid palette(shadow)"
     "}"
@@ -167,7 +163,7 @@ QString CustomTheme::styleSheet() const
     "}"
     "DiffView HunkWidget, DiffView HunkWidget QLabel {"
     "  background: palette(mid);"
-    "  color: %2"
+    "  color: palette(bright-text)"
     "}"
 
     "FileList {"
@@ -207,8 +203,8 @@ QString CustomTheme::styleSheet() const
     "}"
 
     "MenuBar {"
-    "  background: %3;"
-    "  color: %4"
+    "  background: %2;"
+    "  color: %3"
     "}"
 
     "QComboBox QListView {"
@@ -238,7 +234,7 @@ QString CustomTheme::styleSheet() const
     "  border: 1px solid palette(shadow)"
     "}"
     "ToolBar QToolButton:enabled:active:checked {"
-    "  background: %5"
+    "  background: %4"
     "}"
 
     "TreeWidget QColumnView {"
@@ -262,11 +258,9 @@ QString CustomTheme::styleSheet() const
     "}";
 
   QVariantMap button = mMap.value("button").toMap();
-  QVariantMap window = mMap.value("window").toMap();
   QVariantMap menubar = mMap.value("menubar").toMap();
   return text.arg(
     button.value("background").toMap().value("pressed").toString(),
-    window.value("bright_text").toString(),
     menubar.value("background").toString(),
     menubar.value("text").toString(),
     button.value("background").toMap().value("checked").toString());
