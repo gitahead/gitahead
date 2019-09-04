@@ -45,9 +45,9 @@
 
 namespace {
 
-const int kStarPadding = 8;
-const int kLineSpacing = 16;
-const int kVerticalMargin = 2;
+const int kStarPadding = 4;
+const int kLineSpacing = 23;
+const int kVerticalMargin = 5;  // Margin only on top?
 const int kHorizontalMargin = 4;
 
 // FIXME: Factor out into theme?
@@ -814,18 +814,19 @@ public:
     // Draw content.
     git::Commit commit = index.data(CommitRole).value<git::Commit>();
     if (commit.isValid()) {
+      const QFontMetrics &fm = opt.fontMetrics;
+
       // Draw Name.
-      QString name = commit.author().name();
+      /*QString name = commit.author().name();
       painter->save();
       QFont bold = opt.font;
       bold.setBold(true);
       painter->setFont(bold);
       painter->drawText(rect, Qt::AlignLeft, name);
-      painter->restore();
+      painter->restore();*/
 
       // Draw date.
-      const QFontMetrics &fm = opt.fontMetrics;
-      QDateTime date = commit.committer().date().toLocalTime();
+      /*QDateTime date = commit.committer().date().toLocalTime();
       QString timestamp =
         (date.date() == QDate::currentDate()) ?
         date.time().toString(Qt::DefaultLocaleShortDate) :
@@ -835,32 +836,33 @@ public:
         painter->setPen(bright);
         painter->drawText(rect, Qt::AlignRight, timestamp);
         painter->restore();
+      }*/
+
+      QRect star = rect;
+      star.setX(star.x() + star.width() - star.height());
+
+      QRect ref = rect;
+      ref.setWidth(300); // Max width atm
+      ref.setX(ref.x());
+
+      // Draw references.
+      int badgesWidth = rect.x();
+      QList<Badge::Label> refs = mRefs.value(commit.id());
+      if (!refs.isEmpty()) {
+        badgesWidth = Badge::paint(painter, refs, ref, &opt);
       }
 
-      rect.setY(rect.y() + kLineSpacing + kVerticalMargin);
+      QRect text = rect;
+      text.setWidth(text.width() - star.width()); // Ends before Star
+      text.setX(badgesWidth); // Comes right after the badges
 
       // Draw id.
       QString id = commit.shortId();
       painter->save();
-      painter->drawText(rect, Qt::AlignLeft, id);
+      painter->drawText(text, Qt::AlignRight, id);
       painter->restore();
 
-      // Draw references.
-      QList<Badge::Label> refs = mRefs.value(commit.id());
-      if (!refs.isEmpty()) {
-        QRect refsRect = rect;
-        refsRect.setX(refsRect.x() + fm.boundingRect(id).width() + 6);
-        Badge::paint(painter, refs, refsRect, &opt);
-      }
-
-      rect.setY(rect.y() + kLineSpacing + kVerticalMargin);
-
-      // Divide remaining rectangle.
-      QRect star = rect;
-      star.setX(star.x() + star.width() - star.height());
-
-      QRect text = rect;
-      text.setWidth(text.width() - star.width());
+      text.setWidth(text.width() - fm.width(id) - 5);   // Removing Width of ID and Padding   
 
       // Draw message.
       painter->save();
@@ -946,14 +948,15 @@ public:
     }
 #endif
 
-    // Draw separator line.
+    // No separator needed, using negative space instead
+    /*// Draw separator line.
     if (selected == nextSelected) {
       painter->save();
       painter->setRenderHints(QPainter::Antialiasing, false);
       painter->setPen(selected ? text : opt.palette.color(QPalette::Dark));
       painter->drawLine(rect.bottomLeft(), rect.bottomRight());
       painter->restore();
-    }
+    }*/
 
     painter->restore();
   }
@@ -962,7 +965,7 @@ public:
     const QStyleOptionViewItem &option,
     const QModelIndex &index) const override
   {
-    return QSize(0, (kLineSpacing + kVerticalMargin) * 4);
+    return QSize(0, (kLineSpacing + kVerticalMargin)); // 1 line instead of 4
   }
 
   QRect decorationRect(
