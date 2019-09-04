@@ -39,7 +39,7 @@ public:
   static QSize size(const QFont &font, const QList<Label> &labels);
   static QSize size(const QFont &font, const Label &label = Label());
 
-  static void paint(
+  static int paint(
     QPainter *painter,
     const QList<Label> &labels,
     const QRect &rect,

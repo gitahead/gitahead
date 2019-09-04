@@ -80,7 +80,9 @@ QSize Badge::size(const QFont &font, const Label &label)
   return QSize(icon + width + kPadding, fm.lineSpacing() + 2);
 }
 
-void Badge::paint(
+/** Draws the bagdes tal all available space. Left Aligned.
+ * Retuns the final width occupied by the Badges. */
+int Badge::paint(
   QPainter *painter,
   const QList<Label> &list,
   const QRect &rect,
@@ -105,11 +107,11 @@ void Badge::paint(
   painter->save();
   painter->setRenderHints(QPainter::Antialiasing);
 
-  int x = rect.x() + rect.width();
-  for (int i = labels.size() - 1; i >= 0; --i) {
+  int x = rect.x();
+  for (int i = 0; i < labels.size(); i++) {
     Label label = labels.at(i);
     QSize labelSize = size(font, label);
-    QRect labelRect(QPoint(x - labelSize.width(), rect.y()), labelSize);
+    QRect labelRect(QPoint(x, rect.y()), labelSize);
 
     Theme::BadgeState state = Theme::BadgeState::Normal;
     if (selected && active) {
@@ -153,10 +155,11 @@ void Badge::paint(
     painter->setPen(fore);
     painter->drawText(labelRect, kLabelAlignment, label.text);
 
-    x -= labelSize.width() + kSpacing;
+    x += labelSize.width() + kSpacing;
   }
 
   painter->restore();
+  return x;
 }
 
 void Badge::paintEvent(QPaintEvent *event)
