@@ -825,10 +825,10 @@ public:
 
       if (compactMode) {
         int maxWidthRefs = (int)(rect.width() * 0.5); // Max 30% of the 
-        int minWidthRefs = 50; // At least display The ellipsis
-        int minWidthRequestDesc = 100;
+        const int minWidthRefs = 50; // At least display The ellipsis
+        const int minWidthRequestDesc = 100;
+        int minDisplayWidthDate = 350;
         int minDisplayWidthName = 800;
-        int minDisplayWidthDate = 300;
         int minWidthName = 50;
         int maxWidthName = (int)(rect.width() * 0.15);
 
@@ -848,7 +848,7 @@ public:
         painter->restore();
         box.setWidth(box.width() - idWidth);
 
-        // Draw date.
+        // Draw date. Only if String is not the same as previous?
         QDateTime date = commit.committer().date().toLocalTime();
         QString timestamp =
           (date.date() == QDate::currentDate()) ?
@@ -886,8 +886,15 @@ public:
           badgesWidth = Badge::paint(painter, refs, ref, &opt, LEFT);
         }
 
-        text = box;
-        text.setX(badgesWidth); // Comes right after the badges
+        box.setX(badgesWidth); // Comes right after the badges
+
+        // Draw message.
+        painter->save();
+        painter->setPen(bright);
+        QString msg = commit.summary(git::Commit::SubstituteEmoji);
+        QString elidedText = fm.elidedText(msg, Qt::ElideRight, box.width());
+        painter->drawText(box, Qt::ElideRight, elidedText);
+        painter->restore();
       }
 
       if (!compactMode) {
@@ -934,31 +941,31 @@ public:
         // Divide remaining rectangle.
         star.setX(star.x() + star.width() - star.height());
         text.setWidth(text.width() - star.width());
-      }
 
-      // Draw message.
-      painter->save();
-      painter->setPen(bright);
-      QString msg = commit.summary(git::Commit::SubstituteEmoji);
-      QTextLayout layout(msg, painter->font());
-      layout.beginLayout();
+        // Draw message.
+        painter->save();
+        painter->setPen(bright);
+        QString msg = commit.summary(git::Commit::SubstituteEmoji);
+        QTextLayout layout(msg, painter->font());
+        layout.beginLayout();
 
-      QTextLine line = layout.createLine();
-      if (line.isValid()) {
-        int width = text.width();
-        line.setLineWidth(width);
-        int len = line.textLength();
-        painter->drawText(text, Qt::AlignLeft, msg.left(len));
+        QTextLine line = layout.createLine();
+        if (line.isValid()) {
+          int width = text.width();
+          line.setLineWidth(width);
+          int len = line.textLength();
+          painter->drawText(text, Qt::AlignLeft, msg.left(len));
 
-        if (len < msg.length()) {
-          text.setY(text.y() + kLineSpacing);
-          QString elided = fm.elidedText(msg.mid(len), Qt::ElideRight, width);
-          painter->drawText(text, Qt::AlignLeft, elided);
+          if (len < msg.length()) {
+            text.setY(text.y() + kLineSpacing);
+            QString elided = fm.elidedText(msg.mid(len), Qt::ElideRight, width);
+            painter->drawText(text, Qt::AlignLeft, elided);
+          }
         }
-      }
 
-      layout.endLayout();
-      painter->restore();
+        layout.endLayout();
+        painter->restore();
+      }
 
       // Draw star.
       bool starred = commit.isStarred();
