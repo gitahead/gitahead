@@ -45,10 +45,11 @@
 
 namespace {
 
-const int kStarPadding = 6;
+const int kStarPadding = 7;
 const int kLineSpacing = 23;
 const int kVerticalMargin = 5;  // Margin only on top?
 const int kHorizontalMargin = 4;
+const bool compactMode = true;
 
 // FIXME: Factor out into theme?
 const QColor kTaintedColor = Qt::gray;
@@ -704,6 +705,8 @@ public:
     QRect rect = opt.rect;
     rect.setX(rect.x() + 2);
 
+    int totalWidth = rect.width();
+
     // Draw graph.
     painter->save();
     QVariantList columns = index.data(GraphRole).toList();
@@ -810,60 +813,128 @@ public:
     rect.setY(rect.y() + kVerticalMargin);
     rect.setX(rect.x() + kHorizontalMargin);
     rect.setWidth(rect.width() - kHorizontalMargin);
+    if (!compactMode) rect.setWidth(rect.width() + kHorizontalMargin); // Star has enough padding
 
     // Draw content.
     git::Commit commit = index.data(CommitRole).value<git::Commit>();
     if (commit.isValid()) {
       const QFontMetrics &fm = opt.fontMetrics;
 
-      // Draw Name.
-      /*QString name = commit.author().name();
-      painter->save();
-      QFont bold = opt.font;
-      bold.setBold(true);
-      painter->setFont(bold);
-      painter->drawText(rect, Qt::AlignLeft, name);
-      painter->restore();*/
-
-      // Draw date.
-      /*QDateTime date = commit.committer().date().toLocalTime();
-      QString timestamp =
-        (date.date() == QDate::currentDate()) ?
-        date.time().toString(Qt::DefaultLocaleShortDate) :
-        date.date().toString(Qt::DefaultLocaleShortDate);
-      if (rect.width() > fm.width(name) + fm.width(timestamp) + 8) {
-        painter->save();
-        painter->setPen(bright);
-        painter->drawText(rect, Qt::AlignRight, timestamp);
-        painter->restore();
-      }*/
-
+      QRect text = rect;
       QRect star = rect;
-      star.setX(star.x() + star.width() - star.height());
-      star.setY(star.y() - kVerticalMargin);
 
-      QRect ref = rect;
-      ref.setWidth(300); // Max width atm
-      ref.setX(ref.x());
+      if (compactMode) {
+        int maxWidthRefs = (int)(rect.width() * 0.5); // Max 30% of the 
+        int minWidthRefs = 50; // At least display The ellipsis
+        int minWidthRequestDesc = 100;
+        int minDisplayWidthName = 800;
+        int minDisplayWidthDate = 300;
+        int minWidthName = 50;
+        int maxWidthName = (int)(rect.width() * 0.15);
 
-      // Draw references.
-      int badgesWidth = rect.x();
-      QList<Badge::Label> refs = mRefs.value(commit.id());
-      if (!refs.isEmpty()) {
-        badgesWidth = Badge::paint(painter, refs, ref, &opt);
+        // Star always takes up its height on the right side
+        star.setX(star.x() + star.width() - star.height());
+        star.setY(star.y() - kVerticalMargin);
+
+        // maybe..maybe?? not needed in compact mode?
+        // can't really remove it, at least it 
+        // needs to be an option
+        QString id = commit.shortId();
+        QRect box = rect;
+        box.setWidth(box.width() - star.width());
+        int idWidth = fm.horizontalAdvance(id) + kHorizontalMargin;
+        painter->save();
+        painter->drawText(box, Qt::AlignRight, id);
+        painter->restore();
+        box.setWidth(box.width() - idWidth);
+
+        // Draw date.
+        QDateTime date = commit.committer().date().toLocalTime();
+        QString timestamp =
+          (date.date() == QDate::currentDate()) ?
+          date.time().toString(Qt::DefaultLocaleShortDate) :
+          date.date().toString(Qt::DefaultLocaleShortDate);
+        if (box.width() > minWidthRequestDesc + fm.horizontalAdvance(timestamp) + 8 && totalWidth > minDisplayWidthDate) {
+          painter->save();
+          painter->setPen(bright);
+          painter->drawText(box, Qt::AlignRight, timestamp);
+          painter->restore();
+          box.setWidth(box.width() - fm.horizontalAdvance(timestamp) - kHorizontalMargin);
+        }
+
+        // Name is not needed, does not give context or reference
+        /*if (totalWidth > minDisplayWidthName) {
+          QString name = commit.author().name();
+          painter->save();
+          painter->drawText(box, Qt::AlignRight, name);
+          painter->restore();
+          box.setWidth(box.width() - fm.width(name) - kHorizontalMargin);
+        }*/
+
+        QRect ref = box;
+        // calculate remaining width for the references
+        int refsWidth = ref.width() - minWidthRequestDesc;
+        if (maxWidthRefs <= minWidthRefs) maxWidthRefs = minWidthRefs;
+        if (refsWidth < minWidthRefs) refsWidth = minWidthRefs;
+        if (refsWidth > maxWidthRefs) refsWidth = maxWidthRefs;
+        ref.setWidth(refsWidth);
+
+        // Draw references.
+        int badgesWidth = rect.x();
+        QList<Badge::Label> refs = mRefs.value(commit.id());
+        if (!refs.isEmpty()) {
+          badgesWidth = Badge::paint(painter, refs, ref, &opt, LEFT);
+        }
+
+        text = box;
+        text.setX(badgesWidth); // Comes right after the badges
       }
 
-      QRect text = rect;
-      text.setWidth(text.width() - star.width()); // Ends before Star
-      text.setX(badgesWidth); // Comes right after the badges
+      if (!compactMode) {
+        // Draw Name.
+        QString name = commit.author().name();
+        painter->save();
+        QFont bold = opt.font;
+        bold.setBold(true);
+        painter->setFont(bold);
+        painter->drawText(rect, Qt::AlignLeft, name);
+        painter->restore();
 
-      // Draw id.
-      QString id = commit.shortId();
-      painter->save();
-      painter->drawText(text, Qt::AlignRight, id);
-      painter->restore();
+        // Draw date.
+        QDateTime date = commit.committer().date().toLocalTime();
+        QString timestamp =
+          (date.date() == QDate::currentDate()) ?
+          date.time().toString(Qt::DefaultLocaleShortDate) :
+          date.date().toString(Qt::DefaultLocaleShortDate);
+        if (rect.width() > fm.width(name) + fm.width(timestamp) + 8) {
+          painter->save();
+          painter->setPen(bright);
+          painter->drawText(rect, Qt::AlignRight, timestamp);
+          painter->restore();
+        }
 
-      text.setWidth(text.width() - fm.width(id) - 5);   // Removing Width of ID and Padding   
+        rect.setY(rect.y() + kLineSpacing + kVerticalMargin);
+
+        // Draw id.
+        QString id = commit.shortId();
+        painter->save();
+        painter->drawText(rect, Qt::AlignLeft, id);
+        painter->restore();
+
+        // Draw references.
+        QList<Badge::Label> refs = mRefs.value(commit.id());
+        if (!refs.isEmpty()) {
+          QRect refsRect = rect;
+          refsRect.setX(refsRect.x() + fm.boundingRect(id).width() + 6);
+          Badge::paint(painter, refs, refsRect, &opt);
+        }
+
+        rect.setY(rect.y() + kLineSpacing + kVerticalMargin);
+
+        // Divide remaining rectangle.
+        star.setX(star.x() + star.width() - star.height());
+        text.setWidth(text.width() - star.width());
+      }
 
       // Draw message.
       painter->save();
@@ -948,17 +1019,17 @@ public:
       nextSelected = view->selectionModel()->isSelected(next);
     }
 #endif
+    
 
-    // No separator needed, using negative space instead
-    /*// Draw separator line.
-    if (selected == nextSelected) {
+    // Draw separator line.
+    if (!compactMode && selected == nextSelected) {
       painter->save();
       painter->setRenderHints(QPainter::Antialiasing, false);
       painter->setPen(selected ? text : opt.palette.color(QPalette::Dark));
       painter->drawLine(rect.bottomLeft(), rect.bottomRight());
       painter->restore();
-    }*/
-
+    }
+    
     painter->restore();
   }
 
@@ -966,7 +1037,9 @@ public:
     const QStyleOptionViewItem &option,
     const QModelIndex &index) const override
   {
-    return QSize(0, (kLineSpacing + kVerticalMargin)); // 1 line instead of 4
+    int verticalSize = kLineSpacing + kVerticalMargin;
+    if (!compactMode) verticalSize = verticalSize * 4;
+    return QSize(0, verticalSize);
   }
 
   QRect decorationRect(
