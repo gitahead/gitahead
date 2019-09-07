@@ -45,7 +45,7 @@
 
 namespace {
 
-const int kStarPadding = 4;
+const int kStarPadding = 6;
 const int kLineSpacing = 23;
 const int kVerticalMargin = 5;  // Margin only on top?
 const int kHorizontalMargin = 4;
@@ -840,6 +840,7 @@ public:
 
       QRect star = rect;
       star.setX(star.x() + star.width() - star.height());
+      star.setY(star.y() - kVerticalMargin);
 
       QRect ref = rect;
       ref.setWidth(300); // Max width atm
