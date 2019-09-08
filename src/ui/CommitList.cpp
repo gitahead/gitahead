@@ -44,12 +44,12 @@
 #endif
 
 namespace {
-
-const int kStarPadding = 7;
-const int kLineSpacing = 23;
-const int kVerticalMargin = 5;  // Margin only on top?
-const int kHorizontalMargin = 4;
 const bool compactMode = true;
+
+const int kStarPadding = (compactMode) ? 7 : 8;
+const int kLineSpacing = (compactMode) ? 23 : 16;
+const int kVerticalMargin = (compactMode) ? 5 : 2;
+const int kHorizontalMargin = 4;
 
 // FIXME: Factor out into theme?
 const QColor kTaintedColor = Qt::gray;
@@ -812,15 +812,12 @@ public:
     // Adjust margins.
     rect.setY(rect.y() + kVerticalMargin);
     rect.setX(rect.x() + kHorizontalMargin);
-    rect.setWidth(rect.width() - kHorizontalMargin);
-    if (!compactMode) rect.setWidth(rect.width() + kHorizontalMargin); // Star has enough padding
+    if (!compactMode) rect.setWidth(rect.width() - kHorizontalMargin); // Star has enough padding in compact mode
 
     // Draw content.
     git::Commit commit = index.data(CommitRole).value<git::Commit>();
     if (commit.isValid()) {
       const QFontMetrics &fm = opt.fontMetrics;
-
-      QRect text = rect;
       QRect star = rect;
 
       if (compactMode) {
@@ -842,7 +839,8 @@ public:
         QString id = commit.shortId();
         QRect box = rect;
         box.setWidth(box.width() - star.width());
-        int idWidth = fm.horizontalAdvance(id) + kHorizontalMargin;
+        // Using the biggest theoretical width
+        int idWidth = fm.horizontalAdvance("9999999") + kHorizontalMargin;
         painter->save();
         painter->drawText(box, Qt::AlignRight, id);
         painter->restore();
@@ -939,7 +937,9 @@ public:
         rect.setY(rect.y() + kLineSpacing + kVerticalMargin);
 
         // Divide remaining rectangle.
+        star = rect;
         star.setX(star.x() + star.width() - star.height());
+        QRect text = rect;
         text.setWidth(text.width() - star.width());
 
         // Draw message.
