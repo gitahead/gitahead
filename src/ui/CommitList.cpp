@@ -267,6 +267,7 @@ public:
     mSortDate = config.value<bool>("commit.sort.date", true);
     mCleanStatus = config.value<bool>("commit.status.clean", false);
     mGraphVisible = config.value<bool>("commit.graph.visible", true);
+    mCompactMode = config.value<bool>("commit.compact", false);
 
     if (walk)
       resetWalker();
@@ -604,6 +605,7 @@ private:
   bool mSortDate = true;
   bool mCleanStatus = true;
   bool mGraphVisible = true;
+  bool mCompactMode = false; // Needs to be true?
 };
 
 class ListModel : public QAbstractListModel

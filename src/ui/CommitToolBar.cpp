@@ -31,6 +31,7 @@ namespace {
 const QString kRefsKey = "commit.refs.all";
 const QString kSortKey = "commit.sort.date";
 const QString kGraphKey = "commit.graph.visible";
+const QString kCompactKey = "commit.compact";
 const QString kStatusKey = "commit.status.clean";
 const QString kStyleSheet =
   "QToolBar {"
@@ -168,6 +169,16 @@ CommitToolBar::CommitToolBar(QWidget *parent)
     RepoView *view = RepoView::parentView(this);
     git::Config config = view->repo().appConfig();
     config.setValue(kGraphKey, checked);
+    emit settingsChanged();
+  });
+
+  QAction *compact = menu->addAction(tr("Compact Mode"));
+  compact->setCheckable(true);
+  compact->setChecked(config.value<bool>(kCompactKey, false));
+  connect(compact, &QAction::triggered, [this](bool checked) {
+    RepoView *view = RepoView::parentView(this);
+    git::Config config = view->repo().appConfig();
+    config.setValue(kCompactKey, checked);
     emit settingsChanged();
   });
 
