@@ -627,12 +627,16 @@ SideBar::SideBar(TabWidget *tabs, QWidget *parent)
   });
 
   connect(view, &QTreeView::customContextMenuRequested,
-  [view](const QPoint &point) {
+  [this, view](const QPoint &point) {
     QMenu menu;
     QModelIndex index = view->indexAt(point);
     if (RepoView *view = index.data(TabRole).value<RepoView *>()) {
       menu.addAction(tr("Close"), view, &RepoView::close);
     } else if (Account *account = index.data(AccountRole).value<Account *>()) {
+      menu.addAction(tr("Remove"), [this, account] {
+        promptToRemoveAccount(account);
+      });
+
       if (account->isAuthorizeSupported())
         menu.addAction(tr("Authorize"), account, &Account::authorize);
     }
@@ -719,26 +723,7 @@ SideBar::SideBar(TabWidget *tabs, QWidget *parent)
         RecentRepositories::instance()->remove(index.row());
 
       } else if (auto account = index.data(AccountRole).value<Account *>()) {
-        QString name = index.data(Qt::DisplayRole).toString();
-        QString fmt =
-          tr("<p>Are you sure you want to remove the %1 account for '%2'?</p>"
-             "<p>Only the account association will be removed. Remote "
-             "configurations and local clones will not be affected.</p>");
-
-        QMessageBox *dialog = new QMessageBox(
-          QMessageBox::Warning, tr("Remove Account?"),
-          fmt.arg(Account::name(account->kind()), name),
-          QMessageBox::Cancel, this);
-        dialog->setAttribute(Qt::WA_DeleteOnClose);
-
-        QPushButton *remove =
-          dialog->addButton(tr("Remove"), QMessageBox::AcceptRole);
-        remove->setFocus();
-        connect(remove, &QPushButton::clicked, [index] {
-          Accounts::instance()->removeAccount(index.row());
-        });
-
-        dialog->open();
+        promptToRemoveAccount(account);
 
       } else if (auto repo = index.data(RepositoryRole).value<Repository *>()) {
         QString fmt =
@@ -831,4 +816,27 @@ QSize SideBar::sizeHint() const
 QSize SideBar::minimumSizeHint() const
 {
   return QSize(0, 0);
+}
+
+void SideBar::promptToRemoveAccount(Account *account)
+{
+  QString fmt =
+    tr("<p>Are you sure you want to remove the %1 account for '%2'?</p>"
+       "<p>Only the account association will be removed. Remote "
+       "configurations and local clones will not be affected.</p>");
+
+  QMessageBox *dialog = new QMessageBox(
+    QMessageBox::Warning, tr("Remove Account?"),
+    fmt.arg(Account::name(account->kind()), account->username()),
+    QMessageBox::Cancel, this);
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+
+  QPushButton *remove =
+    dialog->addButton(tr("Remove"), QMessageBox::AcceptRole);
+  remove->setFocus();
+  connect(remove, &QPushButton::clicked, [account] {
+    Accounts::instance()->removeAccount(account);
+  });
+
+  dialog->open();
 }
