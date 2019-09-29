@@ -44,12 +44,10 @@
 #endif
 
 namespace {
-const bool compactMode = true;
-
-const int kStarPadding = (compactMode) ? 7 : 8;
-const int kLineSpacing = (compactMode) ? 23 : 16;
-const int kVerticalMargin = (compactMode) ? 5 : 2;
-const int kHorizontalMargin = 4;
+  int kStarPadding = 8;
+  int kLineSpacing = 16;
+  int kVerticalMargin = 2;
+  int kHorizontalMargin = 4;
 
 // FIXME: Factor out into theme?
 const QColor kTaintedColor = Qt::gray;
@@ -673,6 +671,7 @@ public:
   {
     QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
+    bool compactMode = mRepo.appConfig().value<bool>("commit.compact", false);
 
     // Draw background.
     QStyledItemDelegate::paint(painter, opt, index);
@@ -1046,8 +1045,13 @@ public:
     const QStyleOptionViewItem &option,
     const QModelIndex &index) const override
   {
+    bool compact = mRepo.appConfig().value<bool>("commit.compact", false);
+    // Has side effects on paint (intended...)
+    kStarPadding = (compact) ? 7 : 8;
+    kLineSpacing = (compact) ? 23 : 16;
+    kVerticalMargin = (compact) ? 5 : 2;
     int verticalSize = kLineSpacing + kVerticalMargin;
-    if (!compactMode) verticalSize = verticalSize * 4;
+    if (!compact) verticalSize = verticalSize * 4;
     return QSize(0, verticalSize);
   }
 
