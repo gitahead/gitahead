@@ -444,6 +444,7 @@ MenuBar::MenuBar(QWidget *parent)
   });
 
   mNewBranch = branch->addAction(tr("New Branch..."));
+  mNewBranch->setShortcut(tr("Ctrl+Shift+B"));
   connect(mNewBranch, &QAction::triggered, [this] {
     view()->promptToCreateBranch();
   });
