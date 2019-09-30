@@ -870,11 +870,8 @@ public:
 
         // Draw date. Only if String is not the same as previous?
         QDateTime date = commit.committer().date().toLocalTime();
-        QString timestamp =
-          (date.date() == QDate::currentDate()) ?
-          date.time().toString(Qt::DefaultLocaleShortDate) :
-          date.date().toString(Qt::DefaultLocaleShortDate);
-        if (box.width() > minWidthRequestDesc + fm.horizontalAdvance(timestamp) + 8 && totalWidth > minDisplayWidthDate) {
+        QString timestamp = formatTimestamp(date);
+        if (box.width() > minWidthRequestDesc + fm.horizontalAdvance(timestamp) + 8 && totalWidth > minDisplayWidthDate && drawTimeStamp(index)) {
           painter->save();
           painter->setPen(bright);
           painter->drawText(box, Qt::AlignRight, timestamp);
@@ -1101,6 +1098,26 @@ protected:
   }
 
 private:
+   bool drawTimeStamp(const QModelIndex index) const {
+      if (!index.parent().isValid()) { //Always Return as not valid, Not working
+        return true;
+      }
+      git::Commit parent = index.parent().data(CommitRole).value<git::Commit>(); // Does not have Data?
+      git::Commit commit = index.data(CommitRole).value<git::Commit>();
+
+      QDateTime parentDate = parent.committer().date().toLocalTime();
+      QDateTime date = commit.committer().date().toLocalTime();
+      QString timestamp = formatTimestamp(date);
+      QString oldTimestamp = formatTimestamp(parentDate);
+      return !(QString::compare(timestamp, oldTimestamp, Qt::CaseSensitive));
+  }
+
+  QString formatTimestamp(const QDateTime date) const {
+    return  (date.date() == QDate::currentDate()) ?
+        date.time().toString(Qt::DefaultLocaleShortDate) :
+        date.date().toString(Qt::DefaultLocaleShortDate);
+  }
+
   void updateRefs()
   {
     mRefs.clear();
