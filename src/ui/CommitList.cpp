@@ -860,11 +860,13 @@ public:
         QRect box = rect;
         box.setWidth(box.width() - star.width());
         // Using the biggest theoretical width
-        int idWidth = fm.horizontalAdvance("9999999") + paddings.hMargin;
+        int idWidth = fm.horizontalAdvance("9999999");
+        QRect commitBox = box;
+        commitBox.setX(commitBox.x() + commitBox.width() - idWidth);
         painter->save();
-        painter->drawText(box, Qt::AlignRight, id);
+        painter->drawText(commitBox, Qt::AlignLeft, id);
         painter->restore();
-        box.setWidth(box.width() - idWidth);
+        box.setWidth(box.width() - idWidth - paddings.hMargin);
 
         // Draw date. Only if String is not the same as previous?
         QDateTime date = commit.committer().date().toLocalTime();
@@ -879,15 +881,6 @@ public:
           painter->restore();
           box.setWidth(box.width() - fm.horizontalAdvance(timestamp) - paddings.hMargin );
         }
-
-        // Name is not needed, does not give context or reference
-        /*if (totalWidth > minDisplayWidthName) {
-          QString name = commit.author().name();
-          painter->save();
-          painter->drawText(box, Qt::AlignRight, name);
-          painter->restore();
-          box.setWidth(box.width() - fm.width(name) - kHorizontalMargin);
-        }*/
 
         QRect ref = box;
         // calculate remaining width for the references
