@@ -44,10 +44,6 @@
 #endif
 
 namespace {
-  int kStarPadding = 8;
-  int kLineSpacing = 16;
-  int kVerticalMargin = 2;
-  int kHorizontalMargin = 4;
 
 // FIXME: Factor out into theme?
 const QColor kTaintedColor = Qt::gray;
@@ -647,6 +643,18 @@ private:
   QList<git::Commit> mCommits;
 };
 
+struct RowPadding {
+  public:
+  const int starPadding;
+  const int lineSpacing;
+  const int vMargin;
+  const int hMargin;
+
+  RowPadding(int _starPadding, int _lineSpacing, int _vMargin, int  _hMargin):
+   starPadding(_starPadding), lineSpacing(_lineSpacing), vMargin(_vMargin), hMargin(_hMargin) {
+  }
+};
+
 class CommitDelegate : public QStyledItemDelegate
 {
 public:
@@ -664,6 +672,16 @@ public:
             this, &CommitDelegate::updateRefs);
   }
 
+  RowPadding getPadding() const {
+    bool compactMode = mRepo.appConfig().value<bool>("commit.compact", false);
+    int horizontalMargin = 4;
+    int lineSpacing = (compactMode) ? 23 : 16;
+    int starPadding = (compactMode) ? 7 : 8;
+    int verticalMargin = (compactMode) ? 5 : 2;
+
+    return RowPadding(starPadding, lineSpacing, verticalMargin, horizontalMargin);
+  }
+
   void paint(
     QPainter *painter,
     const QStyleOptionViewItem &option,
@@ -672,6 +690,7 @@ public:
     QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
     bool compactMode = mRepo.appConfig().value<bool>("commit.compact", false);
+    RowPadding paddings = getPadding();
 
     // Draw background.
     QStyledItemDelegate::paint(painter, opt, index);
@@ -811,9 +830,9 @@ public:
     painter->restore();
 
     // Adjust margins.
-    rect.setY(rect.y() + kVerticalMargin);
-    rect.setX(rect.x() + kHorizontalMargin);
-    if (!compactMode) rect.setWidth(rect.width() - kHorizontalMargin); // Star has enough padding in compact mode
+    rect.setY(rect.y() + paddings.vMargin);
+    rect.setX(rect.x() + paddings.hMargin);
+    if (!compactMode) rect.setWidth(rect.width() - paddings.hMargin); // Star has enough padding in compact mode
 
     // Draw content.
     git::Commit commit = index.data(CommitRole).value<git::Commit>();
@@ -832,7 +851,7 @@ public:
 
         // Star always takes up its height on the right side
         star.setX(star.x() + star.width() - star.height());
-        star.setY(star.y() - kVerticalMargin);
+        star.setY(star.y() - paddings.vMargin);
 
         // maybe..maybe?? not needed in compact mode?
         // can't really remove it, at least it 
@@ -841,7 +860,7 @@ public:
         QRect box = rect;
         box.setWidth(box.width() - star.width());
         // Using the biggest theoretical width
-        int idWidth = fm.horizontalAdvance("9999999") + kHorizontalMargin;
+        int idWidth = fm.horizontalAdvance("9999999") + paddings.hMargin;
         painter->save();
         painter->drawText(box, Qt::AlignRight, id);
         painter->restore();
@@ -858,7 +877,7 @@ public:
           painter->setPen(bright);
           painter->drawText(box, Qt::AlignRight, timestamp);
           painter->restore();
-          box.setWidth(box.width() - fm.horizontalAdvance(timestamp) - kHorizontalMargin);
+          box.setWidth(box.width() - fm.horizontalAdvance(timestamp) - paddings.hMargin );
         }
 
         // Name is not needed, does not give context or reference
@@ -919,7 +938,7 @@ public:
           painter->restore();
         }
 
-        rect.setY(rect.y() + kLineSpacing + kVerticalMargin);
+        rect.setY(rect.y() + paddings.lineSpacing + paddings.vMargin);
 
         // Draw id.
         QString id = commit.shortId();
@@ -935,7 +954,7 @@ public:
           Badge::paint(painter, refs, refsRect, &opt);
         }
 
-        rect.setY(rect.y() + kLineSpacing + kVerticalMargin);
+        rect.setY(rect.y() + paddings.lineSpacing + paddings.vMargin);
 
         // Divide remaining rectangle.
         star = rect;
@@ -958,7 +977,7 @@ public:
           painter->drawText(text, Qt::AlignLeft, msg.left(len));
 
           if (len < msg.length()) {
-            text.setY(text.y() + kLineSpacing);
+            text.setY(text.y() + paddings.lineSpacing);
             QString elided = fm.elidedText(msg.mid(len), Qt::ElideRight, width);
             painter->drawText(text, Qt::AlignLeft, elided);
           }
@@ -977,7 +996,7 @@ public:
         painter->save();
 
         // Calculate outer radius and vertices.
-        qreal r = (star.height() / 2.0) - kStarPadding;
+        qreal r = (star.height() / 2.0) - paddings.starPadding;
         qreal x = star.x() + (star.width() / 2.0);
         qreal y = star.y() + (star.height() / 2.0);
         qreal x1 = r * qCos(M_PI / 10.0);
@@ -1046,11 +1065,8 @@ public:
     const QModelIndex &index) const override
   {
     bool compact = mRepo.appConfig().value<bool>("commit.compact", false);
-    // Has side effects on paint (intended...)
-    kStarPadding = (compact) ? 7 : 8;
-    kLineSpacing = (compact) ? 23 : 16;
-    kVerticalMargin = (compact) ? 5 : 2;
-    int verticalSize = kLineSpacing + kVerticalMargin;
+    RowPadding paddings = getPadding();
+    int verticalSize = paddings.lineSpacing + paddings.vMargin;
     if (!compact) verticalSize = verticalSize * 4;
     return QSize(0, verticalSize);
   }
@@ -1072,11 +1088,12 @@ public:
     const QModelIndex &index) const
   {
     QRect rect = option.rect;
-    int length = kLineSpacing * 2;
+    RowPadding paddings = getPadding();
+    int length = paddings.lineSpacing * 2;
     rect.setX(rect.x() + rect.width() - length);
     rect.setY(rect.y() + rect.height() - length);
-    rect.setWidth(rect.width() - kStarPadding);
-    rect.setHeight(rect.height() - kStarPadding);
+    rect.setWidth(rect.width() - paddings.starPadding);
+    rect.setHeight(rect.height() - paddings.starPadding);
     return rect;
   }
 
