@@ -59,14 +59,25 @@ private:
   static int paintRight(QPainter *painter,
     const QList<Label> &labels,
     const QRect &rect,
-    QStyleOption *opt,
-    BadgeAlignment alignment);
+     const QFont font,
+    bool selected,
+    bool active);
 
   static int paintLeft(QPainter *painter,
     const QList<Label> &labels,
     const QRect &rect,
-    QStyleOption *opt,
-    BadgeAlignment alignment);
+    const QFont font,
+    bool selected,
+    bool active);
+
+  static void paintBadge(
+    QPainter *painter,
+    bool selected,
+    bool active,
+    Label label,
+    QRect labelRect,
+    const QFont font
+  );
 };
 
 #endif
