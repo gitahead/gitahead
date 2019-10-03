@@ -34,7 +34,7 @@
 #include <QRegularExpression>
 #include <QStackedWidget>
 #include <QStyle>
-#include <QTextEdit>
+#include <QPlainTextEdit>
 #include <QToolButton>
 #include <QUrl>
 #include <QVBoxLayout>
@@ -62,11 +62,11 @@ QString brightText(const QString &text)
   return kAltFmt.arg(QPalette().color(QPalette::BrightText).name(), text);
 }
 
-class MessageLabel : public QTextEdit
+class MessageLabel : public QPlainTextEdit
 {
 public:
   MessageLabel(QWidget *parent = nullptr)
-    : QTextEdit(parent)
+    : QPlainTextEdit(parent)
   {
     setObjectName("MessageLabel");
     setFrameShape(QFrame::NoFrame);
@@ -83,14 +83,14 @@ public:
 protected:
   QSize minimumSizeHint() const override
   {
-    QSize size = QTextEdit::minimumSizeHint();
+    QSize size = QPlainTextEdit::minimumSizeHint();
     return QSize(size.width(), fontMetrics().lineSpacing());
   }
 
   QSize viewportSizeHint() const override
   {
     // Choose the smaller of the height of the document or five lines.
-    QSize size = QTextEdit::viewportSizeHint();
+    QSize size = QPlainTextEdit::viewportSizeHint();
     int height = document()->documentLayout()->documentSize().height();
     return QSize(size.width(), qMin(height, 5 * fontMetrics().lineSpacing()));
   }
@@ -248,7 +248,7 @@ public:
     mSeparator->setFrameShape(QFrame::HLine);
 
     mMessage = new MessageLabel(this);
-    connect(mMessage, &QTextEdit::copyAvailable,
+    connect(mMessage, &QPlainTextEdit::copyAvailable,
             MenuBar::instance(this), &MenuBar::updateCutCopyPaste);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -445,7 +445,7 @@ private:
   QLabel *mParents;
   QLabel *mPicture;
   QFrame *mSeparator;
-  QTextEdit *mMessage;
+  QPlainTextEdit *mMessage;
   AuthorDate *mAuthorDate;
 
   QString mId;
@@ -470,10 +470,10 @@ public:
     labelLayout->addStretch();
     labelLayout->addWidget(mStatus);
 
-    mMessage = new QTextEdit(this);
+    mMessage = new QPlainTextEdit(this);
     mMessage->setObjectName("MessageEditor");
     mMessage->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
-    connect(mMessage, &QTextEdit::textChanged, [this] {
+    connect(mMessage, &QPlainTextEdit::textChanged, [this] {
       mPopulate = false;
 
       bool empty = mMessage->toPlainText().isEmpty();
@@ -486,11 +486,11 @@ public:
 
     // Update menu items.
     MenuBar *menuBar = MenuBar::instance(this);
-    connect(mMessage, &QTextEdit::undoAvailable,
+    connect(mMessage, &QPlainTextEdit::undoAvailable,
             menuBar, &MenuBar::updateUndoRedo);
-    connect(mMessage, &QTextEdit::redoAvailable,
+    connect(mMessage, &QPlainTextEdit::redoAvailable,
             menuBar, &MenuBar::updateUndoRedo);
-    connect(mMessage, &QTextEdit::copyAvailable,
+    connect(mMessage, &QPlainTextEdit::copyAvailable,
             menuBar, &MenuBar::updateCutCopyPaste);
 
     QVBoxLayout *messageLayout = new QVBoxLayout;
@@ -697,7 +697,7 @@ private:
   git::Diff mDiff;
 
   QLabel *mStatus;
-  QTextEdit *mMessage;
+  QPlainTextEdit *mMessage;
   QPushButton *mStage;
   QPushButton *mUnstage;
   QPushButton *mCommit;
