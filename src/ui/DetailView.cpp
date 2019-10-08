@@ -471,6 +471,7 @@ public:
     labelLayout->addWidget(mStatus);
 
     mMessage = new QTextEdit(this);
+    mMessage->setAcceptRichText(false);
     mMessage->setObjectName("MessageEditor");
     mMessage->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     connect(mMessage, &QTextEdit::textChanged, [this] {
