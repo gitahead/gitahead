@@ -253,7 +253,7 @@ bool Application::restoreWindows()
     // Check for command line repo.
     QString arg = mPositionalArguments.first();
     if (QFileInfo(arg).isAbsolute()) {
-      dir = arg;
+      dir.setPath(arg);
     } else {
       dir.cd(arg);
     }
