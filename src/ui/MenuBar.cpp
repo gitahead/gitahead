@@ -633,7 +633,9 @@ MenuBar::MenuBar(QWidget *parent)
   QString name = QCoreApplication::applicationName();
   QAction *about = help->addAction(tr("About %1").arg(name));
   about->setMenuRole(QAction::AboutRole);
-  connect(about, &QAction::triggered, &AboutDialog::openSharedInstance);
+  connect(about, &QAction::triggered, [] {
+    AboutDialog::openSharedInstance();
+  });
 
   QAction *update = help->addAction(tr("Check For Updates..."));
   update->setMenuRole(QAction::ApplicationSpecificRole);

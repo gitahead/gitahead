@@ -48,7 +48,7 @@ public:
   bool isWhitespaceIgnored() const;
   void setWhitespaceIgnored(bool ignored);
 
-  // Last repository path
+  // last repository path
   QString lastPath() const;
   void setLastPath(const QString &lastPath);
 
