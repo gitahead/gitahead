@@ -38,11 +38,12 @@ const QString kSubtitleFmt =
   "<h4 style='margin-top: 0px; color: gray'>%2</h4>";
 
 const QString kTextFmt =
-  "<p style='white-space: nowrap'><b style='font-size: large'>%1 v%2</b> - %3 - %4<br>"
-  "Copyright © 2016-2019 Scientific Toolworks, Inc. All rights reserved.</p>"
-  "<p> If you have a question that might benefit the community, consider "
-  "asking it on <a href='%5'>Stack Overflow</a> by including 'gitahead' in the "
-  "tags. Otherwise, contact us at <a href='mailto:%6'>%6</a>";
+  "<p style='white-space: nowrap'><b style='font-size: large'>%1 v%2</b> "
+  "- %3 - %4<br>Copyright © 2016-2019 Scientific Toolworks, Inc. and "
+  "contributors</p><p> If you have a question that might benefit the "
+  "community, consider asking it on <a href='%5'>Stack Overflow</a> by "
+  "including 'gitahead' in the tags. Otherwise, contact us at "
+  "<a href='mailto:%6'>%6</a>";
 
 const QString kStyleSheet =
   "h3 {"
