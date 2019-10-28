@@ -94,6 +94,7 @@ void PluginsPanel::refresh()
 
           case Plugin::Integer: {
             QSpinBox *spinBox = new QSpinBox(&dialog);
+            spinBox->setMaximum(999);
             spinBox->setValue(value.toInt());
             auto signal = QOverload<int>::of(&QSpinBox::valueChanged);
             connect(spinBox, signal, [plugin, key](int value) {
