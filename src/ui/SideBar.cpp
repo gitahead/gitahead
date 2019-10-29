@@ -31,6 +31,8 @@
 
 namespace {
 
+const QString kRemoteExpandedGroup = "remote/expanded";
+
 const QString kStyleSheet =
   "QTreeView {"
 #ifdef Q_OS_MAC
@@ -548,6 +550,48 @@ bool isRepoIndex(const QModelIndex &index)
           parent.row() == RepoModel::Repo);
 }
 
+bool isRemoteIndex(const QModelIndex &index)
+{
+  QModelIndex parent = index.parent();
+  return (parent.isValid() && !parent.parent().isValid() &&
+          parent.row() == RepoModel::Remote);
+}
+
+void storeExpansionState(QTreeView *view)
+{
+  QSettings settings;
+  settings.beginGroup(kRemoteExpandedGroup);
+
+  QAbstractItemModel *model = view->model();
+  QModelIndex remote = model->index(RepoModel::Remote, 0);
+  for (int i = 0; i < model->rowCount(remote); ++i) {
+    QModelIndex index = model->index(i, 0, remote);
+    QString key = index.data(Qt::DisplayRole).toString();
+    settings.setValue(key, view->isExpanded(index));
+  }
+
+  settings.endGroup();
+}
+
+void restoreExpansionState(QTreeView *view)
+{
+  QAbstractItemModel *model = view->model();
+  for (int i = 0; i < model->rowCount(); ++i)
+    view->expand(model->index(i, 0));
+
+  QSettings settings;
+  settings.beginGroup(kRemoteExpandedGroup);
+
+  QModelIndex remote = model->index(RepoModel::Remote, 0);
+  for (int i = 0; i < model->rowCount(remote); ++i) {
+    QModelIndex index = model->index(i, 0, remote);
+    QString key = index.data(Qt::DisplayRole).toString();
+    view->setExpanded(index, settings.value(key, true).toBool());
+  }
+
+  settings.endGroup();
+}
+
 } // anon. namespace
 
 SideBar::SideBar(TabWidget *tabs, QWidget *parent)
@@ -573,11 +617,21 @@ SideBar::SideBar(TabWidget *tabs, QWidget *parent)
   connect(model, &RepoModel::modelReset, view, [view, model] {
     QCoreApplication::processEvents();
     view->setCurrentIndex(model->currentIndex());
-    view->expandAll();
+    restoreExpansionState(view);
   }, Qt::QueuedConnection);
 
   connect(tabs, &TabWidget::currentChanged, view, [view, model] {
     view->setCurrentIndex(model->currentIndex());
+  });
+
+  // Store expansion state when it changes.
+  connect(view, &QTreeView::collapsed, [view](const QModelIndex &index) {
+    if (isRemoteIndex(index))
+      storeExpansionState(view);
+  });
+  connect(view, &QTreeView::expanded, [view](const QModelIndex &index) {
+    if (isRemoteIndex(index))
+      storeExpansionState(view);
   });
 
   connect(view, &QTreeView::clicked, [tabs](const QModelIndex &index) {
