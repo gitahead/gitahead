@@ -43,6 +43,28 @@ const QString kSidebarKey = "sidebar";
 const QString kGeometryKey = "geometry";
 const QString kWindowsGroup = "windows";
 
+class TabName
+{
+public:
+  TabName(const QString &path)
+    : mPath(path)
+  {}
+
+  QString name() const
+  {
+    return mPath.section('/', -mSections);
+  }
+
+  void increment()
+  {
+    ++mSections;
+  }
+
+private:
+  QString mPath;
+  int mSections = 1;
+};
+
 } // anon. namespace
 
 bool MainWindow::sExiting = false;
@@ -111,6 +133,11 @@ MainWindow::MainWindow(
     updateInterface();
     MenuBar::instance(this)->update();
   });
+
+  connect(tabs, QOverload<>::of(&TabWidget::tabInserted),
+          this, &MainWindow::updateTabNames);
+  connect(tabs, QOverload<>::of(&TabWidget::tabRemoved),
+          this, &MainWindow::updateTabNames);
 
   splitter->addWidget(new SideBar(tabs, splitter));
   splitter->addWidget(tabs);
@@ -457,6 +484,29 @@ void MainWindow::warnInvalidRepo(const QString &path)
   QString title = tr("Invalid Git Repository");
   QString text = tr("%1 does not contain a valid git repository.");
   QMessageBox::warning(nullptr, title, text.arg(path));
+}
+
+void MainWindow::updateTabNames()
+{
+  QList<TabName> names;
+  for (int i = 0; i < count(); ++i) {
+    TabName name(view(i)->repo().workdir().path());
+    auto functor = [&name](const TabName &rhs) {
+      return (name.name() == rhs.name());
+    };
+
+    QList<TabName>::iterator it, end = names.end();
+    while ((it = std::find_if(names.begin(), end, functor)) != end) {
+      it->increment();
+      name.increment();
+    }
+
+    names.append(name);
+  }
+
+  TabWidget *tabs = tabWidget();
+  for (int i = 0; i < count(); ++i)
+    tabs->setTabText(i, names.at(i).name());
 }
 
 void MainWindow::updateInterface()
