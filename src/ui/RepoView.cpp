@@ -950,6 +950,24 @@ void RepoView::startFetchTimer()
   mFetchTimer.start(config.value<int>("autofetch.minutes", minutes) * 60 * 1000);
 }
 
+void RepoView::fetchAll()
+{
+  QList<git::Remote> remotes = mRepo.remotes();
+  if (remotes.isEmpty())
+    return;
+
+  if (remotes.size() == 1) {
+    fetch();
+    return;
+  }
+
+  // Queue up all remotes to fetch them serially.
+  QString text = tr("%1 remotes").arg(remotes.size());
+  LogEntry *entry = addLogEntry(text, tr("Fetch All"));
+  foreach (const git::Remote &remote, remotes)
+    fetch(remote, false, true, entry);
+}
+
 QFuture<git::Result> RepoView::fetch(
   const git::Remote &rmt,
   bool tags,

@@ -397,6 +397,12 @@ MenuBar::MenuBar(QWidget *parent)
     view()->fetch();
   });
 
+  mFetchAll = remote->addAction(tr("Fetch All"));
+  mFetchAll->setShortcut(tr("Ctrl+Shift+Alt+A"));
+  connect(mFetchAll, &QAction::triggered, [this] {
+    view()->fetchAll();
+  });
+
   mFetchFrom = remote->addAction(tr("Fetch From..."));
   mFetchFrom->setShortcut(tr("Ctrl+Shift+F"));
   connect(mFetchFrom, &QAction::triggered, [this] {

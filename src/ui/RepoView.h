@@ -153,6 +153,7 @@ public:
   void startFetchTimer();
 
   // fetch
+  void fetchAll();
   QFuture<git::Result> fetch(
     const git::Remote &remote = git::Remote(),
     bool tags = false,
