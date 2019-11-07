@@ -601,6 +601,30 @@ public:
   }
 };
 
+class MiscPanel : public QWidget
+{
+public:
+  MiscPanel(QWidget *parent = nullptr)
+    : QWidget(parent)
+  {
+    Settings *settings = Settings::instance();
+
+    QLineEdit *sshConfigPathBox = new QLineEdit(settings->value("ssh/configFilePath").toString(), this);
+    connect(sshConfigPathBox, &QLineEdit::textChanged, [](const QString &text) {
+      Settings::instance()->setValue("ssh/configFilePath", text);
+    });
+
+    QLineEdit *sshKeyPathBox = new QLineEdit(settings->value("ssh/keyFilePath").toString(), this);
+    connect(sshKeyPathBox, &QLineEdit::textChanged, [](const QString &text) {
+      Settings::instance()->setValue("ssh/keyFilePath", text);
+    });
+
+    QFormLayout *layout = new QFormLayout(this);
+    layout->addRow(tr("Path to SSH config file:"), sshConfigPathBox);
+    layout->addRow(tr("Path to default / fallback SSH key file:"), sshKeyPathBox);
+  }
+};
+
 #ifdef Q_OS_UNIX
 class TerminalPanel : public QWidget
 {
@@ -799,6 +823,14 @@ SettingsDialog::SettingsDialog(Index index, QWidget *parent)
 
   stack->addWidget(new TerminalPanel(this));
 #endif
+
+  // Add misc panel.
+  QAction *misc = toolbar->addAction(QIcon(":/misc.png"), tr("Misc"));
+  misc->setData(Misc);
+  misc->setActionGroup(actions);
+  misc->setCheckable(true);
+
+  stack->addWidget(new MiscPanel(this));
 
   // Hook up edit button.
   connect(edit, &QPushButton::clicked, stack, [stack] {
