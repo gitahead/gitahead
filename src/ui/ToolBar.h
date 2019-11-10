@@ -54,6 +54,7 @@ private:
 
   QToolButton *mPullRequestButton = nullptr;
 
+  QToolButton *mTerminalButton;
   QToolButton *mConfigButton;
   QToolButton *mLogButton;
   const QButtonGroup *mModeGroup;

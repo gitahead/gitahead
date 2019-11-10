@@ -723,6 +723,41 @@ private:
   QButtonGroup mButtons;
 };
 
+class TerminalButton : public Button
+{
+public:
+  TerminalButton(QWidget *parent = nullptr)
+    : Button(parent)
+  {}
+
+  void paintEvent(QPaintEvent *event)
+  {
+    Button::paintEvent(event);
+
+    QStyleOptionToolButton opt;
+    initStyleOption(&opt);
+
+    QColor color = opt.palette.buttonText().color();
+    QColor light = (isEnabled() && isActiveWindow()) ? color.lighter() : color;
+
+    QPainter painter(this);
+    painter.setPen(QPen(color, 1.0));
+    if (window()->windowHandle()->devicePixelRatio() > 1.0)
+      painter.setRenderHint(QPainter::Antialiasing);
+
+    qreal x = width() / 2.0;
+    qreal y = height() / 2.0;
+
+    painter.drawRect(QRectF(x - 8, y - 7, 16, 13));
+
+    painter.setPen(QPen(light, 1.0));
+    painter.drawLine(QLineF(x - 6, y - 5, x - 4, y - 3));
+    painter.drawLine(QLineF(x - 6, y - 1, x - 4, y - 3));
+
+    painter.drawLine(QLineF(x - 2, y - 1, x, y - 1));
+  }
+};
+
 } // anon. namespace
 
 ToolBar::ToolBar(MainWindow *parent)
@@ -864,6 +899,15 @@ ToolBar::ToolBar(MainWindow *parent)
 
   addWidget(new Spacer(-1, this));
 
+  mTerminalButton = new TerminalButton(this);
+  mTerminalButton->setToolTip(tr("Open Terminal"));
+  addWidget(mTerminalButton);
+  connect(mTerminalButton, &Button::clicked, [this] {
+    currentView()->openTerminal();
+  });
+
+  addWidget(new Spacer(4, this));
+
   mConfigButton = new SettingsButton(this);
   mConfigButton->setToolTip(tr("Configure Settings"));
   addWidget(mConfigButton);
@@ -992,6 +1036,7 @@ void ToolBar::updateStash()
 void ToolBar::updateView()
 {
   RepoView *view = currentView();
+  mTerminalButton->setEnabled(view);
   mConfigButton->setEnabled(view);
   mLogButton->setEnabled(view);
   mModeGroup->button(RepoView::Diff)->setEnabled(view);

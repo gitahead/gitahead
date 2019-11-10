@@ -2308,6 +2308,58 @@ ConfigDialog *RepoView::configureSettings(ConfigDialog::Index index)
   return dialog;
 }
 
+#include <iostream>
+void RepoView::openTerminal()
+{
+  QString terminalCmd = Settings::instance()->value("terminal/command").toString();
+
+  if (terminalCmd.isEmpty()) {
+#if defined(Q_OS_WIN)
+    // TODO
+
+#elif defined(Q_OS_MACOS)
+    // TODO
+
+#elif defined(Q_OS_UNIX)
+    static QString detectedTerminal = nullptr;
+    static const char *candidates[] = {
+      "x-terminal-emulator",
+      "xdg-terminal",
+      "i3-sensible-terminal",
+      "gnome-terminal",
+      "konsole",
+      "xterm",
+      nullptr
+    };
+
+    if (detectedTerminal.isNull()) {
+      detectedTerminal = "";
+
+      for (const char **candidate = candidates; *candidate; ++candidate) {
+        QString exePath = QStandardPaths::findExecutable(*candidate);
+
+        if (!exePath.isEmpty()) {
+          detectedTerminal = '"' + exePath.replace("\\", "\\\\").replace("\"", "\\\"") + '"';
+          break;
+        }
+      }
+    }
+
+    terminalCmd = detectedTerminal;
+#endif
+  }
+
+#if defined(Q_OS_WIN)
+  // TODO
+#elif defined(Q_OS_UNIX)
+  QProcess child;
+  child.setProgram("sh");
+  child.setArguments(QStringList() << "-c" << terminalCmd);
+  child.setWorkingDirectory(mRepo.workdir().absolutePath());
+  child.startDetached();
+#endif
+}
+
 void RepoView::ignore(const QString &name)
 {
   QFile file(mRepo.workdir().filePath(".gitignore"));

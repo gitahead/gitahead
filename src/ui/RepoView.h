@@ -268,6 +268,9 @@ public:
   ConfigDialog *configureSettings(
     ConfigDialog::Index index = ConfigDialog::General);
 
+  // terminal
+  void openTerminal();
+
   // ignore
   void ignore(const QString &name);
 
