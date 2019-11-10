@@ -665,6 +665,7 @@ private:
 SettingsDialog::SettingsDialog(Index index, QWidget *parent)
   : QMainWindow(parent)
 {
+  setWindowFlag(Qt::Dialog);
   setMinimumWidth(500);
   setAttribute(Qt::WA_DeleteOnClose);
   setUnifiedTitleAndToolBarOnMac(true);
