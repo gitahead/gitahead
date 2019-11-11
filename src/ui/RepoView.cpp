@@ -56,6 +56,11 @@
 #include <QVBoxLayout>
 #include <QtConcurrent>
 
+#if defined(Q_OS_WIN)
+#include <Windows.h>
+#include <memory>
+#endif
+
 namespace {
 
 const QString kSplitterKey = "splitter";
@@ -2315,7 +2320,47 @@ void RepoView::openTerminal()
 
   if (terminalCmd.isEmpty()) {
 #if defined(Q_OS_WIN)
-    // TODO
+    static QString detectedTerminal = nullptr;
+
+    if (detectedTerminal.isNull()) {
+      detectedTerminal = "";
+
+      QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+      QString programFilesDir = env.value("PROGRAMFILES");
+      QString programFiles32Dir = env.value("PROGRAMFILES(x86)");
+
+      QStringList candidates;
+
+      candidates.append("git-bash");
+      if (!programFilesDir.isEmpty())
+        candidates.append(programFilesDir + "/Git/git-bash.exe");
+      if (!programFiles32Dir.isEmpty())
+        candidates.append(programFiles32Dir + "/Git/git-bash.exe");
+      if (!programFilesDir.isEmpty())
+        candidates.append(programFilesDir + "/Git/bin/bash.exe");
+      if (!programFiles32Dir.isEmpty())
+        candidates.append(programFiles32Dir + "/Git/bin/bash.exe");
+      candidates.append("cmd");
+
+      for (QString candidate : candidates) {
+        QString exePath;
+
+        if (QDir::isAbsolutePath(candidate)) {
+          if (QFile::exists(candidate))
+            exePath = candidate;
+
+        } else {
+          exePath = QStandardPaths::findExecutable(candidate);
+        }
+
+        if (!exePath.isEmpty()) {
+          detectedTerminal = '"' + QDir::toNativeSeparators(exePath.replace("\"", "\"\"")) + '"';
+          break;
+        }
+      }
+    }
+
+    terminalCmd = detectedTerminal;
 
 #elif defined(Q_OS_MACOS)
     // TODO
@@ -2349,8 +2394,42 @@ void RepoView::openTerminal()
 #endif
   }
 
+  if (terminalCmd.isEmpty())
+    return;
+
 #if defined(Q_OS_WIN)
-  // TODO
+  // No direct method of QProcess can take a raw command line and a working directory
+  // So we call CreateProcessW() directly
+
+  std::unique_ptr<wchar_t[]> cmdBuffer(new wchar_t[terminalCmd.length() + 1]);
+  int len = terminalCmd.toWCharArray(cmdBuffer.get());
+  cmdBuffer[len] = L'\0';
+
+  STARTUPINFOW startupInfo;
+  PROCESS_INFORMATION processInfo;
+
+  ZeroMemory(&startupInfo, sizeof(STARTUPINFOW));
+  ZeroMemory(&processInfo, sizeof(PROCESS_INFORMATION));
+
+  bool success = CreateProcessW(
+    nullptr,
+    cmdBuffer.get(),
+    nullptr,
+    nullptr,
+    FALSE,
+    CREATE_NEW_CONSOLE,
+    nullptr,
+    (LPCWSTR) QDir::toNativeSeparators(mRepo.workdir().absolutePath()).utf16(),
+    &startupInfo,
+    &processInfo
+  );
+
+  if(!success)
+    return;
+
+  CloseHandle(processInfo.hProcess);
+  CloseHandle(processInfo.hThread);
+
 #elif defined(Q_OS_UNIX)
   QProcess child;
   child.setProgram("sh");
