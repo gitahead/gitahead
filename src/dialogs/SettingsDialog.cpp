@@ -814,6 +814,14 @@ SettingsDialog::SettingsDialog(Index index, QWidget *parent)
 
   stack->addWidget(new PluginsPanel(git::Repository(), this));
 
+  // Add misc panel.
+  QAction *misc = toolbar->addAction(QIcon(":/misc.png"), tr("Misc"));
+  misc->setData(Misc);
+  misc->setActionGroup(actions);
+  misc->setCheckable(true);
+
+  stack->addWidget(new MiscPanel(this));
+
 #ifdef Q_OS_UNIX
   // Add terminal panel.
   QAction *terminal = toolbar->addAction(QIcon(":/terminal.png"), tr("Terminal"));
@@ -823,14 +831,6 @@ SettingsDialog::SettingsDialog(Index index, QWidget *parent)
 
   stack->addWidget(new TerminalPanel(this));
 #endif
-
-  // Add misc panel.
-  QAction *misc = toolbar->addAction(QIcon(":/misc.png"), tr("Misc"));
-  misc->setData(Misc);
-  misc->setActionGroup(actions);
-  misc->setCheckable(true);
-
-  stack->addWidget(new MiscPanel(this));
 
   // Hook up edit button.
   connect(edit, &QPushButton::clicked, stack, [stack] {

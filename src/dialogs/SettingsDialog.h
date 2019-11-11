@@ -24,8 +24,8 @@ public:
     Editor,
     Update,
     Plugins,
-    Terminal,
-    Misc
+    Misc,
+    Terminal
   };
 
   SettingsDialog(Index index, QWidget *parent = nullptr);
