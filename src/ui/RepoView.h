@@ -202,13 +202,15 @@ public:
 
   // push
   void promptToForcePush();
+  void promptToForceWithLeasePush();
   void push(
     const git::Remote &remote = git::Remote(),
     const git::Reference &src = git::Reference(),
     const QString &dst = QString(),
     bool setUpstream = false,
     bool force = false,
-    bool tags = false);
+    bool tags = false,
+    bool force_with_lease = false);
 
   // commit
   bool commit(

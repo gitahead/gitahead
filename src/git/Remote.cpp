@@ -527,10 +527,18 @@ Result Remote::push(
   const Reference &src,
   const QString &dst,
   bool force,
-  bool tags)
+  bool tags,
+  bool force_with_lease)
 {
   Repository repo(git_remote_owner(d.data()));
-  QString prefix = force ? "+" : QString();
+  if (force) {
+      // Equivalent to --force
+      QString prefix = "+";
+  } else if (force_with_lease) {
+      QString prefix = "--force-with-lease ";
+  } else {
+      QString prefix = QString();
+  }
   QString refspec = prefix + src.qualifiedName();
   if (!dst.isEmpty()) {
     refspec += ":" + dst;

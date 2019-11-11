@@ -184,7 +184,8 @@ public:
     const Reference &src,
     const QString &dst = QString(),
     bool force = false,
-    bool tags = false);
+    bool tags = false,
+    bool force_with_lease = false);
 
   // Cancel the current operation.
   void stop();

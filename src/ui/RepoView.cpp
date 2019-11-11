@@ -632,12 +632,13 @@ void RepoView::visitLink(const QString &link)
   if (action == "push") {
     if (query.queryItemValue("force") == "true") {
       promptToForcePush();
+    } else if (query.queryItemValue("force_with_lease") == "true") {
+      promptToForceWithLeasePush();
     } else {
       git::Reference ref = mRepo.lookupRef(query.queryItemValue("ref"));
       bool setUpstream = query.queryItemValue("set-upstream") == "true";
       push(git::Remote(), ref, QString(), setUpstream);
     }
-
     return;
   }
 
@@ -1573,19 +1574,46 @@ void RepoView::promptToForcePush()
   dialog->open();
 }
 
+void RepoView::promptToForceWithLeasePush()
+{
+    // FIXME: Check if force is really required?
+
+    QString title = tr("Force With Lease Push?");
+    QString text = tr("Are you sure you want to force with lease push?");
+    QMessageBox *dialog =
+            new QMessageBox(QMessageBox::Warning, title, text, QMessageBox::Cancel, this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+
+    dialog->setInformativeText(
+            tr("The remote will lose any commits that are reachable only from "
+               "the overwritten reference. Dropped commits may be unexpectedly "
+               "reintroduced by clones that already contain those commits locally."
+               "The push will fail if the remote contains any new commits."
+               "That is a safer force push option."));
+
+    QPushButton *accept =
+            dialog->addButton(tr("Force With Lease Push"), QMessageBox::AcceptRole);
+    connect(accept, &QPushButton::clicked, [this] {
+        push(git::Remote(), git::Reference(), QString(), false, false, true);
+    });
+
+    dialog->open();
+}
+
 void RepoView::push(
   const git::Remote &rmt,
   const git::Reference &src,
   const QString &dst,
   bool setUpstream,
   bool force,
-  bool tags)
+  bool tags,
+  bool force_with_lease)
 {
   if (mWatcher) {
     // Queue push.
     connect(mWatcher, &QFutureWatcher<git::Result>::finished, mWatcher,
-    [this, rmt, src, dst, setUpstream, force, tags] {
-      push(rmt, src, dst, setUpstream, force, tags);
+    [this, rmt, src, dst, setUpstream, force, tags, force_with_lease] {
+      push(rmt, src, dst, setUpstream, force, tags, force_with_lease);
     });
 
     return;
@@ -1603,7 +1631,13 @@ void RepoView::push(
   if (upstreamRemote && upstreamRemote.name() != remote.name())
     upstream = git::Branch();
 
-  QString title = !force ? tr("Push") : tr("Push (Force)");
+  if (force) {
+      QString title = tr("Push (Force)");
+  } else if (force_with_lease) {
+      QString title = tr("Push (Force with lease)");
+  } else {
+      QString title = tr("Push");
+  }
   QString text = tr("%1 to %2").arg(refName, name);
   LogEntry *entry = addLogEntry(text, title);
 
@@ -1683,7 +1717,7 @@ void RepoView::push(
           "<a href='action:push'>push</a> again.");
         QString hint2 =
           tr("If you really want the remote to lose commits, you may "
-          "be able to <a href='action:push?force=true'>force push</a>.");
+          "be able to <a href='action:push?force=true'>force push</a> or <a href='action:push?force_with_lease=true'>force_with_lease push (safer)</a>.");
         errorEntry->addEntry(LogEntry::Hint, hint1);
         errorEntry->addEntry(LogEntry::Warning, hint2);
       }
@@ -1716,7 +1750,7 @@ void RepoView::push(
 
   entry->setBusy(true);
   mWatcher->setFuture(QtConcurrent::run(
-    remote, &git::Remote::push, mCallbacks, ref, dst, force, tags));
+    remote, &git::Remote::push, mCallbacks, ref, dst, force, tags, force_with_lease));
 }
 
 bool RepoView::commit(
