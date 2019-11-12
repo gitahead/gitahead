@@ -2313,7 +2313,6 @@ ConfigDialog *RepoView::configureSettings(ConfigDialog::Index index)
   return dialog;
 }
 
-#include <iostream>
 void RepoView::openTerminal()
 {
   QString terminalCmd = Settings::instance()->value("terminal/command").toString();
