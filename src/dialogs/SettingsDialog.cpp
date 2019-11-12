@@ -126,6 +126,8 @@ public:
       AboutDialog::openSharedInstance(AboutDialog::Privacy);
     });
 
+    mFileManagerCommand = new QLineEdit(this);
+
     QFormLayout *form = new QFormLayout;
     form->addRow(tr("User name:"), mName);
     form->addRow(tr("User email:"), mEmail);
@@ -136,6 +138,7 @@ public:
     form->addRow(tr("Credentials:"), mStoreCredentials);
     form->addRow(tr("Usage reporting:"), mUsageReporting);
     form->addRow(QString(), privacy);
+    form->addRow(tr("File manager command:"), mFileManagerCommand);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(16,12,16,12);
@@ -185,6 +188,10 @@ public:
     connect(mUsageReporting, &QCheckBox::toggled, [](bool checked) {
       Settings::instance()->setValue("tracking/enabled", checked);
     });
+
+    connect(mFileManagerCommand, &QLineEdit::textChanged, [](const QString &text) {
+      Settings::instance()->setValue("filemanager/command", text);
+    });
   }
 
   void init()
@@ -207,6 +214,8 @@ public:
 
     mStoreCredentials->setChecked(settings->value("credential/store").toBool());
     mUsageReporting->setChecked(settings->value("tracking/enabled").toBool());
+
+    mFileManagerCommand->setText(settings->value("filemanager/command").toString());
   }
 
 private:
@@ -220,6 +229,8 @@ private:
   QCheckBox *mAutoPrune;
   QCheckBox *mStoreCredentials;
   QCheckBox *mUsageReporting;
+
+  QLineEdit *mFileManagerCommand;
 };
 
 class ToolsPanel : public QWidget
