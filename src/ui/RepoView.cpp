@@ -2375,7 +2375,6 @@ ConfigDialog *RepoView::configureSettings(ConfigDialog::Index index)
   return dialog;
 }
 
-#include <Windows.h>
 void RepoView::openFileManager()
 {
   QString fileManagerCmd = Settings::instance()->value("filemanager/command").toString();
