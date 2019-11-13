@@ -89,6 +89,21 @@ QString Reference::name() const
   return git_reference_shorthand(d.data());
 }
 
+QString Reference::shortName() const
+{
+  if (isBranch()) {
+    const char *name = nullptr;
+    return !git_branch_name(&name, d.data()) ? name : QString();
+  }
+
+  Commit commit = target();
+  if (isDetachedHead() && commit.isValid())
+    return commit.detachedHeadName();
+
+  // Get shorthand.
+  return git_reference_shorthand(d.data());
+}
+
 QString Reference::qualifiedName() const
 {
   return git_reference_name(d.data());

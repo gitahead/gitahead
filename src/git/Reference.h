@@ -43,6 +43,7 @@ public:
   bool isStash() const;
 
   QString name() const;
+  QString shortName() const;
   QString qualifiedName() const;
 
   // Create a walker over the referenced commit.

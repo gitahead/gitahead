@@ -1144,16 +1144,17 @@ void RepoView::merge(
   git::AnnotatedCommit upstream;
   QString upstreamName = tr("<i>no upstream</i>");
 
-  git::Branch head = mRepo.head();
+  git::Reference head = mRepo.head();
   if (commit.isValid()){
     upstream = commit;
     upstreamName = commit.commit().link();
   } else if (ref.isValid()) {
     upstream = ref.annotatedCommit();
     upstreamName = ref.name();
-  } else if (head.isValid()) {
-    upstream = head.annotatedCommitFromFetchHead();
-    git::Branch up = head.upstream();
+  } else if (head.isValid() && head.isBranch()) {
+    git::Branch headBranch = head;
+    upstream = headBranch.annotatedCommitFromFetchHead();
+    git::Branch up = headBranch.upstream();
     if (up.isValid())
       upstreamName = up.name();
   }
@@ -1225,7 +1226,7 @@ void RepoView::fastForward(
   LogEntry *parent,
   const std::function<void()> &callback)
 {
-  git::Branch head = mRepo.head();
+  git::Reference head = mRepo.head();
   Q_ASSERT(head.isValid());
 
   git::Commit commit = upstream.commit();
@@ -1275,7 +1276,7 @@ void RepoView::merge(
   LogEntry *parent,
   const std::function<void()> &callback)
 {
-  git::Branch head = mRepo.head();
+  git::Reference head = mRepo.head();
   Q_ASSERT(head.isValid());
 
   // Try to merge.
