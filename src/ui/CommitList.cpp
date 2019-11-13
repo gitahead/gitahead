@@ -841,7 +841,7 @@ public:
       QRect star = rect;
 
       if (compactMode) {
-        int maxWidthRefs = (int)(rect.width() * 0.5); // Max 30% of the 
+        int maxWidthRefs = (int)(rect.width() * 0.5); // Max  50%
         const int minWidthRefs = 50; // At least display The ellipsis
         const int minWidthRequestDesc = 100;
         int minDisplayWidthDate = 350;
@@ -853,14 +853,12 @@ public:
         star.setX(star.x() + star.width() - star.height());
         star.setY(star.y() - paddings.vMargin);
 
-        // maybe..maybe?? not needed in compact mode?
-        // can't really remove it, at least it 
-        // needs to be an option
+        // Commit ref
         QString id = commit.shortId();
         QRect box = rect;
         box.setWidth(box.width() - star.width());
         // Using the biggest theoretical width
-        int idWidth = fm.horizontalAdvance("9999999");
+        int idWidth = fm.horizontalAdvance("bbbbbbb");
         QRect commitBox = box;
         commitBox.setX(commitBox.x() + commitBox.width() - idWidth);
         painter->save();
@@ -1099,7 +1097,7 @@ protected:
 
 private:
    bool drawTimeStamp(const QModelIndex index) const {
-      if (!index.parent().isValid()) { //Always Return as not valid, Not working
+      if (!index.parent() .isValid()) { //Always Return as not valid, Not working
         return true;
       }
       git::Commit parent = index.parent().data(CommitRole).value<git::Commit>(); // Does not have Data?
