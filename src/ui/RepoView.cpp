@@ -1141,17 +1141,19 @@ void RepoView::merge(
   LogEntry *parent,
   const std::function<void()> &callback)
 {
+  // Shouldn't be called with an unborn HEAD.
+  git::Reference head = mRepo.head();
+  Q_ASSERT(head.isValid());
+
   git::AnnotatedCommit upstream;
   QString upstreamName = tr("<i>no upstream</i>");
-
-  git::Reference head = mRepo.head();
-  if (commit.isValid()){
+  if (commit.isValid()) {
     upstream = commit;
     upstreamName = commit.commit().link();
   } else if (ref.isValid()) {
     upstream = ref.annotatedCommit();
     upstreamName = ref.name();
-  } else if (head.isValid() && head.isBranch()) {
+  } else if (head.isBranch()) {
     git::Branch headBranch = head;
     upstream = headBranch.annotatedCommitFromFetchHead();
     git::Branch up = headBranch.upstream();
@@ -1176,16 +1178,11 @@ void RepoView::merge(
     textFmt = tr("%2 on %1");
   }
 
-  QString headName = head.isValid() ? head.name() : tr("<i>no branch</i>");
+  QString headName = head.name();
   QString text = textFmt.arg(upstreamName, headName);
   LogEntry *entry = addLogEntry(text, title, parent);
 
   // Validate inputs.
-  if (!head.isValid()) {
-    entry->addEntry(LogEntry::Error, tr("You are not currently on a branch."));
-    return;
-  }
-
   if (!upstream.isValid()) {
     entry->addEntry(LogEntry::Error,
       tr("The current branch '%1' has no upstream branch.").arg(headName));

@@ -553,9 +553,9 @@ void ReferenceView::contextMenuEvent(QContextMenuEvent *event)
     dialog->open();
   });
 
-  bool head = (ref.isHead() || ref.isStash());
-  merge->setEnabled(!head);
-  rebase->setEnabled(!head);
+  bool stash = ref.isStash();
+  merge->setEnabled(!stash);
+  rebase->setEnabled(!stash);
 
   menu.exec(event->globalPos());
 }

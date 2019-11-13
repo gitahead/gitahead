@@ -875,9 +875,8 @@ void MenuBar::updateBranch()
   mCheckout->setEnabled(head.isValid() && !view->repo().isBare());
   mNewBranch->setEnabled(head.isValid());
 
-  git::Branch headBranch = head;
-  mMerge->setEnabled(headBranch.isValid());
-  mRebase->setEnabled(headBranch.isValid());
+  mMerge->setEnabled(head.isValid());
+  mRebase->setEnabled(head.isValid());
 
   bool merging = false;
   QString text = tr("Merge");
@@ -907,6 +906,7 @@ void MenuBar::updateBranch()
     }
   }
 
+  git::Branch headBranch = head;
   mAbort->setText(tr("Abort %1").arg(text));
   mAbort->setEnabled(headBranch.isValid() && merging);
 }

@@ -133,13 +133,13 @@ void MergeDialog::update()
 QString MergeDialog::labelText() const
 {
   QString fmt = (flags() & RepoView::Merge) ?
-    tr("Choose a reference to merge into '%1'.") :
-    tr("Choose a reference to rebase '%1' on.");
+    tr("Choose a reference to merge into <b>%1</b>.") :
+    tr("Choose a reference to rebase <b>%1</b> on.");
 
   git::Reference head = mRepo.head();
   Q_ASSERT(head.isValid());
 
-  return fmt.arg(head.shortName());
+  return fmt.arg(head.name(false));
 }
 
 QString MergeDialog::buttonText() const
