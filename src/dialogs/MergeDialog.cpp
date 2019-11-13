@@ -136,9 +136,10 @@ QString MergeDialog::labelText() const
     tr("Choose a reference to merge into '%1'.") :
     tr("Choose a reference to rebase '%1' on.");
 
-  git::Branch head = mRepo.head();
+  git::Reference head = mRepo.head();
   Q_ASSERT(head.isValid());
-  return fmt.arg(head.name());
+
+  return fmt.arg(head.shortName());
 }
 
 QString MergeDialog::buttonText() const
