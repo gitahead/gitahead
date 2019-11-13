@@ -1393,7 +1393,7 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
 
       menu.addSeparator();
 
-      menu.addAction(tr("Merge..."), [view, commit] {
+      QAction *merge = menu.addAction(tr("Merge..."), [view, commit] {
         MergeDialog *dialog =
           new MergeDialog(RepoView::Merge, view->repo(), view);
         connect(dialog, &QDialog::accepted, [view, dialog] {
@@ -1408,7 +1408,7 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
         dialog->open();
       });
 
-      menu.addAction(tr("Rebase..."), [view, commit] {
+      QAction *rebase = menu.addAction(tr("Rebase..."), [view, commit] {
         MergeDialog *dialog =
           new MergeDialog(RepoView::Rebase, view->repo(), view);
         connect(dialog, &QDialog::accepted, [view, dialog] {
@@ -1430,6 +1430,11 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
       menu.addAction(tr("Cherry-pick"), [view, commit] {
         view->cherryPick(commit);
       });
+
+      // Disable merge and rebase when HEAD is detached.
+      bool detached = commit.repo().isHeadDetached();
+      merge->setEnabled(!detached);
+      rebase->setEnabled(!detached);
 
       menu.addSeparator();
 
