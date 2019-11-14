@@ -908,7 +908,7 @@ ToolBar::ToolBar(MainWindow *parent)
   addWidget(new Spacer(-1, this));
 
   mFileManagerButton = new FileManagerButton(this);
-  mFileManagerButton->setToolTip(tr("Open Terminal"));
+  mFileManagerButton->setToolTip(tr("Open file manager"));
   addWidget(mFileManagerButton);
   connect(mFileManagerButton, &Button::clicked, [this] {
     currentView()->openFileManager();
@@ -1044,6 +1044,7 @@ void ToolBar::updateStash()
 void ToolBar::updateView()
 {
   RepoView *view = currentView();
+  mFileManagerButton->setEnabled(view);
   mConfigButton->setEnabled(view);
   mLogButton->setEnabled(view);
   mModeGroup->button(RepoView::Diff)->setEnabled(view);
