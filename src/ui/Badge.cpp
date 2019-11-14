@@ -76,7 +76,7 @@ QSize Badge::size(const QFont &font, const Label &label)
   QFontMetrics fm(copy);
   int icon = label.tag ? kIconWidth : 0;
   int width = (label.text.length() > 1) ?
-    fm.width(label.text) : fm.averageCharWidth();
+    fm.horizontalAdvance(label.text) : fm.averageCharWidth();
   return QSize(icon + width + kPadding, fm.lineSpacing() + 2);
 }
 
@@ -87,7 +87,7 @@ int Badge::paint(
   const QList<Label> &list,
   const QRect &rect,
   QStyleOption *opt,
-  BadgeAlignment alignment = RIGHT)
+  BadgeAlignment alignment)
 {
 
   bool active = (opt && (opt->state & QStyle::State_Active));
