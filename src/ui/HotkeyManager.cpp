@@ -176,4 +176,5 @@ QKeySequence HotkeyManager::keys(const HotkeyManagerHandle *handle) const
 void HotkeyManager::setKeys(const HotkeyManagerHandle *handle, const QKeySequence &keys)
 {
   mKeys[handle->index] = keys;
+  mSettings->setValue("hotkeys/" + QString(handle->configPath), keys.toString());
 }
