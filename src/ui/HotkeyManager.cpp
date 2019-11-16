@@ -39,7 +39,7 @@ HotkeyHandle *Hotkey::use(std::function<void(const QKeySequence&)> changeHandler
   if (!manager)
     manager = HotkeyManager::instance();
 
-  QMetaObject::Connection connection = QObject::connect(manager, &HotkeyManager::changed, [this, changeHandler, manager](HotkeyManagerHandle *handle) {
+  QMetaObject::Connection connection = QObject::connect(manager, &HotkeyManager::changed, [this, changeHandler, manager](const HotkeyManagerHandle *handle) {
     if (handle == mHandle)
       changeHandler(manager->keys(mHandle));
   });
@@ -187,4 +187,6 @@ void HotkeyManager::setKeys(const HotkeyManagerHandle *handle, const QKeySequenc
 {
   mKeys[handle->index] = keys;
   mSettings->setValue("hotkeys/" + QString(handle->configPath), keys.toString());
+
+  emit changed(handle);
 }

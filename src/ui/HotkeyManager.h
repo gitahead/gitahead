@@ -73,7 +73,7 @@ public:
   QVector<Hotkey> knownHotkeys() const;
 
 signals:
-  void changed(HotkeyManagerHandle *handle);
+  void changed(const HotkeyManagerHandle *handle);
 
 private:
   static Hotkey registerHotkey(const char *defaultKeys, QKeySequence::StandardKey standardKey, const char *configPath, const char *label);

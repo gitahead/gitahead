@@ -7,15 +7,23 @@
 // Author: Jason Haslam
 //
 
+#include  <iostream>
+
 #include "HotkeysPanel.h"
 #include "ui/HotkeyManager.h"
 #include <QAbstractItemModel>
+#include <QDialog>
+#include <QDialogButtonBox>
 #include <QHeaderView>
+#include <QKeyEvent>
 #include <QKeySequence>
+#include <QKeySequenceEdit>
+#include <QLabel>
 #include <QMap>
 #include <QModelIndex>
 #include <QRegularExpression>
 #include <QString>
+#include <QVBoxLayout>
 #include <QVector>
 
 namespace
@@ -65,7 +73,7 @@ public:
   {
   }
 
-  virtual ObjectType type() const
+  virtual ObjectType type() const override
   {
     return ObjectType::Group;
   }
@@ -93,7 +101,7 @@ public:
     mKeys = hotkey.currentKeys(manager);
   }
 
-  virtual ObjectType type() const
+  virtual ObjectType type() const override
   {
     return ObjectType::Key;
   }
@@ -130,12 +138,12 @@ public:
   {
   }
 
-  virtual int columnCount(const QModelIndex &parent) const
+  virtual int columnCount(const QModelIndex &parent) const override
   {
-      return 2;
+    return 2;
   }
 
-  virtual int rowCount(const QModelIndex &parent = QModelIndex()) const
+  virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override
   {
     if (!parent.isValid())
       return mRoot->childrenData().length();
@@ -147,7 +155,7 @@ public:
     return ((HotkeyGroupData*)data)->childrenData().length();
   }
 
-  virtual QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const
+  virtual QModelIndex index(int row, int column, const QModelIndex &parent = QModelIndex()) const override
   {
     if (row < 0 || column < (int)ColumnIndex::Min || column > (int)ColumnIndex::Max)
       return QModelIndex();
@@ -168,11 +176,10 @@ public:
     return createIndex(row, column, group->childrenData()[row]);
   }
 
-  virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const
+  virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override
   {
     if (
-      role != Qt::DisplayRole
-      || !index.isValid()
+      !index.isValid()
       || index.column() < (int)ColumnIndex::Min
       || index.column() > (int)ColumnIndex::Max
     )
@@ -182,11 +189,18 @@ public:
 
     switch ((ColumnIndex)index.column()) {
       case ColumnIndex::Label:
-        return QVariant(data->label());
+        if (role == Qt::DisplayRole)
+          return QVariant(data->label());
+        else
+          return QVariant();
       
       case ColumnIndex::Keys:
-        if(data->type() == HotkeyData::ObjectType::Key)
+        if(data->type() != HotkeyData::ObjectType::Key)
+          return QVariant();
+        else if(role == Qt::DisplayRole)
           return QVariant(((HotkeyKeyData*)data)->keys().toString(QKeySequence::NativeText));
+        else if(role == Qt::UserRole)
+          return QVariant::fromValue(((HotkeyKeyData*)data)->keys());
         else
           return QVariant();
     }
@@ -194,21 +208,59 @@ public:
     Q_ASSERT(false);
   }
 
-  virtual QModelIndex parent(const QModelIndex &index) const
+  virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override
   {
-    if (!index.isValid() || index.column() != 0)
+    if (!index.isValid() || index.column() != (int)ColumnIndex::Keys || role != Qt::UserRole)
+      return false;
+
+    HotkeyData *data = (HotkeyData*)index.internalPointer();
+    if (data->type() != HotkeyData::ObjectType::Key)
+      return false;
+
+    ((HotkeyKeyData*)data)->setKeys(value.value<QKeySequence>());
+    return true;
+  }
+
+  virtual QModelIndex parent(const QModelIndex &index) const override
+  {
+    if (
+      !index.isValid()
+      || index.column() < (int)ColumnIndex::Min
+      || index.column() > (int)ColumnIndex::Max
+    )
       return QModelIndex();
 
     HotkeyData *data = (HotkeyData*)index.internalPointer();
     HotkeyGroupData *parent = data->group();
 
+    int parentRow = 0;
+    if (parent && parent->group())
+      parentRow = parent->group()->childrenData().indexOf(parent);
+
     if(!parent)
       return QModelIndex();
     else
-      return createIndex(0, 0, parent);
+      return createIndex(parentRow, 0, parent);
   }
 
-  QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const
+  virtual Qt::ItemFlags flags(const QModelIndex &index) const override
+  {
+    if (
+      !index.isValid()
+      || index.column() < (int)ColumnIndex::Min
+      || index.column() > (int)ColumnIndex::Max
+    )
+      return Qt::ItemFlag::NoItemFlags;
+    
+    Qt::ItemFlags res = Qt::ItemFlag::ItemIsEnabled;
+
+    if (((HotkeyData*)index.internalPointer())->type() == HotkeyData::ObjectType::Key)
+      res |= Qt::ItemFlag::ItemIsSelectable | Qt::ItemFlag::ItemNeverHasChildren;
+
+    return res;
+  }
+
+  virtual QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override
   {
     if (
       orientation != Qt::Orientation::Horizontal
@@ -231,6 +283,73 @@ public:
 
 private:
   HotkeyGroupData *mRoot;
+};
+
+class SimpleKeyEdit : public QKeySequenceEdit
+{
+public:
+  SimpleKeyEdit(QWidget *parent): QKeySequenceEdit(parent)
+  {
+  }
+
+protected:
+  virtual void keyPressEvent(QKeyEvent *e) override
+  {
+    if (e->modifiers() == Qt::KeyboardModifier::NoModifier)
+    {
+      switch (e->key()) {
+        case Qt::Key_Backspace:
+        case Qt::Key_Delete:
+          setKeySequence(QKeySequence());
+
+        case Qt::Key_Enter:
+        case Qt::Key_Return:
+        case Qt::Key_Escape:
+        case Qt::Key_Tab:
+          e->ignore();
+          return;
+      }
+    }
+
+    QKeySequenceEdit::keyPressEvent(e);
+  }
+};
+
+class KeybindDialog : public QDialog
+{
+public:
+  KeybindDialog(QWidget *parent): QDialog(parent)
+  {
+    QVBoxLayout *layout = new QVBoxLayout(this);
+
+    mKeys = new SimpleKeyEdit(this);
+
+    layout->addWidget(new QLabel(tr("Please press the desired hotkey"), this));
+    layout->addWidget(mKeys);
+
+    QDialogButtonBox *buttons = new QDialogButtonBox(this);
+    buttons->addButton(QDialogButtonBox::Ok);
+    buttons->addButton(QDialogButtonBox::Cancel);
+    connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
+
+    layout->addWidget(buttons);
+
+    mKeys->setFocus();
+  }
+
+  QKeySequence keys() const
+  {
+    return mKeys->keySequence();
+  }
+
+  void setKeys(const QKeySequence &keys)
+  {
+    mKeys->setKeySequence(keys);
+  }
+
+private:
+  SimpleKeyEdit *mKeys;
 };
 }
 
@@ -287,9 +406,39 @@ HotkeysPanel::HotkeysPanel(QWidget *parent) : QTreeView(parent)
 
   setModel(new HotkeyModel(this, root));
   setUniformRowHeights(true);
+  setAllColumnsShowFocus(true);
+  setEditTriggers(EditTrigger::DoubleClicked);
+  expandAll();
+
   header()->setSectionsMovable(false);
   header()->setSectionResizeMode(0, QHeaderView::ResizeMode::ResizeToContents);
   header()->setSectionResizeMode(1, QHeaderView::ResizeMode::Stretch);
+}
+
+bool HotkeysPanel::edit(const QModelIndex &index, QAbstractItemView::EditTrigger trigger, QEvent *event)
+{
+  if (!index.isValid() || !(trigger & editTriggers()))
+    return false;
+
+  QVariant data = index
+    .siblingAtColumn((int)HotkeyModel::ColumnIndex::Keys)
+    .data(Qt::UserRole);
+
+  if(!data.isValid())
+    return false;
+
+  KeybindDialog *dialog = new KeybindDialog(this);
+
+  dialog->setKeys(data.value<QKeySequence>());
+
+  QPersistentModelIndex idx(index);
+  connect(dialog, &QDialog::accepted, [this, idx, dialog]() {
+    model()->setData(idx, QVariant::fromValue(dialog->keys()), Qt::UserRole);
+  });
+
+  dialog->setModal(true);
+  dialog->show();
+  return true;
 }
 
 QSize HotkeysPanel::sizeHint() const

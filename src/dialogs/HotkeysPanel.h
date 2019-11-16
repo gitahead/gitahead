@@ -21,5 +21,6 @@ public:
 
   HotkeysPanel(QWidget *parent = nullptr);
 
-  QSize sizeHint() const override;
+  virtual QSize sizeHint() const override;
+  virtual bool edit(const QModelIndex &index, QAbstractItemView::EditTrigger trigger, QEvent *event) override;
 };

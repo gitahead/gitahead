@@ -792,7 +792,7 @@ SettingsDialog::SettingsDialog(Index index, QWidget *parent)
   stack->addWidget(new PluginsPanel(git::Repository(), this));
 
   // Add hotkeys panel.
-  QAction *hotkeys = toolbar->addAction(QIcon(":/plugins.png"), tr("Hotkeys"));
+  QAction *hotkeys = toolbar->addAction(QIcon(":/hotkeys.png"), tr("Hotkeys"));
   hotkeys->setData(Hotkeys);
   hotkeys->setActionGroup(actions);
   hotkeys->setCheckable(true);
