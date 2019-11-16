@@ -21,6 +21,10 @@ struct HotkeyManagerHandle
 
 static HotkeyManagerHandle *hotkeyRegistry;
 
+#ifndef QT_NO_DEBUG
+static bool consumed;
+#endif
+
 HotkeyHandle::HotkeyHandle(QMetaObject::Connection &&changeSignalConnection): changeSignalConnection(std::move(changeSignalConnection))
 {
 }
@@ -61,7 +65,7 @@ HotkeyHandle *Hotkey::use(QAction *action, HotkeyManager *manager) const
 
 QString Hotkey::label() const
 {
-  return QObject::tr(mHandle->label);
+  return mHandle->label;
 }
 
 QKeySequence Hotkey::currentKeys(const HotkeyManager *manager) const
@@ -100,6 +104,8 @@ HotkeyManager *HotkeyManager::instance()
 
 Hotkey HotkeyManager::registerHotkey(const char *defaultKeys, QKeySequence::StandardKey standardKey, const char *configPath, const char *label)
 {
+  Q_ASSERT_X(!consumed, "HotkeyManager::registerHotkey()", "Registering a hotkey after creating a hotkey manager");
+
   HotkeyManagerHandle *info = new HotkeyManagerHandle();
   info->defaultKeys = defaultKeys;
   info->standardKey = standardKey;
@@ -145,6 +151,10 @@ HotkeyManager::HotkeyManager(Settings *settings):
   mHandles(hotkeyRegistry->index + 1),
   mKeys(hotkeyRegistry->index + 1)
 {
+#ifndef QT_NO_DEBUG
+  consumed = true;
+#endif
+
   if (!mSettings)
     mSettings = Settings::instance();
 

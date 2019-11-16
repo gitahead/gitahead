@@ -24,6 +24,7 @@ public:
     Editor,
     Update,
     Plugins,
+    Hotkeys,
     Terminal
   };
 

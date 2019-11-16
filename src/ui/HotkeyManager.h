@@ -47,6 +47,11 @@ public:
   QString defaultKeys() const;
   void setKeys(const QKeySequence &keys, HotkeyManager *manager = nullptr);
 
+  inline bool isValid() const
+  {
+    return mHandle != nullptr;
+  }
+
 private:
   const HotkeyManagerHandle *mHandle;
 
