@@ -22,6 +22,8 @@
 #include "git/Submodule.h"
 #include <QApplication>
 #include <QCloseEvent>
+#include <QGuiApplication>
+#include <QScreen>
 #include <QCryptographicHash>
 #include <QDesktopWidget>
 #include <QMessageBox>
@@ -128,7 +130,7 @@ MainWindow::MainWindow(
   // Set default size and position.
   resize(kDefaultWidth, kDefaultHeight);
 
-  QRect desktop = QApplication::desktop()->availableGeometry();
+  QRect desktop = QGuiApplication::primaryScreen()->availableGeometry();
   int x = (desktop.width() / 2) - (kDefaultWidth / 2);
   int y = (desktop.height() / 2) - (kDefaultHeight / 2);
   move(x, y);
