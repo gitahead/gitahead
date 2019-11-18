@@ -95,7 +95,7 @@ int Badge::paint(
 
 #ifdef Q_OS_WIN
   // Disable selected state in the default theme.
-  selected = (selected && theme->name() != "Default");
+  selected = (selected && Application::theme()->name() != "Default");
 #endif
 
   // Elide labels.
