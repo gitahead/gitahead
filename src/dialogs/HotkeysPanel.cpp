@@ -7,8 +7,6 @@
 // Author: Jason Haslam
 //
 
-#include  <iostream>
-
 #include "HotkeysPanel.h"
 #include "ui/HotkeyManager.h"
 #include <QAbstractItemModel>
@@ -205,7 +203,7 @@ public:
           return QVariant();
     }
 
-    Q_ASSERT(false);
+    return QVariant();
   }
 
   virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override
@@ -278,7 +276,7 @@ public:
         return QVariant(tr("Keys"));
     }
 
-    Q_ASSERT(false);
+    return QVariant();
   }
 
 private:
@@ -295,7 +293,7 @@ public:
 protected:
   virtual void keyPressEvent(QKeyEvent *e) override
   {
-    if (e->modifiers() == Qt::KeyboardModifier::NoModifier)
+    if (e->modifiers() == Qt::KeyboardModifier::NoModifier || e->modifiers() == Qt::KeyboardModifier::KeypadModifier)
     {
       switch (e->key()) {
         case Qt::Key_Backspace:

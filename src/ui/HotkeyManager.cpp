@@ -104,7 +104,9 @@ HotkeyManager *HotkeyManager::instance()
 
 Hotkey HotkeyManager::registerHotkey(const char *defaultKeys, QKeySequence::StandardKey standardKey, const char *configPath, const char *label)
 {
+#ifndef QT_NO_DEBUG
   Q_ASSERT_X(!consumed, "HotkeyManager::registerHotkey()", "Registering a hotkey after creating a hotkey manager");
+#endif
 
   HotkeyManagerHandle *info = new HotkeyManagerHandle();
   info->defaultKeys = defaultKeys;

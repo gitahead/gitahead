@@ -19,7 +19,7 @@
 #include <QVector>
 
 class HotkeyManager;
-class HotkeyManagerHandle;
+struct HotkeyManagerHandle;
 
 class HotkeyHandle : public QObject
 {
