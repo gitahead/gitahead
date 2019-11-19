@@ -150,6 +150,13 @@ theme['menubar']   = {
   background       = '#F0F0F0'
 }
 
+-- tabbar background color (uncomment lines to customize)
+theme['menubar']   = {
+  -- text             = theme['widget']['text'],
+  -- base             = theme['palette']['dark'],
+  -- selected         = theme['window']['background'],
+}
+
 -- remote comment colors
 theme['comment']   = {
   background       = '#212228',

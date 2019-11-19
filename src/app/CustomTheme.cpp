@@ -219,11 +219,12 @@ QString CustomTheme::styleSheet() const
 
     "TabBar::tab {"
     "  border: none;"
-    "  border-right: 1px solid palette(dark);"
-    "  background: palette(dark)"
+    "  border-right: 1px solid %5;"
+    "  background: %5;"
+    "  color: %6;"
     "}"
     "TabBar::tab:selected {"
-    "  background: palette(window)"
+    "  background: %7;"
     "}"
 
     "ToolBar {"
@@ -259,11 +260,28 @@ QString CustomTheme::styleSheet() const
 
   QVariantMap button = mMap.value("button").toMap();
   QVariantMap menubar = mMap.value("menubar").toMap();
+  QVariantMap tabbar = mMap.value("tabbar").toMap();
+
+  QString tabbarBase = tabbar.value("base").toString();
+  if (tabbarBase.isEmpty())
+    tabbarBase = "palette(dark)";
+
+  QString tabbarText = tabbar.value("text").toString();
+  if (tabbarText.isEmpty())
+    tabbarText = "palette(text)";
+
+  QString tabbarSelected = tabbar.value("selected").toString();
+  if (tabbarSelected.isEmpty())
+    tabbarSelected = "palette(window)";
+
   return text.arg(
     button.value("background").toMap().value("pressed").toString(),
     menubar.value("background").toString(),
     menubar.value("text").toString(),
-    button.value("background").toMap().value("checked").toString());
+    button.value("background").toMap().value("checked").toString(),
+    tabbarBase,
+    tabbarText,
+    tabbarSelected);
 }
 
 void CustomTheme::polish(QPalette &palette) const
