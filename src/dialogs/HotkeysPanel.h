@@ -7,6 +7,7 @@
 // Author: Jason Haslam
 //
 
+#include <QKeyEvent>
 #include <QTreeView>
 
 class HotkeysPanel : public QTreeView
@@ -22,5 +23,8 @@ public:
   HotkeysPanel(QWidget *parent = nullptr);
 
   virtual QSize sizeHint() const override;
+
+protected:
   virtual bool edit(const QModelIndex &index, QAbstractItemView::EditTrigger trigger, QEvent *event) override;
+  virtual void keyPressEvent(QKeyEvent *e) override;
 };

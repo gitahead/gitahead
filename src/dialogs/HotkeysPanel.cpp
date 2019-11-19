@@ -13,7 +13,6 @@
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QHeaderView>
-#include <QKeyEvent>
 #include <QKeySequence>
 #include <QKeySequenceEdit>
 #include <QLabel>
@@ -405,7 +404,7 @@ HotkeysPanel::HotkeysPanel(QWidget *parent) : QTreeView(parent)
   setModel(new HotkeyModel(this, root));
   setUniformRowHeights(true);
   setAllColumnsShowFocus(true);
-  setEditTriggers(EditTrigger::DoubleClicked);
+  setEditTriggers(EditTrigger::DoubleClicked | EditTrigger::EditKeyPressed);
   expandAll();
 
   header()->setSectionsMovable(false);
@@ -418,9 +417,8 @@ bool HotkeysPanel::edit(const QModelIndex &index, QAbstractItemView::EditTrigger
   if (!index.isValid() || !(trigger & editTriggers()))
     return false;
 
-  QVariant data = index
-    .siblingAtColumn((int)HotkeyModel::ColumnIndex::Keys)
-    .data(Qt::UserRole);
+  QModelIndex keyIndex = index.siblingAtColumn((int)HotkeyModel::ColumnIndex::Keys);
+  QVariant data = keyIndex.data(Qt::UserRole);
 
   if(!data.isValid())
     return false;
@@ -429,7 +427,7 @@ bool HotkeysPanel::edit(const QModelIndex &index, QAbstractItemView::EditTrigger
 
   dialog->setKeys(data.value<QKeySequence>());
 
-  QPersistentModelIndex idx(index);
+  QPersistentModelIndex idx(keyIndex);
   connect(dialog, &QDialog::accepted, [this, idx, dialog]() {
     model()->setData(idx, QVariant::fromValue(dialog->keys()), Qt::UserRole);
   });
@@ -442,4 +440,17 @@ bool HotkeysPanel::edit(const QModelIndex &index, QAbstractItemView::EditTrigger
 QSize HotkeysPanel::sizeHint() const
 {
   return QSize(600, 320);
+}
+
+void HotkeysPanel::keyPressEvent(QKeyEvent *e)
+{
+  if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return) {
+    QModelIndexList indexes = selectedIndexes();
+    if (!indexes.isEmpty())
+      edit(indexes.first(), EditTrigger::EditKeyPressed, e);
+
+    return;
+  }
+
+  QTreeView::keyPressEvent(e);
 }
