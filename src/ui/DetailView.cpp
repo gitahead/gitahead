@@ -14,6 +14,7 @@
 #include "TreeWidget.h"
 #include "git/Branch.h"
 #include "git/Commit.h"
+#include "git/Config.h"
 #include "git/Diff.h"
 #include "git/Index.h"
 #include "git/Repository.h"
@@ -24,8 +25,12 @@
 #include <QClipboard>
 #include <QCryptographicHash>
 #include <QDateTime>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QFormLayout>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QLineEdit>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -722,6 +727,12 @@ DetailView::DetailView(const git::Repository &repo, QWidget *parent)
   layout->setContentsMargins(0,0,0,0);
   layout->setSpacing(0);
 
+  mAuthorLabel = new QLabel(this);
+  mAuthorLabel->setTextFormat(Qt::TextFormat::RichText);
+  connect(mAuthorLabel, &QLabel::linkActivated, this, &DetailView::authorLinkActivated);
+  updateAuthor();
+  layout->addWidget(mAuthorLabel);
+
   mDetail = new StackedWidget(this);
   mDetail->setVisible(false);
   layout->addWidget(mDetail);
@@ -849,6 +860,74 @@ void DetailView::findNext()
 void DetailView::findPrevious()
 {
   static_cast<ContentWidget *>(mContent->currentWidget())->findPrevious();
+}
+
+QString DetailView::overrideUser() const
+{
+  return mOverrideUser;
+}
+
+QString DetailView::overrideEmail() const
+{
+  return mOverrideEmail;
+}
+
+void DetailView::updateAuthor()
+{
+  git::Config config = RepoView::parentView(this)->repo().config();
+
+  QString text = "<a href=\"changeAuthor\"><b>" + tr("Author:") + "</b></a> ";
+
+  if (mOverrideUser.isEmpty())
+    text += config.value<QString>("user.name").toHtmlEscaped();
+  else
+    text += mOverrideUser.toHtmlEscaped();
+
+  if (mOverrideEmail.isEmpty())
+    text += " &lt;" + config.value<QString>("user.email").toHtmlEscaped() + "&gt;";
+  else
+    text += " &lt;" + mOverrideEmail.toHtmlEscaped() + "&gt;";
+
+  if (!mOverrideUser.isEmpty() || !mOverrideEmail.isEmpty())
+    text += " (<a href=\"reset\">" + tr("reset") + "</a>)";
+
+  mAuthorLabel->setText(text);
+}
+
+void DetailView::authorLinkActivated(const QString &href)
+{
+  if (href == "changeAuthor") {
+    QDialog *dialog = new QDialog(this);
+    QFormLayout *layout = new QFormLayout(dialog);
+
+    QLineEdit *userEdit = new QLineEdit(mOverrideUser, dialog);
+    layout->addRow(tr("Author:"), userEdit);
+
+    QLineEdit *emailEdit = new QLineEdit(mOverrideEmail, dialog);
+    layout->addRow(tr("Email:"), emailEdit);
+
+    QDialogButtonBox *buttons = new QDialogButtonBox(dialog);
+    buttons->addButton(QDialogButtonBox::Ok);
+    buttons->addButton(QDialogButtonBox::Cancel);
+    connect(buttons, &QDialogButtonBox::accepted, dialog, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, dialog, &QDialog::reject);
+    layout->addRow(buttons);
+
+    connect(dialog, &QDialog::accepted, [this, userEdit, emailEdit]() {
+      mOverrideUser = userEdit->text();
+      mOverrideEmail = emailEdit->text();
+      updateAuthor();
+    });
+
+    dialog->setModal(true);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->show();
+
+  } else if (href == "reset") {
+    mOverrideUser = "";
+    mOverrideEmail = "";
+    updateAuthor();
+  }
 }
 
 #include "DetailView.moc"
