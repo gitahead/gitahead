@@ -14,6 +14,7 @@
 #include "ProgressIndicator.h"
 #include "RepoView.h"
 #include "app/Application.h"
+#include "conf/Settings.h"
 #include "dialogs/MergeDialog.h"
 #include "index/Index.h"
 #include "git/Branch.h"
@@ -275,7 +276,6 @@ public:
     mSortDate = config.value<bool>("commit.sort.date", true);
     mCleanStatus = config.value<bool>("commit.status.clean", false);
     mGraphVisible = config.value<bool>("commit.graph.visible", true);
-    mCompactMode = config.value<bool>("commit.compact", false);
 
     if (walk)
       resetWalker();
@@ -613,7 +613,6 @@ private:
   bool mSortDate = true;
   bool mCleanStatus = true;
   bool mGraphVisible = true;
-  bool mCompactMode = false; // Needs to be true?
 };
 
 class ListModel : public QAbstractListModel
@@ -684,14 +683,18 @@ public:
             this, &CommitDelegate::updateRefs);
     connect(notifier, &git::RepositoryNotifier::referenceRemoved,
             this, &CommitDelegate::updateRefs);
+
+    mCompactMode = mRepo.appConfig().value<bool>(
+      "commit.compact",
+      Settings::instance()->value("window/history/compactViewByDefault").toBool()
+    );
   }
 
   RowPadding getPadding() const {
-    bool compactMode = mRepo.appConfig().value<bool>("commit.compact", false);
     int horizontalMargin = 4;
-    int lineSpacing = (compactMode) ? 23 : 16;
-    int starPadding = (compactMode) ? 7 : 8;
-    int verticalMargin = (compactMode) ? 5 : 2;
+    int lineSpacing = (mCompactMode) ? 23 : 16;
+    int starPadding = (mCompactMode) ? 7 : 8;
+    int verticalMargin = (mCompactMode) ? 5 : 2;
 
     return RowPadding(starPadding, lineSpacing, verticalMargin, horizontalMargin);
   }
@@ -703,7 +706,6 @@ public:
   {
     QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
-    bool compactMode = mRepo.appConfig().value<bool>("commit.compact", false);
     RowPadding paddings = getPadding();
 
     // Draw background.
@@ -846,7 +848,7 @@ public:
     // Adjust margins.
     rect.setY(rect.y() + paddings.vMargin);
     rect.setX(rect.x() + paddings.hMargin);
-    if (!compactMode) rect.setWidth(rect.width() - paddings.hMargin); // Star has enough padding in compact mode
+    if (!mCompactMode) rect.setWidth(rect.width() - paddings.hMargin); // Star has enough padding in compact mode
 
     // Draw content.
     git::Commit commit = index.data(CommitRole).value<git::Commit>();
@@ -854,7 +856,7 @@ public:
       const QFontMetrics &fm = opt.fontMetrics;
       QRect star = rect;
 
-      if (compactMode) {
+      if (mCompactMode) {
         int maxWidthRefs = (int)(rect.width() * 0.5); // Max  50%
         const int minWidthRefs = 50; // At least display The ellipsis
         const int minWidthRequestDesc = 100;
@@ -913,7 +915,7 @@ public:
         painter->restore();
       }
 
-      if (!compactMode) {
+      if (!mCompactMode) {
         // Draw Name.
         QString name = commit.author().name();
         painter->save();
@@ -1047,7 +1049,7 @@ public:
     
 
     // Draw separator line.
-    if (!compactMode && selected == nextSelected) {
+    if (!mCompactMode && selected == nextSelected) {
       painter->save();
       painter->setRenderHints(QPainter::Antialiasing, false);
       painter->setPen(selected ? text : opt.palette.color(QPalette::Dark));
@@ -1062,10 +1064,9 @@ public:
     const QStyleOptionViewItem &option,
     const QModelIndex &index) const override
   {
-    bool compact = mRepo.appConfig().value<bool>("commit.compact", false);
     RowPadding paddings = getPadding();
     int verticalSize = paddings.lineSpacing + paddings.vMargin;
-    if (!compact) verticalSize = verticalSize * 4;
+    if (!mCompactMode) verticalSize = verticalSize * 4;
     return QSize(0, verticalSize);
   }
 
@@ -1143,6 +1144,7 @@ private:
 
   git::Repository mRepo;
   QMap<git::Id,QList<Badge::Label>> mRefs;
+  bool mCompactMode;
 };
 
 class SelectionModel : public QItemSelectionModel
