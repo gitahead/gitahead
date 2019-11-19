@@ -49,7 +49,19 @@ foreach(QT_PLUGIN ${QT_PLUGINS})
       ${CMAKE_COMMAND} -E copy_if_different
         ${PLUGIN} ${CMAKE_BINARY_DIR}/${PLUGIN_PATH}
     )
-  elseif(NOT APPLE)
+  elseif(APPLE)
+    # Sign plugin.
+    if(CODESIGN_IDENTITY)
+      install(CODE
+        "execute_process(COMMAND
+          codesign --timestamp --options runtime
+            -s \"${CODESIGN_IDENTITY}\"
+            \${CMAKE_INSTALL_PREFIX}/${CONTENTS_DIR}/${PLUGIN_PATH}
+        )"
+        COMPONENT ${GITAHEAD_NAME}
+      )
+    endif()
+  else()
     # Delete runpath.
     install(CODE
       "execute_process(COMMAND chrpath --delete
@@ -179,7 +191,8 @@ endif()
 if(APPLE AND CODESIGN_IDENTITY)
   install(CODE
     "execute_process(COMMAND
-      codesign --deep -s \"${CODESIGN_IDENTITY}\"
+      codesign --deep --timestamp --options runtime
+        -s \"${CODESIGN_IDENTITY}\"
         \${CMAKE_INSTALL_PREFIX}/${GITAHEAD_NAME}.app
     )"
     COMPONENT ${GITAHEAD_NAME}

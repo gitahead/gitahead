@@ -1,3 +1,27 @@
+### v2.5.11 - 2019-10-30
+
+#### Added
+
+* Added context menu item to remove remote account from the sidebar.
+* Added usage reporting setting to the 'General' preferences panel.
+* Remember sidebar remote account expansion state.
+* Unique sidebar and open tab names in the same way as recent repositories.
+* Added 'Fetch All' item to 'Remote' menu.
+
+#### Fixed
+
+* Fixed failure to launch external edit tools with spaces in their path.
+* Disallow pasting rich text into the commit editor.
+* (Win) Fixed several issues relating to symlinks.
+
+#### Changed
+
+* Allow more than 99 columns in line length plugin interface.
+* Clarify copyright statement in the about dialog.
+* (Mac) Enable the hardened runtime to allow notarization on macOS Catalina.
+
+----
+
 ### v2.5.10 - 2019-08-29
 
 #### Added

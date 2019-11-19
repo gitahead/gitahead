@@ -8,6 +8,7 @@
 //
 
 #include "SettingsDialog.h"
+#include "AboutDialog.h"
 #include "DiffPanel.h"
 #include "ExternalToolsDialog.h"
 #include "PluginsPanel.h"
@@ -115,6 +116,13 @@ public:
     mStoreCredentials = new QCheckBox(
       tr("Store credentials in secure storage"), this);
 
+    mUsageReporting = new QCheckBox(
+      tr("Allow collection of usage data"), this);
+    QLabel *privacy = new QLabel(tr("<a href='view'>View privacy policy</a>"));
+    connect(privacy, &QLabel::linkActivated, [] {
+      AboutDialog::openSharedInstance(AboutDialog::Privacy);
+    });
+
     QFormLayout *form = new QFormLayout;
     form->addRow(tr("User name:"), mName);
     form->addRow(tr("User email:"), mEmail);
@@ -122,6 +130,8 @@ public:
     form->addRow(QString(), mPushCommit);
     form->addRow(QString(), mPullUpdate);
     form->addRow(tr("Credentials:"), mStoreCredentials);
+    form->addRow(tr("Usage reporting:"), mUsageReporting);
+    form->addRow(QString(), privacy);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(16,12,16,12);
@@ -163,6 +173,10 @@ public:
       Settings::instance()->setValue("credential/store", checked);
       delete CredentialHelper::instance();
     });
+
+    connect(mUsageReporting, &QCheckBox::toggled, [](bool checked) {
+      Settings::instance()->setValue("tracking/enabled", checked);
+    });
   }
 
   void init()
@@ -183,6 +197,7 @@ public:
     settings->endGroup();
 
     mStoreCredentials->setChecked(settings->value("credential/store").toBool());
+    mUsageReporting->setChecked(settings->value("tracking/enabled").toBool());
   }
 
 private:
@@ -194,6 +209,7 @@ private:
   QCheckBox *mPushCommit;
   QCheckBox *mPullUpdate;
   QCheckBox *mStoreCredentials;
+  QCheckBox *mUsageReporting;
 };
 
 class ToolsPanel : public QWidget
@@ -647,7 +663,7 @@ private:
 } // anon. namespace
 
 SettingsDialog::SettingsDialog(Index index, QWidget *parent)
-  : QMainWindow(parent)
+  : QMainWindow(parent, Qt::Dialog)
 {
   setMinimumWidth(500);
   setAttribute(Qt::WA_DeleteOnClose);

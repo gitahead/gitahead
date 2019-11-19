@@ -950,6 +950,24 @@ void RepoView::startFetchTimer()
   mFetchTimer.start(config.value<int>("autofetch.minutes", minutes) * 60 * 1000);
 }
 
+void RepoView::fetchAll()
+{
+  QList<git::Remote> remotes = mRepo.remotes();
+  if (remotes.isEmpty())
+    return;
+
+  if (remotes.size() == 1) {
+    fetch();
+    return;
+  }
+
+  // Queue up all remotes to fetch them serially.
+  QString text = tr("%1 remotes").arg(remotes.size());
+  LogEntry *entry = addLogEntry(text, tr("Fetch All"));
+  foreach (const git::Remote &remote, remotes)
+    fetch(remote, false, true, entry);
+}
+
 QFuture<git::Result> RepoView::fetch(
   const git::Remote &rmt,
   bool tags,
@@ -1123,19 +1141,22 @@ void RepoView::merge(
   LogEntry *parent,
   const std::function<void()> &callback)
 {
+  // Shouldn't be called with an unborn HEAD.
+  git::Reference head = mRepo.head();
+  Q_ASSERT(head.isValid());
+
   git::AnnotatedCommit upstream;
   QString upstreamName = tr("<i>no upstream</i>");
-
-  git::Branch head = mRepo.head();
-  if (commit.isValid()){
+  if (commit.isValid()) {
     upstream = commit;
     upstreamName = commit.commit().link();
   } else if (ref.isValid()) {
     upstream = ref.annotatedCommit();
     upstreamName = ref.name();
-  } else if (head.isValid()) {
-    upstream = head.annotatedCommitFromFetchHead();
-    git::Branch up = head.upstream();
+  } else if (head.isBranch()) {
+    git::Branch headBranch = head;
+    upstream = headBranch.annotatedCommitFromFetchHead();
+    git::Branch up = headBranch.upstream();
     if (up.isValid())
       upstreamName = up.name();
   }
@@ -1157,16 +1178,11 @@ void RepoView::merge(
     textFmt = tr("%2 on %1");
   }
 
-  QString headName = head.isValid() ? head.name() : tr("<i>no branch</i>");
+  QString headName = head.name();
   QString text = textFmt.arg(upstreamName, headName);
   LogEntry *entry = addLogEntry(text, title, parent);
 
   // Validate inputs.
-  if (!head.isValid()) {
-    entry->addEntry(LogEntry::Error, tr("You are not currently on a branch."));
-    return;
-  }
-
   if (!upstream.isValid()) {
     entry->addEntry(LogEntry::Error,
       tr("The current branch '%1' has no upstream branch.").arg(headName));
@@ -1207,7 +1223,7 @@ void RepoView::fastForward(
   LogEntry *parent,
   const std::function<void()> &callback)
 {
-  git::Branch head = mRepo.head();
+  git::Reference head = mRepo.head();
   Q_ASSERT(head.isValid());
 
   git::Commit commit = upstream.commit();
@@ -1257,7 +1273,7 @@ void RepoView::merge(
   LogEntry *parent,
   const std::function<void()> &callback)
 {
-  git::Branch head = mRepo.head();
+  git::Reference head = mRepo.head();
   Q_ASSERT(head.isValid());
 
   // Try to merge.

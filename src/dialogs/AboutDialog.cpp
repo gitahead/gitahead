@@ -17,7 +17,6 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QPointer>
-#include <QSettings>
 #include <QTabBar>
 #include <QTextBrowser>
 #include <QVBoxLayout>
@@ -39,11 +38,12 @@ const QString kSubtitleFmt =
   "<h4 style='margin-top: 0px; color: gray'>%2</h4>";
 
 const QString kTextFmt =
-  "<p style='white-space: nowrap'><b style='font-size: large'>%1 v%2</b> - %3 - %4<br>"
-  "Copyright © 2016-2018 Scientific Toolworks, Inc. All rights reserved.</p>"
-  "<p> If you have a question that might benefit the community, consider "
-  "asking it on <a href='%5'>Stack Overflow</a> by including 'gitahead' in the "
-  "tags. Otherwise, contact us at <a href='mailto:%6'>%6</a>";
+  "<p style='white-space: nowrap'><b style='font-size: large'>%1 v%2</b> "
+  "- %3 - %4<br>Copyright © 2016-2019 Scientific Toolworks, Inc. and "
+  "contributors</p><p> If you have a question that might benefit the "
+  "community, consider asking it on <a href='%5'>Stack Overflow</a> by "
+  "including 'gitahead' in the tags. Otherwise, contact us at "
+  "<a href='mailto:%6'>%6</a>";
 
 const QString kStyleSheet =
   "h3 {"
@@ -92,10 +92,10 @@ AboutDialog::AboutDialog(QWidget *parent)
   label->setTextInteractionFlags(kTextFlags);
   connect(label, &QLabel::linkActivated, QDesktopServices::openUrl);
 
-  QTabBar *tabs = new QTabBar(this);
-  tabs->setTabData(tabs->addTab(tr("Changelog")), "changelog.html");
-  tabs->setTabData(tabs->addTab(tr("Acknowledgments")), "acknowledgments.html");
-  tabs->setTabData(tabs->addTab(tr("Privacy")), "privacy.html");
+  mTabs = new QTabBar(this);
+  mTabs->setTabData(mTabs->addTab(tr("Changelog")), "changelog.html");
+  mTabs->setTabData(mTabs->addTab(tr("Acknowledgments")), "acknowledgments.html");
+  mTabs->setTabData(mTabs->addTab(tr("Privacy")), "privacy.html");
 
   QTextBrowser *browser = new QTextBrowser(this);
   browser->setOpenLinks(false);
@@ -104,30 +104,30 @@ AboutDialog::AboutDialog(QWidget *parent)
   connect(browser, &QTextBrowser::anchorClicked, [this](const QUrl &url) {
     if (url.isLocalFile() &&
         QFileInfo(url.toLocalFile()).fileName() == "opt-out") {
-      QSettings().setValue("tracking/enabled", false);
+      Settings::instance()->setValue("tracking/enabled", false);
       QString text =
-        tr("Usage tracking has been disabled. Restart "
-           "the app for changes to take effect.");
-      QMessageBox::information(this, tr("Usage Tracking Disabled"), text);
+        tr("Usage reporting has been disabled. Restart "
+           "the application for changes to take effect.");
+      QMessageBox::information(this, tr("Usage Reporting Disabled"), text);
       return;
     }
 
     QDesktopServices::openUrl(url);
   });
 
-  connect(tabs, &QTabBar::currentChanged, [tabs, browser](int index) {
-    QString url = Settings::docDir().filePath(tabs->tabData(index).toString());
+  connect(mTabs, &QTabBar::currentChanged, [this, browser](int index) {
+    QString url = Settings::docDir().filePath(mTabs->tabData(index).toString());
     browser->setSource(QUrl::fromLocalFile(url));
   });
 
   // Load the initial content.
-  emit tabs->currentChanged(tabs->currentIndex());
+  emit mTabs->currentChanged(mTabs->currentIndex());
 
   QVBoxLayout *right = new QVBoxLayout;
   right->setSpacing(0);
   right->addWidget(label);
   right->addSpacing(12);
-  right->addWidget(tabs, 0, TAB_BAR_ALIGNMENT);
+  right->addWidget(mTabs, 0, TAB_BAR_ALIGNMENT);
   right->addWidget(browser);
 
   QHBoxLayout *layout = new QHBoxLayout(this);
@@ -136,16 +136,22 @@ AboutDialog::AboutDialog(QWidget *parent)
   layout->addLayout(right);
 }
 
-void AboutDialog::openSharedInstance()
+void AboutDialog::openSharedInstance(Index index)
 {
   static QPointer<AboutDialog> dialog;
   if (dialog) {
     dialog->show();
     dialog->raise();
     dialog->activateWindow();
-    return;
+  } else {
+    dialog = new AboutDialog;
+    dialog->show();
   }
 
-  dialog = new AboutDialog;
-  dialog->show();
+  dialog->setCurrentIndex(index);
+}
+
+void AboutDialog::setCurrentIndex(Index index)
+{
+  mTabs->setCurrentIndex(index);
 }

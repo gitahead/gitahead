@@ -5,7 +5,7 @@ project(GitAhead)
 set(GITAHEAD_NAME "GitAhead")
 set(GITAHEAD_VERSION_MAJOR 2)
 set(GITAHEAD_VERSION_MINOR 5)
-set(GITAHEAD_VERSION_PATCH 10)
+set(GITAHEAD_VERSION_PATCH 11)
 set(GITAHEAD_VERSION
   "${GITAHEAD_VERSION_MAJOR}.${GITAHEAD_VERSION_MINOR}.${GITAHEAD_VERSION_PATCH}"
 )
@@ -60,6 +60,20 @@ if(APPLE)
 endif()
 
 find_package(Qt5 5.9 COMPONENTS ${QT_MODULES} REQUIRED)
+
+if(APPLE)
+  foreach(QT_MODULE ${QT_MODULES})
+    # FIXME: Force debug build to link against release libraries
+    # inside of frameworks on macOS. The Qt debug libraries are
+    # broken because their link dependencies are to the release
+    # libraries (e.g. QtGui_debug depends on QtCore). This causes
+    # multiple symbol definition errors at application load time.
+    get_target_property(LOCATION Qt5::${QT_MODULE} LOCATION)
+    set_target_properties(Qt5::${QT_MODULE} PROPERTIES
+      IMPORTED_LOCATION_DEBUG ${LOCATION}
+    )
+  endforeach()
+endif()
 
 add_subdirectory(dep)
 add_subdirectory(src)

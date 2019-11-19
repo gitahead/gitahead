@@ -42,7 +42,7 @@ public:
   bool isHead() const;
   bool isStash() const;
 
-  QString name() const;
+  QString name(bool decorateDetachedHead = true) const;
   QString qualifiedName() const;
 
   // Create a walker over the referenced commit.

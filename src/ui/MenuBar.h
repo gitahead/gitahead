@@ -79,10 +79,11 @@ private:
   // Remote
   QAction *mConfigureRemotes;
   QAction *mFetch;
-  QAction *mPull;
-  QAction *mPush;
+  QAction *mFetchAll;
   QAction *mFetchFrom;
+  QAction *mPull;
   QAction *mPullFrom;
+  QAction *mPush;
   QAction *mPushTo;
 
   // Branch
