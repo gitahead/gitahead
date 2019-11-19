@@ -433,6 +433,7 @@ bool HotkeysPanel::edit(const QModelIndex &index, QAbstractItemView::EditTrigger
   });
 
   dialog->setModal(true);
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
   dialog->show();
   return true;
 }
