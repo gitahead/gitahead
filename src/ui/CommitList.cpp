@@ -47,8 +47,9 @@ namespace {
 
 // FIXME: Factor out into theme?
 const QColor kTaintedColor = Qt::gray;
-
 const QString kPathspecFmt = "pathspec:%1";
+QFont fontCache = QFont();
+int idMaxWidthCache = 0;
 
 enum Role
 {
@@ -70,6 +71,19 @@ enum GraphSegment
   RightIn,
   RightOut
 };
+
+static int GetIDMaxWidth(QFont font, QFontMetrics fm) {
+  if (font.key() == fontCache.key()) return idMaxWidthCache;
+  fontCache = font;
+  int maxWidth = 0;
+  char samples[][8] = {"bbbbbbb", "0000000", "9999999", "4444444","6666666", "ddddddd"};
+  for (int i = 0; i < sizeof(samples)/sizeof(*samples); i++) {
+    int width = fm.horizontalAdvance(samples[i]);
+    if (width > maxWidth) maxWidth = width;
+  }
+  idMaxWidthCache = maxWidth;
+  return maxWidth;
+}
 
 class DiffCallbacks : public git::Diff::Callbacks
 {
@@ -845,9 +859,6 @@ public:
         const int minWidthRefs = 50; // At least display The ellipsis
         const int minWidthRequestDesc = 100;
         int minDisplayWidthDate = 350;
-        int minDisplayWidthName = 800;
-        int minWidthName = 50;
-        int maxWidthName = (int)(rect.width() * 0.15);
 
         // Star always takes up its height on the right side
         star.setX(star.x() + star.width() - star.height());
@@ -857,8 +868,7 @@ public:
         QString id = commit.shortId();
         QRect box = rect;
         box.setWidth(box.width() - star.width());
-        // Using the biggest theoretical width
-        int idWidth = fm.horizontalAdvance("bbbbbbb");
+        int idWidth = GetIDMaxWidth(opt.font, fm);
         QRect commitBox = box;
         commitBox.setX(commitBox.x() + commitBox.width() - idWidth);
         painter->save();
@@ -919,7 +929,7 @@ public:
           (date.date() == QDate::currentDate()) ?
           date.time().toString(Qt::DefaultLocaleShortDate) :
           date.date().toString(Qt::DefaultLocaleShortDate);
-        if (rect.width() > fm.width(name) + fm.width(timestamp) + 8) {
+        if (rect.width() > fm.horizontalAdvance(name) + fm.horizontalAdvance(timestamp) + 8) {
           painter->save();
           painter->setPen(bright);
           painter->drawText(rect, Qt::AlignRight, timestamp);
