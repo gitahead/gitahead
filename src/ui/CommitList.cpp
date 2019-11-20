@@ -14,6 +14,7 @@
 #include "ProgressIndicator.h"
 #include "RepoView.h"
 #include "app/Application.h"
+#include "conf/Settings.h"
 #include "dialogs/MergeDialog.h"
 #include "index/Index.h"
 #include "git/Branch.h"
@@ -665,7 +666,7 @@ public:
     QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
 
-    bool compact = mRepo.appConfig().value<bool>("commit.compact", false);
+    bool compact = Settings::instance()->value("commit/compact").toBool();
     LayoutConstants constants = layoutConstants(compact);
 
     // Draw background.
@@ -1023,7 +1024,7 @@ public:
     const QStyleOptionViewItem &option,
     const QModelIndex &index) const override
   {
-    bool compact = mRepo.appConfig().value<bool>("commit.compact", false);
+    bool compact = Settings::instance()->value("commit/compact").toBool();
     LayoutConstants constants = layoutConstants(compact);
 
     int lineHeight = constants.lineSpacing + constants.vMargin;
@@ -1046,7 +1047,7 @@ public:
     const QStyleOptionViewItem &option,
     const QModelIndex &index) const
   {
-    bool compact = mRepo.appConfig().value<bool>("commit.compact", false);
+    bool compact = Settings::instance()->value("commit/compact").toBool();
     LayoutConstants constants = layoutConstants(compact);
 
     QRect rect = option.rect;
