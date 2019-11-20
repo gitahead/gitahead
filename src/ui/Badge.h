@@ -14,11 +14,6 @@
 
 class QStyleOption;
 
-enum BadgeAlignment {
-  LEFT,
-  RIGHT
-};
-
 class Badge : public QWidget
 {
 public:
@@ -49,35 +44,20 @@ public:
     const QList<Label> &labels,
     const QRect &rect,
     QStyleOption *opt = nullptr,
-    BadgeAlignment alignment = RIGHT);
+    Qt::Alignment alignment = Qt::AlignRight);
 
 protected:
   void paintEvent(QPaintEvent *event) override;
 
 private:
-  QList<Label> mLabels;
-  static int paintRight(QPainter *painter,
-    const QList<Label> &labels,
-    const QRect &rect,
-     const QFont font,
-    bool selected,
-    bool active);
-
-  static int paintLeft(QPainter *painter,
-    const QList<Label> &labels,
-    const QRect &rect,
-    const QFont font,
-    bool selected,
-    bool active);
-
-  static void paintBadge(
+  static void paint(
     QPainter *painter,
+    const Label &label,
+    const QRect &rect,
     bool selected,
-    bool active,
-    Label label,
-    QRect labelRect,
-    const QFont font
-  );
+    bool active);
+
+  QList<Label> mLabels;
 };
 
 #endif

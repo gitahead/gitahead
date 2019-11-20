@@ -48,8 +48,6 @@ namespace {
 // FIXME: Factor out into theme?
 const QColor kTaintedColor = Qt::gray;
 const QString kPathspecFmt = "pathspec:%1";
-QFont fontCache = QFont();
-int idMaxWidthCache = 0;
 
 enum Role
 {
@@ -71,19 +69,6 @@ enum GraphSegment
   RightIn,
   RightOut
 };
-
-static int GetIDMaxWidth(QFont font, QFontMetrics fm) {
-  if (font.key() == fontCache.key()) return idMaxWidthCache;
-  fontCache = font;
-  int maxWidth = 0;
-  char samples[][8] = {"bbbbbbb", "0000000", "9999999", "4444444","6666666", "ddddddd"};
-  for (int i = 0; i < sizeof(samples)/sizeof(*samples); i++) {
-    int width = fm.horizontalAdvance(samples[i]);
-    if (width > maxWidth) maxWidth = width;
-  }
-  idMaxWidthCache = maxWidth;
-  return maxWidth;
-}
 
 class DiffCallbacks : public git::Diff::Callbacks
 {
@@ -275,7 +260,6 @@ public:
     mSortDate = config.value<bool>("commit.sort.date", true);
     mCleanStatus = config.value<bool>("commit.status.clean", false);
     mGraphVisible = config.value<bool>("commit.graph.visible", true);
-    mCompactMode = config.value<bool>("commit.compact", false);
 
     if (walk)
       resetWalker();
@@ -613,7 +597,6 @@ private:
   bool mSortDate = true;
   bool mCleanStatus = true;
   bool mGraphVisible = true;
-  bool mCompactMode = false; // Needs to be true?
 };
 
 class ListModel : public QAbstractListModel
@@ -657,18 +640,6 @@ private:
   QList<git::Commit> mCommits;
 };
 
-struct RowPadding {
-  public:
-  const int starPadding;
-  const int lineSpacing;
-  const int vMargin;
-  const int hMargin;
-
-  RowPadding(int _starPadding, int _lineSpacing, int _vMargin, int  _hMargin):
-   starPadding(_starPadding), lineSpacing(_lineSpacing), vMargin(_vMargin), hMargin(_hMargin) {
-  }
-};
-
 class CommitDelegate : public QStyledItemDelegate
 {
 public:
@@ -686,16 +657,6 @@ public:
             this, &CommitDelegate::updateRefs);
   }
 
-  RowPadding getPadding() const {
-    bool compactMode = mRepo.appConfig().value<bool>("commit.compact", false);
-    int horizontalMargin = 4;
-    int lineSpacing = (compactMode) ? 23 : 16;
-    int starPadding = (compactMode) ? 7 : 8;
-    int verticalMargin = (compactMode) ? 5 : 2;
-
-    return RowPadding(starPadding, lineSpacing, verticalMargin, horizontalMargin);
-  }
-
   void paint(
     QPainter *painter,
     const QStyleOptionViewItem &option,
@@ -703,8 +664,9 @@ public:
   {
     QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
-    bool compactMode = mRepo.appConfig().value<bool>("commit.compact", false);
-    RowPadding paddings = getPadding();
+
+    bool compact = mRepo.appConfig().value<bool>("commit.compact", false);
+    LayoutConstants constants = layoutConstants(compact);
 
     // Draw background.
     QStyledItemDelegate::paint(painter, opt, index);
@@ -844,9 +806,12 @@ public:
     painter->restore();
 
     // Adjust margins.
-    rect.setY(rect.y() + paddings.vMargin);
-    rect.setX(rect.x() + paddings.hMargin);
-    if (!compactMode) rect.setWidth(rect.width() - paddings.hMargin); // Star has enough padding in compact mode
+    rect.setY(rect.y() + constants.vMargin);
+    rect.setX(rect.x() + constants.hMargin);
+
+    // Star has enough padding in compact mode.
+    if (!compact)
+      rect.setWidth(rect.width() - constants.hMargin);
 
     // Draw content.
     git::Commit commit = index.data(CommitRole).value<git::Commit>();
@@ -854,42 +819,47 @@ public:
       const QFontMetrics &fm = opt.fontMetrics;
       QRect star = rect;
 
-      if (compactMode) {
-        int maxWidthRefs = (int)(rect.width() * 0.5); // Max  50%
-        const int minWidthRefs = 50; // At least display The ellipsis
-        const int minWidthRequestDesc = 100;
+      QDateTime date = commit.committer().date().toLocalTime();
+      QString timestamp = (date.date() == QDate::currentDate()) ?
+        date.time().toString(Qt::DefaultLocaleShortDate) :
+        date.date().toString(Qt::DefaultLocaleShortDate);
+      int timestampWidth = fm.horizontalAdvance(timestamp);
+
+      if (compact) {
+        int maxWidthRefs = rect.width() * 0.5; // Max 50%
+        const int minWidthRefs = 50; // At least display the ellipsis
+        const int minWidthDesc = 100;
         int minDisplayWidthDate = 350;
 
-        // Star always takes up its height on the right side
+        // Star always takes up its height on the right side.
         star.setX(star.x() + star.width() - star.height());
-        star.setY(star.y() - paddings.vMargin);
+        star.setY(star.y() - constants.vMargin);
+        rect.setWidth(rect.width() - star.width());
 
-        // Commit ref
-        QString id = commit.shortId();
-        QRect box = rect;
-        box.setWidth(box.width() - star.width());
-        int idWidth = GetIDMaxWidth(opt.font, fm);
-        QRect commitBox = box;
-        commitBox.setX(commitBox.x() + commitBox.width() - idWidth);
+        // Draw commit id.
+        QString id = commit.id().toString().left(7);
+        int idWidth = fm.boundingRect(QString(id.size(), '0')).width();
+
+        QRect commitRect = rect;
+        commitRect.setX(commitRect.x() + commitRect.width() - idWidth);
         painter->save();
-        painter->drawText(commitBox, Qt::AlignLeft, id);
+        painter->drawText(commitRect, Qt::AlignLeft, id);
         painter->restore();
-        box.setWidth(box.width() - idWidth - paddings.hMargin);
+        rect.setWidth(rect.width() - idWidth - constants.hMargin);
 
-        // Draw date. Only if String is not the same as previous?
-        QDateTime date = commit.committer().date().toLocalTime();
-        QString timestamp = formatTimestamp(date);
-        if (box.width() > minWidthRequestDesc + fm.horizontalAdvance(timestamp) + 8 && totalWidth > minDisplayWidthDate && drawTimeStamp(index)) {
+        // Draw date. Only if it is not the same as previous?
+        if (rect.width() > minWidthDesc + timestampWidth + 8 &&
+            totalWidth > minDisplayWidthDate) {
           painter->save();
           painter->setPen(bright);
-          painter->drawText(box, Qt::AlignRight, timestamp);
+          painter->drawText(rect, Qt::AlignRight, timestamp);
           painter->restore();
-          box.setWidth(box.width() - fm.horizontalAdvance(timestamp) - paddings.hMargin );
+          rect.setWidth(rect.width() - timestampWidth - constants.hMargin);
         }
 
-        QRect ref = box;
-        // calculate remaining width for the references
-        int refsWidth = ref.width() - minWidthRequestDesc;
+        // Calculate remaining width for the references.
+        QRect ref = rect;
+        int refsWidth = ref.width() - minWidthDesc;
         if (maxWidthRefs <= minWidthRefs) maxWidthRefs = minWidthRefs;
         if (refsWidth < minWidthRefs) refsWidth = minWidthRefs;
         if (refsWidth > maxWidthRefs) refsWidth = maxWidthRefs;
@@ -898,22 +868,19 @@ public:
         // Draw references.
         int badgesWidth = rect.x();
         QList<Badge::Label> refs = mRefs.value(commit.id());
-        if (!refs.isEmpty()) {
-          badgesWidth = Badge::paint(painter, refs, ref, &opt, LEFT);
-        }
-
-        box.setX(badgesWidth); // Comes right after the badges
+        if (!refs.isEmpty())
+          badgesWidth = Badge::paint(painter, refs, ref, &opt, Qt::AlignLeft);
+        rect.setX(badgesWidth); // Comes right after the badges
 
         // Draw message.
         painter->save();
         painter->setPen(bright);
         QString msg = commit.summary(git::Commit::SubstituteEmoji);
-        QString elidedText = fm.elidedText(msg, Qt::ElideRight, box.width());
-        painter->drawText(box, Qt::ElideRight, elidedText);
+        QString elidedText = fm.elidedText(msg, Qt::ElideRight, rect.width());
+        painter->drawText(rect, Qt::ElideRight, elidedText);
         painter->restore();
-      }
 
-      if (!compactMode) {
+      } else {
         // Draw Name.
         QString name = commit.author().name();
         painter->save();
@@ -924,19 +891,14 @@ public:
         painter->restore();
 
         // Draw date.
-        QDateTime date = commit.committer().date().toLocalTime();
-        QString timestamp =
-          (date.date() == QDate::currentDate()) ?
-          date.time().toString(Qt::DefaultLocaleShortDate) :
-          date.date().toString(Qt::DefaultLocaleShortDate);
-        if (rect.width() > fm.horizontalAdvance(name) + fm.horizontalAdvance(timestamp) + 8) {
+        if (rect.width() > fm.horizontalAdvance(name) + timestampWidth + 8) {
           painter->save();
           painter->setPen(bright);
           painter->drawText(rect, Qt::AlignRight, timestamp);
           painter->restore();
         }
 
-        rect.setY(rect.y() + paddings.lineSpacing + paddings.vMargin);
+        rect.setY(rect.y() + constants.lineSpacing + constants.vMargin);
 
         // Draw id.
         QString id = commit.shortId();
@@ -952,7 +914,7 @@ public:
           Badge::paint(painter, refs, refsRect, &opt);
         }
 
-        rect.setY(rect.y() + paddings.lineSpacing + paddings.vMargin);
+        rect.setY(rect.y() + constants.lineSpacing + constants.vMargin);
 
         // Divide remaining rectangle.
         star = rect;
@@ -975,7 +937,7 @@ public:
           painter->drawText(text, Qt::AlignLeft, msg.left(len));
 
           if (len < msg.length()) {
-            text.setY(text.y() + paddings.lineSpacing);
+            text.setY(text.y() + constants.lineSpacing);
             QString elided = fm.elidedText(msg.mid(len), Qt::ElideRight, width);
             painter->drawText(text, Qt::AlignLeft, elided);
           }
@@ -994,7 +956,7 @@ public:
         painter->save();
 
         // Calculate outer radius and vertices.
-        qreal r = (star.height() / 2.0) - paddings.starPadding;
+        qreal r = (star.height() / 2.0) - constants.starPadding;
         qreal x = star.x() + (star.width() / 2.0);
         qreal y = star.y() + (star.height() / 2.0);
         qreal x1 = r * qCos(M_PI / 10.0);
@@ -1002,7 +964,7 @@ public:
         qreal x2 = r * qCos(17.0 * M_PI / 10.0);
         qreal y2 = -r * qSin(17.0 * M_PI / 10.0);
 
-        // Calculate inner radius and verices.
+        // Calculate inner radius and vertices.
         qreal xi = ((y1 + r) * x2) / (y2 + r);
         qreal ri = qSqrt(qPow(xi, 2.0) + qPow(y1, 2.0));
         qreal xi1 = ri * qCos(3.0 * M_PI / 10.0);
@@ -1044,17 +1006,16 @@ public:
       nextSelected = view->selectionModel()->isSelected(next);
     }
 #endif
-    
 
     // Draw separator line.
-    if (!compactMode && selected == nextSelected) {
+    if (!compact && selected == nextSelected) {
       painter->save();
       painter->setRenderHints(QPainter::Antialiasing, false);
       painter->setPen(selected ? text : opt.palette.color(QPalette::Dark));
       painter->drawLine(rect.bottomLeft(), rect.bottomRight());
       painter->restore();
     }
-    
+
     painter->restore();
   }
 
@@ -1063,10 +1024,10 @@ public:
     const QModelIndex &index) const override
   {
     bool compact = mRepo.appConfig().value<bool>("commit.compact", false);
-    RowPadding paddings = getPadding();
-    int verticalSize = paddings.lineSpacing + paddings.vMargin;
-    if (!compact) verticalSize = verticalSize * 4;
-    return QSize(0, verticalSize);
+    LayoutConstants constants = layoutConstants(compact);
+
+    int lineHeight = constants.lineSpacing + constants.vMargin;
+    return QSize(0, lineHeight * (compact ? 1 : 4));
   }
 
   QRect decorationRect(
@@ -1085,13 +1046,15 @@ public:
     const QStyleOptionViewItem &option,
     const QModelIndex &index) const
   {
+    bool compact = mRepo.appConfig().value<bool>("commit.compact", false);
+    LayoutConstants constants = layoutConstants(compact);
+
     QRect rect = option.rect;
-    RowPadding paddings = getPadding();
-    int length = paddings.lineSpacing * 2;
+    int length = constants.lineSpacing * 2;
     rect.setX(rect.x() + rect.width() - length);
     rect.setY(rect.y() + rect.height() - length);
-    rect.setWidth(rect.width() - paddings.starPadding);
-    rect.setHeight(rect.height() - paddings.starPadding);
+    rect.setWidth(rect.width() - constants.starPadding);
+    rect.setHeight(rect.height() - constants.starPadding);
     return rect;
   }
 
@@ -1106,24 +1069,17 @@ protected:
   }
 
 private:
-   bool drawTimeStamp(const QModelIndex index) const {
-      if (!index.parent() .isValid()) { //Always Return as not valid, Not working
-        return true;
-      }
-      git::Commit parent = index.parent().data(CommitRole).value<git::Commit>(); // Does not have Data?
-      git::Commit commit = index.data(CommitRole).value<git::Commit>();
+  struct LayoutConstants
+  {
+    const int starPadding;
+    const int lineSpacing;
+    const int vMargin;
+    const int hMargin;
+  };
 
-      QDateTime parentDate = parent.committer().date().toLocalTime();
-      QDateTime date = commit.committer().date().toLocalTime();
-      QString timestamp = formatTimestamp(date);
-      QString oldTimestamp = formatTimestamp(parentDate);
-      return !(QString::compare(timestamp, oldTimestamp, Qt::CaseSensitive));
-  }
-
-  QString formatTimestamp(const QDateTime date) const {
-    return  (date.date() == QDate::currentDate()) ?
-        date.time().toString(Qt::DefaultLocaleShortDate) :
-        date.date().toString(Qt::DefaultLocaleShortDate);
+  LayoutConstants layoutConstants(bool compact) const
+  {
+    return { compact ? 7 : 8, compact ? 23 : 16, compact ? 5 : 2, 4 };
   }
 
   void updateRefs()
