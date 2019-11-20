@@ -464,6 +464,12 @@ public:
       Settings::instance()->setPrompt(Settings::PromptStash, checked);
     });
 
+    QCheckBox *compactView = new QCheckBox(tr("Use compact view by default"), this);
+    compactView->setChecked(settings->value("window/history/compactViewByDefault").toBool());
+    connect(compactView, &QCheckBox::toggled, [](bool checked) {
+      Settings::instance()->setValue("window/history/compactViewByDefault", checked);
+    });
+
     QFormLayout *layout = new QFormLayout(this);
 
     layout->addRow(tr("Theme:"), comboBox);
@@ -475,6 +481,7 @@ public:
     layout->addRow(QString(), revert);
     layout->addRow(QString(), cherryPick);
     layout->addRow(QString(), stash);
+    layout->addRow(tr("History:"), compactView);
   }
 };
 

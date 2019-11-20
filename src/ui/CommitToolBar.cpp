@@ -10,6 +10,7 @@
 #include "CommitToolBar.h"
 #include "ContextMenuButton.h"
 #include "RepoView.h"
+#include "conf/Settings.h"
 #include "git/Config.h"
 #include <QApplication>
 #include <QMenu>
@@ -174,7 +175,10 @@ CommitToolBar::CommitToolBar(QWidget *parent)
 
   QAction *compact = menu->addAction(tr("Compact Mode"));
   compact->setCheckable(true);
-  compact->setChecked(config.value<bool>(kCompactKey, false));
+  compact->setChecked(config.value<bool>(
+    kCompactKey,
+    Settings::instance()->value("window/history/compactViewByDefault").toBool()
+  ));
   connect(compact, &QAction::triggered, [this](bool checked) {
     RepoView *view = RepoView::parentView(this);
     git::Config config = view->repo().appConfig();
