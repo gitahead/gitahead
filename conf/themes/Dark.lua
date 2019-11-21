@@ -151,7 +151,7 @@ theme['menubar']   = {
 }
 
 -- tabbar background color (uncomment lines to customize)
-theme['menubar']   = {
+theme['tabbar']   = {
   -- text             = theme['widget']['text'],
   -- base             = theme['palette']['dark'],
   -- selected         = theme['window']['background'],
