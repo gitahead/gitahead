@@ -93,9 +93,12 @@ RemoteCallbacks::RemoteCallbacks(
   : QObject(parent), git::Remote::Callbacks(url, repo),
     mKind(kind), mLog(log), mName(name)
 {
-  // Credentials has to block.
+  // Credentials and interactive has to block.
   connect(this, &RemoteCallbacks::queueCredentials,
           this, &RemoteCallbacks::credentialsImpl,
+          Qt::BlockingQueuedConnection);
+  connect(this, &RemoteCallbacks::queueInteractiveAuth,
+          this, &RemoteCallbacks::interactiveAuthImpl,
           Qt::BlockingQueuedConnection);
 
   // The rest are automatic.
@@ -151,6 +154,24 @@ bool RemoteCallbacks::credentials(
     git_error_set_str(GIT_ERROR_NET, error.toUtf8());
 
   return error.isEmpty();
+}
+
+void RemoteCallbacks::interactiveAuth(
+  const QString &name,
+  const QString &instruction,
+  const QVector<git::Remote::SshInteractivePrompt> &prompts,
+  QVector<QString> &responses
+)
+{
+  if (mCanceled)
+    return;
+
+  QString error;
+  emit queueInteractiveAuth(name, instruction, prompts, responses, error);
+
+  // Set error on the thread that requested interactive auth.
+  if (!error.isEmpty())
+    git_error_set_str(GIT_ERROR_NET, error.toUtf8());
 }
 
 void RemoteCallbacks::sideband(const QString &text)
@@ -317,6 +338,50 @@ void RemoteCallbacks::credentialsImpl(
   mDeferredUrl = url;
   mDeferredUsername = username;
   mDeferredPassword = password;
+}
+
+void RemoteCallbacks::interactiveAuthImpl(
+    const QString &name,
+    const QString &instruction,
+    const QVector<git::Remote::SshInteractivePrompt> &prompts,
+    QVector<QString> &responses,
+    QString &error
+  )
+{
+  QDialog dialog;
+  dialog.setWindowTitle("SSH interactive authentication");
+
+  QDialogButtonBox *buttons = new QDialogButtonBox(&dialog);
+  buttons->addButton(QDialogButtonBox::Ok);
+  buttons->addButton(QDialogButtonBox::Cancel);
+  connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+  connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+  QVector<QLineEdit*> inputs(prompts.length());
+  QFormLayout *form = new QFormLayout(&dialog);
+
+  for (int i = 0; i < prompts.length(); ++i) {
+    QLineEdit *edit = new QLineEdit(&dialog);
+
+    if (!prompts[i].echo)
+      edit->setEchoMode(QLineEdit::EchoMode::Password);
+
+    form->addRow(prompts[i].text, edit);
+    inputs[i] = edit;
+  }
+
+  form->addRow(buttons);
+
+  if (inputs.length() > 0)
+    inputs[0]->setFocus();
+
+  if (!dialog.exec()) {
+    error = tr("authentication canceled");
+    return;
+  }
+
+  for (int i = 0; i < prompts.length(); ++i)
+    responses[i] = inputs[i]->text();
 }
 
 void RemoteCallbacks::sidebandImpl(const QString &text, const QString &fmt)
