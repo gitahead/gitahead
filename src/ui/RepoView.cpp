@@ -1574,6 +1574,7 @@ void RepoView::rebase(
       );
 
       dialog->setModal(true);
+      dialog->setAttribute(Qt::WA_DeleteOnClose);
       dialog->open();
 
       return;
