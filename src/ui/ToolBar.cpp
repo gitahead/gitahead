@@ -193,6 +193,8 @@ private:
 
 class RemoteButton : public Button
 {
+  Q_OBJECT
+
 public:
   enum Kind
   {
@@ -387,6 +389,8 @@ public:
 
 class RefreshButton : public Button
 {
+  Q_OBJECT
+
 public:
   RefreshButton(QWidget *parent = nullptr)
     : Button(parent)
@@ -442,6 +446,8 @@ public:
 
 class PullRequestButton : public Button
 {
+  Q_OBJECT
+
 public:
   PullRequestButton(QWidget *parent = nullptr)
     : Button(parent)
@@ -1015,3 +1021,5 @@ RepoView *ToolBar::currentView() const
 {
   return static_cast<MainWindow *>(parent())->currentView();
 }
+
+#include "ToolBar.moc"

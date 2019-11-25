@@ -63,6 +63,8 @@ enum Role
 
 class RepoModel : public QAbstractListModel
 {
+  Q_OBJECT
+
 public:
   enum Row
   {
@@ -151,6 +153,8 @@ private:
 
 class HostModel : public QAbstractItemModel
 {
+  Q_OBJECT
+
 public:
   HostModel(QStyle *style, QObject *parent = nullptr)
     : QAbstractItemModel(parent),
@@ -850,3 +854,5 @@ MainWindow *StartDialog::openWindow(const QString &repo)
 
   return nullptr;
 }
+
+#include "StartDialog.moc"

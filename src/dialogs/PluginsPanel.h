@@ -12,6 +12,8 @@
 
 class PluginsPanel : public QTreeWidget
 {
+  Q_OBJECT
+
 public:
   enum Column
   {

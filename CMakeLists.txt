@@ -59,7 +59,7 @@ if(APPLE)
   set(QT_MODULES ${QT_MODULES} DBus)
 endif()
 
-find_package(Qt5 5.9 COMPONENTS ${QT_MODULES} REQUIRED)
+find_package(Qt5 5.9 COMPONENTS ${QT_MODULES} LinguistTools REQUIRED)
 
 if(APPLE)
   foreach(QT_MODULE ${QT_MODULES})

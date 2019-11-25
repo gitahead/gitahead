@@ -14,6 +14,8 @@
 
 class Bitbucket : public Account
 {
+  Q_OBJECT
+
 public:
   Bitbucket(const QString &username);
 

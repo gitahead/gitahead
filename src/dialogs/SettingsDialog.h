@@ -14,6 +14,8 @@
 
 class SettingsDialog : public QMainWindow
 {
+  Q_OBJECT
+
 public:
   enum Index
   {

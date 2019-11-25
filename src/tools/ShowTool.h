@@ -14,6 +14,8 @@
 
 class ShowTool : public ExternalTool
 {
+  Q_OBJECT
+
 public:
   ShowTool(const QString &file, QObject *parent = nullptr);
 

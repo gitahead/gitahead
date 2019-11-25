@@ -439,6 +439,8 @@ protected:
 
 class Images : public QWidget
 {
+  Q_OBJECT
+
 public:
   Images(
     const git::Patch patch,

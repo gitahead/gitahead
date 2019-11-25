@@ -26,6 +26,8 @@ class Remote;
 
 class RemoteDialog : public QDialog
 {
+  Q_OBJECT
+
 public:
   enum Kind
   {

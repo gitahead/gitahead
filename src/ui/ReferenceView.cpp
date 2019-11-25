@@ -45,6 +45,8 @@ bool refComparator(const git::Reference &lhs, const git::Reference &rhs)
 
 class ReferenceModel : public QAbstractItemModel
 {
+  Q_OBJECT
+
 public:
   struct ReferenceList
   {
@@ -281,6 +283,8 @@ protected:
 
 class Header : public QHeaderView
 {
+  Q_OBJECT
+
 public:
   Header(ReferenceView *view = nullptr)
     : QHeaderView(Qt::Horizontal, view)
@@ -559,3 +563,5 @@ void ReferenceView::contextMenuEvent(QContextMenuEvent *event)
 
   menu.exec(event->globalPos());
 }
+
+#include "ReferenceView.moc"

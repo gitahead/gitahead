@@ -92,6 +92,8 @@ public:
 
 class GeneralPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   GeneralPanel(QWidget *parent = nullptr)
     : QWidget(parent)
@@ -214,6 +216,8 @@ private:
 
 class ToolsPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   ToolsPanel(QWidget *parent = nullptr)
     : QWidget(parent), mConfig(git::Config::global())
@@ -292,6 +296,8 @@ private:
 
 class WindowPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   WindowPanel(QWidget *parent = nullptr)
     : QWidget(parent)
@@ -496,6 +502,8 @@ public:
 
 class EditorPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   EditorPanel(QWidget *parent = nullptr)
     : QWidget(parent)
@@ -567,6 +575,8 @@ public:
 
 class UpdatePanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   UpdatePanel(QWidget *parent = nullptr)
     : QWidget(parent)
@@ -604,6 +614,8 @@ public:
 #ifdef Q_OS_UNIX
 class TerminalPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   TerminalPanel(QWidget *parent = nullptr)
     : QWidget(parent)
@@ -827,3 +839,5 @@ void SettingsDialog::openSharedInstance(Index index)
   dialog = new SettingsDialog(index);
   dialog->show();
 }
+
+#include "SettingsDialog.moc"

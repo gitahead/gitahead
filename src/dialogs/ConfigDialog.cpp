@@ -73,6 +73,8 @@ public:
 
 class GeneralPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   GeneralPanel(RepoView *view, QWidget *parent = nullptr)
     : QWidget(parent), mRepo(view->repo())
@@ -170,6 +172,8 @@ private:
 
 class RemotesPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   RemotesPanel(const git::Repository &repo, QWidget *parent = nullptr)
     : QWidget(parent), mRepo(repo)
@@ -371,6 +375,8 @@ public:
 
 class SearchPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   SearchPanel(RepoView *view, QWidget *parent = nullptr)
     : QWidget(parent)
@@ -465,6 +471,8 @@ public:
 
 class LfsPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   LfsPanel(RepoView *view, QWidget *parent = nullptr)
     : QWidget(parent)
@@ -846,3 +854,5 @@ void ConfigDialog::showEvent(QShowEvent *event)
   QDialog::showEvent(event);
   adjustSize();
 }
+
+#include "ConfigDialog.moc"

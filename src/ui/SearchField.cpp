@@ -43,6 +43,8 @@ public:
 
 class AdvancedButton : public Button
 {
+  Q_OBJECT
+
 public:
   AdvancedButton(QWidget *parent = nullptr)
     : Button(parent)
@@ -70,6 +72,8 @@ protected:
 
 class ClearButton : public Button
 {
+  Q_OBJECT
+
 public:
   ClearButton(QWidget *parent = nullptr)
     : Button(parent)
@@ -135,3 +139,5 @@ void SearchField::resizeEvent(QResizeEvent *event)
   mAdvancedButton->move(x - size.width(), y);
   mClearButton->move(x - (2 * size.width()), y);
 }
+
+#include "SearchField.moc"

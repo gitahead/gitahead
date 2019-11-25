@@ -23,6 +23,8 @@ class Repository;
 
 class CheckoutDialog : public QDialog
 {
+  Q_OBJECT
+
 public:
   CheckoutDialog(
     const git::Repository &repo,

@@ -24,6 +24,8 @@ class Repository;
 
 class NewBranchDialog : public QDialog
 {
+  Q_OBJECT
+
 public:
   NewBranchDialog(
     const git::Repository &repo,

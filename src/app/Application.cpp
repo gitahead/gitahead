@@ -29,6 +29,7 @@
 #include <QSettings>
 #include <QSysInfo>
 #include <QTimer>
+#include <QTranslator>
 #include <QUrlQuery>
 #include <QUuid>
 
@@ -155,6 +156,23 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   mTheme.reset(Theme::create(parser.value("theme")));
   setStyle(mTheme->style());
   setStyleSheet(mTheme->styleSheet());
+
+  // Load Qt translation file.
+  QDir qtTransDir(QT_TRANSLATIONS_DIR);
+  if (qtTransDir.exists()) {
+    QTranslator *translator = new QTranslator(this);
+    if (translator->load(QLocale(), "qt", "_", qtTransDir.absolutePath()))
+      installTranslator(translator);
+  }
+
+  // Load application translation file.
+  QDir transDir(GITAHEAD_TRANSLATIONS_DIR);
+  if (transDir.exists()) {
+    QTranslator *translator = new QTranslator(this);
+    QString name = QString(GITAHEAD_NAME).toLower();
+    if (translator->load(QLocale(), name, "_", transDir.absolutePath()))
+      installTranslator(translator);
+  }
 
   // Enable system proxy auto-detection.
   QNetworkProxyFactory::setUseSystemConfiguration(true);

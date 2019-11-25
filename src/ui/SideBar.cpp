@@ -101,6 +101,8 @@ protected:
 
 class RepoModel : public QAbstractItemModel
 {
+  Q_OBJECT
+
 public:
   enum RootRow
   {
@@ -894,3 +896,5 @@ void SideBar::promptToRemoveAccount(Account *account)
 
   dialog->open();
 }
+
+#include "SideBar.moc"

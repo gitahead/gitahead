@@ -31,6 +31,8 @@ const QString kVideoLink = "https://gitahead.com/#tutorials";
 
 class DefaultWidget : public QFrame
 {
+  Q_OBJECT
+
 public:
   DefaultWidget(QWidget *parent = nullptr)
     : QFrame(parent)
@@ -187,3 +189,5 @@ void TabWidget::tabRemoved(int index)
 
   mDefaultWidget->setVisible(!count());
 }
+
+#include "TabWidget.moc"
