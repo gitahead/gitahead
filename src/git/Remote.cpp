@@ -191,6 +191,11 @@ private:
 
 } // anon. namespace
 
+Remote::Callbacks::Callbacks(const QString &url,
+  const Repository &repo, const Remote &remote)
+  : mUrl(url), d(remote.d)
+{}
+
 int Remote::Callbacks::sideband(
   const char *str,
   int len,
@@ -437,6 +442,10 @@ Remote::Remote() {}
 
 Remote::Remote(git_remote *remote)
   : d(remote, git_remote_free)
+{}
+
+Remote::Remote(const QSharedPointer<git_remote> &d)
+  : d(d)
 {}
 
 QString Remote::name() const

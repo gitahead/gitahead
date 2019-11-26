@@ -36,6 +36,14 @@ public:
     const QString &url,
     const QString &name = QString(),
     QObject *parent = nullptr,
+    const git::Repository &repo = git::Repository(),
+    const git::Remote &remote = git::Remote());
+
+  RemoteCallbacks(
+    Kind kind,
+    LogEntry *log,
+    const git::Remote &remote,
+    QObject *parent = nullptr,
     const git::Repository &repo = git::Repository());
 
   bool isCanceled() const { return mCanceled; }

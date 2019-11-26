@@ -89,8 +89,10 @@ RemoteCallbacks::RemoteCallbacks(
   const QString &url,
   const QString &name,
   QObject *parent,
-  const git::Repository &repo)
-  : QObject(parent), git::Remote::Callbacks(url, repo),
+  const git::Repository &repo,
+  const git::Remote &remote)
+  : QObject(parent),
+    git::Remote::Callbacks(url, repo, remote),
     mKind(kind), mLog(log), mName(name)
 {
   // Credentials has to block.
@@ -117,13 +119,24 @@ RemoteCallbacks::RemoteCallbacks(
   mTime.start();
 }
 
+RemoteCallbacks::RemoteCallbacks(
+  Kind kind,
+  LogEntry *log,
+  const git::Remote &remote,
+  QObject *parent,
+  const git::Repository &repo)
+  : RemoteCallbacks(kind, log,
+    remote.url(), remote.name(),
+    parent, repo, remote)
+{
+}
+
 void RemoteCallbacks::setCanceled(bool canceled)
 {
   mCanceled = canceled;
-  if (mRepo.isValid() && !mName.isEmpty()) {
-    if (git::Remote remote = mRepo.lookupRemote(mName))
-      remote.stop();
-  }
+  git::Remote remote = this->remote();
+  if (remote.isValid())
+    remote.stop();
 }
 
 void RemoteCallbacks::storeDeferredCredentials()

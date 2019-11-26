@@ -58,7 +58,7 @@ DeleteBranchDialog::DeleteBranchDialog(
       QFutureWatcher<git::Result> *watcher =
         new QFutureWatcher<git::Result>(view);
       RemoteCallbacks *callbacks = new RemoteCallbacks(
-        RemoteCallbacks::Send, entry, remote.url(), remoteName, watcher, repo);
+        RemoteCallbacks::Send, entry, remote, watcher, repo);
 
       entry->setBusy(true);
       QStringList refspecs(QString(":%1").arg(upstreamName));

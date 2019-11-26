@@ -1028,9 +1028,8 @@ QFuture<git::Result> RepoView::fetch(
     mCallbacks = nullptr;
   });
 
-  QString url = remote.url();
   mCallbacks = new RemoteCallbacks(
-    RemoteCallbacks::Receive, entry, url, remote.name(), mWatcher, mRepo);
+    RemoteCallbacks::Receive, entry, remote, mWatcher, mRepo);
   connect(mCallbacks, &RemoteCallbacks::referenceUpdated,
           this, &RepoView::notifyReferenceUpdated);
 
@@ -1706,9 +1705,8 @@ void RepoView::push(
     mCallbacks = nullptr;
   });
 
-  QString url = remote.url();
   mCallbacks = new RemoteCallbacks(
-    RemoteCallbacks::Send, entry, url, remote.name(), mWatcher, mRepo);
+    RemoteCallbacks::Send, entry, remote, mWatcher, mRepo);
   connect(mCallbacks, &RemoteCallbacks::referenceUpdated,
           this, &RepoView::notifyReferenceUpdated);
 

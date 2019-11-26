@@ -45,9 +45,9 @@ public:
       Update
     };
 
-    Callbacks(const QString &url, const Repository &repo = Repository())
-      : mUrl(url), mRepo(repo)
-    {}
+    Callbacks(const QString &url,
+      const Repository &repo,
+      const Remote &remote);
 
     QString url() const
     {
@@ -62,6 +62,11 @@ public:
     Repository repo() const
     {
       return mRepo;
+    }
+
+    Remote remote() const
+    {
+      return Remote(d);
     }
 
     virtual void sideband(
@@ -162,6 +167,7 @@ public:
   protected:
     QString mUrl;
     Repository mRepo;
+    QSharedPointer<git_remote> d;
     State mState = Transfer;
     QSet<QString> mAgentNames;
   };
@@ -203,6 +209,7 @@ public:
 
 private:
   Remote(git_remote *remote);
+  Remote(const QSharedPointer<git_remote> &d);
 
   QSharedPointer<git_remote> d;
 
