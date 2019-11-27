@@ -30,14 +30,16 @@ class Reference;
 class Remote
 {
 public:
-  struct PushUpdate {
+  struct PushUpdate
+  {
     QByteArray srcName;
     QByteArray dstName;
     Id srcId;
     Id dstId;
   };
 
-  class Callbacks {
+  class Callbacks
+  {
   public:
     enum State {
       Transfer,
@@ -125,6 +127,14 @@ public:
     }
 
     // static callback wrappers
+    static int connect(
+      git_remote *remote,
+      void *payload);
+
+    static int disconnect(
+      git_remote *remote,
+      void *payload);
+
     static int sideband(
       const char *str,
       int len,
@@ -160,10 +170,14 @@ public:
       void *payload);
 
   protected:
+    // Try to stop the current remote.
+    void stop();
+
     QString mUrl;
     Repository mRepo;
     State mState = Transfer;
     QSet<QString> mAgentNames;
+    git_remote *mRemote = nullptr;
   };
 
   Remote();
@@ -185,9 +199,6 @@ public:
     const QString &dst = QString(),
     bool force = false,
     bool tags = false);
-
-  // Cancel the current operation.
-  void stop();
 
   static Result clone(
     Callbacks *callbacks,

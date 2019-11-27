@@ -191,6 +191,24 @@ private:
 
 } // anon. namespace
 
+int Remote::Callbacks::connect(
+  git_remote *remote,
+  void *payload)
+{
+  Remote::Callbacks *cbs = reinterpret_cast<Remote::Callbacks *>(payload);
+  cbs->mRemote = remote;
+  return 0;
+}
+
+int Remote::Callbacks::disconnect(
+  git_remote *remote,
+  void *payload)
+{
+  Remote::Callbacks *cbs = reinterpret_cast<Remote::Callbacks *>(payload);
+  cbs->mRemote = nullptr;
+  return 0;
+}
+
 int Remote::Callbacks::sideband(
   const char *str,
   int len,
@@ -433,6 +451,12 @@ int Remote::Callbacks::url(
   return 0;
 }
 
+void Remote::Callbacks::stop()
+{
+  if (mRemote)
+    git_remote_stop(mRemote);
+}
+
 Remote::Remote() {}
 
 Remote::Remote(git_remote *remote)
@@ -471,6 +495,8 @@ void Remote::setUrl(const QString &url)
 Result Remote::fetch(Callbacks *callbacks, bool tags)
 {
   git_fetch_options opts = GIT_FETCH_OPTIONS_INIT;
+  opts.callbacks.connect = &Remote::Callbacks::connect;
+  opts.callbacks.disconnect = &Remote::Callbacks::disconnect;
   opts.callbacks.sideband_progress = &Remote::Callbacks::sideband;
   opts.callbacks.credentials = &Remote::Callbacks::credentials;
   opts.callbacks.certificate_check = &Remote::Callbacks::certificate;
@@ -494,6 +520,8 @@ Result Remote::fetch(Callbacks *callbacks, bool tags)
 Result Remote::push(Callbacks *callbacks, const QStringList &refspecs)
 {
   git_push_options opts = GIT_PUSH_OPTIONS_INIT;
+  opts.callbacks.connect = &Remote::Callbacks::connect;
+  opts.callbacks.disconnect = &Remote::Callbacks::disconnect;
   opts.callbacks.sideband_progress = &Remote::Callbacks::sideband;
   opts.callbacks.credentials = &Remote::Callbacks::credentials;
   opts.callbacks.certificate_check = &Remote::Callbacks::certificate;
@@ -551,11 +579,6 @@ Result Remote::push(
   return push(callbacks, refspecs);
 }
 
-void Remote::stop()
-{
-  git_remote_stop(d.data());
-}
-
 Result Remote::clone(
   Callbacks *callbacks,
   const QString &url,
@@ -564,6 +587,8 @@ Result Remote::clone(
 {
   git_repository *repo = nullptr;
   git_clone_options opts = GIT_CLONE_OPTIONS_INIT;
+  opts.fetch_opts.callbacks.connect = &Remote::Callbacks::connect;
+  opts.fetch_opts.callbacks.disconnect = &Remote::Callbacks::disconnect;
   opts.fetch_opts.callbacks.sideband_progress = &Remote::Callbacks::sideband;
   opts.fetch_opts.callbacks.credentials = &Remote::Callbacks::credentials;
   opts.fetch_opts.callbacks.certificate_check = &Remote::Callbacks::certificate;

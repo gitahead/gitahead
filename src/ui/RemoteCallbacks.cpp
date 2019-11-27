@@ -94,25 +94,33 @@ RemoteCallbacks::RemoteCallbacks(
     mKind(kind), mLog(log), mName(name)
 {
   // Credentials has to block.
-  connect(this, &RemoteCallbacks::queueCredentials,
-          this, &RemoteCallbacks::credentialsImpl,
-          Qt::BlockingQueuedConnection);
+  QObject::connect(
+    this, &RemoteCallbacks::queueCredentials,
+    this, &RemoteCallbacks::credentialsImpl,
+    Qt::BlockingQueuedConnection);
 
   // The rest are automatic.
-  connect(this, &RemoteCallbacks::queueSideband,
-          this, &RemoteCallbacks::sidebandImpl);
-  connect(this, &RemoteCallbacks::queueTransfer,
-          this, &RemoteCallbacks::transferImpl);
-  connect(this, &RemoteCallbacks::queueResolve,
-          this, &RemoteCallbacks::resolveImpl);
-  connect(this, &RemoteCallbacks::queueUpdate,
-          this, &RemoteCallbacks::updateImpl);
-  connect(this, &RemoteCallbacks::queueRejected,
-          this, &RemoteCallbacks::rejectedImpl);
-  connect(this, &RemoteCallbacks::queueAdd,
-          this, &RemoteCallbacks::addImpl);
-  connect(this, &RemoteCallbacks::queueDelta,
-          this, &RemoteCallbacks::deltaImpl);
+  QObject::connect(
+    this, &RemoteCallbacks::queueSideband,
+    this, &RemoteCallbacks::sidebandImpl);
+  QObject::connect(
+    this, &RemoteCallbacks::queueTransfer,
+    this, &RemoteCallbacks::transferImpl);
+  QObject::connect(
+    this, &RemoteCallbacks::queueResolve,
+    this, &RemoteCallbacks::resolveImpl);
+  QObject::connect(
+    this, &RemoteCallbacks::queueUpdate,
+    this, &RemoteCallbacks::updateImpl);
+  QObject::connect(
+    this, &RemoteCallbacks::queueRejected,
+    this, &RemoteCallbacks::rejectedImpl);
+  QObject::connect(
+    this, &RemoteCallbacks::queueAdd,
+    this, &RemoteCallbacks::addImpl);
+  QObject::connect(
+    this, &RemoteCallbacks::queueDelta,
+    this, &RemoteCallbacks::deltaImpl);
 
   mTime.start();
 }
@@ -120,10 +128,7 @@ RemoteCallbacks::RemoteCallbacks(
 void RemoteCallbacks::setCanceled(bool canceled)
 {
   mCanceled = canceled;
-  if (mRepo.isValid() && !mName.isEmpty()) {
-    if (git::Remote remote = mRepo.lookupRemote(mName))
-      remote.stop();
-  }
+  stop();
 }
 
 void RemoteCallbacks::storeDeferredCredentials()
@@ -224,10 +229,10 @@ bool RemoteCallbacks::negotiation(
   process.setWorkingDirectory(mRepo.workdir().path());
   using Signal = void (QProcess::*)(int, QProcess::ExitStatus);
   auto signal = static_cast<Signal>(&QProcess::finished);
-  connect(&process, signal, &loop, &QEventLoop::exit);
+  QObject::connect(&process, signal, &loop, &QEventLoop::exit);
 
   // Print hook output with the same semantics as sideband.
-  connect(&process, &QProcess::readyReadStandardOutput, [this, &process] {
+  QObject::connect(&process, &QProcess::readyReadStandardOutput, [this, &process] {
     emit queueSideband(process.readAllStandardOutput());
     if (mCanceled)
       process.terminate();
@@ -284,8 +289,8 @@ void RemoteCallbacks::credentialsImpl(
 
   QDialogButtonBox *buttons =
     new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
-  connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
-  connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+  QObject::connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+  QObject::connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
 
   QFormLayout *layout = new QFormLayout(&dialog);
   if (usernameField)
@@ -301,8 +306,8 @@ void RemoteCallbacks::credentialsImpl(
 
   updateButtons();
   if (usernameField)
-    connect(usernameField, &QLineEdit::textChanged, updateButtons);
-  connect(passwordField, &QLineEdit::textChanged, updateButtons);
+    QObject::connect(usernameField, &QLineEdit::textChanged, updateButtons);
+  QObject::connect(passwordField, &QLineEdit::textChanged, updateButtons);
 
   if (!dialog.exec()) {
     error = tr("authentication canceled");
