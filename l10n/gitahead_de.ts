@@ -3224,7 +3224,7 @@ Konflikt zu beheben</translation>
     <message>
         <location filename="../src/ui/SideBar.cpp" line="363"/>
         <source>remote</source>
-        <translation>remotec</translation>
+        <translation>remote</translation>
     </message>
     <message>
         <location filename="../src/ui/SideBar.cpp" line="378"/>
@@ -3749,7 +3749,7 @@ Dies reverted den Commit %2.</translation>
     <message>
         <location filename="../src/ui/RepoView.cpp" line="1676"/>
         <source>push to</source>
-        <translation>pushe nach</translation>
+        <translation>pushen</translation>
     </message>
     <message>
         <location filename="../src/ui/RepoView.cpp" line="1679"/>
@@ -4159,7 +4159,7 @@ Dies reverted den Commit %2.</translation>
     <message>
         <location filename="../src/conf/Settings.cpp" line="194"/>
         <source>Prompt to edit commit message before merging</source>
-        <translation>Auffordern, die Commit-Nachricht zu bearbeiten, bevor memerged wird</translation>
+        <translation>Auffordern, die Commit-Nachricht zu bearbeiten, bevor gemerged wird</translation>
     </message>
     <message>
         <location filename="../src/conf/Settings.cpp" line="197"/>
