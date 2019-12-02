@@ -84,8 +84,7 @@ QString Reference::name(bool decorateDetachedHead) const
   Commit commit = target();
   if (isDetachedHead() && commit.isValid()) {
     QString name = commit.detachedHeadName();
-    return !decorateDetachedHead ? name :
-      QObject::tr("HEAD detached at %1").arg(name);
+    return !decorateDetachedHead ? name : tr("HEAD detached at %1").arg(name);
   }
 
   // Get shorthand.
