@@ -48,7 +48,7 @@ else()
   endif()
 
   install(TARGETS indexer
-    DESTINATION .
+    DESTINATION ${CMAKE_INSTALL_LIBEXECDIR}
     COMPONENT ${GITAHEAD_NAME}
   )
 endif()

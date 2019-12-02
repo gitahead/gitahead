@@ -251,7 +251,7 @@ QDir Settings::confDir()
   dir.cdUp(); // Contents
 #endif
 
-  if (!dir.cd("Resources"))
+  if (!dir.cd("share") || !dir.cd("gitahead"))
     dir = QDir(CONF_DIR);
   return dir;
 }
@@ -275,6 +275,12 @@ QDir Settings::pluginsDir()
 {
   QDir dir = confDir();
   dir.cd("plugins");
+  return dir;
+}
+
+QDir Settings::helpersDir()
+{
+  QDir dir = QDir(HELPERS_DIR);
   return dir;
 }
 

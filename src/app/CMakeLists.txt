@@ -147,10 +147,11 @@ add_dependencies(gitahead indexer relauncher)
 
 # Install application.
 install(TARGETS gitahead
-  DESTINATION .
+  DESTINATION ${CMAKE_INSTALL_BINDIR}
   COMPONENT ${GITAHEAD_NAME}
 )
 
+set(PRIVATE_DATADIR ${CMAKE_INSTALL_DATADIR}/gitahead)
 if(APPLE)
   get_target_property(QT_LIBRARY Qt5::Core LOCATION)
   get_filename_component(QT_FRAMEWORK ${QT_LIBRARY} DIRECTORY)
@@ -195,36 +196,36 @@ else()
   # Install config files.
   if(CHANGELOG_HTML AND ACKNOWLEDGMENTS_HTML AND PRIVACY_HTML AND PLUGIN_HTML)
     install(FILES ${CHANGELOG_HTML} ${ACKNOWLEDGMENTS_HTML} ${PRIVACY_HTML} ${PLUGIN_HTML}
-      DESTINATION Resources
+      DESTINATION ${PRIVATE_DATADIR}
       COMPONENT ${GITAHEAD_NAME}
     )
   endif()
 
   install(FILES ${EMOJI} ${MERGETOOLS}
-    DESTINATION Resources
+    DESTINATION ${PRIVATE_DATADIR}
     COMPONENT ${GITAHEAD_NAME}
   )
 
   foreach(CONFIG_FILE ${CONFIG_FILES})
     install(FILES ${CONFIG_FILE}
-      DESTINATION Resources
+      DESTINATION ${PRIVATE_DATADIR}
       COMPONENT ${GITAHEAD_NAME}
     )
   endforeach()
 
   install(FILES ${THEMES}
-    DESTINATION Resources/themes
+    DESTINATION ${PRIVATE_DATADIR}/themes
     COMPONENT ${GITAHEAD_NAME}
   )
 
   install(FILES ${LUA_PLUGINS}
-    DESTINATION Resources/plugins
+    DESTINATION ${PRIVATE_DATADIR}/plugins
     COMPONENT ${GITAHEAD_NAME}
   )
 
   foreach(SCINTILLUA_LEXER ${SCINTILLUA_LEXERS})
     install(FILES ${SCINTILLUA_LEXER}
-      DESTINATION Resources/lexers
+      DESTINATION ${PRIVATE_DATADIR}/lexers
       COMPONENT ${GITAHEAD_NAME}
     )
   endforeach()

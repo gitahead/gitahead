@@ -8,6 +8,7 @@
 //
 
 #include "GitCredential.h"
+#include "conf/Settings.h"
 #include <QCoreApplication>
 #include <QDir>
 #include <QProcess>
@@ -103,6 +104,6 @@ bool GitCredential::store(
 
 QString GitCredential::command() const
 {
-  QDir dir(QCoreApplication::applicationDirPath());
+  QDir dir(Settings::helpersDir());
   return dir.filePath(QString("git-credential-%1").arg(mName));
 }

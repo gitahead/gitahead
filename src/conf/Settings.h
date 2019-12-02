@@ -59,6 +59,7 @@ public:
   static QDir lexerDir();
   static QDir themesDir();
   static QDir pluginsDir();
+  static QDir helpersDir();
 
   static QDir userDir();
 

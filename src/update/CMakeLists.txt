@@ -38,11 +38,11 @@ if(APPLE)
   )
 elseif(UNIX)
   set_target_properties(relauncher PROPERTIES
-    INSTALL_RPATH "$ORIGIN"
+    INSTALL_RPATH "${CMAKE_INSTALL_LIBDIR}"
   )
 
   install(TARGETS relauncher
-    DESTINATION .
+    DESTINATION ${CMAKE_INSTALL_LIBEXECDIR}
     COMPONENT ${GITAHEAD_NAME}
   )
 endif()

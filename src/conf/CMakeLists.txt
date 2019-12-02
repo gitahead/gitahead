@@ -11,8 +11,9 @@ target_link_libraries(conf
 )
 
 target_compile_definitions(conf PRIVATE
-  CONF_DIR="${CMAKE_SOURCE_DIR}/conf"
-  SCINTILLUA_LEXERS_DIR="${SCINTILLUA_LEXERS_DIR}"
+  CONF_DIR="${CMAKE_INSTALL_FULL_DATADIR}/gitahead"
+  SCINTILLUA_LEXERS_DIR="${CMAKE_INSTALL_FULL_DATADIR}/gitahead/lexers"
+  HELPERS_DIR="${CMAKE_INSTALL_FULL_LIBEXECDIR}"
 )
 
 set_target_properties(conf PROPERTIES
