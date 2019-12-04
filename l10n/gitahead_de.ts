@@ -656,99 +656,99 @@
 <context>
     <name>CommitList</name>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1420"/>
+        <location filename="../src/ui/CommitList.cpp" line="1414"/>
         <source>Remove Untracked Files</source>
         <translation>Ungetrackte Dateien entfernen</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1437"/>
+        <location filename="../src/ui/CommitList.cpp" line="1431"/>
         <source>Apply</source>
         <translation>Anwenden</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1441"/>
+        <location filename="../src/ui/CommitList.cpp" line="1435"/>
         <source>Pop</source>
         <translation>Poppen</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1445"/>
+        <location filename="../src/ui/CommitList.cpp" line="1439"/>
         <source>Drop</source>
         <translation>Droppen</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1459"/>
+        <location filename="../src/ui/CommitList.cpp" line="1453"/>
         <source>Unstar</source>
         <translation>Ent-Favorisieren</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1459"/>
+        <location filename="../src/ui/CommitList.cpp" line="1453"/>
         <source>Star</source>
         <translation>Favorisieren</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1468"/>
+        <location filename="../src/ui/CommitList.cpp" line="1462"/>
         <source>Add Tag...</source>
         <translation>Tag hinzufügen...</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1472"/>
+        <location filename="../src/ui/CommitList.cpp" line="1466"/>
         <source>New Branch...</source>
         <translation>Neuer Branch...</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1478"/>
+        <location filename="../src/ui/CommitList.cpp" line="1472"/>
         <source>Merge...</source>
         <translation>Mergen...</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1493"/>
+        <location filename="../src/ui/CommitList.cpp" line="1487"/>
         <source>Rebase...</source>
         <translation>Rebasen...</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1508"/>
+        <location filename="../src/ui/CommitList.cpp" line="1502"/>
         <source>Revert</source>
         <translation>Reverten</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1512"/>
+        <location filename="../src/ui/CommitList.cpp" line="1506"/>
         <source>Cherry-pick</source>
         <translation>Cherry-Picken</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1521"/>
-        <location filename="../src/ui/CommitList.cpp" line="1531"/>
-        <location filename="../src/ui/CommitList.cpp" line="1551"/>
+        <location filename="../src/ui/CommitList.cpp" line="1515"/>
+        <location filename="../src/ui/CommitList.cpp" line="1525"/>
+        <location filename="../src/ui/CommitList.cpp" line="1545"/>
         <source>Checkout %1</source>
         <translation>%1 auschecken</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1542"/>
+        <location filename="../src/ui/CommitList.cpp" line="1536"/>
         <source>Local branch is already checked out</source>
         <translation>Ein lokaler Branch ist bereits ausgecheckt</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1545"/>
+        <location filename="../src/ui/CommitList.cpp" line="1539"/>
         <source>This is a bare repository</source>
         <translation>Dies ist ein Bare-Repository</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1562"/>
+        <location filename="../src/ui/CommitList.cpp" line="1556"/>
         <source>Reset</source>
         <translation>Zurücksetzen</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1563"/>
+        <location filename="../src/ui/CommitList.cpp" line="1557"/>
         <source>Soft</source>
         <translation>Soft</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1564"/>
+        <location filename="../src/ui/CommitList.cpp" line="1558"/>
         <source>Mixed</source>
         <translation>Mixed</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1565"/>
+        <location filename="../src/ui/CommitList.cpp" line="1559"/>
         <source>Hard</source>
         <translation>Hard</translation>
     </message>
@@ -756,12 +756,12 @@
 <context>
     <name>CommitModel</name>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="354"/>
+        <location filename="../src/ui/CommitList.cpp" line="346"/>
         <source>Uncommitted changes</source>
         <translation>Uncommittete Änderungen</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="355"/>
+        <location filename="../src/ui/CommitList.cpp" line="347"/>
         <source>Checking for uncommitted changes</source>
         <translation>Prüfe auf uncommittete Änderungen</translation>
     </message>
@@ -769,37 +769,37 @@
 <context>
     <name>CommitToolBar</name>
     <message>
-        <location filename="../src/ui/CommitToolBar.cpp" line="143"/>
+        <location filename="../src/ui/CommitToolBar.cpp" line="137"/>
         <source>Show All Branches</source>
         <translation>Zeige alle Branches</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitToolBar.cpp" line="144"/>
+        <location filename="../src/ui/CommitToolBar.cpp" line="138"/>
         <source>Show Selected Branch</source>
         <translation>Zeige den ausgewählten Branch</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitToolBar.cpp" line="148"/>
+        <location filename="../src/ui/CommitToolBar.cpp" line="142"/>
         <source>Sort by Date</source>
         <translation>Nach Datum sortieren</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitToolBar.cpp" line="149"/>
+        <location filename="../src/ui/CommitToolBar.cpp" line="143"/>
         <source>Sort Topologically</source>
         <translation>Nach Topologie sortieren</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitToolBar.cpp" line="166"/>
+        <location filename="../src/ui/CommitToolBar.cpp" line="160"/>
         <source>Show Graph</source>
         <translation>Graph zeigen</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitToolBar.cpp" line="176"/>
+        <location filename="../src/ui/CommitToolBar.cpp" line="170"/>
         <source>Show Clean Status</source>
         <translation>Sauberen Status zeigen</translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitToolBar.cpp" line="187"/>
+        <location filename="../src/ui/CommitToolBar.cpp" line="181"/>
         <source>Compact Mode</source>
         <translation>Kompakter Modus</translation>
     </message>
@@ -1556,44 +1556,44 @@
 <context>
     <name>GeneralPanel</name>
     <message>
-        <location filename="../src/dialogs/ConfigDialog.cpp" line="85"/>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="104"/>
+        <location filename="../src/dialogs/ConfigDialog.cpp" line="85"/>
         <source>Fetch every</source>
         <translation>Fetchen alle</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/ConfigDialog.cpp" line="93"/>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="112"/>
+        <location filename="../src/dialogs/ConfigDialog.cpp" line="93"/>
         <source>minutes</source>
         <translation>Minuten</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/ConfigDialog.cpp" line="96"/>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="115"/>
+        <location filename="../src/dialogs/ConfigDialog.cpp" line="96"/>
         <source>Push after each commit</source>
         <translation>Nach jedem Commit pushen</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/ConfigDialog.cpp" line="97"/>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="116"/>
+        <location filename="../src/dialogs/ConfigDialog.cpp" line="97"/>
         <source>Update submodules after pull</source>
         <translation>Submodule nach pull aktualisieren</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/ConfigDialog.cpp" line="100"/>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="129"/>
+        <location filename="../src/dialogs/ConfigDialog.cpp" line="100"/>
         <source>User name:</source>
         <translation>Benutzername:</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/ConfigDialog.cpp" line="101"/>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="130"/>
+        <location filename="../src/dialogs/ConfigDialog.cpp" line="101"/>
         <source>User email:</source>
         <translation>E-Mail-Adresse:</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/ConfigDialog.cpp" line="102"/>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="131"/>
+        <location filename="../src/dialogs/ConfigDialog.cpp" line="102"/>
         <source>Automatic actions:</source>
         <translation>Automatische Aktionen:</translation>
     </message>
@@ -2854,9 +2854,8 @@ Beispiele
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/git/Reference.cpp" line="88"/>
         <source>HEAD detached at %1</source>
-        <translation>HEAD losgelöst bei %1</translation>
+        <translation type="vanished">HEAD losgelöst bei %1</translation>
     </message>
 </context>
 <context>
@@ -2881,6 +2880,14 @@ you have the option to continue solving the conflict using the command line</sou
 Da GitAhead derzeit keine Unterstützung zum Arbeiten mit Rebase-
 Konflikten hat, hast Du die Option, mithilfe der Kommandozeile den
 Konflikt zu beheben</translation>
+    </message>
+</context>
+<context>
+    <name>Reference</name>
+    <message>
+        <location filename="../src/git/Reference.cpp" line="87"/>
+        <source>HEAD detached at %1</source>
+        <translation type="unfinished">HEAD losgelöst bei %1</translation>
     </message>
 </context>
 <context>
@@ -4822,6 +4829,22 @@ Dies reverted den Commit %2.</translation>
         <translation>Installer-Skript schlug fehl: %1</translation>
     </message>
     <message>
+        <location filename="../src/update/Updater_mac.mm" line="77"/>
+        <source>The disk image failed to mount successfully</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/update/Updater_mac.mm" line="96"/>
+        <source>The existing bundle could not be moved to the trash</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/update/Updater_mac.mm" line="108"/>
+        <source>The new bundle could not be copied into place</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/update/Updater_mac.mm" line="117"/>
         <location filename="../src/update/Updater.cpp" line="274"/>
         <source>Helper application failed to start</source>
         <translation>Helfer-Programm konnte nicht gestartet werden</translation>

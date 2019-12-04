@@ -77,5 +77,6 @@ endif()
 
 add_subdirectory(dep)
 add_subdirectory(src)
+add_subdirectory(l10n)
 add_subdirectory(test)
 add_subdirectory(pack)

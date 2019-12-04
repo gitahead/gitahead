@@ -656,99 +656,99 @@
 <context>
     <name>CommitList</name>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1420"/>
+        <location filename="../src/ui/CommitList.cpp" line="1414"/>
         <source>Remove Untracked Files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1437"/>
+        <location filename="../src/ui/CommitList.cpp" line="1431"/>
         <source>Apply</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1441"/>
+        <location filename="../src/ui/CommitList.cpp" line="1435"/>
         <source>Pop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1445"/>
+        <location filename="../src/ui/CommitList.cpp" line="1439"/>
         <source>Drop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1459"/>
+        <location filename="../src/ui/CommitList.cpp" line="1453"/>
         <source>Unstar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1459"/>
+        <location filename="../src/ui/CommitList.cpp" line="1453"/>
         <source>Star</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1468"/>
+        <location filename="../src/ui/CommitList.cpp" line="1462"/>
         <source>Add Tag...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1472"/>
+        <location filename="../src/ui/CommitList.cpp" line="1466"/>
         <source>New Branch...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1478"/>
+        <location filename="../src/ui/CommitList.cpp" line="1472"/>
         <source>Merge...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1493"/>
+        <location filename="../src/ui/CommitList.cpp" line="1487"/>
         <source>Rebase...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1508"/>
+        <location filename="../src/ui/CommitList.cpp" line="1502"/>
         <source>Revert</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1512"/>
+        <location filename="../src/ui/CommitList.cpp" line="1506"/>
         <source>Cherry-pick</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1521"/>
-        <location filename="../src/ui/CommitList.cpp" line="1531"/>
-        <location filename="../src/ui/CommitList.cpp" line="1551"/>
+        <location filename="../src/ui/CommitList.cpp" line="1515"/>
+        <location filename="../src/ui/CommitList.cpp" line="1525"/>
+        <location filename="../src/ui/CommitList.cpp" line="1545"/>
         <source>Checkout %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1542"/>
+        <location filename="../src/ui/CommitList.cpp" line="1536"/>
         <source>Local branch is already checked out</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1545"/>
+        <location filename="../src/ui/CommitList.cpp" line="1539"/>
         <source>This is a bare repository</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1562"/>
+        <location filename="../src/ui/CommitList.cpp" line="1556"/>
         <source>Reset</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1563"/>
+        <location filename="../src/ui/CommitList.cpp" line="1557"/>
         <source>Soft</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1564"/>
+        <location filename="../src/ui/CommitList.cpp" line="1558"/>
         <source>Mixed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="1565"/>
+        <location filename="../src/ui/CommitList.cpp" line="1559"/>
         <source>Hard</source>
         <translation type="unfinished"></translation>
     </message>
@@ -756,12 +756,12 @@
 <context>
     <name>CommitModel</name>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="354"/>
+        <location filename="../src/ui/CommitList.cpp" line="346"/>
         <source>Uncommitted changes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitList.cpp" line="355"/>
+        <location filename="../src/ui/CommitList.cpp" line="347"/>
         <source>Checking for uncommitted changes</source>
         <translation type="unfinished"></translation>
     </message>
@@ -769,37 +769,37 @@
 <context>
     <name>CommitToolBar</name>
     <message>
-        <location filename="../src/ui/CommitToolBar.cpp" line="143"/>
+        <location filename="../src/ui/CommitToolBar.cpp" line="137"/>
         <source>Show All Branches</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitToolBar.cpp" line="144"/>
+        <location filename="../src/ui/CommitToolBar.cpp" line="138"/>
         <source>Show Selected Branch</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitToolBar.cpp" line="148"/>
+        <location filename="../src/ui/CommitToolBar.cpp" line="142"/>
         <source>Sort by Date</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitToolBar.cpp" line="149"/>
+        <location filename="../src/ui/CommitToolBar.cpp" line="143"/>
         <source>Sort Topologically</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitToolBar.cpp" line="166"/>
+        <location filename="../src/ui/CommitToolBar.cpp" line="160"/>
         <source>Show Graph</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitToolBar.cpp" line="176"/>
+        <location filename="../src/ui/CommitToolBar.cpp" line="170"/>
         <source>Show Clean Status</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/CommitToolBar.cpp" line="187"/>
+        <location filename="../src/ui/CommitToolBar.cpp" line="181"/>
         <source>Compact Mode</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1541,44 +1541,44 @@
 <context>
     <name>GeneralPanel</name>
     <message>
-        <location filename="../src/dialogs/ConfigDialog.cpp" line="85"/>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="104"/>
+        <location filename="../src/dialogs/ConfigDialog.cpp" line="85"/>
         <source>Fetch every</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/ConfigDialog.cpp" line="93"/>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="112"/>
+        <location filename="../src/dialogs/ConfigDialog.cpp" line="93"/>
         <source>minutes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/ConfigDialog.cpp" line="96"/>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="115"/>
+        <location filename="../src/dialogs/ConfigDialog.cpp" line="96"/>
         <source>Push after each commit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/ConfigDialog.cpp" line="97"/>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="116"/>
+        <location filename="../src/dialogs/ConfigDialog.cpp" line="97"/>
         <source>Update submodules after pull</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/ConfigDialog.cpp" line="100"/>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="129"/>
+        <location filename="../src/dialogs/ConfigDialog.cpp" line="100"/>
         <source>User name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/ConfigDialog.cpp" line="101"/>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="130"/>
+        <location filename="../src/dialogs/ConfigDialog.cpp" line="101"/>
         <source>User email:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/ConfigDialog.cpp" line="102"/>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="131"/>
+        <location filename="../src/dialogs/ConfigDialog.cpp" line="102"/>
         <source>Automatic actions:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2479,7 +2479,7 @@ Examples
     <message>
         <location filename="../src/ui/MenuBar.cpp" line="640"/>
         <source>About %1</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">Acerca de %1</translation>
     </message>
     <message>
         <location filename="../src/ui/MenuBar.cpp" line="646"/>
@@ -2782,9 +2782,9 @@ Examples
     </message>
 </context>
 <context>
-    <name>QObject</name>
+    <name>Reference</name>
     <message>
-        <location filename="../src/git/Reference.cpp" line="88"/>
+        <location filename="../src/git/Reference.cpp" line="87"/>
         <source>HEAD detached at %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2892,58 +2892,58 @@ Examples
 <context>
     <name>RemoteCallbacks</name>
     <message>
-        <location filename="../src/ui/RemoteCallbacks.cpp" line="158"/>
+        <location filename="../src/ui/RemoteCallbacks.cpp" line="163"/>
         <source>remote: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/RemoteCallbacks.cpp" line="217"/>
+        <location filename="../src/ui/RemoteCallbacks.cpp" line="222"/>
         <source>failed to execute pre-push hook: bash not found</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/RemoteCallbacks.cpp" line="251"/>
+        <location filename="../src/ui/RemoteCallbacks.cpp" line="256"/>
         <source>failed to execute pre-push hook: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/RemoteCallbacks.cpp" line="279"/>
+        <location filename="../src/ui/RemoteCallbacks.cpp" line="284"/>
         <source>HTTPS Credentials</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/RemoteCallbacks.cpp" line="279"/>
+        <location filename="../src/ui/RemoteCallbacks.cpp" line="284"/>
         <source>SSH Passphrase</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/RemoteCallbacks.cpp" line="292"/>
+        <location filename="../src/ui/RemoteCallbacks.cpp" line="297"/>
         <source>Username:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/RemoteCallbacks.cpp" line="293"/>
+        <location filename="../src/ui/RemoteCallbacks.cpp" line="298"/>
         <source>Password:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/RemoteCallbacks.cpp" line="293"/>
+        <location filename="../src/ui/RemoteCallbacks.cpp" line="298"/>
         <source>Passphrase:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/RemoteCallbacks.cpp" line="308"/>
+        <location filename="../src/ui/RemoteCallbacks.cpp" line="313"/>
         <source>authentication canceled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/RemoteCallbacks.cpp" line="407"/>
+        <location filename="../src/ui/RemoteCallbacks.cpp" line="412"/>
         <source>From %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/RemoteCallbacks.cpp" line="407"/>
-        <location filename="../src/ui/RemoteCallbacks.cpp" line="450"/>
+        <location filename="../src/ui/RemoteCallbacks.cpp" line="412"/>
+        <location filename="../src/ui/RemoteCallbacks.cpp" line="455"/>
         <source>To %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4706,6 +4706,22 @@ This reverts commit %2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../src/update/Updater_mac.mm" line="77"/>
+        <source>The disk image failed to mount successfully</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/update/Updater_mac.mm" line="96"/>
+        <source>The existing bundle could not be moved to the trash</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/update/Updater_mac.mm" line="108"/>
+        <source>The new bundle could not be copied into place</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/update/Updater_mac.mm" line="117"/>
         <location filename="../src/update/Updater.cpp" line="274"/>
         <source>Helper application failed to start</source>
         <translation type="unfinished"></translation>
