@@ -36,14 +36,6 @@
 #include <QTextLayout>
 #include <QtConcurrent>
 
-#if defined(Q_OS_MAC)
-#define FONT_SIZE 13
-#elif defined(Q_OS_WIN)
-#define FONT_SIZE 9
-#else
-#define FONT_SIZE 10
-#endif
-
 namespace {
 
 // FIXME: Factor out into theme?
@@ -1190,9 +1182,11 @@ CommitList::CommitList(Index *index, QWidget *parent)
     }
   });
 
+#ifdef Q_OS_MAC
   QFont font = this->font();
-  font.setPointSize(FONT_SIZE);
+  font.setPointSize(13);
   setFont(font);
+#endif
 }
 
 git::Diff CommitList::status() const

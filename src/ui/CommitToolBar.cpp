@@ -19,14 +19,6 @@
 #include <QStyleOption>
 #include <QToolButton>
 
-#if defined(Q_OS_MAC)
-#define FONT_SIZE 11
-#elif defined(Q_OS_WIN)
-#define FONT_SIZE 8
-#else
-#define FONT_SIZE 9
-#endif
-
 namespace {
 
 const QString kRefsKey = "commit.refs.all";
@@ -89,9 +81,11 @@ public:
       setText(action->text());
     });
 
+#ifdef Q_OS_MAC
     QFont font = this->font();
-    font.setPointSize(FONT_SIZE);
+    font.setPointSize(11);
     setFont(font);
+#endif
   }
 };
 
