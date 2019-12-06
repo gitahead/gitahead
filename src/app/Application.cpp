@@ -174,7 +174,7 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   } else {
     QDir dir(QT_TRANSLATIONS_DIR);
     if (dir.exists() && qt->load(QLocale(), "qt", "_", dir.absolutePath())) {
-      installTranslator(translator);
+      installTranslator(qt);
     } else {
       delete qt;
     }
