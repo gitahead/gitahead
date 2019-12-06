@@ -58,7 +58,6 @@ target_compile_definitions(app
   PRIVATE
     GITAHEAD_TRACKING_ID="${GITAHEAD_TRACKING_ID}"
     QT_TRANSLATIONS_DIR="${Qt5_DIR}/../../../translations"
-    GITAHEAD_TRANSLATIONS_DIR="${CMAKE_CURRENT_BINARY_DIR}"
 )
 
 target_link_libraries(app

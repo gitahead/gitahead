@@ -166,7 +166,7 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   }
 
   // Load application translation file.
-  QDir transDir(GITAHEAD_TRANSLATIONS_DIR);
+  QDir transDir(applicationDirPath() + "/l10n");
   if (transDir.exists()) {
     QTranslator *translator = new QTranslator(this);
     QString name = QString(GITAHEAD_NAME).toLower();
