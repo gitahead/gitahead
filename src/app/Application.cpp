@@ -157,21 +157,27 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   setStyle(mTheme->style());
   setStyleSheet(mTheme->styleSheet());
 
-  // Load Qt translation file.
-  QDir qtTransDir(QT_TRANSLATIONS_DIR);
-  if (qtTransDir.exists()) {
-    QTranslator *translator = new QTranslator(this);
-    if (translator->load(QLocale(), "qt", "_", qtTransDir.absolutePath()))
-      installTranslator(translator);
+  // Load translation files.
+  QDir l10n = Settings::l10nDir();
+  QString name = QString(GITAHEAD_NAME).toLower();
+  QTranslator *translator = new QTranslator(this);
+  if (translator->load(QLocale(), name, "_", l10n.absolutePath())) {
+    installTranslator(translator);
+  } else {
+    delete translator;
   }
 
-  // Load application translation file.
-  QDir transDir(GITAHEAD_TRANSLATIONS_DIR);
-  if (transDir.exists()) {
-    QTranslator *translator = new QTranslator(this);
-    QString name = QString(GITAHEAD_NAME).toLower();
-    if (translator->load(QLocale(), name, "_", transDir.absolutePath()))
+  // Load Qt translation file.
+  QTranslator *qt = new QTranslator(this);
+  if (qt->load(QLocale(), "qt", "_", l10n.absolutePath())) {
+    installTranslator(qt);
+  } else {
+    QDir dir(QT_TRANSLATIONS_DIR);
+    if (dir.exists() && qt->load(QLocale(), "qt", "_", dir.absolutePath())) {
       installTranslator(translator);
+    } else {
+      delete qt;
+    }
   }
 
   // Enable system proxy auto-detection.

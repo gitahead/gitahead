@@ -71,6 +71,17 @@ QString promptKey(Settings::PromptKind kind)
   return QString("window/prompt/%1").arg(key);
 }
 
+QDir rootDir()
+{
+  QDir dir(QCoreApplication::applicationDirPath());
+
+#ifdef Q_OS_MAC
+  dir.cdUp(); // Contents
+#endif
+
+  return dir;
+}
+
 } // anon. namespace
 
 Settings::Settings(QObject *parent)
@@ -244,15 +255,17 @@ QDir Settings::docDir()
 
 QDir Settings::confDir()
 {
-  QDir dir(QCoreApplication::applicationDirPath());
-
-#ifdef Q_OS_MAC
-  // Search bundle.
-  dir.cdUp(); // Contents
-#endif
-
+  QDir dir = rootDir();
   if (!dir.cd("Resources"))
     dir = QDir(CONF_DIR);
+  return dir;
+}
+
+QDir Settings::l10nDir()
+{
+  QDir dir = rootDir();
+  if (!dir.cd("Resources/l10n"))
+    dir = QDir(L10N_DIR);
   return dir;
 }
 
