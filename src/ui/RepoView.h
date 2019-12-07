@@ -201,7 +201,10 @@ public:
   void cherryPick(const git::Commit &commit);
 
   // push
-  void promptToForcePush();
+  void promptToForcePush(
+    const git::Remote &remote = git::Remote(),
+    const git::Reference &src = git::Reference());
+
   void push(
     const git::Remote &remote = git::Remote(),
     const git::Reference &src = git::Reference(),
