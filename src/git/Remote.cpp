@@ -492,7 +492,7 @@ void Remote::setUrl(const QString &url)
   git_remote_set_url(repo, git_remote_name(d.data()), url.toUtf8());
 }
 
-Result Remote::fetch(Callbacks *callbacks, bool tags)
+Result Remote::fetch(Callbacks *callbacks, bool tags, bool prune)
 {
   git_fetch_options opts = GIT_FETCH_OPTIONS_INIT;
   opts.callbacks.connect = &Remote::Callbacks::connect;
@@ -510,6 +510,9 @@ Result Remote::fetch(Callbacks *callbacks, bool tags)
 
   if (tags)
     opts.download_tags = GIT_REMOTE_DOWNLOAD_TAGS_ALL;
+
+  if (prune)
+    opts.prune = GIT_FETCH_PRUNE;
 
   // Write reflog message.
   QString msg = QString("fetch: %1").arg(name());

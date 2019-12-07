@@ -973,13 +973,14 @@ QFuture<git::Result> RepoView::fetch(
   bool tags,
   bool interactive,
   LogEntry *parent,
-  QStringList *submodules)
+  QStringList *submodules,
+  bool prune)
 {
   if (mWatcher) {
     // Queue fetch.
     connect(mWatcher, &QFutureWatcher<git::Result>::finished, mWatcher,
-    [this, rmt, tags, interactive, parent, submodules] {
-      fetch(rmt, tags, interactive, parent, submodules);
+    [this, rmt, tags, interactive, parent, submodules, prune] {
+      fetch(rmt, tags, interactive, parent, submodules, prune);
     });
 
     return QFuture<git::Result>();
@@ -1035,8 +1036,8 @@ QFuture<git::Result> RepoView::fetch(
           this, &RepoView::notifyReferenceUpdated);
 
   entry->setBusy(true);
-  mWatcher->setFuture(QtConcurrent::run([this, remote, tags, submodules] {
-    git::Result result = git::Remote(remote).fetch(mCallbacks, tags);
+  mWatcher->setFuture(QtConcurrent::run([this, remote, tags, submodules, prune] {
+    git::Result result = git::Remote(remote).fetch(mCallbacks, tags, prune);
 
     if (result && submodules) {
       // Scan for unmodified submodules on the fetch thread.
@@ -1055,7 +1056,8 @@ QFuture<git::Result> RepoView::fetch(
 void RepoView::pull(
   MergeFlags flags,
   const git::Remote &rmt,
-  bool tags)
+  bool tags,
+  bool prune)
 {
   if (mWatcher) {
     // Queue pull.
@@ -1127,7 +1129,7 @@ void RepoView::pull(
     merge(mf, git::Reference(), git::AnnotatedCommit(), entry, callback);
   });
 
-  watcher->setFuture(fetch(remote, tags, true, entry, submodules));
+  watcher->setFuture(fetch(remote, tags, true, entry, submodules, prune));
   if (watcher->isCanceled()) {
     delete watcher;
     delete submodules;

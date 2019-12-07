@@ -159,13 +159,15 @@ public:
     bool tags = false,
     bool interactive = true,
     LogEntry *parent = nullptr,
-    QStringList *submodules = nullptr);
+    QStringList *submodules = nullptr,
+    bool prune = false);
 
   // pull
   void pull(
     MergeFlags flags = Default,
     const git::Remote &remote = git::Remote(),
-    bool tags = false);
+    bool tags = false,
+    bool prune = false);
   void merge(
     MergeFlags flags,
     const git::Reference &ref = git::Reference(),

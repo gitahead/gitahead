@@ -58,6 +58,8 @@ RemoteDialog::RemoteDialog(Kind kind, RepoView *parent)
 
   QWidget *advanced = nullptr;
   ExpandButton *expand = nullptr;
+  QCheckBox *prune = nullptr;
+
   if (kind == Push) {
     auto kinds = ReferenceView::LocalBranches | ReferenceView::Tags;
     mRefs = new ReferenceList(repo, kinds, this);
@@ -91,6 +93,9 @@ RemoteDialog::RemoteDialog(Kind kind, RepoView *parent)
     });
 
     mRefs->select(repo.head());
+
+  } else {
+    prune = new QCheckBox(tr("Prune references"), this);
   }
 
   QString button;
@@ -116,6 +121,8 @@ RemoteDialog::RemoteDialog(Kind kind, RepoView *parent)
   if (mAction)
     form->addRow(tr("Action:"), mAction);
   form->addRow(QString(), mTags);
+  if (prune)
+    form->addRow(QString(), prune);
   if (mSetUpstream)
     form->addRow(QString(), mSetUpstream);
   if (mForce)
@@ -127,7 +134,7 @@ RemoteDialog::RemoteDialog(Kind kind, RepoView *parent)
     new QDialogButtonBox(QDialogButtonBox::Cancel, this);
   connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
   connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
-  buttons->addButton(button, QDialogButtonBox::AcceptRole)->setFocus();
+  buttons->addButton(button, QDialogButtonBox::AcceptRole);
 
   QVBoxLayout *layout = new QVBoxLayout(this);
   layout->addLayout(form);
@@ -135,7 +142,7 @@ RemoteDialog::RemoteDialog(Kind kind, RepoView *parent)
     layout->addWidget(advanced);
   layout->addWidget(buttons);
 
-  connect(this, &RemoteDialog::accepted, [this, kind] {
+  connect(this, &RemoteDialog::accepted, [this, kind, prune] {
     RepoView *view = RepoView::parentView(this);
     QString remoteName = mRemotes->currentText();
     git::Remote tmp = mRemotes->currentData().value<git::Remote>();
@@ -145,12 +152,13 @@ RemoteDialog::RemoteDialog(Kind kind, RepoView *parent)
 
     switch (kind) {
       case Fetch:
-        view->fetch(remote, tags);
+        view->fetch(remote, tags, true, nullptr, nullptr,
+          prune->isChecked());
         break;
 
       case Pull: {
         RepoView::MergeFlags flags(mAction->currentData().toInt());
-        view->pull(flags, remote, tags);
+        view->pull(flags, remote, tags, prune->isChecked());
         break;
       }
 
