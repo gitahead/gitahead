@@ -20,3 +20,18 @@ endif()
 
 add_custom_target(translations DEPENDS ${QM_FILES})
 add_dependencies(gitahead translations)
+
+foreach(LANGUAGE_CODE de es)
+  set(QT_QM_FILES ${QT_QM_FILES}
+    ${QT_TRANSLATIONS_DIR}/qt_${LANGUAGE_CODE}.qm
+  )
+endforeach()
+
+set(MAC $<PLATFORM_ID:Darwin>)
+set(CONTENTS_DIR ${GITAHEAD_NAME}.app/Contents)
+foreach(QM_FILE ${QM_FILES} ${QT_QM_FILES})
+  install(FILES ${QM_FILE}
+    DESTINATION $<${MAC}:${CONTENTS_DIR}/>Resources/l10n
+    COMPONENT ${GITAHEAD_NAME}
+  )
+endforeach()

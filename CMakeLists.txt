@@ -61,6 +61,8 @@ endif()
 
 find_package(Qt5 5.9 COMPONENTS ${QT_MODULES} LinguistTools REQUIRED)
 
+set(QT_TRANSLATIONS_DIR "${Qt5_DIR}/../../../translations")
+
 if(APPLE)
   foreach(QT_MODULE ${QT_MODULES})
     # FIXME: Force debug build to link against release libraries
