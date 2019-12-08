@@ -579,7 +579,7 @@ public:
 
     // Pre-populate commit editor with the merge message.
     QString msg = RepoView::parentView(this)->repo().message();
-    if (!msg.isEmpty())
+    if (!msg.isEmpty() && !msg.toLower().contains("revert"))
       mMessage->setPlainText(msg);
   }
 
