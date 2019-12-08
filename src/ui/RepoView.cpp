@@ -1671,7 +1671,7 @@ void RepoView::push(
 
   mWatcher = new QFutureWatcher<git::Result>(this);
   connect(mWatcher, &QFutureWatcher<git::Result>::finished, mWatcher,
-  [this, src, setUpstream, remote, entry, remoteBranchName] {
+  [this, src, ref, setUpstream, remote, entry, remoteBranchName] {
     entry->setBusy(false);
 
     git::Result result = mWatcher->result();
@@ -1682,7 +1682,7 @@ void RepoView::push(
       QString errString = result.errorString();
       LogEntry *errorEntry = error(entry, tr("push to"), name, errString);
       if (err == GIT_ENONFASTFORWARD) {
-        if (src.isTag()) {
+        if (ref.isTag()) {
           QString hint1 =
             tr("The tag update may cause the remote to lose commits.");
           QString hint2 =
@@ -1691,7 +1691,7 @@ void RepoView::push(
 
           errorEntry->addEntry(LogEntry::Hint, hint1);
           errorEntry->addEntry(LogEntry::Warning, hint2.arg(
-            src.qualifiedName().toHtmlEscaped(), name.toHtmlEscaped()));
+            ref.qualifiedName().toHtmlEscaped(), name.toHtmlEscaped()));
 
         } else {
           QString hint1 =
