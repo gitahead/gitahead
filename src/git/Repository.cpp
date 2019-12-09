@@ -592,6 +592,7 @@ Commit Repository::commit(
 
   // Cleanup merge state.
   switch (state()) {
+    case GIT_REPOSITORY_STATE_NONE:
     case GIT_REPOSITORY_STATE_MERGE:
     case GIT_REPOSITORY_STATE_REVERT:
     case GIT_REPOSITORY_STATE_CHERRYPICK:
