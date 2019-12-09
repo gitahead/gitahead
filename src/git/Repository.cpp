@@ -590,6 +590,18 @@ Commit Repository::commit(
         message.toUtf8(), tree, parents.size(), parents.data()))
     return Commit();
 
+  // Cleanup merge state.
+  switch (state()) {
+    case GIT_REPOSITORY_STATE_MERGE:
+    case GIT_REPOSITORY_STATE_REVERT:
+    case GIT_REPOSITORY_STATE_CHERRYPICK:
+      cleanupState();
+      break;
+
+    default:
+      break;
+  }
+
   git_commit *commit = nullptr;
   git_commit_lookup(&commit, d->repo, &id);
   emit d->notifier->referenceUpdated(head());

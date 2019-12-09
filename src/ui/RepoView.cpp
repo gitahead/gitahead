@@ -1777,18 +1777,6 @@ bool RepoView::commit(
     error->addEntry(LogEntry::Hint, hint3);
   }
 
-  // Cleanup merge state.
-  switch (mRepo.state()) {
-    case GIT_REPOSITORY_STATE_MERGE:
-    case GIT_REPOSITORY_STATE_REVERT:
-    case GIT_REPOSITORY_STATE_CHERRYPICK:
-      mRepo.cleanupState();
-      break;
-
-    default:
-      break;
-  }
-
   // Automatically push if enabled.
   bool enable = Settings::instance()->value("global/autopush/enable").toBool();
   if (mRepo.appConfig().value<bool>("autopush.enable", enable))
