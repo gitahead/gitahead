@@ -21,7 +21,15 @@ endif()
 add_custom_target(translations DEPENDS ${QM_FILES})
 add_dependencies(gitahead translations)
 
-foreach(LANGUAGE_CODE de es)
+foreach(TS_FILE ${TS_FILES})
+  if(TS_FILE MATCHES ^.*_\([a-zA-Z_-]+\)\\.ts$
+    AND NOT CMAKE_MATCH_1 IN_LIST LANGUAGES)
+
+    set(LANGUAGES ${LANGUAGES} ${CMAKE_MATCH_1})
+  endif()
+endforeach()
+
+foreach(LANGUAGE_CODE ${LANGUAGES})
   set(QT_QM_FILES ${QT_QM_FILES}
     ${QT_TRANSLATIONS_DIR}/qt_${LANGUAGE_CODE}.qm
   )
