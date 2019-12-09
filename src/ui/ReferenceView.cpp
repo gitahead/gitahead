@@ -11,6 +11,7 @@
 #include "RepoView.h"
 #include "TabBar.h"
 #include "dialogs/DeleteBranchDialog.h"
+#include "dialogs/DeleteTagDialog.h"
 #include "dialogs/MergeDialog.h"
 #include "git/Branch.h"
 #include "git/Repository.h"
@@ -507,12 +508,10 @@ void ReferenceView::contextMenuEvent(QContextMenuEvent *event)
   if (ref.isTag() || ref.isLocalBranch()) {
     QAction *remove = menu.addAction(tr("Delete"), [this, ref] {
       if (ref.isTag()) {
-        // FIXME: Prompt to delete tag?
-        if (!git::TagRef(ref).remove()) {
-          RepoView *view = RepoView::parentView(this);
-          LogEntry *parent = view->addLogEntry(ref.name(), tr("Delete Tag"));
-          view->error(parent, tr("delete tag"), ref.name());
-        }
+        DeleteTagDialog *dialog = new DeleteTagDialog(ref, this);
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+        dialog->open();
+
       } else {
         DeleteBranchDialog *dialog = new DeleteBranchDialog(ref, this);
         dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -522,6 +521,14 @@ void ReferenceView::contextMenuEvent(QContextMenuEvent *event)
 
     remove->setEnabled(ref.isTag() || !ref.isHead());
 
+  }
+
+  if (ref.isTag()) {
+    git::Remote remote = ref.repo().defaultRemote();
+    menu.addAction(tr("Push Tag to %1").arg(remote.name()),
+      [this, ref, view, remote] {
+        view->push(remote, ref);
+      });
   }
 
   if (ref.isRemoteBranch()) {
