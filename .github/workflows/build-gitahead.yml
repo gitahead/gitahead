@@ -1,0 +1,79 @@
+name: Build GitAhead
+on: [push]
+jobs:
+  build:
+    runs-on: ${{ matrix.env.os }}
+    strategy:
+      matrix:
+        env:
+          - name: macos
+            os: macos-latest
+            ninja_platform: mac
+            qt_platform: mac
+            arch: darwin64-x86_64-cc
+
+          - name: linux
+            os: ubuntu-latest
+            ninja_platform: linux
+            qt_platform: linux
+            arch: linux-x86_64
+
+          # Needs a Perl implementation that uses UNIX style paths
+          # No such implementation is currently available for GitHub actions
+          # - name: windows
+          #   os: windows-latest
+          #   ninja_platform: win
+          #   qt_platform: windows
+          #   arch: VC-WIN64A
+
+      fail-fast: true
+    steps:
+    - name: Source code checkout
+      uses: actions/checkout@v1
+    - name: Install Ninja
+      uses: seanmiddleditch/gha-setup-ninja@v1
+      with:
+        version: 1.9.0
+        platform: ${{ matrix.env.ninja_platform }} # [win, mac, linux]
+        destination: _ninja_install
+    - name: Set up NASM (Windows only)
+      if: matrix.env.name == 'windows'
+      uses: ilammy/setup-nasm@v1.0.0
+      with:
+        platform: win64
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v2.2.0
+      with:
+        version: 5.12.5
+        target: desktop
+        host: ${{ matrix.env.qtplatform }}
+        install-deps: true
+        modules: qtwebengine
+    - name: Initialize Submodules
+      uses: snickerbockers/submodules-init@v4
+    - name: Build OpensSSL
+      run: |
+        cd dep/openssl/openssl
+        perl Configure ${{ matrix.env.arch }} no-shared
+        make
+    - name: Configure Release
+      run: |
+        mkdir -p build/release
+        cd build/release
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ../..
+    - name: Build Information
+      run: |
+        echo "ninja version: $(ninja --version)"
+        git --version
+        qmake --version
+        cmake --version
+    - name: Build
+      run: |
+        cd build/release
+        ninja
+    - name: Test
+      if: false
+      # TODO: Disable ui tests in headless environment or find a way to send tests to an external browser, ninja check
+      run: |
+        cd build/release
+        ninja check

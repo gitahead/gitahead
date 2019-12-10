@@ -7,6 +7,8 @@ add_library(index
   Query.cpp
 )
 
+find_package(Threads)
+
 target_link_libraries(index
   conf
   git
@@ -14,6 +16,8 @@ target_link_libraries(index
   lua
   Qt5::Core
   Qt5::Concurrent
+  ${CMAKE_DL_LIBS} # DL is needed by OpenSSL on Linux
+  Threads::Threads # Ditto for pthread
 )
 
 set_target_properties(index PROPERTIES AUTOMOC ON)
