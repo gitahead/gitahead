@@ -6,7 +6,7 @@ set(STATIC_CRT OFF CACHE BOOL "" FORCE)
 # Enabled manually. Don't search for it.
 set(USE_SSH OFF CACHE BOOL "" FORCE)
 
-if(WIN32)
+if(WIN32 AND NOT USE_SYSTEM_OPENSSL)
   # Disable search for OpenSSL.
   set(USE_OPENSSL OFF CACHE BOOL "" FORCE)
 

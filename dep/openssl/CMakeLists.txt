@@ -1,9 +1,11 @@
-if(EXISTS ${CMAKE_BINARY_DIR}/../openssl)
-  set(OPENSSL_DIR ${CMAKE_BINARY_DIR}/../openssl CACHE PATH "")
-else()
-  set(OPENSSL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/openssl CACHE PATH "")
-endif()
+IF(NOT USE_SYSTEM_OPENSSL)
+  if(EXISTS ${CMAKE_BINARY_DIR}/../openssl)
+    set(OPENSSL_DIR ${CMAKE_BINARY_DIR}/../openssl CACHE PATH "")
+  else()
+    set(OPENSSL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/openssl CACHE PATH "")
+  endif()
 
-# This are hints for the FindOpenSSL module.
-set(OPENSSL_ROOT_DIR ${OPENSSL_DIR} PARENT_SCOPE)
-set(OPENSSL_USE_STATIC_LIBS TRUE)
+  # This are hints for the FindOpenSSL module.
+  set(OPENSSL_ROOT_DIR ${OPENSSL_DIR} PARENT_SCOPE)
+  set(OPENSSL_USE_STATIC_LIBS TRUE)
+endif()

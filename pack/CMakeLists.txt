@@ -139,36 +139,38 @@ if(UNIX AND NOT APPLE)
 endif()
 
 # Install SSL libraries.
-if(NOT APPLE)
-  if(WIN32)
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-      set(SSL_LIB_SUFFIX "-1_1-x64.dll")
-    else()
-      set(SSL_LIB_SUFFIX "-1_1.dll")
-    endif()
-  else()
-    set(SSL_LIB_SUFFIX ".so.1.1")
-  endif()
-
-  foreach(SSL_LIB_NAME ssl crypto)
-    set(SSL_LIB "${OPENSSL_DIR}/lib${SSL_LIB_NAME}${SSL_LIB_SUFFIX}")
-
+if(NOT USE_SYSTEM_OPENSSL)
+  if(NOT APPLE)
     if(WIN32)
-      # Copy into build dir.
-      execute_process(COMMAND
-        ${CMAKE_COMMAND} -E copy_if_different
-          ${SSL_LIB} ${CMAKE_BINARY_DIR}
-      )
+      if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(SSL_LIB_SUFFIX "-1_1-x64.dll")
+      else()
+        set(SSL_LIB_SUFFIX "-1_1.dll")
+      endif()
+    else()
+      set(SSL_LIB_SUFFIX ".so.1.1")
     endif()
 
-    install(FILES ${SSL_LIB}
-      DESTINATION .
-      PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-        GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-      COMPONENT ${GITAHEAD_NAME}
-      OPTIONAL # if we use the system libssh, we have not built openssl
-    )
-  endforeach()
+    foreach(SSL_LIB_NAME ssl crypto)
+      set(SSL_LIB "${OPENSSL_DIR}/lib${SSL_LIB_NAME}${SSL_LIB_SUFFIX}")
+
+      if(WIN32)
+        # Copy into build dir.
+        execute_process(COMMAND
+          ${CMAKE_COMMAND} -E copy_if_different
+            ${SSL_LIB} ${CMAKE_BINARY_DIR}
+        )
+      endif()
+
+      install(FILES ${SSL_LIB}
+        DESTINATION .
+        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+          GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+        COMPONENT ${GITAHEAD_NAME}
+        OPTIONAL # if we use the system libssh, we have not built openssl
+      )
+    endforeach()
+  endif()
 endif()
 
 # Install config files.

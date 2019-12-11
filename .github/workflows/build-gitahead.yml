@@ -11,36 +11,48 @@ jobs:
             ninja_platform: mac
             qt_platform: mac
             arch: darwin64-x86_64-cc
+            cmake_env: {}
 
           - name: linux
             os: ubuntu-latest
             ninja_platform: linux
             qt_platform: linux
             arch: linux-x86_64
+            cmake_env: {}
 
-          # Needs a Perl implementation that uses UNIX style paths
-          # No such implementation is currently available for GitHub actions
-          # - name: windows
-          #   os: windows-latest
-          #   ninja_platform: win
-          #   qt_platform: windows
-          #   arch: VC-WIN64A
+          - name: windows
+            os: windows-latest
+            ninja_platform: win
+            qt_platform: windows
+            arch: VC-WIN64A
+            cmake_flags: "-DUSE_SYSTEM_OPENSSL=1"
+            cmake_env:
+              CC: cl
+              CXX: cl
 
       fail-fast: true
     steps:
     - name: Source code checkout
       uses: actions/checkout@v1
+
+    - name: Setup VS Dev Environment
+      if: matrix.env.name == 'windows'
+      uses: seanmiddleditch/gha-setup-vsdevenv@v1
+
     - name: Install Ninja
       uses: seanmiddleditch/gha-setup-ninja@v1
       with:
         version: 1.9.0
         platform: ${{ matrix.env.ninja_platform }} # [win, mac, linux]
         destination: _ninja_install
-    - name: Set up NASM (Windows only)
-      if: matrix.env.name == 'windows'
-      uses: ilammy/setup-nasm@v1.0.0
-      with:
-        platform: win64
+
+    # Required for building OpenSSL
+    # - name: Set up NASM (Windows only)
+    #   if: matrix.env.name == 'windows'
+    #   uses: ilammy/setup-nasm@v1.0.0
+    #   with:
+    #     platform: win64
+
     - name: Install Qt
       uses: jurplel/install-qt-action@v2.2.0
       with:
@@ -49,28 +61,38 @@ jobs:
         host: ${{ matrix.env.qtplatform }}
         install-deps: true
         modules: qtwebengine
+
     - name: Initialize Submodules
       uses: snickerbockers/submodules-init@v4
+
+    # Needs a Perl implementation that uses UNIX style paths on Windows
+    # No such implementation is currently available for GitHub actions
     - name: Build OpensSSL
+      if: matrix.env.name != 'windows'
       run: |
         cd dep/openssl/openssl
         perl Configure ${{ matrix.env.arch }} no-shared
         make
+
     - name: Configure Release
+      env: ${{ matrix.env.cmake_env }}
       run: |
         mkdir -p build/release
         cd build/release
-        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ../..
+        cmake ${{ matrix.env.cmake_flags }} -G Ninja -DCMAKE_BUILD_TYPE=Release ../..
+
     - name: Build Information
       run: |
         echo "ninja version: $(ninja --version)"
         git --version
         qmake --version
         cmake --version
+
     - name: Build
       run: |
         cd build/release
         ninja
+
     - name: Test
       if: false
       # TODO: Disable ui tests in headless environment or find a way to send tests to an external browser, ninja check
