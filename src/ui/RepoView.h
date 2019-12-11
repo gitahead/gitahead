@@ -160,12 +160,20 @@ public:
     bool interactive = true,
     LogEntry *parent = nullptr,
     QStringList *submodules = nullptr);
+  QFuture<git::Result> fetch(
+    const git::Remote &remote,
+    bool tags,
+    bool interactive,
+    LogEntry *parent,
+    QStringList *submodules,
+    bool prune);
 
   // pull
   void pull(
     MergeFlags flags = Default,
     const git::Remote &remote = git::Remote(),
-    bool tags = false);
+    bool tags = false,
+    bool prune = false);
   void merge(
     MergeFlags flags,
     const git::Reference &ref = git::Reference(),

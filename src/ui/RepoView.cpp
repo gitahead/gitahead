@@ -951,7 +951,10 @@ void RepoView::startFetchTimer()
   if (!config.value<bool>("autofetch.enable", enable))
     return;
 
-  fetch(git::Remote(), false, false);
+  bool prune = settings->value("global/autoprune/enable").toBool();
+  fetch(git::Remote(), false, false, nullptr, nullptr,
+    config.value<bool>("autoprune.enable", prune));
+
   mFetchTimer.start(config.value<int>("autofetch.minutes", minutes) * 60 * 1000);
 }
 
@@ -980,11 +983,26 @@ QFuture<git::Result> RepoView::fetch(
   LogEntry *parent,
   QStringList *submodules)
 {
+  bool prune = Settings::instance()->value("global/autoprune/enable").toBool();
+    git::Config config = mRepo.appConfig();
+
+  return fetch(rmt, tags, interactive, parent, submodules,
+    config.value<bool>("autoprune.enable", prune));
+}
+
+QFuture<git::Result> RepoView::fetch(
+  const git::Remote &rmt,
+  bool tags,
+  bool interactive,
+  LogEntry *parent,
+  QStringList *submodules,
+  bool prune)
+{
   if (mWatcher) {
     // Queue fetch.
     connect(mWatcher, &QFutureWatcher<git::Result>::finished, mWatcher,
-    [this, rmt, tags, interactive, parent, submodules] {
-      fetch(rmt, tags, interactive, parent, submodules);
+    [this, rmt, tags, interactive, parent, submodules, prune] {
+      fetch(rmt, tags, interactive, parent, submodules, prune);
     });
 
     return QFuture<git::Result>();
@@ -1040,8 +1058,8 @@ QFuture<git::Result> RepoView::fetch(
           this, &RepoView::notifyReferenceUpdated);
 
   entry->setBusy(true);
-  mWatcher->setFuture(QtConcurrent::run([this, remote, tags, submodules] {
-    git::Result result = git::Remote(remote).fetch(mCallbacks, tags);
+  mWatcher->setFuture(QtConcurrent::run([this, remote, tags, submodules, prune] {
+    git::Result result = git::Remote(remote).fetch(mCallbacks, tags, prune);
 
     if (result && submodules) {
       // Scan for unmodified submodules on the fetch thread.
@@ -1060,7 +1078,8 @@ QFuture<git::Result> RepoView::fetch(
 void RepoView::pull(
   MergeFlags flags,
   const git::Remote &rmt,
-  bool tags)
+  bool tags,
+  bool prune)
 {
   if (mWatcher) {
     // Queue pull.
@@ -1132,7 +1151,7 @@ void RepoView::pull(
     merge(mf, git::Reference(), git::AnnotatedCommit(), entry, callback);
   });
 
-  watcher->setFuture(fetch(remote, tags, true, entry, submodules));
+  watcher->setFuture(fetch(remote, tags, true, entry, submodules, prune));
   if (watcher->isCanceled()) {
     delete watcher;
     delete submodules;

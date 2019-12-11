@@ -191,7 +191,7 @@ public:
   QString url() const;
   void setUrl(const QString &url);
 
-  Result fetch(Callbacks *callbacks, bool tags = false);
+  Result fetch(Callbacks *callbacks, bool tags = false, bool prune = false);
   Result push(Callbacks *callbacks, const QStringList &refspecs);
   Result push(
     Callbacks *callbacks,
