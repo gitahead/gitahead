@@ -95,6 +95,7 @@ public:
 
     mPushCommit = new QCheckBox(tr("Push after each commit"), this);
     mPullUpdate = new QCheckBox(tr("Update submodules after pull"), this);
+    mAutoPrune = new QCheckBox(tr("Prune when fetching"), this);
 
     QFormLayout *form = new QFormLayout(this);
     form->addRow(tr("User name:"), mName);
@@ -102,6 +103,7 @@ public:
     form->addRow(tr("Automatic actions:"), fetchLayout);
     form->addRow(QString(), mPushCommit);
     form->addRow(QString(), mPullUpdate);
+    form->addRow(QString(), mAutoPrune);
 
     init();
 
@@ -132,6 +134,10 @@ public:
     connect(mPullUpdate, &QCheckBox::toggled, [this](bool checked) {
       mRepo.appConfig().setValue("autoupdate.enable", checked);
     });
+
+    connect(mAutoPrune, &QCheckBox::toggled, [this](bool checked) {
+      mRepo.appConfig().setValue("autoprune.enable", checked);
+    });
   }
 
   void init()
@@ -150,6 +156,7 @@ public:
 
     bool push = settings->value("autopush/enable").toBool();
     bool update = settings->value("autoupdate/enable").toBool();
+    bool prune = settings->value("autoprune/enable").toBool();
     settings->endGroup();
 
     git::Config app = mRepo.appConfig();
@@ -157,6 +164,7 @@ public:
     mFetchMinutes->setValue(app.value<int>("autofetch.minutes", minutes));
     mPushCommit->setChecked(app.value<bool>("autopush.enable", push));
     mPullUpdate->setChecked(app.value<bool>("autoupdate.enable", update));
+    mAutoPrune->setChecked(app.value<bool>("autoprune.enable", prune));
   }
 
 private:
@@ -168,6 +176,7 @@ private:
   QSpinBox *mFetchMinutes;
   QCheckBox *mPushCommit;
   QCheckBox *mPullUpdate;
+  QCheckBox *mAutoPrune;
 };
 
 class RemotesPanel : public QWidget

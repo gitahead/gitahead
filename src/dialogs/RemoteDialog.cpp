@@ -8,6 +8,7 @@
 //
 
 #include "RemoteDialog.h"
+#include "conf/Settings.h"
 #include "git/Config.h"
 #include "git/Remote.h"
 #include "git/Repository.h"
@@ -95,7 +96,11 @@ RemoteDialog::RemoteDialog(Kind kind, RepoView *parent)
     mRefs->select(repo.head());
 
   } else {
+    bool autoPrune = Settings::instance()->value("global/autoprune/enable").toBool();
+    git::Config config = repo.appConfig();
+
     prune = new QCheckBox(tr("Prune references"), this);
+    prune->setChecked(config.value<bool>("autoprune.enable", autoPrune));
   }
 
   QString button;

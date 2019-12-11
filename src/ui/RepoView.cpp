@@ -946,7 +946,10 @@ void RepoView::startFetchTimer()
   if (!config.value<bool>("autofetch.enable", enable))
     return;
 
-  fetch(git::Remote(), false, false);
+  bool prune = settings->value("global/autoprune/enable").toBool();
+  fetch(git::Remote(), false, false, nullptr, nullptr,
+    config.value<bool>("autoprune.enable", prune));
+
   mFetchTimer.start(config.value<int>("autofetch.minutes", minutes) * 60 * 1000);
 }
 
@@ -966,6 +969,20 @@ void RepoView::fetchAll()
   LogEntry *entry = addLogEntry(text, tr("Fetch All"));
   foreach (const git::Remote &remote, remotes)
     fetch(remote, false, true, entry);
+}
+
+QFuture<git::Result> RepoView::fetch(
+  const git::Remote &rmt,
+  bool tags,
+  bool interactive,
+  LogEntry *parent,
+  QStringList *submodules)
+{
+  bool prune = Settings::instance()->value("global/autoprune/enable").toBool();
+    git::Config config = mRepo.appConfig();
+
+  return fetch(rmt, tags, interactive, parent, submodules,
+    config.value<bool>("autoprune.enable", prune));
 }
 
 QFuture<git::Result> RepoView::fetch(

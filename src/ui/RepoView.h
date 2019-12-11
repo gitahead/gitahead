@@ -159,8 +159,14 @@ public:
     bool tags = false,
     bool interactive = true,
     LogEntry *parent = nullptr,
-    QStringList *submodules = nullptr,
-    bool prune = false);
+    QStringList *submodules = nullptr);
+  QFuture<git::Result> fetch(
+    const git::Remote &remote,
+    bool tags,
+    bool interactive,
+    LogEntry *parent,
+    QStringList *submodules,
+    bool prune);
 
   // pull
   void pull(
