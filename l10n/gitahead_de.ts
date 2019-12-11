@@ -2960,7 +2960,7 @@ Konflikt zu beheben</translation>
 <context>
     <name>ReferenceList</name>
     <message>
-        <location filename="../src/ui/ReferenceList.cpp" line="168"/>
+        <location filename="../src/ui/ReferenceList.cpp" line="167"/>
         <source>Commit</source>
         <translation>Commit</translation>
     </message>
