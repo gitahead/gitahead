@@ -955,7 +955,7 @@ void RepoView::startFetchTimer()
   fetch(git::Remote(), false, false, nullptr, nullptr,
     config.value<bool>("autoprune.enable", prune));
 
-  mFetchTimer.start(config.value<int>("autofetch.minutes", minutes) * 60 * 1000);
+  mFetchTimer.start(config.value<int>("autofetch.minutes", minutes) * 60000);
 }
 
 void RepoView::fetchAll()
@@ -984,10 +984,8 @@ QFuture<git::Result> RepoView::fetch(
   QStringList *submodules)
 {
   bool prune = Settings::instance()->value("global/autoprune/enable").toBool();
-    git::Config config = mRepo.appConfig();
-
   return fetch(rmt, tags, interactive, parent, submodules,
-    config.value<bool>("autoprune.enable", prune));
+    mRepo.appConfig().value<bool>("autoprune.enable", prune));
 }
 
 QFuture<git::Result> RepoView::fetch(
