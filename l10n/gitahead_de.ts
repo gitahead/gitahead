@@ -4205,12 +4205,12 @@ Dies reverted den Commit %2.</translation>
 <context>
     <name>Repository</name>
     <message>
-        <location filename="../src/git/Repository.cpp" line="1063"/>
+        <location filename="../src/git/Repository.cpp" line="1064"/>
         <source>Unknown error</source>
         <translation>Unbekannter Fehler</translation>
     </message>
     <message>
-        <location filename="../src/git/Repository.cpp" line="1146"/>
+        <location filename="../src/git/Repository.cpp" line="1147"/>
         <source>git-lfs not found</source>
         <translation>git-lfs nicht gefunden</translation>
     </message>

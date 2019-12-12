@@ -4067,12 +4067,12 @@ This reverts commit %2.</source>
 <context>
     <name>Repository</name>
     <message>
-        <location filename="../src/git/Repository.cpp" line="1063"/>
+        <location filename="../src/git/Repository.cpp" line="1064"/>
         <source>Unknown error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/git/Repository.cpp" line="1146"/>
+        <location filename="../src/git/Repository.cpp" line="1147"/>
         <source>git-lfs not found</source>
         <translation type="unfinished"></translation>
     </message>
