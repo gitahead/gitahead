@@ -195,7 +195,7 @@ void MainWindow::installTouchBar()
 void MainWindow::updateTouchBar(int ahead, int behind)
 {
   NSView *view = reinterpret_cast<NSView *>(winId());
-  if ([view.window.delegate isKindOfClass:[TouchBarProvider class]]) {
+  if (view && [view.window.delegate isKindOfClass:[TouchBarProvider class]]) {
     TouchBarProvider *provider = (TouchBarProvider *) view.window.delegate;
     [provider updateRemoteAhead:ahead behind:behind];
   }
