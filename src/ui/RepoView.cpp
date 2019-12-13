@@ -1389,7 +1389,7 @@ void RepoView::mergeAbort(LogEntry *parent)
   }
 
   int state = mRepo.state();
-  if (!commit.reset(GIT_RESET_HARD, paths.toList()))
+  if (!commit.reset(GIT_RESET_HARD, paths.values()))
     return;
 
   QString text = tr("merge");

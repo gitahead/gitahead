@@ -269,7 +269,7 @@ QList<git::Commit> Index::commits(const QList<Posting> &postings) const
       commits.insert(commit);
   }
 
-  return commits.toList();
+  return commits.values();
 }
 
 QList<Index::Posting> Index::postings(const Term &term, bool positional) const

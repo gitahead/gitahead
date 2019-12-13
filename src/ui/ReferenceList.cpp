@@ -173,7 +173,7 @@ void ReferenceList::paintEvent(QPaintEvent *event)
       &painter, rect.adjusted(1, 0, -1, 0),
       QStyle::visualAlignment(opt.direction, Qt::AlignLeft | Qt::AlignVCenter),
       opt.palette, opt.state & QStyle::State_Enabled, text);
-    rect.setX(rect.x() + opt.fontMetrics.width(text));
+    rect.setX(rect.x() + opt.fontMetrics.horizontalAdvance(text));
     painter.restore();
   }
 
@@ -195,7 +195,7 @@ void ReferenceList::paintEvent(QPaintEvent *event)
 QSize ReferenceList::calculateSizeHint() const
 {
   const QFontMetrics &fm = fontMetrics();
-  int width = 24 * fm.width(QLatin1Char('x'));
+  int width = 24 * fm.horizontalAdvance(QLatin1Char('x'));
   int height = qMax(qCeil(QFontMetricsF(fm).height()), 14) + 2;
 
   // Adjust to contents.

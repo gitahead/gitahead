@@ -282,7 +282,7 @@ public:
       QString text = (mBadge > 999) ? tr("999+") : QString::number(mBadge);
       QFontMetrics fm = painter.fontMetrics();
 
-      int w = fm.width(text) + 8;
+      int w = fm.horizontalAdvance(text) + 8;
       QRect rect(width() - w - 2, 2, w, fm.lineSpacing() + 2);
 
       Theme *theme = Application::theme();

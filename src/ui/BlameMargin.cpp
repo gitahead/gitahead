@@ -16,6 +16,7 @@
 #include "git/Repository.h"
 #include "git/RevWalk.h"
 #include "git/Signature.h"
+#include <QDateTime>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QScrollBar>

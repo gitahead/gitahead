@@ -167,7 +167,7 @@ public:
     cursor.insertText(date.toString(Qt::DefaultLocaleLongDate));
 
     QTextBlockFormat indent;
-    indent.setLeftMargin(fontMetrics().width(' ') * kIndent);
+    indent.setLeftMargin(fontMetrics().horizontalAdvance(' ') * kIndent);
     cursor.insertBlock(indent);
 
     QTextCharFormat body;
@@ -1203,7 +1203,7 @@ private:
       if (it != comments.constEnd()) {
         QString whitespace(kIndent, ' ');
         QFont font = mEditor->styleFont(TextEditor::CommentBody);
-        int margin = QFontMetrics(font).width(' ') * kIndent * 2;
+        int margin = QFontMetrics(font).horizontalAdvance(' ') * kIndent * 2;
         int width = mEditor->textRectangle().width() - margin - 50;
 
         foreach (const QDateTime &key, it->keys()) {

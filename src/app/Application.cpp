@@ -191,7 +191,7 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   // Load SF Mono font from Terminal.app.
   QDir dir("/System/Applications");
   if (!dir.exists())
-    dir = "/Applications";
+    dir.setPath("/Applications");
   dir.cd("Utilities/Terminal.app/Contents/Resources/Fonts");
   foreach (const QString &name, dir.entryList({"SFMono-*.otf"}, QDir::Files))
     QFontDatabase::addApplicationFont(dir.filePath(name));

@@ -370,7 +370,7 @@ MenuBar::MenuBar(QWidget *parent)
   QMenu *lfs = repository->addMenu(tr("Git LFS"));
   mLfsUnlock = lfs->addAction(tr("Remove all locks"));
   connect(mLfsUnlock, &QAction::triggered, [this] {
-    view()->lfsSetLocked(view()->repo().lfsLocks().toList(), false);
+    view()->lfsSetLocked(view()->repo().lfsLocks().values(), false);
   });
 
   lfs->addSeparator();

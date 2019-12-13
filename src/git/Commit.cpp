@@ -99,7 +99,7 @@ QString Commit::description() const
         parents.insert(parent);
     }
 
-    commits = parents.toList();
+    commits = parents.values();
   }
 
   return QString();

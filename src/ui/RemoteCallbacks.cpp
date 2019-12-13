@@ -122,7 +122,7 @@ RemoteCallbacks::RemoteCallbacks(
     this, &RemoteCallbacks::queueDelta,
     this, &RemoteCallbacks::deltaImpl);
 
-  mTime.start();
+  mTimer.start();
 }
 
 void RemoteCallbacks::setCanceled(bool canceled)
@@ -165,10 +165,10 @@ void RemoteCallbacks::sideband(const QString &text)
 
 bool RemoteCallbacks::transfer(int total, int current, int bytes)
 {
-  int elapsed = mTime.elapsed();
+  int elapsed = mTimer.elapsed();
   if (current == 0 || current == total || elapsed > 100) {
     emit queueTransfer(total, current, bytes, elapsed);
-    mTime.restart();
+    mTimer.restart();
   }
 
   return !mCanceled;
@@ -176,9 +176,9 @@ bool RemoteCallbacks::transfer(int total, int current, int bytes)
 
 bool RemoteCallbacks::resolve(int total, int current)
 {
-  if (current == 0 || current == total || mTime.elapsed() > 100) {
+  if (current == 0 || current == total || mTimer.elapsed() > 100) {
     emit queueResolve(total, current);
-    mTime.restart();
+    mTimer.restart();
   }
 
   return !mCanceled;

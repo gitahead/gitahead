@@ -65,8 +65,8 @@
 #include <QAbstractScrollArea>
 #include <QAction>
 #include <QClipboard>
+#include <QElapsedTimer>
 #include <QPaintEvent>
-#include <QTime>
 
 #ifdef SCI_NAMESPACE
 namespace Scintilla {
@@ -180,7 +180,7 @@ private:
     sptr_t ptr, unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
 private:
-  QTime time;
+  QElapsedTimer timer;
 
   int preeditPos = -1;
   QString preeditString;
