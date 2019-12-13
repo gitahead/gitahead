@@ -8,7 +8,6 @@
 //
 
 #include "Footer.h"
-#include "app/Application.h"
 #include <QHBoxLayout>
 #include <QMenu>
 #include <QPainter>
@@ -80,10 +79,7 @@ protected:
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-    QPalette palette = Application::theme()->footer();
-    QColor color = isEnabled() ?
-      palette.color(QPalette::ButtonText) :
-      palette.color(QPalette::Disabled, QPalette::ButtonText);
+    QColor color = opt.palette.buttonText().color();
     painter.setPen(QPen(color, 2));
     painter.drawPath(path);
   }

@@ -66,6 +66,7 @@ public:
     Timestamp
   };
 
+  Theme();
   virtual ~Theme() = default;
 
   virtual QDir dir() const;
@@ -80,17 +81,18 @@ public:
   virtual QPalette commitList();
   virtual QColor diff(Diff color);
   virtual QPalette fileList();
-  virtual QPalette footer();
   virtual QColor heatMap(HeatMap color);
   virtual QColor remoteComment(Comment color);
-  virtual QPalette stars();
-  virtual QColor windowBrightText();
+  virtual QColor star();
 
   static void drawCloseButton(
     const QStyleOption *option,
     QPainter *painter);
 
   static Theme *create(const QString &name = QString());
+
+private:
+  bool mDark;
 };
 
 #endif

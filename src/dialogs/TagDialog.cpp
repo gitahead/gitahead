@@ -24,8 +24,10 @@
 TagDialog::TagDialog(
   const git::Repository &repo,
   const QString &id,
+  const git::Remote &remote,
   QWidget *parent)
-  : QDialog(parent)
+  : QDialog(parent),
+    mRemote(remote)
 {
   setAttribute(Qt::WA_DeleteOnClose);
 
@@ -35,6 +37,11 @@ TagDialog::TagDialog(
 
   mNameField = new QLineEdit(this);
   mForce = new QCheckBox(tr("Force (replace existing tag)"), this);
+
+  if (remote.isValid())
+    mPush = new QCheckBox(tr("Push to %1").arg(remote.name()), this);
+  else
+    mPush = nullptr;
 
   QCheckBox *annotated = new QCheckBox(tr("Annotated"), this);
   ExpandButton *expand = new ExpandButton(this);
@@ -81,6 +88,8 @@ TagDialog::TagDialog(
   layout->addRow(label);
   layout->addRow(tr("Name"), mNameField);
   layout->addRow(mForce);
+  if (mPush)
+    layout->addRow(mPush);
   layout->addRow(annotatedLayout);
   layout->addRow(mMessage);
   layout->addRow(buttons);
@@ -89,6 +98,14 @@ TagDialog::TagDialog(
 bool TagDialog::force() const
 {
   return mForce->isChecked();
+}
+
+git::Remote TagDialog::remote() const
+{
+  if (mPush && mPush->isChecked())
+    return mRemote;
+  else
+    return git::Remote();
 }
 
 QString TagDialog::name() const

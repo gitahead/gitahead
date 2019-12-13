@@ -50,7 +50,7 @@ Id::operator const git_oid *() const
 
 bool Id::isNull() const
 {
-  return git_oid_iszero(&d);
+  return git_oid_is_zero(&d);
 }
 
 bool Id::isValid() const

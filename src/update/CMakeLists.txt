@@ -15,7 +15,7 @@ add_library(update
 
 target_link_libraries(update
   conf
-  libcmark_static
+  ${LIBCMARK_LIBRARIES}
   Qt5::Network
   Qt5::Widgets
   ${UPDATER_IMPL_LIBS}

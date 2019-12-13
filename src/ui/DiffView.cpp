@@ -439,6 +439,8 @@ protected:
 
 class Images : public QWidget
 {
+  Q_OBJECT
+
 public:
   Images(
     const git::Patch patch,
@@ -623,11 +625,11 @@ public:
       if (patch.isConflicted()) {
         mSave = new QToolButton(this);
         mSave->setObjectName("ConflictSave");
-        mSave->setText(tr("Save"));
+        mSave->setText(HunkWidget::tr("Save"));
 
         mUndo = new QToolButton(this);
         mUndo->setObjectName("ConflictUndo");
-        mUndo->setText(tr("Undo"));
+        mUndo->setText(HunkWidget::tr("Undo"));
         connect(mUndo, &QToolButton::clicked, [this] {
           mSave->setVisible(false);
           mUndo->setVisible(false);
@@ -638,7 +640,7 @@ public:
         mOurs = new QToolButton(this);
         mOurs->setObjectName("ConflictOurs");
         mOurs->setStyleSheet(buttonStyle(Theme::Diff::Ours));
-        mOurs->setText(tr("Use Ours"));
+        mOurs->setText(HunkWidget::tr("Use Ours"));
         connect(mOurs, &QToolButton::clicked, [this] {
           mSave->setVisible(true);
           mUndo->setVisible(true);
@@ -649,7 +651,7 @@ public:
         mTheirs = new QToolButton(this);
         mTheirs->setObjectName("ConflictTheirs");
         mTheirs->setStyleSheet(buttonStyle(Theme::Diff::Theirs));
-        mTheirs->setText(tr("Use Theirs"));
+        mTheirs->setText(HunkWidget::tr("Use Theirs"));
         connect(mTheirs, &QToolButton::clicked, [this] {
           mSave->setVisible(true);
           mUndo->setVisible(true);
@@ -659,30 +661,30 @@ public:
       }
 
       EditButton *edit = new EditButton(patch, index, false, lfs, this);
-      edit->setToolTip(tr("Edit Hunk"));
+      edit->setToolTip(HunkWidget::tr("Edit Hunk"));
 
       // Add discard button.
       DiscardButton *discard = nullptr;
       if (diff.isStatusDiff() && !submodule && !patch.isConflicted()) {
         discard = new DiscardButton(this);
-        discard->setToolTip(tr("Discard Hunk"));
+        discard->setToolTip(HunkWidget::tr("Discard Hunk"));
         connect(discard, &DiscardButton::clicked, [this, patch, index] {
           QString name = patch.name();
           int line = patch.lineNumber(index, 0, git::Diff::NewFile);
 
-          QString title = tr("Discard Hunk?");
+          QString title = HunkWidget::tr("Discard Hunk?");
           QString text = patch.isUntracked() ?
-            tr("Are you sure you want to remove '%1'?").arg(name) :
-            tr("Are you sure you want to discard the "
+            HunkWidget::tr("Are you sure you want to remove '%1'?").arg(name) :
+            HunkWidget::tr("Are you sure you want to discard the "
                "hunk starting at line %1 in '%2'?").arg(line).arg(name);
 
           QMessageBox *dialog = new QMessageBox(
             QMessageBox::Warning, title, text, QMessageBox::Cancel, this);
           dialog->setAttribute(Qt::WA_DeleteOnClose);
-          dialog->setInformativeText(tr("This action cannot be undone."));
+          dialog->setInformativeText(HunkWidget::tr("This action cannot be undone."));
 
           QPushButton *discard =
-            dialog->addButton(tr("Discard Hunk"), QMessageBox::AcceptRole);
+            dialog->addButton(HunkWidget::tr("Discard Hunk"), QMessageBox::AcceptRole);
           connect(discard, &QPushButton::clicked, [this, patch, index] {
             git::Repository repo = patch.repo();
             if (patch.isUntracked()) {
@@ -715,10 +717,10 @@ public:
 
       mButton = new DisclosureButton(this);
       mButton->setToolTip(
-        mButton->isChecked() ? tr("Collapse Hunk") : tr("Expand Hunk"));
+        mButton->isChecked() ? HunkWidget::tr("Collapse Hunk") : HunkWidget::tr("Expand Hunk"));
       connect(mButton, &DisclosureButton::toggled, [this] {
         mButton->setToolTip(
-          mButton->isChecked() ? tr("Collapse Hunk") : tr("Expand Hunk"));
+          mButton->isChecked() ? HunkWidget::tr("Collapse Hunk") : HunkWidget::tr("Expand Hunk"));
       });
 
       QHBoxLayout *buttons = new QHBoxLayout;
@@ -1627,12 +1629,12 @@ public:
 
       // Add LFS buttons.
       if (lfs) {
-        Badge *lfsBadge = new Badge({Badge::Label(tr("LFS"), true)}, this);
+        Badge *lfsBadge = new Badge({Badge::Label(FileWidget::tr("LFS"), true)}, this);
         buttons->addWidget(lfsBadge);
 
         QToolButton *lfsLockButton = new QToolButton(this);
         bool locked = patch.repo().lfsIsLocked(patch.name());
-        lfsLockButton->setText(locked ? tr("Unlock") : tr("Lock"));
+        lfsLockButton->setText(locked ? FileWidget::tr("Unlock") : FileWidget::tr("Lock"));
         buttons->addWidget(lfsLockButton);
 
         connect(lfsLockButton, &QToolButton::clicked, [this, patch] {
@@ -1644,11 +1646,11 @@ public:
         connect(notifier, &git::RepositoryNotifier::lfsLocksChanged, this,
         [this, patch, lfsLockButton] {
           bool locked = patch.repo().lfsIsLocked(patch.name());
-          lfsLockButton->setText(locked ? tr("Unlock") : tr("Lock"));
+          lfsLockButton->setText(locked ? FileWidget::tr("Unlock") : FileWidget::tr("Lock"));
         });
 
         mLfsButton = new QToolButton(this);
-        mLfsButton->setText(tr("Show Object"));
+        mLfsButton->setText(FileWidget::tr("Show Object"));
         mLfsButton->setCheckable(true);
 
         buttons->addWidget(mLfsButton);
@@ -1657,33 +1659,33 @@ public:
 
       // Add edit button.
       mEdit = new EditButton(patch, -1, binary, lfs, this);
-      mEdit->setToolTip(tr("Edit File"));
+      mEdit->setToolTip(FileWidget::tr("Edit File"));
       buttons->addWidget(mEdit);
 
       // Add discard button.
       if (diff.isStatusDiff() && !submodule && !patch.isConflicted()) {
         DiscardButton *discard = new DiscardButton(this);
-        discard->setToolTip(tr("Discard File"));
+        discard->setToolTip(FileWidget::tr("Discard File"));
         buttons->addWidget(discard);
 
         connect(discard, &QToolButton::clicked, [this] {
           QString name = mPatch.name();
           bool untracked = mPatch.isUntracked();
           QString path = mPatch.repo().workdir().filePath(name);
-          QString arg = QFileInfo(path).isDir() ? tr("Directory") : tr("File");
+          QString arg = QFileInfo(path).isDir() ? FileWidget::tr("Directory") : FileWidget::tr("File");
           QString title =
-            untracked ? tr("Remove %1?").arg(arg) : tr("Discard Changes?");
+            untracked ? FileWidget::tr("Remove %1?").arg(arg) : FileWidget::tr("Discard Changes?");
           QString text = untracked ?
-            tr("Are you sure you want to remove '%1'?") :
-            tr("Are you sure you want to discard all changes in '%1'?");
+            FileWidget::tr("Are you sure you want to remove '%1'?") :
+            FileWidget::tr("Are you sure you want to discard all changes in '%1'?");
           QMessageBox *dialog = new QMessageBox(
             QMessageBox::Warning, title, text.arg(name),
             QMessageBox::Cancel, this);
           dialog->setAttribute(Qt::WA_DeleteOnClose);
-          dialog->setInformativeText(tr("This action cannot be undone."));
+          dialog->setInformativeText(FileWidget::tr("This action cannot be undone."));
 
           QString button =
-            untracked ? tr("Remove %1").arg(arg) : tr("Discard Changes");
+            untracked ? FileWidget::tr("Remove %1").arg(arg) : FileWidget::tr("Discard Changes");
           QPushButton *discard =
             dialog->addButton(button, QMessageBox::AcceptRole);
           connect(discard, &QPushButton::clicked, [this, untracked] {
@@ -1700,8 +1702,8 @@ public:
                 dir.remove(name);
               }
             } else if (!repo.checkout(git::Commit(), nullptr, {name}, strategy)) {
-              LogEntry *parent = view->addLogEntry(mPatch.name(), tr("Discard"));
-              view->error(parent, tr("discard"), mPatch.name());
+              LogEntry *parent = view->addLogEntry(mPatch.name(), FileWidget::tr("Discard"));
+              view->error(parent, FileWidget::tr("discard"), mPatch.name());
             }
 
             // FIXME: Work dir changed?
@@ -1714,10 +1716,10 @@ public:
 
       mDisclosureButton = new DisclosureButton(this);
       mDisclosureButton->setToolTip(
-        mDisclosureButton->isChecked() ? tr("Collapse File") : tr("Expand File"));
+        mDisclosureButton->isChecked() ? FileWidget::tr("Collapse File") : FileWidget::tr("Expand File"));
       connect(mDisclosureButton, &DisclosureButton::toggled, [this] {
         mDisclosureButton->setToolTip(
-          mDisclosureButton->isChecked() ? tr("Collapse File") : tr("Expand File"));
+          mDisclosureButton->isChecked() ? FileWidget::tr("Collapse File") : FileWidget::tr("Expand File"));
       });
       buttons->addWidget(mDisclosureButton);
 
@@ -1727,7 +1729,7 @@ public:
       // Respond to check changes.
       connect(mCheck, &QCheckBox::clicked, [this](bool staged) {
         mCheck->setChecked(!staged); // Allow index to decide.
-        mPatch.repo().index().setStaged({mPatch.name()}, staged);
+        mDiff.index().setStaged({mPatch.name()}, staged);
       });
 
       // Respond to index changes.
@@ -1758,8 +1760,7 @@ public:
     void contextMenuEvent(QContextMenuEvent *event) override
     {
       RepoView *view = RepoView::parentView(this);
-      FileContextMenu menu(view, {mPatch.name()},
-        mDiff.isStatusDiff() ? view->repo().index() : git::Index());
+      FileContextMenu menu(view, {mPatch.name()}, mDiff.index());
       menu.exec(event->globalPos());
     }
 
@@ -1768,7 +1769,7 @@ public:
     {
       bool disabled = false;
       Qt::CheckState state = Qt::Unchecked;
-      switch (mPatch.repo().index().isStaged(mPatch.name())) {
+      switch (mDiff.index().isStaged(mPatch.name())) {
         case git::Index::Disabled:
           disabled = true;
           break;
@@ -1808,7 +1809,7 @@ public:
     const git::Patch &patch,
     const git::Patch &staged,
     QWidget *parent = nullptr)
-    : QWidget(parent), mView(view), mPatch(patch)
+    : QWidget(parent), mView(view), mDiff(diff), mPatch(patch)
   {
     setObjectName("FileWidget");
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -1989,7 +1990,7 @@ public:
     for (int i = 0; i < mHunks.size(); ++i)
       hunks[i] = mHunks.at(i)->header()->check()->isChecked();
 
-    git::Index index = mPatch.repo().index();
+    git::Index index = mDiff.index();
     if (hunks == QBitArray(hunks.size(), true)) {
       index.setStaged({mPatch.name()}, true);
       return;
@@ -2013,6 +2014,8 @@ signals:
 
 private:
   DiffView *mView;
+
+  git::Diff mDiff;
   git::Patch mPatch;
 
   Header *mHeader;

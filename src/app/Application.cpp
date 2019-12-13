@@ -29,6 +29,7 @@
 #include <QSettings>
 #include <QSysInfo>
 #include <QTimer>
+#include <QTranslator>
 #include <QUrlQuery>
 #include <QUuid>
 
@@ -156,6 +157,29 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   setStyle(mTheme->style());
   setStyleSheet(mTheme->styleSheet());
 
+  // Load translation files.
+  QDir l10n = Settings::l10nDir();
+  QString name = QString(GITAHEAD_NAME).toLower();
+  QTranslator *translator = new QTranslator(this);
+  if (translator->load(QLocale(), name, "_", l10n.absolutePath())) {
+    installTranslator(translator);
+  } else {
+    delete translator;
+  }
+
+  // Load Qt translation file.
+  QTranslator *qt = new QTranslator(this);
+  if (qt->load(QLocale(), "qt", "_", l10n.absolutePath())) {
+    installTranslator(qt);
+  } else {
+    QDir dir(QT_TRANSLATIONS_DIR);
+    if (dir.exists() && qt->load(QLocale(), "qt", "_", dir.absolutePath())) {
+      installTranslator(qt);
+    } else {
+      delete qt;
+    }
+  }
+
   // Enable system proxy auto-detection.
   QNetworkProxyFactory::setUseSystemConfiguration(true);
 
@@ -165,8 +189,12 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   registerService();
 
   // Load SF Mono font from Terminal.app.
-  QDir dir("/Applications/Utilities/Terminal.app/Contents/Resources/Fonts");
-  QFontDatabase::addApplicationFont(dir.filePath("SFMono-Regular.otf"));
+  QDir dir("/System/Applications");
+  if (!dir.exists())
+    dir = "/Applications";
+  dir.cd("Utilities/Terminal.app/Contents/Resources/Fonts");
+  foreach (const QString &name, dir.entryList({"SFMono-*.otf"}, QDir::Files))
+    QFontDatabase::addApplicationFont(dir.filePath(name));
 
   // Don't quit on close.
   setQuitOnLastWindowClosed(false);
@@ -253,7 +281,7 @@ bool Application::restoreWindows()
     // Check for command line repo.
     QString arg = mPositionalArguments.first();
     if (QFileInfo(arg).isAbsolute()) {
-      dir = arg;
+      dir.setPath(arg);
     } else {
       dir.cd(arg);
     }

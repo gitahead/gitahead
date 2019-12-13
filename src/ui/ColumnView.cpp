@@ -167,7 +167,7 @@ public:
     // Draw badges.
     QString status = index.data(TreeModel::StatusRole).toString();
     if (!status.isEmpty()) {
-      QSize size = Badge::size(opt.font);
+      QSize size = Badge::size(painter->font());
       int width = size.width();
       int height = size.height();
 

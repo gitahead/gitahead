@@ -20,7 +20,7 @@
 struct git_cred;
 struct git_oid;
 struct git_remote;
-struct git_transfer_progress;
+struct git_indexer_progress;
 
 namespace git {
 
@@ -30,14 +30,16 @@ class Reference;
 class Remote
 {
 public:
-  struct PushUpdate {
+  struct PushUpdate
+  {
     QByteArray srcName;
     QByteArray dstName;
     Id srcId;
     Id dstId;
   };
 
-  class Callbacks {
+  class Callbacks
+  {
   public:
     enum State {
       Transfer,
@@ -45,9 +47,14 @@ public:
       Update
     };
 
-    Callbacks(const Repository &repo = Repository())
-      : mRepo(repo)
+    Callbacks(const QString &url, const Repository &repo = Repository())
+      : mUrl(url), mRepo(repo)
     {}
+
+    QString url() const
+    {
+      return mUrl;
+    }
 
     State state() const
     {
@@ -120,6 +127,14 @@ public:
     }
 
     // static callback wrappers
+    static int connect(
+      git_remote *remote,
+      void *payload);
+
+    static int disconnect(
+      git_remote *remote,
+      void *payload);
+
     static int sideband(
       const char *str,
       int len,
@@ -139,7 +154,7 @@ public:
       void *payload);
 
     static int transfer(
-      const git_transfer_progress *stats,
+      const git_indexer_progress *stats,
       void *payload);
 
     static int update(
@@ -150,14 +165,19 @@ public:
 
     static int url(
       git_buf *out,
-      git_remote *remote,
-      git_direction direction,
+      const char *url,
+      int direction,
       void *payload);
 
   protected:
+    // Try to stop the current remote.
+    void stop();
+
+    QString mUrl;
     Repository mRepo;
     State mState = Transfer;
     QSet<QString> mAgentNames;
+    git_remote *mRemote = nullptr;
   };
 
   Remote();
@@ -171,7 +191,7 @@ public:
   QString url() const;
   void setUrl(const QString &url);
 
-  Result fetch(Callbacks *callbacks, bool tags = false);
+  Result fetch(Callbacks *callbacks, bool tags = false, bool prune = false);
   Result push(Callbacks *callbacks, const QStringList &refspecs);
   Result push(
     Callbacks *callbacks,
@@ -179,9 +199,6 @@ public:
     const QString &dst = QString(),
     bool force = false,
     bool tags = false);
-
-  // Cancel the current operation.
-  void stop();
 
   static Result clone(
     Callbacks *callbacks,

@@ -100,8 +100,8 @@ public:
 
   // status/diff
   Diff status(
-    const Index &index = Index(),
-    Diff::Callbacks *callbacks = nullptr) const;
+    const Index &index,
+    Diff::Callbacks *callbacks) const;
   Diff diffTreeToIndex(
     const Tree &tree,
     const Index &index = Index()) const;
@@ -249,8 +249,8 @@ private:
     git_repository *repo;
     RepositoryNotifier *notifier;
 
-    QStringList submoduleNames;
-    bool submoduleNamesCached = false;
+    QStringList submodules;
+    bool submodulesCached = false;
 
     QSet<QString> lfsLocks;
     bool lfsLocksCached = false;
@@ -260,6 +260,8 @@ private:
 
   Repository(git_repository *repo);
   operator git_repository *() const;
+
+  void ensureSubmodulesCached() const;
 
   QByteArray lfsExecute(
     const QStringList &args,

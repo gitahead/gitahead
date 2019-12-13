@@ -34,6 +34,7 @@ NewBranchDialog::NewBranchDialog(
   mUpstream = new ReferenceList(repo, kinds, this);
 
   mRefs = new ReferenceList(repo, ReferenceView::AllRefs, this);
+  mRefs->select(repo.head());
   mRefs->setCommit(commit);
 
   mCheckout = new QCheckBox(tr("Checkout branch"), this);

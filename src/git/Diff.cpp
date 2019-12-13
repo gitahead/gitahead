@@ -72,12 +72,12 @@ bool Diff::isConflicted() const
 
 bool Diff::isStatusDiff() const
 {
-  return d->status;
+  return d->index.isValid();
 }
 
-void Diff::setStatusDiff(bool enabled)
+void Diff::setIndex(const Index &index)
 {
-  d->status = enabled;
+  d->index = index;
 }
 
 int Diff::count() const
@@ -155,6 +155,14 @@ void Diff::sort(SortRole role, Qt::SortOrder order)
       }
     }
   });
+}
+
+void Diff::setAllStaged(bool staged, bool yieldFocus)
+{
+  QStringList paths;
+  for (int i = 0; i < count(); ++i)
+    paths.append(name(i));
+  index().setStaged(paths, staged);
 }
 
 char Diff::statusChar(git_delta_t status)

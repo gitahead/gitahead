@@ -291,7 +291,8 @@ void ScintillaQt::keyPressEvent(QKeyEvent *event)
   bool alt   = QApplication::keyboardModifiers() & Qt::AltModifier;
 
   bool consumed = false;
-  bool added = KeyDown(key, shift, ctrl, alt, &consumed) != 0;
+  bool added = KeyDownWithModifiers(
+    key, ModifierFlags(shift, ctrl, alt), &consumed);
   if (!consumed)
     consumed = added;
 
@@ -361,7 +362,8 @@ void ScintillaQt::mousePressEvent(QMouseEvent *event)
     bool alt = QApplication::keyboardModifiers() & Qt::AltModifier;
 #endif
 
-    ButtonDown(pos, time.elapsed(), shift, ctrl, alt);
+    ButtonDownWithModifiers(
+      pos, time.elapsed(), ModifierFlags(shift, ctrl, alt));
   }
 }
 
@@ -370,7 +372,8 @@ void ScintillaQt::mouseReleaseEvent(QMouseEvent *event)
   Point point = PointFromQPoint(event->pos());
   bool ctrl  = QApplication::keyboardModifiers() & Qt::ControlModifier;
   if (event->button() == Qt::LeftButton)
-    ButtonUp(point, time.elapsed(), ctrl);
+    ButtonUpWithModifiers(
+      point, time.elapsed(), ModifierFlags(false, ctrl, false));
 
   int pos = send(SCI_POSITIONFROMPOINT, point.x, point.y);
   int line = send(SCI_LINEFROMPOSITION, pos);
@@ -400,9 +403,7 @@ void ScintillaQt::mouseMoveEvent(QMouseEvent *event)
   bool alt   = QApplication::keyboardModifiers() & Qt::AltModifier;
 #endif
 
-  int modifiers = (shift ? SCI_SHIFT : 0) | (ctrl ? SCI_CTRL : 0) | (alt ? SCI_ALT : 0);
-
-  ButtonMoveWithModifiers(pos, modifiers);
+  ButtonMoveWithModifiers(pos, time.elapsed(), ModifierFlags(shift, ctrl, alt));
 }
 
 void ScintillaQt::contextMenuEvent(QContextMenuEvent *event)
@@ -428,7 +429,7 @@ void ScintillaQt::dragEnterEvent(QDragEnterEvent *event)
 
 void ScintillaQt::dragLeaveEvent(QDragLeaveEvent *event)
 {
-  SetDragPosition(SelectionPosition(invalidPosition));
+  SetDragPosition(SelectionPosition(Sci::invalidPosition));
 }
 
 void ScintillaQt::dragMoveEvent(QDragMoveEvent *event)
@@ -481,7 +482,7 @@ void ScintillaQt::DrawImeIndicator(int indicator, int len)
   if (indicator < 8 || indicator > INDIC_MAX) {
     return;
   }
-  pdoc->decorations.SetCurrentIndicator(indicator);
+  pdoc->decorations->SetCurrentIndicator(indicator);
   for (size_t r = 0; r < sel.Count(); ++r) {
     int positionInsert = sel.Range(r).Start().Position();
     pdoc->DecorationFillRange(positionInsert - len, 1, len);
@@ -493,12 +494,13 @@ void ScintillaQt::inputMethodEvent(QInputMethodEvent *event)
   // Copy & paste by johnsonj with a lot of helps of Neil
   // Great thanks for my forerunners, jiniya and BLUEnLIVE
 
+	bool initialCompose = false;
   if (pdoc->TentativeActive()) {
     pdoc->TentativeUndo();
   } else {
     // No tentative undo means start of this composition so
     // Fill in any virtual spaces.
-    FillVirtualSpace();
+		initialCompose = true;
   }
 
   view.imeCaretBlockOverride = false;
@@ -525,6 +527,8 @@ void ScintillaQt::inputMethodEvent(QInputMethodEvent *event)
       return;
     }
 
+		if (initialCompose)
+			ClearBeforeTentativeStart();
     pdoc->TentativeStart(); // TentativeActive() from now on.
 
     // Mark segments and get ime caret position.
@@ -775,7 +779,7 @@ bool ScintillaQt::ValidCodePage(int codePage) const
   return (codePage == SC_CP_UTF8);
 }
 
-void ScintillaQt::ScrollText(int linesToMove)
+void ScintillaQt::ScrollText(Sci::Line linesToMove)
 {
   viewport()->scroll(0, vs.lineHeight * linesToMove);
 }
@@ -790,7 +794,7 @@ void ScintillaQt::SetHorizontalScrollPos()
   horizontalScrollBar()->setValue(xOffset);
 }
 
-bool ScintillaQt::ModifyScrollBars(int nMax, int nPage)
+bool ScintillaQt::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage)
 {
   bool modified = false;
 
@@ -990,11 +994,6 @@ void ScintillaQt::NotifyParent(SCNotification scn)
   }
 }
 
-bool ScintillaQt::FineTickerAvailable()
-{
-  return true;
-}
-
 bool ScintillaQt::FineTickerRunning(TickReason reason)
 {
   return timers[reason] != 0;
@@ -1094,7 +1093,7 @@ void ScintillaQt::StartDrag()
   }
 
   inDragDrop = ddNone;
-  SetDragPosition(SelectionPosition(invalidPosition));
+  SetDragPosition(SelectionPosition(Sci::invalidPosition));
 }
 
 void ScintillaQt::CreateCallTipWindow(PRectangle rc)

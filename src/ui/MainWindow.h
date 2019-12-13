@@ -69,6 +69,7 @@ protected:
   void dropEvent(QDropEvent *event) override;
 
 private:
+  void updateTabNames();
   void updateInterface();
   void updateWindowTitle(int ahead = -1, int behind = -1);
 

@@ -1,4 +1,4 @@
-set(SCINTILLA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/scintilla-3.6.0)
+set(SCINTILLA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/scintilla-3.10.6)
 
 add_library(scintilla
   ${SCINTILLA_DIR}/src/AutoComplete.cxx
@@ -27,6 +27,7 @@ add_library(scintilla
   ${SCINTILLA_DIR}/src/Selection.cxx
   ${SCINTILLA_DIR}/src/Style.cxx
   ${SCINTILLA_DIR}/src/UniConversion.cxx
+  ${SCINTILLA_DIR}/src/UniqueString.cxx
   ${SCINTILLA_DIR}/src/ViewStyle.cxx
   ${SCINTILLA_DIR}/src/XPM.cxx
   ${SCINTILLA_DIR}/lexlib/Accessor.cxx
@@ -61,3 +62,5 @@ target_link_libraries(scintilla
 set_target_properties(scintilla PROPERTIES
   AUTOMOC ON
 )
+
+set(SCINTILLUA_LEXERS_DIR ${SCINTILLA_DIR}/lexlua CACHE INTERNAL "")

@@ -53,9 +53,8 @@ ReferenceList::ReferenceList(
   setRootModelIndex(model->index(0, 0));
   setCurrentIndex(0);
 
-  using Signal = void (QComboBox::*)(int);
-  auto signal = static_cast<Signal>(&QComboBox::currentIndexChanged);
-  connect(this, signal, [this](int index) {
+  connect(this, QOverload<int>::of(&QComboBox::currentIndexChanged),
+  [this](int index) {
     if (index >= 0)
       emit referenceSelected(currentReference());
   });

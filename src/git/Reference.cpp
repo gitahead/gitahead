@@ -74,7 +74,7 @@ bool Reference::isStash() const
   return (qualifiedName() == "refs/stash");
 }
 
-QString Reference::name() const
+QString Reference::name(bool decorateDetachedHead) const
 {
   if (isBranch()) {
     const char *name = nullptr;
@@ -82,8 +82,10 @@ QString Reference::name() const
   }
 
   Commit commit = target();
-  if (isDetachedHead() && commit.isValid())
-    return QObject::tr("HEAD detached at %1").arg(commit.detachedHeadName());
+  if (isDetachedHead() && commit.isValid()) {
+    QString name = commit.detachedHeadName();
+    return !decorateDetachedHead ? name : tr("HEAD detached at %1").arg(name);
+  }
 
   // Get shorthand.
   return git_reference_shorthand(d.data());

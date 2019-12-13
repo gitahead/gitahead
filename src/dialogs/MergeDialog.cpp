@@ -141,9 +141,10 @@ QString MergeDialog::labelText() const
   else
     fmt = tr("Choose a reference to squash into '%1'.");
 
-  git::Branch head = mRepo.head();
+  git::Reference head = mRepo.head();
   Q_ASSERT(head.isValid());
-  return fmt.arg(head.name());
+
+  return fmt.arg(head.name(false));
 }
 
 QString MergeDialog::buttonText() const

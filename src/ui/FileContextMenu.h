@@ -19,6 +19,8 @@ class RepoView;
 
 class FileContextMenu : public QMenu
 {
+  Q_OBJECT
+
 public:
   FileContextMenu(
     RepoView *view,

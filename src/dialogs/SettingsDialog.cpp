@@ -8,6 +8,7 @@
 //
 
 #include "SettingsDialog.h"
+#include "AboutDialog.h"
 #include "DiffPanel.h"
 #include "ExternalToolsDialog.h"
 #include "PluginsPanel.h"
@@ -52,8 +53,6 @@
 
 namespace {
 
-namespace {
-
 void populateExternalTools(QComboBox *comboBox, const QString &type)
 {
   comboBox->clear();
@@ -72,8 +71,6 @@ void populateExternalTools(QComboBox *comboBox, const QString &type)
   foreach (const QString &tool, names)
     comboBox->addItem(tool);
 }
-
-} // anon. namespace
 
 class StackedWidget : public QStackedWidget
 {
@@ -95,6 +92,8 @@ public:
 
 class GeneralPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   GeneralPanel(QWidget *parent = nullptr)
     : QWidget(parent)
@@ -115,9 +114,17 @@ public:
 
     mPushCommit = new QCheckBox(tr("Push after each commit"), this);
     mPullUpdate = new QCheckBox(tr("Update submodules after pull"), this);
+    mAutoPrune = new QCheckBox(tr("Prune when fetching"), this);
 
     mStoreCredentials = new QCheckBox(
       tr("Store credentials in secure storage"), this);
+
+    mUsageReporting = new QCheckBox(
+      tr("Allow collection of usage data"), this);
+    QLabel *privacy = new QLabel(tr("<a href='view'>View privacy policy</a>"));
+    connect(privacy, &QLabel::linkActivated, [] {
+      AboutDialog::openSharedInstance(AboutDialog::Privacy);
+    });
 
     QFormLayout *form = new QFormLayout;
     form->addRow(tr("User name:"), mName);
@@ -125,7 +132,10 @@ public:
     form->addRow(tr("Automatic actions:"), fetchLayout);
     form->addRow(QString(), mPushCommit);
     form->addRow(QString(), mPullUpdate);
+    form->addRow(QString(), mAutoPrune);
     form->addRow(tr("Credentials:"), mStoreCredentials);
+    form->addRow(tr("Usage reporting:"), mUsageReporting);
+    form->addRow(QString(), privacy);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(16,12,16,12);
@@ -163,9 +173,17 @@ public:
       Settings::instance()->setValue("global/autoupdate/enable", checked);
     });
 
+    connect(mAutoPrune, &QCheckBox::toggled, [](bool checked) {
+      Settings::instance()->setValue("global/autoprune/enable", checked);
+    });
+
     connect(mStoreCredentials, &QCheckBox::toggled, [](bool checked) {
       Settings::instance()->setValue("credential/store", checked);
       delete CredentialHelper::instance();
+    });
+
+    connect(mUsageReporting, &QCheckBox::toggled, [](bool checked) {
+      Settings::instance()->setValue("tracking/enabled", checked);
     });
   }
 
@@ -184,9 +202,11 @@ public:
 
     mPushCommit->setChecked(settings->value("autopush/enable").toBool());
     mPullUpdate->setChecked(settings->value("autoupdate/enable").toBool());
+    mPullUpdate->setChecked(settings->value("autoprune/enable").toBool());
     settings->endGroup();
 
     mStoreCredentials->setChecked(settings->value("credential/store").toBool());
+    mUsageReporting->setChecked(settings->value("tracking/enabled").toBool());
   }
 
 private:
@@ -197,11 +217,15 @@ private:
   QSpinBox *mFetchMinutes;
   QCheckBox *mPushCommit;
   QCheckBox *mPullUpdate;
+  QCheckBox *mAutoPrune;
   QCheckBox *mStoreCredentials;
+  QCheckBox *mUsageReporting;
 };
 
 class ToolsPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   ToolsPanel(QWidget *parent = nullptr)
     : QWidget(parent), mConfig(git::Config::global())
@@ -280,6 +304,8 @@ private:
 
 class WindowPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   WindowPanel(QWidget *parent = nullptr)
     : QWidget(parent)
@@ -484,6 +510,8 @@ public:
 
 class EditorPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   EditorPanel(QWidget *parent = nullptr)
     : QWidget(parent)
@@ -555,6 +583,8 @@ public:
 
 class UpdatePanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   UpdatePanel(QWidget *parent = nullptr)
     : QWidget(parent)
@@ -592,6 +622,8 @@ public:
 #ifdef Q_OS_UNIX
 class TerminalPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   TerminalPanel(QWidget *parent = nullptr)
     : QWidget(parent)
@@ -651,7 +683,7 @@ private:
 } // anon. namespace
 
 SettingsDialog::SettingsDialog(Index index, QWidget *parent)
-  : QMainWindow(parent)
+  : QMainWindow(parent, Qt::Dialog)
 {
   setMinimumWidth(500);
   setAttribute(Qt::WA_DeleteOnClose);
@@ -815,3 +847,5 @@ void SettingsDialog::openSharedInstance(Index index)
   dialog = new SettingsDialog(index);
   dialog->show();
 }
+
+#include "SettingsDialog.moc"

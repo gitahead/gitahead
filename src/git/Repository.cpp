@@ -115,12 +115,6 @@ int insert_stash_id(
   return 0;
 }
 
-int append_submodule_name(git_submodule *, const char *name, void *payload)
-{
-  reinterpret_cast<QStringList *>(payload)->append(name);
-  return 0;
-}
-
 } // anon. namespace
 
 QMap<git_repository *,QWeakPointer<Repository::Data>> Repository::registry;
@@ -198,7 +192,7 @@ QDir Repository::appDir() const
 Id Repository::workdirId(const QString &path) const
 {
   git_oid id;
-  if (git_blob_create_fromworkdir(&id, d->repo, path.toUtf8()))
+  if (git_blob_create_from_workdir(&id, d->repo, path.toUtf8()))
     return Id();
 
   return id;
@@ -301,7 +295,7 @@ Diff Repository::status(
 
   diff.merge(workdir);
   diff.findSimilar();
-  diff.setStatusDiff(true);
+  diff.setIndex(index);
 
   return diff.count() ? diff : Diff();
 }
@@ -596,6 +590,19 @@ Commit Repository::commit(
         message.toUtf8(), tree, parents.size(), parents.data()))
     return Commit();
 
+  // Cleanup merge state.
+  switch (state()) {
+    case GIT_REPOSITORY_STATE_NONE:
+    case GIT_REPOSITORY_STATE_MERGE:
+    case GIT_REPOSITORY_STATE_REVERT:
+    case GIT_REPOSITORY_STATE_CHERRYPICK:
+      cleanupState();
+      break;
+
+    default:
+      break;
+  }
+
   git_commit *commit = nullptr;
   git_commit_lookup(&commit, d->repo, &id);
   emit d->notifier->referenceUpdated(head());
@@ -641,19 +648,17 @@ void Repository::setCommitStarred(const Id &commit, bool starred)
 
 void Repository::invalidateSubmoduleCache()
 {
-  d->submoduleNames.clear();
-  d->submoduleNamesCached = false;
+  git_repository_submodule_cache_clear(d->repo);
+  d->submodules.clear();
+  d->submodulesCached = false;
 }
 
 QList<Submodule> Repository::submodules() const
 {
-  if (!d->submoduleNamesCached) {
-    git_submodule_foreach(d->repo, &append_submodule_name, &d->submoduleNames);
-    d->submoduleNamesCached = true;
-  }
+  ensureSubmodulesCached();
 
   QList<Submodule> submodules;
-  foreach (const QString &name, d->submoduleNames) {
+  foreach (const QString &name, d->submodules) {
     if (Submodule submodule = lookupSubmodule(name))
       submodules.append(submodule);
   }
@@ -661,10 +666,12 @@ QList<Submodule> Repository::submodules() const
   return submodules;
 }
 
-Submodule Repository::lookupSubmodule(const QString &path) const
+Submodule Repository::lookupSubmodule(const QString &name) const
 {
+  ensureSubmodulesCached();
+
   git_submodule *submodule = nullptr;
-  git_submodule_lookup(&submodule, d->repo, path.toUtf8());
+  git_submodule_lookup(&submodule, d->repo, name.toUtf8());
   return Submodule(submodule);
 }
 
@@ -1116,6 +1123,19 @@ void Repository::shutdown()
 RepositoryNotifier::RepositoryNotifier(QObject *parent)
   : QObject(parent)
 {}
+
+void Repository::ensureSubmodulesCached() const
+{
+  if (!d->submodulesCached) {
+    d->submodulesCached = true;
+    git_submodule_foreach(d->repo,
+    [](git_submodule *, const char *name, void *payload) {
+      reinterpret_cast<QStringList *>(payload)->append(name);
+      return 0;
+    }, &d->submodules);
+    git_repository_submodule_cache_all(d->repo);
+  }
+}
 
 QByteArray Repository::lfsExecute(
   const QStringList &args,

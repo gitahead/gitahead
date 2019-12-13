@@ -57,6 +57,7 @@ target_compile_definitions(app
     GITAHEAD_VERSION="${GITAHEAD_VERSION}"
   PRIVATE
     GITAHEAD_TRACKING_ID="${GITAHEAD_TRACKING_ID}"
+    QT_TRANSLATIONS_DIR="${QT_TRANSLATIONS_DIR}"
 )
 
 target_link_libraries(app
@@ -65,6 +66,10 @@ target_link_libraries(app
   ui
   update
   Qt5::Widgets
+)
+
+set_target_properties(app PROPERTIES
+  AUTOMOC ON
 )
 
 # Add main executable.

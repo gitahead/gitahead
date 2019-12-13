@@ -22,6 +22,8 @@
 #include "git/Submodule.h"
 #include <QApplication>
 #include <QCloseEvent>
+#include <QGuiApplication>
+#include <QScreen>
 #include <QCryptographicHash>
 #include <QDesktopWidget>
 #include <QMessageBox>
@@ -42,6 +44,28 @@ const QString kActiveKey = "active";
 const QString kSidebarKey = "sidebar";
 const QString kGeometryKey = "geometry";
 const QString kWindowsGroup = "windows";
+
+class TabName
+{
+public:
+  TabName(const QString &path)
+    : mPath(path)
+  {}
+
+  QString name() const
+  {
+    return mPath.section('/', -mSections);
+  }
+
+  void increment()
+  {
+    ++mSections;
+  }
+
+private:
+  QString mPath;
+  int mSections = 1;
+};
 
 } // anon. namespace
 
@@ -112,6 +136,11 @@ MainWindow::MainWindow(
     MenuBar::instance(this)->update();
   });
 
+  connect(tabs, QOverload<>::of(&TabWidget::tabInserted),
+          this, &MainWindow::updateTabNames);
+  connect(tabs, QOverload<>::of(&TabWidget::tabRemoved),
+          this, &MainWindow::updateTabNames);
+
   splitter->addWidget(new SideBar(tabs, splitter));
   splitter->addWidget(tabs);
   splitter->setCollapsible(1, false);
@@ -128,7 +157,7 @@ MainWindow::MainWindow(
   // Set default size and position.
   resize(kDefaultWidth, kDefaultHeight);
 
-  QRect desktop = QApplication::desktop()->availableGeometry();
+  QRect desktop = QGuiApplication::primaryScreen()->availableGeometry();
   int x = (desktop.width() / 2) - (kDefaultWidth / 2);
   int y = (desktop.height() / 2) - (kDefaultHeight / 2);
   move(x, y);
@@ -192,6 +221,15 @@ RepoView *MainWindow::addTab(const QString &path)
   if (path.isEmpty())
     return nullptr;
 
+  TabWidget *tabs = tabWidget();
+  for (int i = 0; i < tabs->count(); i++) {
+    RepoView *view = static_cast<RepoView *>(tabs->widget(i));
+    if (path == view->repo().workdir().path()) {
+      tabs->setCurrentIndex(i);
+      return view;
+    }
+  }
+
   git::Repository repo = git::Repository::open(path, true);
   if (!repo.isValid()) {
     warnInvalidRepo(path);
@@ -207,6 +245,15 @@ RepoView *MainWindow::addTab(const git::Repository &repo)
   QDir dir = repo.workdir();
   RecentRepositories::instance()->add(dir.path());
 
+  TabWidget *tabs = tabWidget();
+  for (int i = 0; i < tabs->count(); i++) {
+    RepoView *view = static_cast<RepoView *>(tabs->widget(i));
+    if (dir.path() == view->repo().workdir().path()) {
+      tabs->setCurrentIndex(i);
+      return view;
+    }
+  }
+
   RepoView *view = new RepoView(repo, this);
   git::RepositoryNotifier *notifier = repo.notifier();
   connect(notifier, &git::RepositoryNotifier::referenceUpdated,
@@ -215,7 +262,6 @@ RepoView *MainWindow::addTab(const git::Repository &repo)
     updateWindowTitle();
   });
 
-  TabWidget *tabs = tabWidget();
   emit tabs->tabAboutToBeInserted();
   tabs->setCurrentIndex(tabs->addTab(view, dir.dirName()));
 
@@ -440,6 +486,29 @@ void MainWindow::warnInvalidRepo(const QString &path)
   QString title = tr("Invalid Git Repository");
   QString text = tr("%1 does not contain a valid git repository.");
   QMessageBox::warning(nullptr, title, text.arg(path));
+}
+
+void MainWindow::updateTabNames()
+{
+  QList<TabName> names;
+  for (int i = 0; i < count(); ++i) {
+    TabName name(view(i)->repo().workdir().path());
+    auto functor = [&name](const TabName &rhs) {
+      return (name.name() == rhs.name());
+    };
+
+    QList<TabName>::iterator it, end = names.end();
+    while ((it = std::find_if(names.begin(), end, functor)) != end) {
+      it->increment();
+      name.increment();
+    }
+
+    names.append(name);
+  }
+
+  TabWidget *tabs = tabWidget();
+  for (int i = 0; i < count(); ++i)
+    tabs->setTabText(i, names.at(i).name());
 }
 
 void MainWindow::updateInterface()

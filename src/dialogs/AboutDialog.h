@@ -12,12 +12,28 @@
 
 #include <QDialog>
 
+class QTabBar;
+
 class AboutDialog : public QDialog
 {
+  Q_OBJECT
+
 public:
+  enum Index
+  {
+    Changelog,
+    Acknowledgments,
+    Privacy
+  };
+
   AboutDialog(QWidget *parent = nullptr);
 
-  static void openSharedInstance();
+  static void openSharedInstance(Index index = Changelog);
+
+private:
+  void setCurrentIndex(Index index);
+
+  QTabBar *mTabs;
 };
 
 #endif

@@ -42,7 +42,6 @@ theme['widget']    = {
 -- { default, active, inactive, disabled }
 theme['window']    = {
   text             = '#E1E5F2',
-  bright_text      = '#AAB2BE',
   background       = '#2D2E34'
 }
 
@@ -138,12 +137,6 @@ theme['diff']      = {
   error            = '#7E494B'  -- error background
 }
 
--- list view footer colors
--- { default, active, inactive, disabled }
-theme['footer']    = {
-  button           = { active = '#D6DAE0', disabled = '#728094' },
-}
-
 -- link colors
 -- { default, active, inactive, disabled }
 theme['link']      = {
@@ -157,6 +150,13 @@ theme['menubar']   = {
   background       = '#F0F0F0'
 }
 
+-- tabbar background color (uncomment lines to customize)
+theme['tabbar']   = {
+  -- text             = theme['widget']['text'],
+  -- base             = theme['palette']['dark'],
+  -- selected         = theme['window']['background'],
+}
+
 -- remote comment colors
 theme['comment']   = {
   background       = '#212228',
@@ -166,7 +166,6 @@ theme['comment']   = {
 }
 
 -- star fill color
--- { default, active, inactive, disabled }
 theme['star']      = {
   fill             = '#FFFFFF'
 }
@@ -189,6 +188,20 @@ theme['tooltip']   = {
 -- Symbolic style names are allowed:
 --   $(style.name)
 -- http://www.scintilla.org/MyScintillaDoc.html#Styling
+
+-- colors
+theme.property['color.red']          = '#994D4D'
+theme.property['color.yellow']       = '#99994D'
+theme.property['color.green']        = '#4D994D'
+theme.property['color.teal']         = '#4D9999'
+theme.property['color.purple']       = '#994D99'
+theme.property['color.orange']       = '#E6994D'
+theme.property['color.blue']         = '#4D99E6'
+theme.property['color.black']        = '#1A1A1A'
+theme.property['color.grey']         = '#808080'
+theme.property['color.white']        = '#E6E6E6'
+
+-- styles
 theme.property['style.bracebad']     = 'fore:#CC8080'
 theme.property['style.bracelight']   = 'fore:#80CCFF'
 theme.property['style.calltip']      = 'fore:#AAB2BE,back:#333333'

@@ -94,6 +94,12 @@ public:
   void commit();
   bool isCommitEnabled() const;
 
+  // stage / unstage
+  void stage();
+  bool isStageEnabled() const;
+  void unstage();
+  bool isUnstageEnabled() const;
+
   // mode
   ViewMode viewMode() const;
   void setViewMode(ViewMode mode);
@@ -148,18 +154,27 @@ public:
   void startFetchTimer();
 
   // fetch
+  void fetchAll();
   QFuture<git::Result> fetch(
     const git::Remote &remote = git::Remote(),
     bool tags = false,
     bool interactive = true,
     LogEntry *parent = nullptr,
     QStringList *submodules = nullptr);
+  QFuture<git::Result> fetch(
+    const git::Remote &remote,
+    bool tags,
+    bool interactive,
+    LogEntry *parent,
+    QStringList *submodules,
+    bool prune);
 
   // pull
   void pull(
     MergeFlags flags = Default,
     const git::Remote &remote = git::Remote(),
-    bool tags = false);
+    bool tags = false,
+    bool prune = false);
   void merge(
     MergeFlags flags,
     const git::Reference &ref = git::Reference(),
@@ -200,7 +215,10 @@ public:
   void cherryPick(const git::Commit &commit);
 
   // push
-  void promptToForcePush();
+  void promptToForcePush(
+    const git::Remote &remote = git::Remote(),
+    const git::Reference &src = git::Reference());
+
   void push(
     const git::Remote &remote = git::Remote(),
     const git::Reference &src = git::Reference(),
@@ -249,8 +267,11 @@ public:
   void promptToReset(
     const git::Commit &commit,
     git_reset_t type,
-    const QString &message = QString());
-  void reset(const git::Commit &commit, git_reset_t type);
+    const git::Commit &commitToAmend = git::Commit());
+  void reset(
+    const git::Commit &commit,
+    git_reset_t type,
+    const git::Commit &commitToAmend = git::Commit());
 
   // submodule
   void updateSubmodules(

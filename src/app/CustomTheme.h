@@ -32,11 +32,9 @@ public:
   QPalette commitList() override;
   QColor diff(Diff color) override;
   QPalette fileList() override;
-  QPalette footer() override;
   QColor heatMap(HeatMap color) override;
   QColor remoteComment(Comment color) override;
-  QPalette stars() override;
-  QColor windowBrightText() override;
+  QColor star() override;
 
   QVariantMap checkbox() const;
   void polishWindow(QWindow *window) const;

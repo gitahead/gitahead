@@ -54,6 +54,14 @@ private:
 
 } // anon. namespace
 
+Theme::Theme()
+{
+  QPalette palette;
+  QColor base = palette.color(QPalette::Base);
+  QColor text = palette.color(QPalette::Text);
+  mDark = (text.lightnessF() > base.lightnessF());
+}
+
 QDir Theme::dir() const
 {
   QDir dir = Settings::confDir();
@@ -73,47 +81,186 @@ QStyle *Theme::style() const
 
 QString Theme::styleSheet() const
 {
-  QString styleSheet =
-    "AdvancedSearchWidget QLabel {"
-    "  color: #646464"
-    "}"
+  if (mDark) {
+    return
+      "QSplitter::handle {"
+      "  border-left: 1px solid palette(light)"
+      "}"
 
+      "ColumnView, ColumnView QAbstractItemView {"
+      "  background: palette(base);"
+      "  border-right: 1px solid palette(light)"
+      "}"
+
+      "DetailView QStackedWidget {"
+      "  background: palette(base)"
+      "}"
+      "DetailView #separator {"
+      "  border-top: 1px solid palette(light)"
+      "}"
+      "CommitEditor {"
+      "  background: palette(window)"
+      "}"
+
+      "DiffView {"
+      "  background: palette(mid)"
+      "}"
+      "DiffView .QFrame {"
+      "  background: palette(midlight)"
+      "}"
+      "DiffView HunkWidget {"
+      "  background: palette(base)"
+      "}"
+      "DiffView HunkWidget QLabel {"
+      "  color: palette(bright-text)"
+      "}"
+
+      "FileList {"
+      "  border-top: 1px solid palette(light)"
+      "}"
+      "FileList QToolButton:pressed {"
+      "  background: #6C6C6C"
+      "}"
+
+      "FindWidget {"
+      "  background: palette(window)"
+      "}"
+      "FindWidget QToolButton {"
+      "  border: 1px solid #A2A2A2;"
+      "  border-radius: 4px"
+      "}"
+      "FindWidget QToolButton:pressed {"
+      "  background: #575757;"
+      "}"
+      "FindWidget QLineEdit {"
+      "  border: 1px solid #A2A2A2"
+      "}"
+
+      "Footer {"
+      "  background: #3C3C3C;"
+      "  border: 1px solid #7F7F7F"
+      "}"
+      "Footer QToolButton {"
+      "  background: #3C3C3C;"
+      "  margin-left: 1px;"
+      "  border: 1px solid #7F7F7F;"
+      "  border-left: none"
+      "}"
+      "Footer QToolButton:pressed {"
+      "  background: #575757;"
+      "  margin-left: -1px"
+      "}"
+
+      "ExpandButton {"
+      "  background: #656565;"
+      "  border-radius: 4px;"
+      "  padding: 0px 4px 0px 4px"
+      "}"
+      "ExpandButton:pressed {"
+      "  background: #7B7B7B"
+      "}"
+
+      "PathspecWidget ExpandButton, ReferenceWidget ExpandButton {"
+      "  border-radius: 0px;"
+      "  padding: 0px 0px 0px 0px"
+      "}"
+
+      "TabWidget::pane {"
+      "  border-top: 1px solid palette(light)" // FIXME: Color doesn't work.
+      "}"
+      "TabBar::tab {"
+      "  color: palette(text);"
+      "  border-top: 1px solid #484848;"
+      "  border-left: 1px solid #545454;"
+      "  background: #202020"
+      "}"
+      "TabBar::tab:selected {"
+      "  background: #303030"
+      "}"
+      "TabBar::tab:first {"
+      "  border-left: none"
+      "}"
+
+      "TreeWidget QColumnView {"
+      "  border-top: 1px solid palette(light);"
+      "  border-bottom: 1px solid palette(light)"
+      "}"
+
+      "QToolButton {"
+      "  color: #505050"
+      "}"
+      "QToolButton:active {"
+      "  color: #E8E8E8"
+      "}"
+      "QToolButton:disabled {"
+      "  color: #B0B0B0"
+      "}"
+
+      "ToolBar QToolButton {"
+      "  background: #3D3D3D"
+      "}"
+      "ToolBar QToolButton:active {"
+      "  background: #656565"
+      "}"
+      "ToolBar QToolButton#first, ToolBar QToolButton#middle {"
+      "  border-right: 1px solid #585858"
+      "}"
+      "ToolBar QToolButton:pressed {"
+      "  background: #7B7B7B"
+      "}"
+      "ToolBar QLineEdit {"
+      "  background: #3D3D3D"
+      "}"
+      "ToolBar QLineEdit:active {"
+      "  background: #656565"
+      "}"
+
+      "CommitDetail QToolButton,"
+      "HunkWidget QToolButton,"
+      "FileWidget QToolButton {"
+      "  border: 1px solid #363636;"
+      "  border-radius: 4px"
+      "}"
+      "CommitDetail QToolButton:pressed,"
+      "HunkWidget QToolButton:pressed,"
+      "FileWidget QToolButton:pressed {"
+      "  background: #7B7B7B"
+      "}"
+
+      "CommitToolBar QToolButton:pressed {"
+      "  background: #6C6C6C;"
+      "  color: white"
+      "}";
+  }
+
+  return
     "ColumnView, ColumnView QAbstractItemView {"
     "  background: palette(base);"
-    "  border-right: 1px solid #E6E6E6"
+    "  border-right: 1px solid palette(light)"
     "}"
 
     "DetailView QStackedWidget {"
     "  background: palette(base)"
     "}"
     "DetailView #separator {"
-    "  border-top: 1px solid #E6E6E6"
+    "  border-top: 1px solid palette(light)"
     "}"
 
     "DiffView {"
-    "  background-color: palette(dark)"
+    "  background: palette(dark)"
     "}"
     "DiffView .QFrame {"
-    "  background-color: #E4E8EE"
-    "}"
-    "DiffView .QFrame:disabled {"
-    "  background-color: #BEC2C7"
+    "  background: #E4E8EE"
     "}"
     "DiffView HunkWidget {"
-    "  background-color: #FFFFFF"
-    "}"
-    "DiffView HunkWidget:disabled {"
-    "  background-color: #D5D5D5"
+    "  background: #FFFFFF"
     "}"
     "DiffView HunkWidget QLabel {"
     "  color: #4F4F4F"
     "}"
 
     "FileList {"
-    "  border-top: 1px solid #E6E6E6"
-    "}"
-    "FileList QToolButton:active {"
-    "  color: #939292"
+    "  border-top: 1px solid palette(light)"
     "}"
     "FileList QToolButton:pressed {"
     "  background: #E2E2E2"
@@ -139,21 +286,26 @@ QString Theme::styleSheet() const
     "  background-color: qlineargradient("
     "    x1:0, y1: 0, x2: 0, y2: 1, stop: 0 #FCFCFC, stop: 1 #F4F4F4);"
     "  border: 1px solid #A6A6A6;"
-    "  border-top-width: 0px"
+    "  border-top: none"
     "}"
     "Footer QToolButton {"
     "  background-color: qlineargradient("
     "    x1:0, y1: 0, x2: 0, y2: 1, stop: 0 #FCFCFC, stop: 1 #F4F4F4);"
     "  margin-left: 1px;"
     "  border: 1px solid #A6A6A6;"
-    "  border-width: 0 1px 1px 0"
+    "  border-left: none;"
+    "  border-top: none"
     "}"
     "Footer QToolButton:pressed {"
     "  background-color: qlineargradient("
     "    x1:0, y1: 0, x2: 0, y2: 1, stop: 0 #BCBCBC, stop: 1 #B4B4B4);"
-    "  margin-left: -1px;"
-    "  border: 1px solid #A6A6A6;"
-    "  border-width: 0 1px 1px 0"
+    "  margin-left: -1px"
+    "}"
+    "SideBar Footer {"
+    "  border-top: 1px solid #A6A6A6"
+    "}"
+    "SideBar Footer QToolButton {"
+    "  border-top: 1px solid #A6A6A6"
     "}"
 
     "ExpandButton {"
@@ -205,8 +357,8 @@ QString Theme::styleSheet() const
     "}"
 
     "TreeWidget QColumnView {"
-    "  border-top: 1px solid #E6E6E6;"
-    "  border-bottom: 1px solid #E6E6E6"
+    "  border-top: 1px solid palette(light);"
+    "  border-bottom: 1px solid palette(light)"
     "}"
 
     "QToolButton {"
@@ -240,8 +392,7 @@ QString Theme::styleSheet() const
     "HunkWidget QToolButton,"
     "FileWidget QToolButton {"
     "  border: 1px solid #DCDCDC;"
-    "  border-radius: 4px;"
-    "  background: white"
+    "  border-radius: 4px"
     "}"
     "CommitDetail QToolButton:pressed,"
     "HunkWidget QToolButton:pressed,"
@@ -253,28 +404,51 @@ QString Theme::styleSheet() const
     "  background: #6C6C6C;"
     "  color: white"
     "}";
-
-#ifdef Q_OS_MAC
-  if (QSysInfo::macVersion() >= QSysInfo::MV_YOSEMITE)
-    styleSheet +=
-      "QToolTip {"
-      "  opacity: 255;"
-      "  background-color: #F0F0F0"
-      "}";
-#endif
-
-  return styleSheet;
 }
 
 void Theme::polish(QPalette &palette) const
 {
-  palette.setColor(QPalette::Light, "#E6E6E6");
-  palette.setColor(QPalette::BrightText, "#808080");
+  palette.setColor(QPalette::BrightText, mDark ? "#9C9C9C" : "#646464");
+  palette.setColor(QPalette::Light, mDark ? "#121212" : "#E6E6E6");
   palette.setColor(QPalette::Shadow, palette.color(QPalette::Mid));
+
+  if (mDark)
+    palette.setColor(QPalette::Link, "#2A82DA");
 }
 
 QColor Theme::badge(BadgeRole role, BadgeState state)
 {
+  if (mDark) {
+    switch (role) {
+      case BadgeRole::Foreground:
+        switch (state) {
+          case BadgeState::Selected:
+            return "#2A82DA";
+
+          default:
+            return "#E1E5F2";
+        }
+
+      case BadgeRole::Background:
+        switch (state) {
+          case BadgeState::Normal:
+            return "#2A82DA";
+
+          case BadgeState::Selected:
+            return "#E1E5F2";
+
+          case BadgeState::Conflicted:
+            return "#DA2ADA";
+
+          case BadgeState::Head:
+            return "#52A500";
+
+          case BadgeState::Notification:
+            return "#D00000";
+        }
+    }
+  }
+
   switch (role) {
     case BadgeRole::Foreground:
       switch (state) {
@@ -307,21 +481,31 @@ QColor Theme::badge(BadgeRole role, BadgeState state)
 
 QList<QColor> Theme::branchTopologyEdges()
 {
-  return {"steelblue", "crimson", "forestgreen", "goldenrod",
-          "darkviolet", "darkcyan", "orange", "cornflowerblue",
-          "tomato", "darkturquoise", "palevioletred", "sandybrown"};
+  return {
+    "steelblue",
+    "crimson",
+    "forestgreen",
+    "goldenrod",
+    "darkviolet",
+    "darkcyan",
+    "orange",
+    "cornflowerblue",
+    "tomato",
+    "darkturquoise",
+    "palevioletred",
+    "sandybrown"
+  };
 }
 
 QColor Theme::buttonChecked()
 {
-  return QColor("#0086F3");
+  return mDark ? "#19B4FB" : "#0086F3";
 }
 
 QPalette Theme::commitList()
 {
   QPalette palette;
-  QString bright = "#808080";
-  palette.setColor(QPalette::BrightText, bright);
+  QColor bright = palette.color(QPalette::BrightText);
 
   // highlight
 #ifdef Q_OS_WIN
@@ -330,8 +514,9 @@ QPalette Theme::commitList()
   palette.setColor(QPalette::Active, QPalette::WindowText, bright);
   palette.setColor(QPalette::Inactive, QPalette::WindowText, bright);
 #else
+  QColor inactive = mDark ? Qt::white : Qt::black;
   palette.setColor(QPalette::Active, QPalette::HighlightedText, Qt::white);
-  palette.setColor(QPalette::Inactive, QPalette::HighlightedText, Qt::black);
+  palette.setColor(QPalette::Inactive, QPalette::HighlightedText, inactive);
   palette.setColor(QPalette::Active, QPalette::WindowText, "#C0C0C0");
   palette.setColor(QPalette::Inactive, QPalette::WindowText, bright);
 #endif
@@ -341,6 +526,22 @@ QPalette Theme::commitList()
 
 QColor Theme::diff(Diff color)
 {
+  if (mDark) {
+    switch (color) {
+      case Diff::Ours:         return "#000060";
+      case Diff::Theirs:       return "#600060";
+      case Diff::Addition:     return "#394734";
+      case Diff::Deletion:     return "#5E3638";
+      case Diff::WordAddition: return "#296812";
+      case Diff::WordDeletion: return "#781B20";
+      case Diff::Plus:         return "#207A00";
+      case Diff::Minus:        return "#BC0009";
+      case Diff::Note:         return "#E1E5F2";
+      case Diff::Warning:      return "#E8C080";
+      case Diff::Error:        return "#7E494B";
+    }
+  }
+
   switch (color) {
     case Diff::Ours:         return "#DCFFFF";
     case Diff::Theirs:       return "#FFDCFF";
@@ -356,14 +557,6 @@ QColor Theme::diff(Diff color)
   }
 }
 
-QPalette Theme::footer()
-{
-  QPalette palette;
-  palette.setColor(QPalette::Normal, QPalette::ButtonText, "#525252");
-  palette.setColor(QPalette::Disabled, QPalette::ButtonText, "#909090");
-  return palette;
-}
-
 QPalette Theme::fileList()
 {
   return QPalette();
@@ -371,6 +564,13 @@ QPalette Theme::fileList()
 
 QColor Theme::heatMap(HeatMap color)
 {
+  if (mDark) {
+    switch (color) {
+      case HeatMap::Hot:  return "#5E3638";
+      case HeatMap::Cold: return "#282940";
+    }
+  }
+
   switch (color) {
     case HeatMap::Hot:  return "#FFC0C0";
     case HeatMap::Cold: return "#C0C0FF";
@@ -387,11 +587,9 @@ QColor Theme::remoteComment(Comment color)
   }
 }
 
-QPalette Theme::stars()
+QColor Theme::star()
 {
-  QPalette palette;
-  palette.setColor(QPalette::Base, "#FFCE6D");
-  return palette;
+  return "#FFCE6D";
 }
 
 void Theme::drawCloseButton(
@@ -423,11 +621,6 @@ void Theme::drawCloseButton(
   painter->drawLine(QPointF(x - in, y - in), QPointF(x + in, y + in));
   painter->drawLine(QPointF(x - in, y + in), QPointF(x + in, y - in));
   painter->restore();
-}
-
-QColor Theme::windowBrightText()
-{
-  return QColor("#808080");
 }
 
 Theme *Theme::create(const QString &defaultName)

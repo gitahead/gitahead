@@ -402,16 +402,19 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
     setLogVisible(false);
   });
 
-  connect(notifier, &git::RepositoryNotifier::indexStageError, [this] {
+  connect(notifier, &git::RepositoryNotifier::indexStageError, this, [this] {
     error(mLogRoot, "stage");
   });
 
-  connect(notifier, &git::RepositoryNotifier::lfsNotFound, [this] {
+  QObject *context = new QObject(this);
+  connect(notifier, &git::RepositoryNotifier::lfsNotFound,
+  context, [this, context] {
     QString text =
       tr("Git LFS was not found on the PATH. "
          "<a href='https://git-lfs.github.com'>"
          "Install Git LFS</a> to use LFS integration.");
     mLogRoot->addEntry(LogEntry::Error, text);
+    delete context; // Disconnect after the first error.
   });
 
   // Automatically hide the log when the model changes.
@@ -488,6 +491,26 @@ void RepoView::commit()
 bool RepoView::isCommitEnabled() const
 {
   return mDetails->isCommitEnabled();
+}
+
+void RepoView::stage()
+{
+  mDetails->stage();
+}
+
+bool RepoView::isStageEnabled() const
+{
+  return mDetails->isStageEnabled();
+}
+
+void RepoView::unstage()
+{
+  mDetails->unstage();
+}
+
+bool RepoView::isUnstageEnabled() const
+{
+  return mDetails->isUnstageEnabled();
 }
 
 RepoView::ViewMode RepoView::viewMode() const
@@ -607,12 +630,17 @@ void RepoView::visitLink(const QString &link)
   }
 
   if (action == "push") {
+    git::Remote remote;
+
+    QString value = query.queryItemValue("to");
+    if (!value.isEmpty())
+      remote = mRepo.lookupRemote(value);
+
     if (query.queryItemValue("force") == "true") {
-      promptToForcePush();
+      promptToForcePush(remote, ref);
     } else {
-      git::Reference ref = mRepo.lookupRef(query.queryItemValue("ref"));
       bool setUpstream = query.queryItemValue("set-upstream") == "true";
-      push(git::Remote(), ref, QString(), setUpstream);
+      push(remote, ref, QString(), setUpstream);
     }
 
     return;
@@ -923,8 +951,29 @@ void RepoView::startFetchTimer()
   if (!config.value<bool>("autofetch.enable", enable))
     return;
 
-  fetch(git::Remote(), false, false);
-  mFetchTimer.start(config.value<int>("autofetch.minutes", minutes) * 60 * 1000);
+  bool prune = settings->value("global/autoprune/enable").toBool();
+  fetch(git::Remote(), false, false, nullptr, nullptr,
+    config.value<bool>("autoprune.enable", prune));
+
+  mFetchTimer.start(config.value<int>("autofetch.minutes", minutes) * 60000);
+}
+
+void RepoView::fetchAll()
+{
+  QList<git::Remote> remotes = mRepo.remotes();
+  if (remotes.isEmpty())
+    return;
+
+  if (remotes.size() == 1) {
+    fetch();
+    return;
+  }
+
+  // Queue up all remotes to fetch them serially.
+  QString text = tr("%1 remotes").arg(remotes.size());
+  LogEntry *entry = addLogEntry(text, tr("Fetch All"));
+  foreach (const git::Remote &remote, remotes)
+    fetch(remote, false, true, entry);
 }
 
 QFuture<git::Result> RepoView::fetch(
@@ -934,11 +983,24 @@ QFuture<git::Result> RepoView::fetch(
   LogEntry *parent,
   QStringList *submodules)
 {
+  bool prune = Settings::instance()->value("global/autoprune/enable").toBool();
+  return fetch(rmt, tags, interactive, parent, submodules,
+    mRepo.appConfig().value<bool>("autoprune.enable", prune));
+}
+
+QFuture<git::Result> RepoView::fetch(
+  const git::Remote &rmt,
+  bool tags,
+  bool interactive,
+  LogEntry *parent,
+  QStringList *submodules,
+  bool prune)
+{
   if (mWatcher) {
     // Queue fetch.
     connect(mWatcher, &QFutureWatcher<git::Result>::finished, mWatcher,
-    [this, rmt, tags, interactive, parent, submodules] {
-      fetch(rmt, tags, interactive, parent, submodules);
+    [this, rmt, tags, interactive, parent, submodules, prune] {
+      fetch(rmt, tags, interactive, parent, submodules, prune);
     });
 
     return QFuture<git::Result>();
@@ -994,8 +1056,8 @@ QFuture<git::Result> RepoView::fetch(
           this, &RepoView::notifyReferenceUpdated);
 
   entry->setBusy(true);
-  mWatcher->setFuture(QtConcurrent::run([this, remote, tags, submodules] {
-    git::Result result = git::Remote(remote).fetch(mCallbacks, tags);
+  mWatcher->setFuture(QtConcurrent::run([this, remote, tags, submodules, prune] {
+    git::Result result = git::Remote(remote).fetch(mCallbacks, tags, prune);
 
     if (result && submodules) {
       // Scan for unmodified submodules on the fetch thread.
@@ -1014,7 +1076,8 @@ QFuture<git::Result> RepoView::fetch(
 void RepoView::pull(
   MergeFlags flags,
   const git::Remote &rmt,
-  bool tags)
+  bool tags,
+  bool prune)
 {
   if (mWatcher) {
     // Queue pull.
@@ -1086,7 +1149,7 @@ void RepoView::pull(
     merge(mf, git::Reference(), git::AnnotatedCommit(), entry, callback);
   });
 
-  watcher->setFuture(fetch(remote, tags, true, entry, submodules));
+  watcher->setFuture(fetch(remote, tags, true, entry, submodules, prune));
   if (watcher->isCanceled()) {
     delete watcher;
     delete submodules;
@@ -1100,19 +1163,22 @@ void RepoView::merge(
   LogEntry *parent,
   const std::function<void()> &callback)
 {
+  // Shouldn't be called with an unborn HEAD.
+  git::Reference head = mRepo.head();
+  Q_ASSERT(head.isValid());
+
   git::AnnotatedCommit upstream;
   QString upstreamName = tr("<i>no upstream</i>");
-
-  git::Branch head = mRepo.head();
-  if (commit.isValid()){
+  if (commit.isValid()) {
     upstream = commit;
     upstreamName = commit.commit().link();
   } else if (ref.isValid()) {
     upstream = ref.annotatedCommit();
     upstreamName = ref.name();
-  } else if (head.isValid()) {
-    upstream = head.annotatedCommitFromFetchHead();
-    git::Branch up = head.upstream();
+  } else if (head.isBranch()) {
+    git::Branch headBranch = head;
+    upstream = headBranch.annotatedCommitFromFetchHead();
+    git::Branch up = headBranch.upstream();
     if (up.isValid())
       upstreamName = up.name();
   }
@@ -1135,16 +1201,11 @@ void RepoView::merge(
     textFmt = tr("%2 on %1");
   }
 
-  QString headName = head.isValid() ? head.name() : tr("<i>no branch</i>");
+  QString headName = head.name();
   QString text = textFmt.arg(upstreamName, headName);
   LogEntry *entry = addLogEntry(text, title, parent);
 
   // Validate inputs.
-  if (!head.isValid()) {
-    entry->addEntry(LogEntry::Error, tr("You are not currently on a branch."));
-    return;
-  }
-
   if (!upstream.isValid()) {
     entry->addEntry(LogEntry::Error,
       tr("The current branch '%1' has no upstream branch.").arg(headName));
@@ -1190,7 +1251,7 @@ void RepoView::fastForward(
   LogEntry *parent,
   const std::function<void()> &callback)
 {
-  git::Branch head = mRepo.head();
+  git::Reference head = mRepo.head();
   Q_ASSERT(head.isValid());
 
   git::Commit commit = upstream.commit();
@@ -1240,7 +1301,7 @@ void RepoView::merge(
   LogEntry *parent,
   const std::function<void()> &callback)
 {
-  git::Branch head = mRepo.head();
+  git::Reference head = mRepo.head();
   Q_ASSERT(head.isValid());
 
   // Try to merge.
@@ -1546,7 +1607,9 @@ void RepoView::cherryPick(const git::Commit &commit)
   this->commit(msg, git::AnnotatedCommit(), parent);
 }
 
-void RepoView::promptToForcePush()
+void RepoView::promptToForcePush(
+  const git::Remote &remote,
+  const git::Reference &src)
 {
   // FIXME: Check if force is really required?
 
@@ -1563,8 +1626,8 @@ void RepoView::promptToForcePush()
 
   QPushButton *accept =
     dialog->addButton(tr("Force Push"), QMessageBox::AcceptRole);
-  connect(accept, &QPushButton::clicked, [this] {
-    push(git::Remote(), git::Reference(), QString(), false, true);
+  connect(accept, &QPushButton::clicked, [this, remote, src] {
+    push(remote, src, QString(), false, true);
   });
 
   dialog->open();
@@ -1663,7 +1726,7 @@ void RepoView::push(
 
   mWatcher = new QFutureWatcher<git::Result>(this);
   connect(mWatcher, &QFutureWatcher<git::Result>::finished, mWatcher,
-  [this, src, setUpstream, remote, entry, remoteBranchName] {
+  [this, src, ref, setUpstream, remote, entry, remoteBranchName] {
     entry->setBusy(false);
 
     git::Result result = mWatcher->result();
@@ -1674,15 +1737,28 @@ void RepoView::push(
       QString errString = result.errorString();
       LogEntry *errorEntry = error(entry, tr("push to"), name, errString);
       if (err == GIT_ENONFASTFORWARD) {
-        QString hint1 =
-          tr("You may want to integrate remote commits first by "
-          "<a href='action:pull'>pulling</a>. Then "
-          "<a href='action:push'>push</a> again.");
-        QString hint2 =
-          tr("If you really want the remote to lose commits, you may "
-          "be able to <a href='action:push?force=true'>force push</a>.");
-        errorEntry->addEntry(LogEntry::Hint, hint1);
-        errorEntry->addEntry(LogEntry::Warning, hint2);
+        if (ref.isTag()) {
+          QString hint1 =
+            tr("The tag update may cause the remote to lose commits.");
+          QString hint2 =
+            tr("If you want to risk the remote losing commits, you can "
+            "<a href='action:push?ref=%1&to=%2&force=true'>force push</a>.");
+
+          errorEntry->addEntry(LogEntry::Hint, hint1);
+          errorEntry->addEntry(LogEntry::Warning, hint2.arg(
+            ref.qualifiedName().toHtmlEscaped(), name.toHtmlEscaped()));
+
+        } else {
+          QString hint1 =
+            tr("You may want to integrate remote commits first by "
+            "<a href='action:pull'>pulling</a>. Then "
+            "<a href='action:push'>push</a> again.");
+          QString hint2 =
+            tr("If you really want the remote to lose commits, you may "
+            "be able to <a href='action:push?force=true'>force push</a>.");
+          errorEntry->addEntry(LogEntry::Hint, hint1);
+          errorEntry->addEntry(LogEntry::Warning, hint2);
+        }
       }
     } else {
       mCallbacks->storeDeferredCredentials();
@@ -1776,18 +1852,6 @@ bool RepoView::commit(
     error->addEntry(LogEntry::Hint, hint3);
   }
 
-  // Cleanup merge state.
-  switch (mRepo.state()) {
-    case GIT_REPOSITORY_STATE_MERGE:
-    case GIT_REPOSITORY_STATE_REVERT:
-    case GIT_REPOSITORY_STATE_CHERRYPICK:
-      mRepo.cleanupState();
-      break;
-
-    default:
-      break;
-  }
-
   // Automatically push if enabled.
   bool enable = Settings::instance()->value("global/autopush/enable").toBool();
   if (mRepo.appConfig().value<bool>("autopush.enable", enable))
@@ -1819,7 +1883,7 @@ void RepoView::amendCommit()
 
     case 1:
       // Reset to parent commit.
-      promptToReset(parents.first(), GIT_RESET_SOFT, commit.message());
+      promptToReset(parents.first(), GIT_RESET_SOFT, commit);
       break;
 
     default:
@@ -2071,18 +2135,24 @@ void RepoView::popStash(int index)
 
 void RepoView::promptToTag(const git::Commit &commit)
 {
-  TagDialog *dialog = new TagDialog(mRepo, commit.shortId(), this);
+  TagDialog *dialog = new TagDialog(mRepo, commit.shortId(),
+    mRepo.defaultRemote(), this);
+
   connect(dialog, &TagDialog::accepted, this, [this, commit, dialog] {
     bool force = dialog->force();
     QString name = dialog->name();
     QString msg = dialog->message();
     git::TagRef tag = mRepo.createTag(commit, name, msg, force);
 
+    git::Remote remote = dialog->remote();
+
     QString link = commit.link();
     QString text = tag.isValid() ? tr("%1 as %2").arg(link, tag.name()) : link;
     LogEntry *entry = addLogEntry(text, tr("Tag"));
     if (!tag.isValid())
       error(entry, tr("tag"), link);
+    else if (remote.isValid())
+      push(remote, tag);
   });
 
   dialog->open();
@@ -2091,20 +2161,23 @@ void RepoView::promptToTag(const git::Commit &commit)
 void RepoView::promptToReset(
   const git::Commit &commit,
   git_reset_t type,
-  const QString &message)
+  const git::Commit &commitToAmend)
 {
   git::Branch head = mRepo.head();
   if (!head.isValid()) {
-    LogEntry *entry = addLogEntry(tr("<i>no branch</i>"), tr("Reset"));
+    QString title = commitToAmend ? tr("Amend") : tr("Reset");
+    LogEntry *entry = addLogEntry(tr("<i>no branch</i>"), title);
     entry->addEntry(LogEntry::Error, tr("You are not currently on a branch."));
     return;
   }
 
-  QString title = tr("Reset?");
-  QString text = tr("Are you sure you want to reset '%1' to '%2'?");
+  QString id = commitToAmend ? commitToAmend.shortId() : commit.shortId();
+  QString title = commitToAmend ? tr("Amend?") : tr("Reset?");
+  QString text = commitToAmend ?
+    tr("Are you sure you want to amend '%1'?").arg(id) :
+    tr("Are you sure you want to reset '%1' to '%2'?").arg(head.name(), id);
   QMessageBox *dialog = new QMessageBox(
-    QMessageBox::Warning, title, text.arg(head.name(), commit.shortId()),
-    QMessageBox::Cancel, this);
+    QMessageBox::Warning, title, text, QMessageBox::Cancel, this);
   dialog->setAttribute(Qt::WA_DeleteOnClose);
 
   QString info;
@@ -2127,27 +2200,33 @@ void RepoView::promptToReset(
 
   dialog->setInformativeText(info);
 
-  QPushButton *accept = dialog->addButton(tr("Reset"), QMessageBox::AcceptRole);
-  connect(accept, &QPushButton::clicked, [this, commit, type, message] {
-    reset(commit, type);
+  QString buttonText = commitToAmend ? tr("Amend") : tr("Reset");
+  QPushButton *accept = dialog->addButton(buttonText, QMessageBox::AcceptRole);
+  connect(accept, &QPushButton::clicked, [this, commit, type, commitToAmend] {
+    reset(commit, type, commitToAmend);
 
     // Pre-populate the commit message editor.
-    mDetails->setCommitMessage(message);
+    if (commitToAmend)
+      mDetails->setCommitMessage(commitToAmend.message());
   });
 
   dialog->open();
 }
 
-void RepoView::reset(const git::Commit &commit, git_reset_t type)
+void RepoView::reset(
+  const git::Commit &commit,
+  git_reset_t type,
+  const git::Commit &commitToAmend)
 {
   git::Reference head = mRepo.head();
   Q_ASSERT(head.isValid());
 
+  QString title = commitToAmend ? tr("Amend") : tr("Reset");
   QString text = tr("%1 to %2").arg(head.name(), commit.link());
-  LogEntry *entry = addLogEntry(text, tr("Reset"));
+  LogEntry *entry = addLogEntry(text, title);
 
   if (!commit.reset(type))
-    error(entry, tr("reset"), head.name());
+    error(entry, commitToAmend ? tr("amend") : tr("reset"), head.name());
 }
 
 void RepoView::updateSubmodules(

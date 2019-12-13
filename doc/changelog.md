@@ -1,3 +1,104 @@
+### v2.6.0 - 2019-12-12
+
+#### Added
+
+* Added options to automatically prune remote tracking branches on fetch/pull. (Kas)
+* Added context menu action to push tags to the default remote. (Kas)
+* Added prompt to delete tags (including from the remote). (Kas)
+* Added German language translation. (Kas)
+* Added theme variables to color the tab bar independently. (Kas)
+* Added compact history mode (in the gear popup menu). (Attila Greguss)
+
+#### Fixed
+
+* Jump to matching reference on click instead of selection change.
+* Fixed possible invalid commit editor message after revert, cherry-pick, etc.
+* Fixed inconsistent history list font size on some displays.
+* Fixed failure to cancel some remote transfer operations.
+* Removed artificial limitation on merging and rebasing with a detached HEAD.
+* Fixed crash when merging or rebasing with a detached HEAD. (Kas)
+
+----
+
+### v2.5.11 - 2019-10-30
+
+#### Added
+
+* Added context menu item to remove remote account from the sidebar.
+* Added usage reporting setting to the 'General' preferences panel.
+* Remember sidebar remote account expansion state.
+* Unique sidebar and open tab names in the same way as recent repositories.
+* Added 'Fetch All' item to 'Remote' menu.
+
+#### Fixed
+
+* Fixed failure to launch external edit tools with spaces in their path.
+* Disallow pasting rich text into the commit editor.
+* (Win) Fixed several issues relating to symlinks.
+
+#### Changed
+
+* Allow more than 99 columns in line length plugin interface.
+* Clarify copyright statement in the about dialog.
+* (Mac) Enable the hardened runtime to allow notarization on macOS Catalina.
+
+----
+
+### v2.5.10 - 2019-08-29
+
+#### Added
+
+* Automatically switch between light and dark mode on macOS Mojave when using the native theme.
+
+#### Fixed
+
+* Fixed stash performance issue.
+* Fixed crash on LFS-not-found error.
+* Avoid reporting the LFS-not-found error multiple times.
+* Fixed possible failure to look up the correct SSH identity file when the config file contains a 'HostName' entry.
+* Fixed failure to draw tree view badges in some cases.
+* Add missing dark mode colors for some lexers that reference colors directly (e.g. markdown).
+
+----
+
+### v2.5.9 - 2019-08-10
+
+#### Fixed
+
+* Updated Bitbucket integration to use v2.0 API.
+* Avoid opening a new tab for repositories that are already open.
+* Changed new branch dialog default start point to the HEAD instead of the first branch in the reference list.
+* Fix regression in staging submodules.
+* Fix crash on right-click on clean status diff.
+* Fix regression in double-clicking to clone a repository.
+
+#### Changed
+
+* Changed wording of prompt-to-amend dialog to clarify its purpose.
+
+----
+
+### v2.5.8 - 2019-07-17
+
+#### Added
+
+* Added menu items and keyboard shortcuts to stage and unstage all files.
+
+#### Fixed
+
+* Fixed possible crash in merge dialog on action change.
+* Fixed performance regression on viewing status diffs with large files.
+* (Linux) Fixed input of accented characters when using the compose input method.
+* (Linux) Fixed several credential helper issues.
+
+#### Changed
+
+* Double-clicking on a repo in the sidebar no longer opens a new tab if the repo is already open.
+* Apply "store credentials in secure storage" setting immediately.
+* Allow name and date to wrap when the detail view becomes too small to show them side-by-side.
+
+----
+
 ### v2.5.7 - 2019-05-22
 
 #### Fixed

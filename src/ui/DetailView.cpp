@@ -12,7 +12,6 @@
 #include "DiffWidget.h"
 #include "MenuBar.h"
 #include "TreeWidget.h"
-#include "app/Application.h"
 #include "git/Branch.h"
 #include "git/Commit.h"
 #include "git/Diff.h"
@@ -60,7 +59,7 @@ const Qt::TextInteractionFlags kTextFlags =
 
 QString brightText(const QString &text)
 {
-  return kAltFmt.arg(Application::theme()->windowBrightText().name(), text);
+  return kAltFmt.arg(QPalette().color(QPalette::BrightText).name(), text);
 }
 
 class MessageLabel : public QTextEdit
@@ -197,13 +196,13 @@ private:
   int mSpacing;
 };
 
-class CommitDetail : public QWidget
+class CommitDetail : public QFrame
 {
   Q_OBJECT
 
 public:
   CommitDetail(QWidget *parent = nullptr)
-    : QWidget(parent)
+    : QFrame(parent)
   {
     mAuthorDate = new AuthorDate(this);
 
@@ -455,11 +454,13 @@ private:
   QFutureWatcher<QString> mWatcher;
 };
 
-class CommitEditor : public QWidget
+class CommitEditor : public QFrame
 {
+  Q_OBJECT
+
 public:
   CommitEditor(const git::Repository &repo, QWidget *parent = nullptr)
-    : QWidget(parent), mRepo(repo)
+    : QFrame(parent)
   {
     QLabel *label = new QLabel(tr("<b>Commit Message:</b>"), this);
     mStatus = new QLabel(QString(), this);
@@ -470,6 +471,7 @@ public:
     labelLayout->addWidget(mStatus);
 
     mMessage = new QTextEdit(this);
+    mMessage->setAcceptRichText(false);
     mMessage->setObjectName("MessageEditor");
     mMessage->setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
     connect(mMessage, &QTextEdit::textChanged, [this] {
@@ -499,20 +501,10 @@ public:
 
     mStage = new QPushButton(tr("Stage All"), this);
     mStage->setObjectName("StageAll");
-    connect(mStage, &QPushButton::clicked, [this] {
-      QStringList paths;
-      for (int i = 0; i < mDiff.count(); ++i)
-        paths.append(mDiff.name(i));
-      mRepo.index().setStaged(paths, true);
-    });
+    connect(mStage, &QPushButton::clicked, this, &CommitEditor::stage);
 
     mUnstage = new QPushButton(tr("Unstage All"), this);
-    connect(mUnstage, &QPushButton::clicked, [this] {
-      QStringList paths;
-      for (int i = 0; i < mDiff.count(); ++i)
-        paths.append(mDiff.name(i));
-      mRepo.index().setStaged(paths, false);
-    });
+    connect(mUnstage, &QPushButton::clicked, this, &CommitEditor::unstage);
 
     mCommit = new QPushButton(tr("Commit"), this);
     mCommit->setDefault(true);
@@ -554,6 +546,26 @@ public:
     return mCommit->isEnabled();
   }
 
+  void stage()
+  {
+    mDiff.setAllStaged(true);
+  }
+
+  bool isStageEnabled() const
+  {
+    return mStage->isEnabled();
+  }
+
+  void unstage()
+  {
+    mDiff.setAllStaged(false);
+  }
+
+  bool isUnstageEnabled() const
+  {
+    return mUnstage->isEnabled();
+  }
+
   void setMessage(const QString &message)
   {
     mMessage->setPlainText(message);
@@ -586,7 +598,7 @@ private:
     int partial = 0;
     int conflicted = 0;
     int count = mDiff.count();
-    git::Index index = mRepo.index();
+    git::Index index = mDiff.index();
     for (int i = 0; i < count; ++i) {
       QString name = mDiff.name(i);
       switch (index.isStaged(name)) {
@@ -684,7 +696,6 @@ private:
   }
 
   git::Diff mDiff;
-  git::Repository mRepo;
 
   QLabel *mStatus;
   QTextEdit *mMessage;
@@ -740,6 +751,32 @@ bool DetailView::isCommitEnabled() const
           static_cast<CommitEditor *>(widget)->isCommitEnabled());
 }
 
+void DetailView::stage()
+{
+  Q_ASSERT(isStageEnabled());
+  static_cast<CommitEditor *>(mDetail->currentWidget())->stage();
+}
+
+bool DetailView::isStageEnabled() const
+{
+  QWidget *widget = mDetail->currentWidget();
+  return (mDetail->currentIndex() == EditorIndex &&
+          static_cast<CommitEditor *>(widget)->isStageEnabled());
+}
+
+void DetailView::unstage()
+{
+  Q_ASSERT(isUnstageEnabled());
+  static_cast<CommitEditor *>(mDetail->currentWidget())->unstage();
+}
+
+bool DetailView::isUnstageEnabled() const
+{
+  QWidget *widget = mDetail->currentWidget();
+  return (mDetail->currentIndex() == EditorIndex &&
+          static_cast<CommitEditor *>(widget)->isUnstageEnabled());
+}
+
 RepoView::ViewMode DetailView::viewMode() const
 {
   return static_cast<RepoView::ViewMode>(mContent->currentIndex());
@@ -785,6 +822,9 @@ void DetailView::setDiff(
 
   ContentWidget *cw = static_cast<ContentWidget *>(mContent->currentWidget());
   cw->setDiff(diff, file, pathspec);
+
+  // Update menu actions.
+  MenuBar::instance(this)->updateRepository();
 }
 
 void DetailView::cancelBackgroundTasks()

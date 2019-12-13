@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 3.3.1)
+cmake_minimum_required(VERSION 3.6.2)
 project(GitAhead)
 
 # Set name and version.
 set(GITAHEAD_NAME "GitAhead")
 set(GITAHEAD_VERSION_MAJOR 2)
-set(GITAHEAD_VERSION_MINOR 5)
-set(GITAHEAD_VERSION_PATCH 7)
+set(GITAHEAD_VERSION_MINOR 6)
+set(GITAHEAD_VERSION_PATCH 0)
 set(GITAHEAD_VERSION
   "${GITAHEAD_VERSION_MAJOR}.${GITAHEAD_VERSION_MINOR}.${GITAHEAD_VERSION_PATCH}"
 )
@@ -59,9 +59,26 @@ if(APPLE)
   set(QT_MODULES ${QT_MODULES} DBus)
 endif()
 
-find_package(Qt5 5.9 COMPONENTS ${QT_MODULES} REQUIRED)
+find_package(Qt5 5.9 COMPONENTS ${QT_MODULES} LinguistTools REQUIRED)
+
+set(QT_TRANSLATIONS_DIR "${Qt5_DIR}/../../../translations")
+
+if(APPLE)
+  foreach(QT_MODULE ${QT_MODULES})
+    # FIXME: Force debug build to link against release libraries
+    # inside of frameworks on macOS. The Qt debug libraries are
+    # broken because their link dependencies are to the release
+    # libraries (e.g. QtGui_debug depends on QtCore). This causes
+    # multiple symbol definition errors at application load time.
+    get_target_property(LOCATION Qt5::${QT_MODULE} LOCATION)
+    set_target_properties(Qt5::${QT_MODULE} PROPERTIES
+      IMPORTED_LOCATION_DEBUG ${LOCATION}
+    )
+  endforeach()
+endif()
 
 add_subdirectory(dep)
 add_subdirectory(src)
+add_subdirectory(l10n)
 add_subdirectory(test)
 add_subdirectory(pack)

@@ -58,7 +58,7 @@ bool EditTool::start()
   auto signal = QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished);
   QObject::connect(process, signal, this, &ExternalTool::deleteLater);
 
-  process->start(QString("%1 %2").arg(editor, mFile));
+  process->start(editor, {mFile});
   if (!process->waitForStarted())
     return false;
 

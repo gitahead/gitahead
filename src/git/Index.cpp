@@ -112,7 +112,7 @@ Index::StagedState Index::isStaged(const QString &path) const
     return it.value();
 
   Repository repo(git_index_owner(d->index));
-  Submodule sm = isSubmodule(path) ? repo.lookupSubmodule(path) : Submodule();
+  Submodule sm = repo.lookupSubmodule(path);
 
   // Handle untracked directories.
   QFileInfo info(repo.workdir().filePath(path));
@@ -121,9 +121,14 @@ Index::StagedState Index::isStaged(const QString &path) const
 
   uint32_t headMode = GIT_FILEMODE_UNREADABLE;
   uint32_t indexMode = GIT_FILEMODE_UNREADABLE;
-  uint32_t workdirMode = GIT_FILEMODE_UNREADABLE;
   Id head = sm.isValid() ? sm.headId() : headId(path, &headMode);
   Id index = sm.isValid() ? sm.indexId() : indexId(path, &indexMode);
+
+  // Handle untracked files.
+  if (!head.isValid() && !index.isValid())
+    return d->stagedCache.insert(path, Unstaged).value();
+
+  uint32_t workdirMode = GIT_FILEMODE_UNREADABLE;
   Id workdir = sm.isValid() ? sm.workdirId() : workdirId(path, &workdirMode);
 
   // Handle filter callback error.
@@ -170,8 +175,7 @@ void Index::setStaged(const QStringList &files, bool staged, bool yieldFocus)
     }
 
     // submodule
-    if (isSubmodule(file)) {
-      Submodule submodule = repo.lookupSubmodule(file);
+    if (Submodule submodule = repo.lookupSubmodule(file)) {
       if (staged) {
         if (git_submodule_add_to_index(submodule, false))
           continue;
@@ -211,6 +215,7 @@ void Index::setStaged(const QStringList &files, bool staged, bool yieldFocus)
         }
       }
 
+      repo.invalidateSubmoduleCache();
       changedFiles.append(file);
       continue;
     }
@@ -311,7 +316,7 @@ void Index::add(const QString &path, const QByteArray &buffer)
   if (!entry)
     return;
 
-  if (git_index_add_frombuffer(d->index, entry, buffer, buffer.size()))
+  if (git_index_add_from_buffer(d->index, entry, buffer, buffer.size()))
     return;
 
   git_index_write(d->index);
@@ -353,18 +358,6 @@ Index Index::create()
 const git_index_entry *Index::entry(const QString &path, int stage) const
 {
   return git_index_get_bypath(d->index, path.toUtf8(), stage);
-}
-
-bool Index::isSubmodule(const QString &path) const
-{
-  if (!d->submodulesCached) {
-    d->submodulesCached = true;
-    Repository repo(git_index_owner(d->index));
-    foreach (const Submodule &submodule, repo.submodules())
-      d->submodules.insert(submodule.path());
-  }
-
-  return d->submodules.contains(path);
 }
 
 bool Index::addDirectory(const QString &file) const

@@ -14,6 +14,8 @@
 
 class UpToDateDialog : public QDialog
 {
+  Q_OBJECT
+
 public:
   UpToDateDialog(QWidget *parent = nullptr);
 };

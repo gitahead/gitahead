@@ -12,15 +12,21 @@
 
 #include <QWidget>
 
+class Account;
 class TabWidget;
 
 class SideBar : public QWidget
 {
+  Q_OBJECT
+
 public:
   SideBar(TabWidget *tabs, QWidget *parent = nullptr);
 
   QSize sizeHint() const override;
   QSize minimumSizeHint() const override;
+
+private:
+  void promptToRemoveAccount(Account *account);
 };
 
 #endif

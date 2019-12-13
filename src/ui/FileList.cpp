@@ -36,7 +36,7 @@ class FileModel : public QAbstractListModel
 
 public:
   FileModel(const git::Repository &repo, QObject *parent = nullptr)
-    : QAbstractListModel(parent), mRepo(repo)
+    : QAbstractListModel(parent)
   {
     connect(repo.notifier(), &git::RepositoryNotifier::indexChanged,
             this, &FileModel::updateCheckState);
@@ -70,7 +70,7 @@ public:
           return QVariant();
 
         QString name = mDiff.name(index.row());
-        switch (mRepo.index().isStaged(name)) {
+        switch (mDiff.index().isStaged(name)) {
           case git::Index::Disabled:
           case git::Index::Unstaged:
           case git::Index::Conflicted:
@@ -101,11 +101,11 @@ public:
     switch (role) {
       case Qt::CheckStateRole: {
         QString name = mDiff.name(index.row());
-        if (mRepo.index().isStaged(name) == git::Index::Conflicted &&
+        if (mDiff.index().isStaged(name) == git::Index::Conflicted &&
             mDiff.patch(index.row()).count() > 0)
           return false;
 
-        mRepo.index().setStaged({name}, value.toBool(), mYieldFocus);
+        mDiff.index().setStaged({name}, value.toBool(), mYieldFocus);
         emit dataChanged(index, index, {role});
         return true;
       }
@@ -131,7 +131,6 @@ private:
     }
   }
 
-  git::Repository mRepo;
   git::Diff mDiff;
 
   bool mYieldFocus = true;
@@ -390,8 +389,7 @@ void FileList::contextMenuEvent(QContextMenuEvent *event)
     files.append(index.data(Qt::DisplayRole).toString());
 
   RepoView *view = RepoView::parentView(this);
-  FileContextMenu menu(view, files,
-    mDiff.isStatusDiff() ? view->repo().index() : git::Index());
+  FileContextMenu menu(view, files, mDiff.index());
   menu.exec(event->globalPos());
 }
 

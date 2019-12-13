@@ -50,6 +50,8 @@ submodules are optional or may also be satisfied by system libraries.
 * libssh2 (needed by `libgit2` for SSH support)
 * openssl (needed by `libssh2` and `libgit2` on some platforms)
 
+Note that building `OpenSSL` on Windows requires `Perl` and `NASM`.
+
 How to Build
 ------------
 

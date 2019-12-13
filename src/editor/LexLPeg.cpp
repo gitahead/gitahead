@@ -137,10 +137,13 @@ class LexerLPeg : public ILexer {
       luaL_argcheck(L, !is_lexer || !newindex, 3, "read-only property");
       if (is_lexer) {
         l_pushlexerp(L, llexer_property);
-      } else if (!newindex)
+      } else if (!newindex) {
         lua_pushstring(L, props->Get(luaL_checkstring(L, 2)));
-      else
-        props->Set(luaL_checkstring(L, 2), luaL_checkstring(L, 3));
+      } else {
+        const char *key = luaL_checkstring(L, 2);
+        const char *val = luaL_checkstring(L, 3);
+        props->Set(key, val, strlen(key), strlen(val));
+      }
     } else if (strcmp(key, "property_int") == 0) {
       luaL_argcheck(L, !newindex, 3, "read-only property");
       if (is_lexer) {
@@ -245,8 +248,11 @@ class LexerLPeg : public ILexer {
     while (lua_next(L, -2)) {
       if (lua_isstring(L, -2) && lua_isstring(L, -1)) {
         lua_pushstring(L, "style."), lua_pushvalue(L, -3), lua_concat(L, 2);
-        if (!*props.Get(lua_tostring(L, -1)))
-          props.Set(lua_tostring(L, -1), lua_tostring(L, -2));
+        if (!*props.Get(lua_tostring(L, -1))) {
+          const char *key = lua_tostring(L, -1);
+          const char *val = lua_tostring(L, -2);
+          props.Set(key, val, strlen(key), strlen(val));
+        }
         lua_pop(L, 1); // style name
       }
       lua_pop(L, 1); // value
@@ -288,7 +294,7 @@ class LexerLPeg : public ILexer {
     char lexers[FILENAME_MAX], themes[FILENAME_MAX], theme[FILENAME_MAX];
     props.GetExpanded("lexer.lpeg.lexers", lexers);
     props.GetExpanded("lexer.lpeg.themes", themes);
-    props.GetExpanded("lexer.lpeg.color.theme", theme);
+    props.GetExpanded("lexer.lpeg.theme", theme);
     if (!*lexers || !*lexer) return false;
 
     lua_pushlightuserdata(L, reinterpret_cast<void *>(&props));
@@ -310,7 +316,12 @@ class LexerLPeg : public ILexer {
     l_setconstant(L, SC_FOLDLEVELHEADERFLAG, "FOLD_HEADER");
     l_setmetatable(L, "sci_lexer", llexer_property);
     if (*theme) {
+      char mode[FILENAME_MAX];
+      props.GetExpanded("lexer.lpeg.theme.mode", mode);
+
       lua_newtable(L);
+      lua_pushboolean(L, strcmp(mode, "dark") == 0);
+      lua_setfield(L, -2, "dark"); // system palette
       l_setmetatable(L, "sci_lexer", llexer_property);
       lua_setglobal(L, "theme");
 
@@ -521,7 +532,8 @@ public:
    * @param val The string value.
    */
   Sci_Position SCI_METHOD PropertySet(const char *key, const char *value) {
-    props.Set(key, *value ? value : " "); // ensure property is cleared
+    const char *val = *value ? value : " ";
+    props.Set(key, val, strlen(key), strlen(val)); // ensure property is cleared
     return -1; // no need to re-lex
   }
 

@@ -14,6 +14,7 @@
 #include "ProgressIndicator.h"
 #include "RepoView.h"
 #include "app/Application.h"
+#include "conf/Settings.h"
 #include "dialogs/MergeDialog.h"
 #include "index/Index.h"
 #include "git/Branch.h"
@@ -35,24 +36,10 @@
 #include <QTextLayout>
 #include <QtConcurrent>
 
-#if defined(Q_OS_MAC)
-#define FONT_SIZE 13
-#elif defined(Q_OS_WIN)
-#define FONT_SIZE 9
-#else
-#define FONT_SIZE 10
-#endif
-
 namespace {
-
-const int kStarPadding = 8;
-const int kLineSpacing = 16;
-const int kVerticalMargin = 2;
-const int kHorizontalMargin = 4;
 
 // FIXME: Factor out into theme?
 const QColor kTaintedColor = Qt::gray;
-
 const QString kPathspecFmt = "pathspec:%1";
 
 enum Role
@@ -671,6 +658,9 @@ public:
     QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
 
+    bool compact = Settings::instance()->value("commit/compact").toBool();
+    LayoutConstants constants = layoutConstants(compact);
+
     // Draw background.
     QStyledItemDelegate::paint(painter, opt, index);
 
@@ -703,6 +693,8 @@ public:
     // Copy content rect.
     QRect rect = opt.rect;
     rect.setX(rect.x() + 2);
+
+    int totalWidth = rect.width();
 
     // Draw graph.
     painter->save();
@@ -807,84 +799,146 @@ public:
     painter->restore();
 
     // Adjust margins.
-    rect.setY(rect.y() + kVerticalMargin);
-    rect.setX(rect.x() + kHorizontalMargin);
-    rect.setWidth(rect.width() - kHorizontalMargin);
+    rect.setY(rect.y() + constants.vMargin);
+    rect.setX(rect.x() + constants.hMargin);
+
+    // Star has enough padding in compact mode.
+    if (!compact)
+      rect.setWidth(rect.width() - constants.hMargin);
 
     // Draw content.
     git::Commit commit = index.data(CommitRole).value<git::Commit>();
     if (commit.isValid()) {
-      // Draw Name.
-      QString name = commit.author().name();
-      painter->save();
-      QFont bold = opt.font;
-      bold.setBold(true);
-      painter->setFont(bold);
-      painter->drawText(rect, Qt::AlignLeft, name);
-      painter->restore();
-
-      // Draw date.
       const QFontMetrics &fm = opt.fontMetrics;
+      QRect star = rect;
+
       QDateTime date = commit.committer().date().toLocalTime();
-      QString timestamp =
-        (date.date() == QDate::currentDate()) ?
+      QString timestamp = (date.date() == QDate::currentDate()) ?
         date.time().toString(Qt::DefaultLocaleShortDate) :
         date.date().toString(Qt::DefaultLocaleShortDate);
-      if (rect.width() > fm.width(name) + fm.width(timestamp) + 8) {
+      int timestampWidth = fm.horizontalAdvance(timestamp);
+
+      if (compact) {
+        int maxWidthRefs = rect.width() * 0.5; // Max 50%
+        const int minWidthRefs = 50; // At least display the ellipsis
+        const int minWidthDesc = 100;
+        int minDisplayWidthDate = 350;
+
+        // Star always takes up its height on the right side.
+        star.setX(star.x() + star.width() - star.height());
+        star.setY(star.y() - constants.vMargin);
+        rect.setWidth(rect.width() - star.width());
+
+        // Draw commit id.
+        QString id = commit.id().toString().left(7);
+        int idWidth = fm.boundingRect(QString(id.size(), '0')).width();
+
+        QRect commitRect = rect;
+        commitRect.setX(commitRect.x() + commitRect.width() - idWidth);
+        painter->save();
+        painter->drawText(commitRect, Qt::AlignLeft, id);
+        painter->restore();
+        rect.setWidth(rect.width() - idWidth - constants.hMargin);
+
+        // Draw date. Only if it is not the same as previous?
+        if (rect.width() > minWidthDesc + timestampWidth + 8 &&
+            totalWidth > minDisplayWidthDate) {
+          painter->save();
+          painter->setPen(bright);
+          painter->drawText(rect, Qt::AlignRight, timestamp);
+          painter->restore();
+          rect.setWidth(rect.width() - timestampWidth - constants.hMargin);
+        }
+
+        // Calculate remaining width for the references.
+        QRect ref = rect;
+        int refsWidth = ref.width() - minWidthDesc;
+        if (maxWidthRefs <= minWidthRefs) maxWidthRefs = minWidthRefs;
+        if (refsWidth < minWidthRefs) refsWidth = minWidthRefs;
+        if (refsWidth > maxWidthRefs) refsWidth = maxWidthRefs;
+        ref.setWidth(refsWidth);
+
+        // Draw references.
+        int badgesWidth = rect.x();
+        QList<Badge::Label> refs = mRefs.value(commit.id());
+        if (!refs.isEmpty())
+          badgesWidth = Badge::paint(painter, refs, ref, &opt, Qt::AlignLeft);
+        rect.setX(badgesWidth); // Comes right after the badges
+
+        // Draw message.
         painter->save();
         painter->setPen(bright);
-        painter->drawText(rect, Qt::AlignRight, timestamp);
+        QString msg = commit.summary(git::Commit::SubstituteEmoji);
+        QString elidedText = fm.elidedText(msg, Qt::ElideRight, rect.width());
+        painter->drawText(rect, Qt::ElideRight, elidedText);
+        painter->restore();
+
+      } else {
+        // Draw Name.
+        QString name = commit.author().name();
+        painter->save();
+        QFont bold = opt.font;
+        bold.setBold(true);
+        painter->setFont(bold);
+        painter->drawText(rect, Qt::AlignLeft, name);
+        painter->restore();
+
+        // Draw date.
+        if (rect.width() > fm.horizontalAdvance(name) + timestampWidth + 8) {
+          painter->save();
+          painter->setPen(bright);
+          painter->drawText(rect, Qt::AlignRight, timestamp);
+          painter->restore();
+        }
+
+        rect.setY(rect.y() + constants.lineSpacing + constants.vMargin);
+
+        // Draw id.
+        QString id = commit.shortId();
+        painter->save();
+        painter->drawText(rect, Qt::AlignLeft, id);
+        painter->restore();
+
+        // Draw references.
+        QList<Badge::Label> refs = mRefs.value(commit.id());
+        if (!refs.isEmpty()) {
+          QRect refsRect = rect;
+          refsRect.setX(refsRect.x() + fm.boundingRect(id).width() + 6);
+          Badge::paint(painter, refs, refsRect, &opt);
+        }
+
+        rect.setY(rect.y() + constants.lineSpacing + constants.vMargin);
+
+        // Divide remaining rectangle.
+        star = rect;
+        star.setX(star.x() + star.width() - star.height());
+        QRect text = rect;
+        text.setWidth(text.width() - star.width());
+
+        // Draw message.
+        painter->save();
+        painter->setPen(bright);
+        QString msg = commit.summary(git::Commit::SubstituteEmoji);
+        QTextLayout layout(msg, painter->font());
+        layout.beginLayout();
+
+        QTextLine line = layout.createLine();
+        if (line.isValid()) {
+          int width = text.width();
+          line.setLineWidth(width);
+          int len = line.textLength();
+          painter->drawText(text, Qt::AlignLeft, msg.left(len));
+
+          if (len < msg.length()) {
+            text.setY(text.y() + constants.lineSpacing);
+            QString elided = fm.elidedText(msg.mid(len), Qt::ElideRight, width);
+            painter->drawText(text, Qt::AlignLeft, elided);
+          }
+        }
+
+        layout.endLayout();
         painter->restore();
       }
-
-      rect.setY(rect.y() + kLineSpacing + kVerticalMargin);
-
-      // Draw id.
-      QString id = commit.shortId();
-      painter->save();
-      painter->drawText(rect, Qt::AlignLeft, id);
-      painter->restore();
-
-      // Draw references.
-      QList<Badge::Label> refs = mRefs.value(commit.id());
-      if (!refs.isEmpty()) {
-        QRect refsRect = rect;
-        refsRect.setX(refsRect.x() + fm.boundingRect(id).width() + 6);
-        Badge::paint(painter, refs, refsRect, &opt);
-      }
-
-      rect.setY(rect.y() + kLineSpacing + kVerticalMargin);
-
-      // Divide remaining rectangle.
-      QRect star = rect;
-      star.setX(star.x() + star.width() - star.height());
-
-      QRect text = rect;
-      text.setWidth(text.width() - star.width());
-
-      // Draw message.
-      painter->save();
-      painter->setPen(bright);
-      QString msg = commit.summary(git::Commit::SubstituteEmoji);
-      QTextLayout layout(msg, painter->font());
-      layout.beginLayout();
-
-      QTextLine line = layout.createLine();
-      if (line.isValid()) {
-        int width = text.width();
-        line.setLineWidth(width);
-        int len = line.textLength();
-        painter->drawText(text, Qt::AlignLeft, msg.left(len));
-
-        if (len < msg.length()) {
-          text.setY(text.y() + kLineSpacing);
-          QString elided = fm.elidedText(msg.mid(len), Qt::ElideRight, width);
-          painter->drawText(text, Qt::AlignLeft, elided);
-        }
-      }
-
-      layout.endLayout();
-      painter->restore();
 
       // Draw star.
       bool starred = commit.isStarred();
@@ -895,7 +949,7 @@ public:
         painter->save();
 
         // Calculate outer radius and vertices.
-        qreal r = (star.height() / 2.0) - kStarPadding;
+        qreal r = (star.height() / 2.0) - constants.starPadding;
         qreal x = star.x() + (star.width() / 2.0);
         qreal y = star.y() + (star.height() / 2.0);
         qreal x1 = r * qCos(M_PI / 10.0);
@@ -903,7 +957,7 @@ public:
         qreal x2 = r * qCos(17.0 * M_PI / 10.0);
         qreal y2 = -r * qSin(17.0 * M_PI / 10.0);
 
-        // Calculate inner radius and verices.
+        // Calculate inner radius and vertices.
         qreal xi = ((y1 + r) * x2) / (y2 + r);
         qreal ri = qSqrt(qPow(xi, 2.0) + qPow(y1, 2.0));
         qreal xi1 = ri * qCos(3.0 * M_PI / 10.0);
@@ -924,10 +978,8 @@ public:
           QPointF(-xi1, yi1)
         });
 
-        if (starred) {
-          QPalette palette = Application::theme()->stars();
-          painter->setBrush(palette.color(QPalette::Base));
-        }
+        if (starred)
+          painter->setBrush(Application::theme()->star());
 
         painter->setPen(QPen(bright, 1.25));
         painter->drawPolygon(polygon.translated(x, y));
@@ -949,7 +1001,7 @@ public:
 #endif
 
     // Draw separator line.
-    if (selected == nextSelected) {
+    if (!compact && selected == nextSelected) {
       painter->save();
       painter->setRenderHints(QPainter::Antialiasing, false);
       painter->setPen(selected ? text : opt.palette.color(QPalette::Dark));
@@ -964,7 +1016,11 @@ public:
     const QStyleOptionViewItem &option,
     const QModelIndex &index) const override
   {
-    return QSize(0, (kLineSpacing + kVerticalMargin) * 4);
+    bool compact = Settings::instance()->value("commit/compact").toBool();
+    LayoutConstants constants = layoutConstants(compact);
+
+    int lineHeight = constants.lineSpacing + constants.vMargin;
+    return QSize(0, lineHeight * (compact ? 1 : 4));
   }
 
   QRect decorationRect(
@@ -983,12 +1039,15 @@ public:
     const QStyleOptionViewItem &option,
     const QModelIndex &index) const
   {
+    bool compact = Settings::instance()->value("commit/compact").toBool();
+    LayoutConstants constants = layoutConstants(compact);
+
     QRect rect = option.rect;
-    int length = kLineSpacing * 2;
+    int length = constants.lineSpacing * 2;
     rect.setX(rect.x() + rect.width() - length);
     rect.setY(rect.y() + rect.height() - length);
-    rect.setWidth(rect.width() - kStarPadding);
-    rect.setHeight(rect.height() - kStarPadding);
+    rect.setWidth(rect.width() - constants.starPadding);
+    rect.setHeight(rect.height() - constants.starPadding);
     return rect;
   }
 
@@ -1003,6 +1062,19 @@ protected:
   }
 
 private:
+  struct LayoutConstants
+  {
+    const int starPadding;
+    const int lineSpacing;
+    const int vMargin;
+    const int hMargin;
+  };
+
+  LayoutConstants layoutConstants(bool compact) const
+  {
+    return { compact ? 7 : 8, compact ? 23 : 16, compact ? 5 : 2, 4 };
+  }
+
   void updateRefs()
   {
     mRefs.clear();
@@ -1110,9 +1182,11 @@ CommitList::CommitList(Index *index, QWidget *parent)
     }
   });
 
+#ifdef Q_OS_MAC
   QFont font = this->font();
-  font.setPointSize(FONT_SIZE);
+  font.setPointSize(13);
   setFont(font);
+#endif
 }
 
 git::Diff CommitList::status() const
@@ -1330,10 +1404,11 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
 
     // clean
     QStringList untracked;
-    git::Diff diff = status();
-    for (int i = 0; i < diff.count(); i++) {
-      if (diff.status(i) == GIT_DELTA_UNTRACKED)
-        untracked.append(diff.name(i));
+    if (git::Diff diff = status()) {
+      for (int i = 0; i < diff.count(); i++) {
+        if (diff.status(i) == GIT_DELTA_UNTRACKED)
+          untracked.append(diff.name(i));
+      }
     }
 
     QAction *clean = menu.addAction(tr("Remove Untracked Files"),

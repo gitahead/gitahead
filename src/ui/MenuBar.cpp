@@ -339,6 +339,20 @@ MenuBar::MenuBar(QWidget *parent)
 
   repository->addSeparator();
 
+  mStageAll = repository->addAction(tr("Stage All"));
+  mStageAll->setShortcut(tr("Ctrl++"));
+  connect(mStageAll, &QAction::triggered, [this] {
+    view()->stage();
+  });
+
+  mUnstageAll = repository->addAction(tr("Unstage All"));
+  mUnstageAll->setShortcut(tr("Ctrl+-"));
+  connect(mUnstageAll, &QAction::triggered, [this] {
+    view()->unstage();
+  });
+
+  repository->addSeparator();
+
   mCommit = repository->addAction(tr("Commit"));
   mCommit->setShortcut(tr("Ctrl+Shift+C"));
   connect(mCommit, &QAction::triggered, [this] {
@@ -381,6 +395,12 @@ MenuBar::MenuBar(QWidget *parent)
   mFetch->setShortcut(tr("Ctrl+Shift+Alt+F"));
   connect(mFetch, &QAction::triggered, [this] {
     view()->fetch();
+  });
+
+  mFetchAll = remote->addAction(tr("Fetch All"));
+  mFetchAll->setShortcut(tr("Ctrl+Shift+Alt+A"));
+  connect(mFetchAll, &QAction::triggered, [this] {
+    view()->fetchAll();
   });
 
   mFetchFrom = remote->addAction(tr("Fetch From..."));
@@ -632,7 +652,9 @@ MenuBar::MenuBar(QWidget *parent)
   QString name = QCoreApplication::applicationName();
   QAction *about = help->addAction(tr("About %1").arg(name));
   about->setMenuRole(QAction::AboutRole);
-  connect(about, &QAction::triggered, &AboutDialog::openSharedInstance);
+  connect(about, &QAction::triggered, [] {
+    AboutDialog::openSharedInstance();
+  });
 
   QAction *update = help->addAction(tr("Check For Updates..."));
   update->setMenuRole(QAction::ApplicationSpecificRole);
@@ -830,6 +852,8 @@ void MenuBar::updateRepository()
   RepoView *view = win ? win->currentView() : nullptr;
   mConfigureRepository->setEnabled(view);
   mCommit->setEnabled(view && view->isCommitEnabled());
+  mStageAll->setEnabled(view && view->isStageEnabled());
+  mUnstageAll->setEnabled(view && view->isUnstageEnabled());
   mAmendCommit->setEnabled(view);
 
   bool lfs = view && view->repo().lfsIsInitialized();
@@ -864,9 +888,8 @@ void MenuBar::updateBranch()
   mCheckout->setEnabled(head.isValid() && !view->repo().isBare());
   mNewBranch->setEnabled(head.isValid());
 
-  git::Branch headBranch = head;
-  mMerge->setEnabled(headBranch.isValid());
-  mRebase->setEnabled(headBranch.isValid());
+  mMerge->setEnabled(head.isValid());
+  mRebase->setEnabled(head.isValid());
 
   bool merging = false;
   QString text = tr("Merge");
@@ -896,6 +919,7 @@ void MenuBar::updateBranch()
     }
   }
 
+  git::Branch headBranch = head;
   mAbort->setText(tr("Abort %1").arg(text));
   mAbort->setEnabled(headBranch.isValid() && merging);
 }

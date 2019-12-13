@@ -10,6 +10,7 @@
 #include "CommitToolBar.h"
 #include "ContextMenuButton.h"
 #include "RepoView.h"
+#include "conf/Settings.h"
 #include "git/Config.h"
 #include <QApplication>
 #include <QMenu>
@@ -18,20 +19,13 @@
 #include <QStyleOption>
 #include <QToolButton>
 
-#if defined(Q_OS_MAC)
-#define FONT_SIZE 11
-#elif defined(Q_OS_WIN)
-#define FONT_SIZE 8
-#else
-#define FONT_SIZE 9
-#endif
-
 namespace {
 
 const QString kRefsKey = "commit.refs.all";
 const QString kSortKey = "commit.sort.date";
 const QString kGraphKey = "commit.graph.visible";
 const QString kStatusKey = "commit.status.clean";
+const QString kCompactKey = "commit/compact";
 const QString kStyleSheet =
   "QToolBar {"
   "  border: none"
@@ -87,9 +81,11 @@ public:
       setText(action->text());
     });
 
+#ifdef Q_OS_MAC
     QFont font = this->font();
-    font.setPointSize(FONT_SIZE);
+    font.setPointSize(11);
     setFont(font);
+#endif
   }
 };
 
@@ -177,6 +173,16 @@ CommitToolBar::CommitToolBar(QWidget *parent)
   connect(status, &QAction::triggered, [this](bool checked) {
     RepoView *view = RepoView::parentView(this);
     view->repo().appConfig().setValue(kStatusKey, checked);
+    emit settingsChanged();
+  });
+
+  menu->addSeparator();
+
+  QAction *compact = menu->addAction(tr("Compact Mode"));
+  compact->setCheckable(true);
+  compact->setChecked(Settings::instance()->value(kCompactKey).toBool());
+  connect(compact, &QAction::triggered, [this](bool checked) {
+    Settings::instance()->setValue(kCompactKey, checked);
     emit settingsChanged();
   });
 }
