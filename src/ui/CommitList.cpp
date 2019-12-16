@@ -40,7 +40,12 @@ namespace {
 
 // FIXME: Factor out into theme?
 const QColor kTaintedColor = Qt::gray;
+
 const QString kPathspecFmt = "pathspec:%1";
+
+// Use fixed short id size in compact mode.
+// FIXME: Use 'core.abbrev' config instead?
+const int kShortIdSize = 7;
 
 enum Role
 {
@@ -830,8 +835,8 @@ public:
         rect.setWidth(rect.width() - star.width());
 
         // Draw commit id.
-        QString id = commit.id().toString().left(7);
-        int idWidth = fm.boundingRect(QString(id.size(), '0')).width();
+        QString id = commit.id().toString().left(kShortIdSize);
+        int idWidth = maxShortIdWidth(fm);
 
         QRect commitRect = rect;
         commitRect.setX(commitRect.x() + commitRect.width() - idWidth);
@@ -1090,8 +1095,27 @@ private:
     }
   }
 
+  int maxShortIdWidth(const QFontMetrics &fm) const
+  {
+    if (mMaxShortIdWidth < 0) {
+      for (char ch = 'a'; ch <= 'f'; ++ch) {
+        int width = fm.boundingRect(QString(kShortIdSize, ch)).width();
+        mMaxShortIdWidth = qMax(mMaxShortIdWidth, width);
+      }
+
+      for (char ch = '0'; ch <= '9'; ++ch) {
+        int width = fm.boundingRect(QString(kShortIdSize, ch)).width();
+        mMaxShortIdWidth = qMax(mMaxShortIdWidth, width);
+      }
+    }
+
+    return mMaxShortIdWidth;
+  }
+
   git::Repository mRepo;
   QMap<git::Id,QList<Badge::Label>> mRefs;
+
+  mutable int mMaxShortIdWidth = -1;
 };
 
 class SelectionModel : public QItemSelectionModel
