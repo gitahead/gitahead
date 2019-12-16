@@ -357,12 +357,13 @@ void Application::track(const QUrlQuery &query)
     return;
 
   QString sys = userAgentSystem();
+  QString language = QLocale().uiLanguages().first();
   QString userAgent = kUserAgentFmt.arg(GITAHEAD_NAME, GITAHEAD_VERSION, sys);
 
   QUrlQuery tmp = query;
   tmp.addQueryItem("v", "1");
   tmp.addQueryItem("ds", "app");
-  tmp.addQueryItem("ul", "en-us");
+  tmp.addQueryItem("ul", language);
   tmp.addQueryItem("ua", userAgent);
   tmp.addQueryItem("an", GITAHEAD_NAME);
   tmp.addQueryItem("av", GITAHEAD_VERSION);

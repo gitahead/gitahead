@@ -313,12 +313,12 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/app/Application.cpp" line="390"/>
+        <location filename="../src/app/Application.cpp" line="391"/>
         <source>SSL Errors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/app/Application.cpp" line="392"/>
+        <location filename="../src/app/Application.cpp" line="393"/>
         <source>Failed to set up SSL session. Do you want to ignore these errors?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -370,12 +370,12 @@
 <context>
     <name>BlameMargin</name>
     <message>
-        <location filename="../src/ui/BlameMargin.cpp" line="375"/>
+        <location filename="../src/ui/BlameMargin.cpp" line="376"/>
         <source>Not Committed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/BlameMargin.cpp" line="378"/>
+        <location filename="../src/ui/BlameMargin.cpp" line="379"/>
         <source>Invalid Signature</source>
         <translation type="unfinished"></translation>
     </message>
