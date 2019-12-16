@@ -31,7 +31,7 @@ add_dependencies(gitahead translations)
 
 foreach(LANGUAGE ${LANGUAGES})
   set(QT_QM_FILES ${QT_QM_FILES}
-    ${QT_TRANSLATIONS_DIR}/qt_${LANGUAGE}.qm
+    ${QT_TRANSLATIONS_DIR}/qtbase_${LANGUAGE}.qm
   )
 endforeach()
 
