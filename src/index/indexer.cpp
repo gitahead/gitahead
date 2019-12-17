@@ -247,7 +247,7 @@ public:
     QByteArray date = time.date().toString(Index::dateFormat()).toUtf8();
     result.fields[Index::Date][date].append(0);
 
-    // Index author name ane email.
+    // Index author name and email.
     git::Signature author = commit.author();
     QByteArray email = author.email().toUtf8().toLower();
     result.fields[Index::Email][email].append(0);

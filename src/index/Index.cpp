@@ -75,7 +75,7 @@ void Index::reset()
       mIds.append(idFile.read(GIT_OID_RAWSZ));
   }
 
-  // Read dictonary.
+  // Read dictionary.
   QFile dictFile(dir.filePath(kDictFile));
   if (dictFile.open(QIODevice::ReadOnly)) {
     QDataStream dictIn(&dictFile);

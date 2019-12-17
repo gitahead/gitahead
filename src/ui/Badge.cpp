@@ -27,7 +27,7 @@ bool isEmpty(QList<Badge::Label> &labels)
   return labels.isEmpty();
 }
 
-} // anon. namepsace
+} // anon. namespace
 
 Badge::Badge(const QList<Label> &labels, QWidget *parent)
   : QWidget(parent), mLabels(labels)

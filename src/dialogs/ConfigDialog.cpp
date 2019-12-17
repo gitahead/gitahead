@@ -664,7 +664,7 @@ public:
     commitDaysLayout->addWidget(new QLabel(tr("commit days")));
     commitDaysLayout->addStretch();
 
-    // lfs environement
+    // lfs environment
     QPushButton *environment = new QPushButton(tr("View Environment"));
     connect(environment, &QAbstractButton::clicked, [this, view] {
       git::Repository repo = view->repo();
