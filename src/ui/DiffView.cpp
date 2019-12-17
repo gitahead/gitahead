@@ -1443,7 +1443,7 @@ public:
   void paintEvent(QPaintEvent *event) override
   {
     // Drawing the outline of the shapes with a narrow pen approximates
-    // a slight drop shadow. Minus has to be drawn slighly smaller than
+    // a slight drop shadow. Minus has to be drawn slightly smaller than
     // plus or it creates an optical illusion that makes it look to big.
 
     QPainter painter(this);

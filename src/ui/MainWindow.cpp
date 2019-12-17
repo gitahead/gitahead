@@ -169,7 +169,7 @@ MainWindow::MainWindow(
   // Restore sidebar.
   setSideBarVisible(QSettings().value(kSidebarKey, true).toBool());
 
-  // Set inital state of interface.
+  // Set initial state of interface.
   updateInterface();
 }
 

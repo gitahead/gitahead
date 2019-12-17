@@ -1236,7 +1236,7 @@ public:
      */
     void setWrapVisualFlags(int wrapVisualFlags);
     /**
-     * Retrive the display mode of visual flags for wrapped lines.
+     * Retrieve the display mode of visual flags for wrapped lines.
      */
     int wrapVisualFlags() const;
     /**
@@ -1244,7 +1244,7 @@ public:
      */
     void setWrapVisualFlagsLocation(int wrapVisualFlagsLocation);
     /**
-     * Retrive the location of visual flags for wrapped lines.
+     * Retrieve the location of visual flags for wrapped lines.
      */
     int wrapVisualFlagsLocation() const;
     /**
@@ -1252,7 +1252,7 @@ public:
      */
     void setWrapStartIndent(int indent);
     /**
-     * Retrive the start indent for wrapped lines.
+     * Retrieve the start indent for wrapped lines.
      */
     int wrapStartIndent() const;
     /**

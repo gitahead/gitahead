@@ -179,7 +179,7 @@ QList<Commit> Commit::parents() const
 
 QList<Reference> Commit::refs() const
 {
-  // Add detatched HEAD.
+  // Add detached HEAD.
   QList<Reference> refs;
   Repository repo = this->repo();
   if (repo.isHeadDetached()) {
