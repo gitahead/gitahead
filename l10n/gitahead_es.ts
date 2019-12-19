@@ -4210,89 +4210,89 @@ This reverts commit %2.</source>
 <context>
     <name>SideBar</name>
     <message>
-        <location filename="../src/ui/SideBar.cpp" line="690"/>
+        <location filename="../src/ui/SideBar.cpp" line="688"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/SideBar.cpp" line="692"/>
-        <location filename="../src/ui/SideBar.cpp" line="796"/>
-        <location filename="../src/ui/SideBar.cpp" line="891"/>
+        <location filename="../src/ui/SideBar.cpp" line="690"/>
+        <location filename="../src/ui/SideBar.cpp" line="794"/>
+        <location filename="../src/ui/SideBar.cpp" line="889"/>
         <source>Remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/SideBar.cpp" line="697"/>
+        <location filename="../src/ui/SideBar.cpp" line="695"/>
         <source>Authorize</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/SideBar.cpp" line="711"/>
+        <location filename="../src/ui/SideBar.cpp" line="709"/>
         <source>Clone Repository</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/SideBar.cpp" line="722"/>
+        <location filename="../src/ui/SideBar.cpp" line="720"/>
         <source>Open Existing Repository</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/SideBar.cpp" line="726"/>
+        <location filename="../src/ui/SideBar.cpp" line="724"/>
         <source>Open Repository</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/SideBar.cpp" line="736"/>
+        <location filename="../src/ui/SideBar.cpp" line="734"/>
         <source>Initialize New Repository</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/SideBar.cpp" line="751"/>
+        <location filename="../src/ui/SideBar.cpp" line="749"/>
         <source>Add %1 Account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/SideBar.cpp" line="786"/>
+        <location filename="../src/ui/SideBar.cpp" line="784"/>
         <source>&lt;p&gt;Are you sure you want to remove the remote repository association for %1?&lt;/p&gt;&lt;p&gt;The local clone itself will not be affected.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/SideBar.cpp" line="791"/>
+        <location filename="../src/ui/SideBar.cpp" line="789"/>
         <source>Remove Repository Association?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/SideBar.cpp" line="815"/>
+        <location filename="../src/ui/SideBar.cpp" line="813"/>
         <source>Clear All Recent</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/SideBar.cpp" line="820"/>
+        <location filename="../src/ui/SideBar.cpp" line="818"/>
         <source>Show Full Path</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/SideBar.cpp" line="830"/>
+        <location filename="../src/ui/SideBar.cpp" line="828"/>
         <source>Filter Non-existent Paths</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/SideBar.cpp" line="839"/>
+        <location filename="../src/ui/SideBar.cpp" line="837"/>
         <source>Refresh Remote Accounts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/SideBar.cpp" line="846"/>
+        <location filename="../src/ui/SideBar.cpp" line="844"/>
         <source>Show Full Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/SideBar.cpp" line="880"/>
+        <location filename="../src/ui/SideBar.cpp" line="878"/>
         <source>&lt;p&gt;Are you sure you want to remove the %1 account for &apos;%2&apos;?&lt;/p&gt;&lt;p&gt;Only the account association will be removed. Remote configurations and local clones will not be affected.&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/SideBar.cpp" line="885"/>
+        <location filename="../src/ui/SideBar.cpp" line="883"/>
         <source>Remove Account?</source>
         <translation type="unfinished"></translation>
     </message>
