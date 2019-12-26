@@ -1,3 +1,14 @@
+### v2.6.1 - 2019-12-26
+
+#### Fixed
+
+* Fixed potential crash on adding a remote account from the sidebar.
+* Fixed width of ID column in compact history mode for some fonts.
+* (Mac) Fixed missing translations for some items in app menu.
+* (Mac) Fixed incorrect UI language when English comes before German in list of preferred languages.
+
+----
+
 ### v2.6.0 - 2019-12-12
 
 #### Added
