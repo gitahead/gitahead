@@ -136,6 +136,7 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   parser.addOption({{"d", "debug-menu"}, "Show debug menu."});
   parser.addOption({{"t", "theme"}, "Choose theme.", "name"});
   parser.addOption({{"f", "filter"}, "Set the pathspec filter.", "pathspec"});
+  parser.addOption({"no-translation", "Disable translation."});
 
   if (haltOnParseError) {
     parser.process(arguments());
@@ -157,27 +158,29 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   setStyle(mTheme->style());
   setStyleSheet(mTheme->styleSheet());
 
-  // Load translation files.
-  QLocale locale;
-  QDir l10n = Settings::l10nDir();
-  QString name = QString(GITAHEAD_NAME).toLower();
-  QTranslator *translator = new QTranslator(this);
-  if (translator->load(locale, name, "_", l10n.absolutePath())) {
-    installTranslator(translator);
-  } else {
-    delete translator;
-  }
+  if (!parser.isSet("no-translation")) {
+    // Load translation files.
+    QLocale locale;
+    QDir l10n = Settings::l10nDir();
+    QString name = QString(GITAHEAD_NAME).toLower();
+    QTranslator *translator = new QTranslator(this);
+    if (translator->load(locale, name, "_", l10n.absolutePath())) {
+      installTranslator(translator);
+    } else {
+      delete translator;
+    }
 
-  // Load Qt translation file.
-  QTranslator *qt = new QTranslator(this);
-  if (qt->load(locale, "qtbase", "_", l10n.absolutePath())) {
-    installTranslator(qt);
-  } else {
-    QDir dir(QT_TRANSLATIONS_DIR);
-    if (dir.exists() && qt->load(locale, "qtbase", "_", dir.absolutePath())) {
+    // Load Qt translation file.
+    QTranslator *qt = new QTranslator(this);
+    if (qt->load(locale, "qtbase", "_", l10n.absolutePath())) {
       installTranslator(qt);
     } else {
-      delete qt;
+      QDir dir(QT_TRANSLATIONS_DIR);
+      if (dir.exists() && qt->load(locale, "qtbase", "_", dir.absolutePath())) {
+        installTranslator(qt);
+      } else {
+        delete qt;
+      }
     }
   }
 

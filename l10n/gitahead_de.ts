@@ -313,12 +313,12 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/app/Application.cpp" line="392"/>
+        <location filename="../src/app/Application.cpp" line="395"/>
         <source>SSL Errors</source>
         <translation>SSL-Fehler</translation>
     </message>
     <message>
-        <location filename="../src/app/Application.cpp" line="394"/>
+        <location filename="../src/app/Application.cpp" line="397"/>
         <source>Failed to set up SSL session. Do you want to ignore these errors?</source>
         <translation>SSL-Sitzung konnte nicht initialisiert werden. Willst Du den Fehler ignorieren?</translation>
     </message>
