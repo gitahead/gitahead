@@ -2386,7 +2386,8 @@ void RepoView::openFileManager()
     arg = arg.replace("\"", "\"\"");
 
 #elif defined(Q_OS_MACOS)
-    // TODO
+    fileManagerCmd = "open \"%1\"";
+    arg = arg.replace("\"", "\\\"");
 
 #elif defined(Q_OS_UNIX)
     fileManagerCmd = "xdg-open \"%1\"";
