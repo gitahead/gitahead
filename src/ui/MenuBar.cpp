@@ -162,9 +162,7 @@ MenuBar::MenuBar(QWidget *parent)
   QAction *quit = file->addAction(tr("Exit"));
   quit->setMenuRole(QAction::QuitRole);
   quit->setShortcut(QKeySequence::Quit);
-  connect(quit, &QAction::triggered, [] {
-    QCoreApplication::postEvent(qApp, new QCloseEvent);
-  });
+  connect(quit, &QAction::triggered, &QApplication::closeAllWindows);
 #endif
 
   // Edit
