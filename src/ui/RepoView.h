@@ -61,9 +61,10 @@ public:
     Default       = 0x0,
     Merge         = 0x1,
     Rebase        = 0x2,
-    FastForward   = 0x4, // equivalent to --ff-only
-    NoFastForward = 0x8, // equivalent to --no-ff
-    NoCommit      = 0x10 // equivalent to --no-commit
+    FastForward   = 0x4,  // equivalent to --ff-only
+    NoFastForward = 0x8,  // equivalent to --no-ff
+    NoCommit      = 0x10, // equivalent to --no-commit
+    Squash        = 0x20
   };
 
   Q_DECLARE_FLAGS(MergeFlags, MergeFlag);
@@ -201,6 +202,11 @@ public:
     const git::AnnotatedCommit &upstream,
     LogEntry *parent,
     const std::function<void()> &callback = std::function<void()>());
+
+  // squash
+  void squash(
+    const git::AnnotatedCommit &upstream,
+    LogEntry *parent);
 
   // revert
   void revert(const git::Commit &commit);

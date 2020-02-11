@@ -1523,6 +1523,21 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
         dialog->open();
       });
 
+      menu.addAction(tr("Squash..."), [view, commit] {
+        MergeDialog *dialog =
+          new MergeDialog(RepoView::Squash, view->repo(), view);
+        connect(dialog, &QDialog::accepted, [view, dialog] {
+          git::AnnotatedCommit upstream;
+          git::Reference ref = dialog->reference();
+          if (!ref.isValid())
+            upstream = dialog->target().annotatedCommit();
+          view->merge(dialog->flags(), ref, upstream);
+        });
+
+        dialog->setCommit(commit);
+        dialog->open();
+      });
+
       menu.addAction(tr("Revert"), [view, commit] {
         view->revert(commit);
       });

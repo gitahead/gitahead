@@ -564,9 +564,22 @@ void ReferenceView::contextMenuEvent(QContextMenuEvent *event)
     dialog->open();
   });
 
+  QAction *squash = menu.addAction(tr("Squash..."), [this, ref] {
+    RepoView *view = RepoView::parentView(this);
+    MergeDialog *dialog =
+      new MergeDialog(RepoView::Squash, view->repo(), view);
+    connect(dialog, &QDialog::accepted, [view, dialog] {
+      view->merge(dialog->flags(), dialog->reference());
+    });
+
+    dialog->setReference(ref);
+    dialog->open();
+  });
+
   bool stash = ref.isStash();
   merge->setEnabled(!stash);
   rebase->setEnabled(!stash);
+  squash->setEnabled(!stash);
 
   menu.exec(event->globalPos());
 }

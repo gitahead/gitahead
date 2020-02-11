@@ -49,6 +49,7 @@ MergeDialog::MergeDialog(
   mAction = new QComboBox(this);
   mAction->addItem(tr("Merge"), RepoView::Merge);
   mAction->addItem(tr("Rebase"), RepoView::Rebase);
+  mAction->addItem(tr("Squash"), RepoView::Squash);
   mAction->addItem(tr("Merge (No Fast-forward)"), noff);
   mAction->addItem(tr("Merge (Fast-forward Only)"), ffonly);
   mAction->setCurrentIndex(mAction->findData(static_cast<int>(flags)));
@@ -132,9 +133,13 @@ void MergeDialog::update()
 
 QString MergeDialog::labelText() const
 {
-  QString fmt = (flags() & RepoView::Merge) ?
-    tr("Choose a reference to merge into <b>%1</b>.") :
-    tr("Choose a reference to rebase <b>%1</b> on.");
+  QString fmt;
+  if (flags() & RepoView::Merge)
+    fmt = tr("Choose a reference to merge into '%1'.");
+  else if (flags() & RepoView::Rebase)
+    fmt = tr("Choose a reference to rebase '%1' on.");
+  else
+    fmt = tr("Choose a reference to squash into '%1'.");
 
   git::Reference head = mRepo.head();
   Q_ASSERT(head.isValid());
@@ -144,5 +149,8 @@ QString MergeDialog::labelText() const
 
 QString MergeDialog::buttonText() const
 {
-  return (flags() & RepoView::Merge) ? tr("Merge") : tr("Rebase");
+  if (flags() & RepoView::Merge)
+    return tr("Merge");
+
+  return (flags() & RepoView::Rebase) ? tr("Rebase") : tr("Squash");
 }
