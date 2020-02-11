@@ -1538,6 +1538,8 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
         dialog->open();
       });
 
+      menu.addSeparator();
+
       menu.addAction(tr("Revert"), [view, commit] {
         view->revert(commit);
       });
