@@ -29,6 +29,7 @@
 #include <QSettings>
 #include <QSysInfo>
 #include <QTimer>
+#include <QTranslator>
 #include <QUrlQuery>
 #include <QUuid>
 
@@ -135,6 +136,7 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   parser.addOption({{"d", "debug-menu"}, "Show debug menu."});
   parser.addOption({{"t", "theme"}, "Choose theme.", "name"});
   parser.addOption({{"f", "filter"}, "Set the pathspec filter.", "pathspec"});
+  parser.addOption({"no-translation", "Disable translation."});
 
   if (haltOnParseError) {
     parser.process(arguments());
@@ -156,6 +158,32 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   setStyle(mTheme->style());
   setStyleSheet(mTheme->styleSheet());
 
+  if (!parser.isSet("no-translation")) {
+    // Load translation files.
+    QLocale locale;
+    QDir l10n = Settings::l10nDir();
+    QString name = QString(GITAHEAD_NAME).toLower();
+    QTranslator *translator = new QTranslator(this);
+    if (translator->load(locale, name, "_", l10n.absolutePath())) {
+      installTranslator(translator);
+    } else {
+      delete translator;
+    }
+
+    // Load Qt translation file.
+    QTranslator *qt = new QTranslator(this);
+    if (qt->load(locale, "qtbase", "_", l10n.absolutePath())) {
+      installTranslator(qt);
+    } else {
+      QDir dir(QT_TRANSLATIONS_DIR);
+      if (dir.exists() && qt->load(locale, "qtbase", "_", dir.absolutePath())) {
+        installTranslator(qt);
+      } else {
+        delete qt;
+      }
+    }
+  }
+
   // Enable system proxy auto-detection.
   QNetworkProxyFactory::setUseSystemConfiguration(true);
 
@@ -167,7 +195,7 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   // Load SF Mono font from Terminal.app.
   QDir dir("/System/Applications");
   if (!dir.exists())
-    dir = "/Applications";
+    dir.setPath("/Applications");
   dir.cd("Utilities/Terminal.app/Contents/Resources/Fonts");
   foreach (const QString &name, dir.entryList({"SFMono-*.otf"}, QDir::Files))
     QFontDatabase::addApplicationFont(dir.filePath(name));
@@ -333,12 +361,13 @@ void Application::track(const QUrlQuery &query)
     return;
 
   QString sys = userAgentSystem();
+  QString language = QLocale().uiLanguages().first();
   QString userAgent = kUserAgentFmt.arg(GITAHEAD_NAME, GITAHEAD_VERSION, sys);
 
   QUrlQuery tmp = query;
   tmp.addQueryItem("v", "1");
   tmp.addQueryItem("ds", "app");
-  tmp.addQueryItem("ul", "en-us");
+  tmp.addQueryItem("ul", language);
   tmp.addQueryItem("ua", userAgent);
   tmp.addQueryItem("an", GITAHEAD_NAME);
   tmp.addQueryItem("av", GITAHEAD_VERSION);

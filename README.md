@@ -1,3 +1,6 @@
+[![Actions Status](https://github.com/gitahead/gitahead/workflows/GitAhead%20%28master%29/badge.svg)](https://github.com/gitahead/gitahead/actions) [![Actions Status](https://github.com/gitahead/gitahead/workflows/GitAhead%20%28stage%29/badge.svg)](https://github.com/gitahead/gitahead/actions)
+
+
 GitAhead - Understand Your History
 ==================================
 

@@ -14,6 +14,8 @@
 
 class Beanstalk : public Account
 {
+  Q_OBJECT
+
 public:
   Beanstalk(const QString &username);
 

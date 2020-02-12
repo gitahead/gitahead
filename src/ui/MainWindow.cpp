@@ -22,6 +22,8 @@
 #include "git/Submodule.h"
 #include <QApplication>
 #include <QCloseEvent>
+#include <QGuiApplication>
+#include <QScreen>
 #include <QCryptographicHash>
 #include <QDesktopWidget>
 #include <QMessageBox>
@@ -155,7 +157,7 @@ MainWindow::MainWindow(
   // Set default size and position.
   resize(kDefaultWidth, kDefaultHeight);
 
-  QRect desktop = QApplication::desktop()->availableGeometry();
+  QRect desktop = QGuiApplication::primaryScreen()->availableGeometry();
   int x = (desktop.width() / 2) - (kDefaultWidth / 2);
   int y = (desktop.height() / 2) - (kDefaultHeight / 2);
   move(x, y);
@@ -167,7 +169,7 @@ MainWindow::MainWindow(
   // Restore sidebar.
   setSideBarVisible(QSettings().value(kSidebarKey, true).toBool());
 
-  // Set inital state of interface.
+  // Set initial state of interface.
   updateInterface();
 }
 

@@ -326,7 +326,7 @@ public:
       QSet<QString> names;
       foreach (const git::Commit &commit, commits)
         names.insert(kBoldFmt.arg(commit.author().name()));
-      QStringList list = names.toList();
+      QStringList list = names.values();
       if (list.size() > 3)
         list = list.mid(0, 3) << kBoldFmt.arg("...");
       mAuthorDate->setAuthor(list.join(", "));

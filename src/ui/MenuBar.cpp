@@ -495,9 +495,7 @@ MenuBar::MenuBar(QWidget *parent)
   QAction *quit = file->addAction(tr("Exit"));
   quit->setMenuRole(QAction::QuitRole);
   quitHotkey.use(quit);
-  connect(quit, &QAction::triggered, [] {
-    QCoreApplication::postEvent(qApp, new QCloseEvent);
-  });
+  connect(quit, &QAction::triggered, &QApplication::closeAllWindows);
 #endif
 
   // Edit
@@ -706,7 +704,7 @@ MenuBar::MenuBar(QWidget *parent)
   mLfsUnlock = lfs->addAction(tr("Remove all locks"));
   lfsUnlockHotkey.use(mLfsUnlock);
   connect(mLfsUnlock, &QAction::triggered, [this] {
-    view()->lfsSetLocked(view()->repo().lfsLocks().toList(), false);
+    view()->lfsSetLocked(view()->repo().lfsLocks().values(), false);
   });
 
   lfs->addSeparator();
@@ -834,6 +832,19 @@ MenuBar::MenuBar(QWidget *parent)
     RepoView *view = this->view();
     MergeDialog *dialog =
       new MergeDialog(RepoView::Rebase, view->repo(), view);
+    connect(dialog, &QDialog::accepted, [view, dialog] {
+      view->merge(dialog->flags(), dialog->reference());
+    });
+
+    dialog->open();
+  });
+
+  mSquash = branch->addAction(tr("Squash..."));
+  mSquash->setShortcut(tr("Ctrl+Shift+Q"));
+  connect(mSquash, &QAction::triggered, [this] {
+    RepoView *view = this->view();
+    MergeDialog *dialog =
+      new MergeDialog(RepoView::Squash, view->repo(), view);
     connect(dialog, &QDialog::accepted, [view, dialog] {
       view->merge(dialog->flags(), dialog->reference());
     });
@@ -1219,6 +1230,7 @@ void MenuBar::updateBranch()
 
   mMerge->setEnabled(head.isValid());
   mRebase->setEnabled(head.isValid());
+  mSquash->setEnabled(head.isValid());
 
   bool merging = false;
   QString text = tr("Merge");

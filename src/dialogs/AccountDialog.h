@@ -19,6 +19,8 @@
 
 class AccountDialog : public QDialog
 {
+  Q_OBJECT
+
 public:
   AccountDialog(Account *account, QWidget *parent = nullptr);
 

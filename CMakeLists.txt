@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 3.3.1)
+cmake_minimum_required(VERSION 3.6.2)
 project(GitAhead)
 
 # Set name and version.
 set(GITAHEAD_NAME "GitAhead")
 set(GITAHEAD_VERSION_MAJOR 2)
-set(GITAHEAD_VERSION_MINOR 5)
-set(GITAHEAD_VERSION_PATCH 11)
+set(GITAHEAD_VERSION_MINOR 6)
+set(GITAHEAD_VERSION_PATCH 1)
 set(GITAHEAD_VERSION
   "${GITAHEAD_VERSION_MAJOR}.${GITAHEAD_VERSION_MINOR}.${GITAHEAD_VERSION_PATCH}"
 )
@@ -59,7 +59,9 @@ if(APPLE)
   set(QT_MODULES ${QT_MODULES} DBus)
 endif()
 
-find_package(Qt5 5.9 COMPONENTS ${QT_MODULES} REQUIRED)
+find_package(Qt5 5.9 COMPONENTS ${QT_MODULES} LinguistTools REQUIRED)
+
+set(QT_TRANSLATIONS_DIR "${Qt5_DIR}/../../../translations")
 
 if(APPLE)
   foreach(QT_MODULE ${QT_MODULES})
@@ -77,5 +79,6 @@ endif()
 
 add_subdirectory(dep)
 add_subdirectory(src)
+add_subdirectory(l10n)
 add_subdirectory(test)
 add_subdirectory(pack)

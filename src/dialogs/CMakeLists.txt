@@ -9,6 +9,7 @@ add_library(dialogs
   CommitDialog.cpp
   ConfigDialog.cpp
   DeleteBranchDialog.cpp
+  DeleteTagDialog.cpp
   DiffPanel.cpp
   ExternalToolsDialog.cpp
   ExternalToolsModel.cpp

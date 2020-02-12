@@ -16,6 +16,8 @@ class QLabel;
 
 class UpdateDialog : public QDialog
 {
+  Q_OBJECT
+
 public:
   UpdateDialog(
     const QString &version,

@@ -99,7 +99,7 @@ QString Commit::description() const
         parents.insert(parent);
     }
 
-    commits = parents.toList();
+    commits = parents.values();
   }
 
   return QString();
@@ -179,7 +179,7 @@ QList<Commit> Commit::parents() const
 
 QList<Reference> Commit::refs() const
 {
-  // Add detatched HEAD.
+  // Add detached HEAD.
   QList<Reference> refs;
   Repository repo = this->repo();
   if (repo.isHeadDetached()) {

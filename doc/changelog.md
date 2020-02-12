@@ -1,3 +1,36 @@
+### v2.6.1 - 2019-12-26
+
+#### Fixed
+
+* Fixed potential crash on adding a remote account from the sidebar.
+* Fixed width of ID column in compact history mode for some fonts.
+* (Mac) Fixed missing translations for some items in app menu.
+* (Mac) Fixed incorrect UI language when English comes before German in list of preferred languages.
+
+----
+
+### v2.6.0 - 2019-12-12
+
+#### Added
+
+* Added options to automatically prune remote tracking branches on fetch/pull. (Kas)
+* Added context menu action to push tags to the default remote. (Kas)
+* Added prompt to delete tags (including from the remote). (Kas)
+* Added German language translation. (Kas)
+* Added theme variables to color the tab bar independently. (Kas)
+* Added compact history mode (in the gear popup menu). (Attila Greguss)
+
+#### Fixed
+
+* Jump to matching reference on click instead of selection change.
+* Fixed possible invalid commit editor message after revert, cherry-pick, etc.
+* Fixed inconsistent history list font size on some displays.
+* Fixed failure to cancel some remote transfer operations.
+* Removed artificial limitation on merging and rebasing with a detached HEAD.
+* Fixed crash when merging or rebasing with a detached HEAD. (Kas)
+
+----
+
 ### v2.5.11 - 2019-10-30
 
 #### Added

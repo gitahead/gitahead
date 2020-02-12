@@ -101,6 +101,8 @@ protected:
 
 class RepoModel : public QAbstractItemModel
 {
+  Q_OBJECT
+
 public:
   enum RootRow
   {
@@ -612,13 +614,11 @@ SideBar::SideBar(TabWidget *tabs, QWidget *parent)
   RepoModel *model = new RepoModel(tabs, view);
   view->setModel(model);
 
-  // Try really hard to make sure all pending events are
-  // processed before resetting selection and expansion.
+  // Restore selection and expansion state after model reset.
   connect(model, &RepoModel::modelReset, view, [view, model] {
-    QCoreApplication::processEvents();
     view->setCurrentIndex(model->currentIndex());
     restoreExpansionState(view);
-  }, Qt::QueuedConnection);
+  });
 
   connect(tabs, &TabWidget::currentChanged, view, [view, model] {
     view->setCurrentIndex(model->currentIndex());
@@ -894,3 +894,5 @@ void SideBar::promptToRemoveAccount(Account *account)
 
   dialog->open();
 }
+
+#include "SideBar.moc"

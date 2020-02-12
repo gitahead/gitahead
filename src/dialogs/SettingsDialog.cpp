@@ -93,6 +93,8 @@ public:
 
 class GeneralPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   GeneralPanel(QWidget *parent = nullptr)
     : QWidget(parent)
@@ -113,6 +115,7 @@ public:
 
     mPushCommit = new QCheckBox(tr("Push after each commit"), this);
     mPullUpdate = new QCheckBox(tr("Update submodules after pull"), this);
+    mAutoPrune = new QCheckBox(tr("Prune when fetching"), this);
 
     mStoreCredentials = new QCheckBox(
       tr("Store credentials in secure storage"), this);
@@ -130,6 +133,7 @@ public:
     form->addRow(tr("Automatic actions:"), fetchLayout);
     form->addRow(QString(), mPushCommit);
     form->addRow(QString(), mPullUpdate);
+    form->addRow(QString(), mAutoPrune);
     form->addRow(tr("Credentials:"), mStoreCredentials);
     form->addRow(tr("Usage reporting:"), mUsageReporting);
     form->addRow(QString(), privacy);
@@ -170,6 +174,10 @@ public:
       Settings::instance()->setValue("global/autoupdate/enable", checked);
     });
 
+    connect(mAutoPrune, &QCheckBox::toggled, [](bool checked) {
+      Settings::instance()->setValue("global/autoprune/enable", checked);
+    });
+
     connect(mStoreCredentials, &QCheckBox::toggled, [](bool checked) {
       Settings::instance()->setValue("credential/store", checked);
       delete CredentialHelper::instance();
@@ -195,6 +203,7 @@ public:
 
     mPushCommit->setChecked(settings->value("autopush/enable").toBool());
     mPullUpdate->setChecked(settings->value("autoupdate/enable").toBool());
+    mPullUpdate->setChecked(settings->value("autoprune/enable").toBool());
     settings->endGroup();
 
     mStoreCredentials->setChecked(settings->value("credential/store").toBool());
@@ -209,12 +218,15 @@ private:
   QSpinBox *mFetchMinutes;
   QCheckBox *mPushCommit;
   QCheckBox *mPullUpdate;
+  QCheckBox *mAutoPrune;
   QCheckBox *mStoreCredentials;
   QCheckBox *mUsageReporting;
 };
 
 class ToolsPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   ToolsPanel(QWidget *parent = nullptr)
     : QWidget(parent), mConfig(git::Config::global())
@@ -293,6 +305,8 @@ private:
 
 class WindowPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   WindowPanel(QWidget *parent = nullptr)
     : QWidget(parent)
@@ -497,6 +511,8 @@ public:
 
 class EditorPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   EditorPanel(QWidget *parent = nullptr)
     : QWidget(parent)
@@ -568,6 +584,8 @@ public:
 
 class UpdatePanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   UpdatePanel(QWidget *parent = nullptr)
     : QWidget(parent)
@@ -605,6 +623,8 @@ public:
 #ifdef Q_OS_UNIX
 class TerminalPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   TerminalPanel(QWidget *parent = nullptr)
     : QWidget(parent)
@@ -836,3 +856,5 @@ void SettingsDialog::openSharedInstance(Index index)
   dialog = new SettingsDialog(index);
   dialog->show();
 }
+
+#include "SettingsDialog.moc"

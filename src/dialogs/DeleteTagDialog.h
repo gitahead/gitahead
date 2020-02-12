@@ -4,24 +4,24 @@
 // This software is licensed under the MIT License. The LICENSE.md file
 // describes the conditions under which this software may be distributed.
 //
-// Author: Jason Haslam
+// Author: Kas
 //
 
-#ifndef DELETEBRANCHDIALOG_H
-#define DELETEBRANCHDIALOG_H
+#ifndef DELETETAGDIALOG_H
+#define DELETETAGDIALOG_H
 
 #include <QMessageBox>
 
 namespace git {
-class Branch;
+class TagRef;
 }
 
-class DeleteBranchDialog : public QMessageBox
+class DeleteTagDialog : public QMessageBox
 {
   Q_OBJECT
 
 public:
-  DeleteBranchDialog(const git::Branch &branch, QWidget *parent = nullptr);
+  DeleteTagDialog(const git::TagRef &tag, QWidget *parent = nullptr);
 };
 
 #endif 

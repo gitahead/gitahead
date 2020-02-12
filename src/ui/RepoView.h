@@ -61,9 +61,10 @@ public:
     Default       = 0x0,
     Merge         = 0x1,
     Rebase        = 0x2,
-    FastForward   = 0x4, // equivalent to --ff-only
-    NoFastForward = 0x8, // equivalent to --no-ff
-    NoCommit      = 0x10 // equivalent to --no-commit
+    FastForward   = 0x4,  // equivalent to --ff-only
+    NoFastForward = 0x8,  // equivalent to --no-ff
+    NoCommit      = 0x10, // equivalent to --no-commit
+    Squash        = 0x20
   };
 
   Q_DECLARE_FLAGS(MergeFlags, MergeFlag);
@@ -160,12 +161,20 @@ public:
     bool interactive = true,
     LogEntry *parent = nullptr,
     QStringList *submodules = nullptr);
+  QFuture<git::Result> fetch(
+    const git::Remote &remote,
+    bool tags,
+    bool interactive,
+    LogEntry *parent,
+    QStringList *submodules,
+    bool prune);
 
   // pull
   void pull(
     MergeFlags flags = Default,
     const git::Remote &remote = git::Remote(),
-    bool tags = false);
+    bool tags = false,
+    bool prune = false);
   void merge(
     MergeFlags flags,
     const git::Reference &ref = git::Reference(),
@@ -194,6 +203,11 @@ public:
     LogEntry *parent,
     const std::function<void()> &callback = std::function<void()>());
 
+  // squash
+  void squash(
+    const git::AnnotatedCommit &upstream,
+    LogEntry *parent);
+
   // revert
   void revert(const git::Commit &commit);
 
@@ -201,7 +215,10 @@ public:
   void cherryPick(const git::Commit &commit);
 
   // push
-  void promptToForcePush();
+  void promptToForcePush(
+    const git::Remote &remote = git::Remote(),
+    const git::Reference &src = git::Reference());
+
   void push(
     const git::Remote &remote = git::Remote(),
     const git::Reference &src = git::Reference(),

@@ -112,7 +112,7 @@ return {
   },
   rust = {
     name = "Rust",
-    extenstions = "rs"
+    extensions = "rs"
   },
   sass = {
     name = "Sass",

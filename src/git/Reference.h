@@ -25,6 +25,8 @@ class RevWalk;
 
 class Reference
 {
+  Q_DECLARE_TR_FUNCTIONS(Reference)
+
 public:
   Reference();
 

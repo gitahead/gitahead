@@ -214,7 +214,7 @@ void SurfaceImpl::RoundedRectangle(
   PenColour(fore);
 
   QPainter *painter = GetPainter();
-  painter->drawRoundRect(QRectFFromPRect(rc));
+  painter->drawRoundedRect(QRectFFromPRect(rc), 25, 25, Qt::RelativeSize);
   painter->setBrush(QColorFromCA(back));
 }
 

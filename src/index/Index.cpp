@@ -75,7 +75,7 @@ void Index::reset()
       mIds.append(idFile.read(GIT_OID_RAWSZ));
   }
 
-  // Read dictonary.
+  // Read dictionary.
   QFile dictFile(dir.filePath(kDictFile));
   if (dictFile.open(QIODevice::ReadOnly)) {
     QDataStream dictIn(&dictFile);
@@ -269,7 +269,7 @@ QList<git::Commit> Index::commits(const QList<Posting> &postings) const
       commits.insert(commit);
   }
 
-  return commits.toList();
+  return commits.values();
 }
 
 QList<Index::Posting> Index::postings(const Term &term, bool positional) const

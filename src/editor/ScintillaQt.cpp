@@ -107,7 +107,7 @@ bool IsHangul(const QChar qchar)
 ScintillaQt::ScintillaQt(QWidget *parent)
   : QAbstractScrollArea(parent)
 {
-  time.start();
+  timer.start();
 
   // Set Qt defaults.
   setAcceptDrops(true);
@@ -363,7 +363,7 @@ void ScintillaQt::mousePressEvent(QMouseEvent *event)
 #endif
 
     ButtonDownWithModifiers(
-      pos, time.elapsed(), ModifierFlags(shift, ctrl, alt));
+      pos, timer.elapsed(), ModifierFlags(shift, ctrl, alt));
   }
 }
 
@@ -373,7 +373,7 @@ void ScintillaQt::mouseReleaseEvent(QMouseEvent *event)
   bool ctrl  = QApplication::keyboardModifiers() & Qt::ControlModifier;
   if (event->button() == Qt::LeftButton)
     ButtonUpWithModifiers(
-      point, time.elapsed(), ModifierFlags(false, ctrl, false));
+      point, timer.elapsed(), ModifierFlags(false, ctrl, false));
 
   int pos = send(SCI_POSITIONFROMPOINT, point.x, point.y);
   int line = send(SCI_LINEFROMPOSITION, pos);
@@ -403,7 +403,7 @@ void ScintillaQt::mouseMoveEvent(QMouseEvent *event)
   bool alt   = QApplication::keyboardModifiers() & Qt::AltModifier;
 #endif
 
-  ButtonMoveWithModifiers(pos, time.elapsed(), ModifierFlags(shift, ctrl, alt));
+  ButtonMoveWithModifiers(pos, timer.elapsed(), ModifierFlags(shift, ctrl, alt));
 }
 
 void ScintillaQt::contextMenuEvent(QContextMenuEvent *event)

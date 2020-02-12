@@ -16,6 +16,8 @@ class QTabBar;
 
 class AboutDialog : public QDialog
 {
+  Q_OBJECT
+
 public:
   enum Index
   {

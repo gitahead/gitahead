@@ -193,6 +193,8 @@ private:
 
 class RemoteButton : public Button
 {
+  Q_OBJECT
+
 public:
   enum Kind
   {
@@ -280,7 +282,7 @@ public:
       QString text = (mBadge > 999) ? tr("999+") : QString::number(mBadge);
       QFontMetrics fm = painter.fontMetrics();
 
-      int w = fm.width(text) + 8;
+      int w = fm.horizontalAdvance(text) + 8;
       QRect rect(width() - w - 2, 2, w, fm.lineSpacing() + 2);
 
       Theme *theme = Application::theme();
@@ -387,6 +389,8 @@ public:
 
 class RefreshButton : public Button
 {
+  Q_OBJECT
+
 public:
   RefreshButton(QWidget *parent = nullptr)
     : Button(parent)
@@ -442,6 +446,8 @@ public:
 
 class PullRequestButton : public Button
 {
+  Q_OBJECT
+
 public:
   PullRequestButton(QWidget *parent = nullptr)
     : Button(parent)
@@ -1015,3 +1021,5 @@ RepoView *ToolBar::currentView() const
 {
   return static_cast<MainWindow *>(parent())->currentView();
 }
+
+#include "ToolBar.moc"
