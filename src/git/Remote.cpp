@@ -38,6 +38,22 @@ const QStringList kKeyKinds = {"ed25519", "rsa", "dsa"};
 bool keyFile(QString &key)
 {
   QDir dir = QDir::home();
+
+  QString filePath = Settings::instance()->value("ssh/keyFilePath").toString();
+  if (!filePath.isEmpty()) {
+    QFileInfo file(filePath);
+
+    if (!file.isAbsolute())
+      file.setFile(dir.absolutePath() + '/' + file.filePath());
+    
+    if (file.exists()) {
+      key = file.absoluteFilePath();
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   if (!dir.cd(".ssh"))
     return false;
 
@@ -136,11 +152,22 @@ public:
 
   ConfigFile()
   {
+    QString filePath = Settings::instance()->value("ssh/configFilePath").toString();
     QDir dir = QDir::home();
-    if (!dir.cd(".ssh"))
-      return;
 
-    mFile.reset(new QFile(dir.filePath("config")));
+    if (filePath.isEmpty()) {
+      if (!dir.cd(".ssh"))
+        return;
+
+      filePath = dir.absoluteFilePath("config");
+    }
+
+    QFileInfo file(filePath);
+
+    if (!file.isAbsolute())
+      file.setFile(dir.absolutePath() + '/' + file.filePath());
+
+    mFile.reset(new QFile(file.absoluteFilePath()));
     if (!mFile->open(QFile::ReadOnly))
       return;
 

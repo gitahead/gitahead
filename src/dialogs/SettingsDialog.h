@@ -26,6 +26,7 @@ public:
     Editor,
     Update,
     Plugins,
+    Misc,
     Terminal
   };
 

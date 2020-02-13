@@ -60,5 +60,7 @@
   <file>update@2x.png</file>
   <file>window.png</file>
   <file>window@2x.png</file>
+  <file>misc.png</file>
+  <file>misc@2x.png</file>
 </qresource>
 </RCC>
