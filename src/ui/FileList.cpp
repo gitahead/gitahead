@@ -261,6 +261,12 @@ FileList::FileList(const git::Repository &repo, QWidget *parent)
     Settings::instance()->setWhitespaceIgnored(checked);
   });
 
+  mCompactMode = menu->addAction(tr("Compact mode"));
+  mCompactMode->setCheckable(true);
+  connect(mCompactMode, &QAction::triggered, [](bool checked) {
+    Settings::instance()->setValue("diff/compact", checked, true);
+  });
+
   connect(this, &FileList::doubleClicked, [this](const QModelIndex &index) {
     if (!index.isValid())
       return;
@@ -467,6 +473,7 @@ void FileList::updateMenu(const git::Diff &diff)
 
   // ignore whitespace
   mIgnoreWs->setChecked(settings->isWhitespaceIgnored());
+  mCompactMode->setChecked(settings->value("diff/compact").toBool());
 }
 
 #include "FileList.moc"

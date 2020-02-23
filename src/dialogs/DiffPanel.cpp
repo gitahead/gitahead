@@ -77,17 +77,24 @@ DiffPanel::DiffPanel(const git::Repository &repo, QWidget *parent)
   if (qobject_cast<ConfigDialog *>(parent))
     return;
 
+  Settings *settings = Settings::instance();
+
   // ignore whitespace
   // The ignore whitespace option is global because it's
   // not a config setting. It's a flag (-w) to git diff.
   QCheckBox *ignoreWs = new QCheckBox(tr("Ignore Whitespace (-w)"), this);
-  ignoreWs->setChecked(Settings::instance()->isWhitespaceIgnored());
-  connect(ignoreWs, &QCheckBox::toggled, [](bool checked) {
-    Settings::instance()->setWhitespaceIgnored(checked);
+  ignoreWs->setChecked(settings->isWhitespaceIgnored());
+  connect(ignoreWs, &QCheckBox::toggled, [settings](bool checked) {
+    settings->setWhitespaceIgnored(checked);
+  });
+
+  QCheckBox *compactMode = new QCheckBox(tr("Compact mode"), this);
+  compactMode->setChecked(settings->value("diff/compact").toBool());
+  connect(compactMode, &QCheckBox::toggled, [settings](bool checked) {
+    settings->setValue("diff/compact", checked);
   });
 
   // auto collapse
-  Settings *settings = Settings::instance();
   QCheckBox *collapseAdded = new QCheckBox(tr("Added files"), this);
   collapseAdded->setChecked(settings->value("collapse/added").toBool());
   connect(collapseAdded, &QCheckBox::toggled, [settings](bool checked) {
@@ -101,6 +108,7 @@ DiffPanel::DiffPanel(const git::Repository &repo, QWidget *parent)
   });
 
   layout->addRow(tr("Whitespace:"), ignoreWs);
+  layout->addRow(tr("Compact mode:"), compactMode);
   layout->addRow(tr("Auto Collapse:"), collapseAdded);
   layout->addRow(QString(), collapseDeleted);
 }
