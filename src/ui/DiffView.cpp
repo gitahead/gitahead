@@ -1878,6 +1878,8 @@ public:
     if (patch.isUntracked()) {
       if (!QFileInfo(path).isDir())
         layout->addWidget(addHunk(diff, patch, -1, lfs, submodule));
+      if (Settings::instance()->value("collapse/added").toBool())
+        disclosureButton->setChecked(false);
       return;
     }
 
