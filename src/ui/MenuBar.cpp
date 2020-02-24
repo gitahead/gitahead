@@ -398,6 +398,12 @@ static Hotkey preferencesHotkey = HotkeyManager::registerHotkey(
   "Tools/Options"
 );
 
+static Hotkey squashHotkey = HotkeyManager::registerHotkey(
+  "Ctrl+Shift+Q",
+  "tools/preferences",
+  "Tools/Options"
+);
+
 MenuBar::MenuBar(QWidget *parent)
   : QMenuBar(parent)
 {
@@ -840,7 +846,7 @@ MenuBar::MenuBar(QWidget *parent)
   });
 
   mSquash = branch->addAction(tr("Squash..."));
-  mSquash->setShortcut(tr("Ctrl+Shift+Q"));
+  squashHotkey.use(mSquash);
   connect(mSquash, &QAction::triggered, [this] {
     RepoView *view = this->view();
     MergeDialog *dialog =
