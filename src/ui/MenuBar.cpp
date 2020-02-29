@@ -865,6 +865,7 @@ void MenuBar::updateRemote()
   RepoView *view = win ? win->currentView() : nullptr;
   mConfigureRemotes->setEnabled(view);
   mFetch->setEnabled(view);
+  mFetchAll->setEnabled(view);
   mPull->setEnabled(view && !view->repo().isBare());
   mPush->setEnabled(view);
   mFetchFrom->setEnabled(view);
