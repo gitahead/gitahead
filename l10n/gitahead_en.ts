@@ -313,12 +313,12 @@
 <context>
     <name>Application</name>
     <message>
-        <location filename="../src/app/Application.cpp" line="395"/>
+        <location filename="../src/app/Application.cpp" line="389"/>
         <source>SSL Errors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/app/Application.cpp" line="397"/>
+        <location filename="../src/app/Application.cpp" line="391"/>
         <source>Failed to set up SSL session. Do you want to ignore these errors?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2003,59 +2003,59 @@ Examples
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="486"/>
+        <location filename="../src/ui/MainWindow.cpp" line="481"/>
         <source>Invalid Git Repository</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="487"/>
+        <location filename="../src/ui/MainWindow.cpp" line="482"/>
         <source>%1 does not contain a valid git repository.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="549"/>
-        <location filename="../src/ui/MainWindow.cpp" line="567"/>
+        <location filename="../src/ui/MainWindow.cpp" line="544"/>
+        <location filename="../src/ui/MainWindow.cpp" line="562"/>
         <source>%1 - %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="561"/>
+        <location filename="../src/ui/MainWindow.cpp" line="556"/>
         <source>ahead: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="563"/>
+        <location filename="../src/ui/MainWindow.cpp" line="558"/>
         <source>behind: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="565"/>
+        <location filename="../src/ui/MainWindow.cpp" line="560"/>
         <source>up-to-date</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="566"/>
-        <location filename="../src/ui/MainWindow.cpp" line="603"/>
+        <location filename="../src/ui/MainWindow.cpp" line="561"/>
+        <location filename="../src/ui/MainWindow.cpp" line="598"/>
         <source>%1 (%2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="575"/>
+        <location filename="../src/ui/MainWindow.cpp" line="570"/>
         <source>MERGING</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="580"/>
+        <location filename="../src/ui/MainWindow.cpp" line="575"/>
         <source>REVERTING</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="585"/>
+        <location filename="../src/ui/MainWindow.cpp" line="580"/>
         <source>CHERRY-PICKING</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/MainWindow.cpp" line="594"/>
+        <location filename="../src/ui/MainWindow.cpp" line="589"/>
         <source>REBASING</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2611,27 +2611,27 @@ Examples
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/MenuBar.cpp" line="894"/>
+        <location filename="../src/ui/MenuBar.cpp" line="895"/>
         <source>Merge</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/MenuBar.cpp" line="904"/>
+        <location filename="../src/ui/MenuBar.cpp" line="905"/>
         <source>Revert</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/MenuBar.cpp" line="910"/>
+        <location filename="../src/ui/MenuBar.cpp" line="911"/>
         <source>Cherry-pick</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/MenuBar.cpp" line="916"/>
+        <location filename="../src/ui/MenuBar.cpp" line="917"/>
         <source>Rebase</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/ui/MenuBar.cpp" line="922"/>
+        <location filename="../src/ui/MenuBar.cpp" line="923"/>
         <source>Abort %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2702,6 +2702,19 @@ Examples
     <message>
         <location filename="../src/tools/MergeTool.cpp" line="44"/>
         <source>External Merge</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>MiscPanel</name>
+    <message>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="641"/>
+        <source>Path to SSH config file:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="642"/>
+        <source>Path to default / fallback SSH key file:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4183,57 +4196,62 @@ This reverts commit %2.</source>
 <context>
     <name>SettingsDialog</name>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="694"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="718"/>
         <source>Esc</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="709"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="733"/>
         <source>Global git settings can be overridden for each repository in the corresponding repository configuration page.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="728"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="752"/>
         <source>Edit Config File...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="756"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="780"/>
         <source>General</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="764"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="788"/>
         <source>Diff</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="772"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="796"/>
         <source>Tools</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="782"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="806"/>
         <source>Window</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="790"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="814"/>
         <source>Editor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="798"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="822"/>
         <source>Update</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="806"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="830"/>
         <source>Plugins</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="815"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="838"/>
+        <source>Misc</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="847"/>
         <source>Terminal</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4525,23 +4543,23 @@ This reverts commit %2.</source>
 <context>
     <name>TerminalPanel</name>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="648"/>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="673"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="672"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="697"/>
         <source>Install</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="661"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="685"/>
         <source>Name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="662"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="686"/>
         <source>Location:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="673"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="697"/>
         <source>Uninstall</source>
         <translation type="unfinished"></translation>
     </message>
