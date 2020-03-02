@@ -56,9 +56,6 @@ public:
   static MainWindow *open(const QString &path, bool warnOnInvalid = true);
   static MainWindow *open(const git::Repository &repo = git::Repository());
 
-  // Avoid updating interface during exit.
-  static void setExiting(bool exiting);
-
   // Save window settings on close.
   static void setSaveWindowSettings(bool enabled);
 
@@ -86,8 +83,8 @@ private:
   bool mIsSideBarVisible = true;
 
   bool mShown = false;
+  bool mClosing = false;
 
-  static bool sExiting;
   static bool sSaveWindowSettings;
 };
 

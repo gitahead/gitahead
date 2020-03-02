@@ -69,7 +69,6 @@ private:
 
 } // anon. namespace
 
-bool MainWindow::sExiting = false;
 bool MainWindow::sSaveWindowSettings = false;
 
 MainWindow::MainWindow(
@@ -403,11 +402,6 @@ MainWindow *MainWindow::open(const git::Repository &repo)
   return window;
 }
 
-void MainWindow::setExiting(bool exiting)
-{
-  sExiting = exiting;
-}
-
 void MainWindow::setSaveWindowSettings(bool enabled)
 {
   sSaveWindowSettings = enabled;
@@ -452,6 +446,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
   }
 
+  mClosing = true;
   QMainWindow::closeEvent(event);
 }
 
@@ -513,8 +508,8 @@ void MainWindow::updateTabNames()
 
 void MainWindow::updateInterface()
 {
-  // Avoid updating during exit.
-  if (sExiting)
+  // Avoid updating during close.
+  if (mClosing)
     return;
 
   int ahead = 0;

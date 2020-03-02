@@ -200,9 +200,6 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   foreach (const QString &name, dir.entryList({"SFMono-*.otf"}, QDir::Files))
     QFontDatabase::addApplicationFont(dir.filePath(name));
 
-  // Don't quit on close.
-  setQuitOnLastWindowClosed(false);
-
   // Create shared menu bar on Mac.
   (void) MenuBar::instance(nullptr);
 
@@ -223,9 +220,6 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   git::Repository::init();
 
   connect(this, &Application::aboutToQuit, [this] {
-    // Avoid updating interface during exit.
-    MainWindow::setExiting(true);
-
     // Clean up git library.
     // Make sure windows are really deleted.
     sendPostedEvents(nullptr, QEvent::DeferredDelete);
