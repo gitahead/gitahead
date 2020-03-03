@@ -30,6 +30,10 @@ namespace {
 const QString kNameFmt = "<p style='font-size: large'>%1</p>";
 const QString kLabelFmt = "<p style='color: gray; font-weight: bold'>%1</p>";
 
+/*!
+ * \brief The PreviewWidget class
+ * Widget shown in the next column when file selected instead of a folder
+ */
 class PreviewWidget : public QFrame
 {
   Q_OBJECT
