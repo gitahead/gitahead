@@ -18,22 +18,22 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 {
 	stagedFiles = new QTreeView(this);
 	unstagedFiles = new QTreeView(this);
-	QVBoxLayout* layout = new QVBoxLayout(this);
-	layout->addWidget(unstagedFiles);
-	layout->addWidget(stagedFiles);
-	QWidget* widget = new QWidget(this);
-	widget->setLayout(layout);
+	QSplitter *treeViewSplitter = new QSplitter(Qt::Vertical, this);
+	treeViewSplitter->setHandleWidth(10);
+	treeViewSplitter->addWidget(unstagedFiles);
+	treeViewSplitter->addWidget(stagedFiles);
+	treeViewSplitter->setStretchFactor(1, 1);
 
 	mEditor = new BlameEditor(repo, this);
 
 
-	QSplitter *splitter = new QSplitter(Qt::Horizontal, this);
+	QSplitter* splitter = new QSplitter(Qt::Horizontal, this);
 	splitter->setHandleWidth(0);
-	splitter->addWidget(widget);
+	splitter->addWidget(treeViewSplitter);
 	splitter->addWidget(mEditor);
 	splitter->setStretchFactor(1, 1);
 
-	QVBoxLayout *layout = new QVBoxLayout(this);
+	QVBoxLayout* layout = new QVBoxLayout(this);
 	layout->setContentsMargins(0,0,0,0);
 	layout->addWidget(splitter);
 }
