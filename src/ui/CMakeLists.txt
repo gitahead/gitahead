@@ -8,6 +8,7 @@ add_library(ui
   BlameEditor.cpp
   BlameMargin.cpp
   ColumnView.cpp
+  TreeView.cpp
   CommitList.cpp
   CommitToolBar.cpp
   ContextMenuButton.cpp
@@ -45,6 +46,7 @@ add_library(ui
   ToolBar.cpp
   TreeModel.cpp
   TreeWidget.cpp
+  AlternativeTreeWidget.cpp
   ${IMPL_FILES}
 )
 

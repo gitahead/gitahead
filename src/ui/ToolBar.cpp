@@ -899,6 +899,9 @@ ToolBar::ToolBar(MainWindow *parent)
   ModeButton *tree = new ModeButton(RepoView::Tree, mode);
   mode->addButton(tree, tr("Tree View"), true);
 
+  ModeButton *alternativeTree = new ModeButton(RepoView::Tree, mode);
+  mode->addButton(alternativeTree, tr("Alternative Tree View"), true);
+
   addWidget(mode);
 
   using Signal = void (QButtonGroup::*)(int);
