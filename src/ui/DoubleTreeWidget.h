@@ -7,22 +7,26 @@
 // Author: Martin Marmsoler
 //
 
-#ifndef ALTERNATIVETREEWIDGET_H
-#define ALTERNATIVETREEWIDGET_H
+#ifndef DOUBLETREEWIDGET_H
+#define DOUBLETREEWIDGET_H
 
 #include "DetailView.h" // ContentWidget
-#include "TreeView.h"
+
+class QTreeView;
+class BlameEditor;
+
+// button in treeview: https://stackoverflow.com/questions/40716138/how-to-add-a-button-to-a-qtreeview-row
 
 /*!
- * \brief The AlternativeTreeWidget class
+ * \brief The DoubleTreeWidget class
  * TreeView like in GitKraken
  */
-class AlternativeTreeWidget : public ContentWidget
+class DoubleTreeWidget : public ContentWidget
 {
   Q_OBJECT
   
 public:
-  AlternativeTreeWidget(const git::Repository &repo, QWidget *parent = nullptr);
+  DoubleTreeWidget(const git::Repository &repo, QWidget *parent = nullptr);
   QString selectedFile() const override;
 
   void setDiff(
@@ -35,6 +39,8 @@ protected:
 
 private:
 
-  TreeView *mView;
+  QTreeView* stagedFiles{nullptr};
+  QTreeView* unstagedFiles{nullptr};
+  BlameEditor *mEditor{nullptr};
 };
-#endif // ALTERNATIVETREEWIDGET_H
+#endif // DOUBLETREEWIDGET_H
