@@ -12,7 +12,7 @@
 
 #include "DetailView.h" // ContentWidget
 
-class QTreeView;
+class TreeView;
 class BlameEditor;
 
 // button in treeview: https://stackoverflow.com/questions/40716138/how-to-add-a-button-to-a-qtreeview-row

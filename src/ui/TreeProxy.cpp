@@ -53,5 +53,4 @@ bool TreeProxy::filterAcceptsRow(int source_row, const QModelIndex &source_paren
 		return false;
 
 	return true;
-
 }

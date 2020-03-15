@@ -25,10 +25,14 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 	QVBoxLayout* vBoxLayout = new QVBoxLayout();
 	QHBoxLayout* hBoxLayout = new QHBoxLayout();
 	QLabel* label = new QLabel(tr("Staged Files"));
-	QPushButton* button = new QPushButton(tr("Stage all changes"));
 	hBoxLayout->addWidget(label);
-	hBoxLayout->addWidget(button);
-	stagedFiles = new QTreeView(this);
+	stagedFiles = new TreeView(this);
+	TreeModel* treemodel = new TreeModel(repo, this);
+	TreeProxy* treewrapperStaged = new TreeProxy(true, this);
+	treewrapperStaged->setSourceModel(treemodel);
+	stagedFiles->setModel(treewrapperStaged);
+	stagedFiles->setHeaderHidden(false);
+	stagedFiles->setItemDelegateForColumn(0, new ViewDelegate());
 	vBoxLayout->addLayout(hBoxLayout);
 	vBoxLayout->addWidget(stagedFiles);
 	QWidget* stagedWidget = new QWidget();
@@ -37,10 +41,13 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 	vBoxLayout = new QVBoxLayout();
 	hBoxLayout = new QHBoxLayout();
 	label = new QLabel(tr("Unstaged Files"));
-	button = new QPushButton(tr("Unstage all changes"));
 	hBoxLayout->addWidget(label);
-	hBoxLayout->addWidget(button);
-	unstagedFiles = new QTreeView(this);
+	unstagedFiles = new TreeView(this);
+	TreeProxy* treewrapperUnstaged = new TreeProxy(false, this);
+	treewrapperUnstaged->setSourceModel(treemodel);
+	unstagedFiles->setModel(treewrapperUnstaged);
+	unstagedFiles->setHeaderHidden(true);
+	unstagedFiles->setItemDelegateForColumn(0, new ViewDelegate());
 	vBoxLayout->addLayout(hBoxLayout);
 	vBoxLayout->addWidget(unstagedFiles);
 	QWidget* unstagedWidget = new QWidget();
@@ -48,8 +55,8 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 
 	QSplitter *treeViewSplitter = new QSplitter(Qt::Vertical, this);
 	treeViewSplitter->setHandleWidth(10);
-	treeViewSplitter->addWidget(unstagedWidget);
 	treeViewSplitter->addWidget(stagedWidget);
+	treeViewSplitter->addWidget(unstagedWidget);
 	treeViewSplitter->setStretchFactor(1, 1);
 
 	mEditor = new BlameEditor(repo, this);
