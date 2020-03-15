@@ -27,8 +27,6 @@ TreeProxy::TreeProxy(bool staged, QObject *parent):
 	mStaged(staged),
 	QSortFilterProxyModel(parent)
 {
-	setFilterRole(TreeModel::StatusRole);
-	setFilterRegExp(".*[AM?].*");
 }
 
 TreeProxy::~TreeProxy()
