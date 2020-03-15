@@ -9,8 +9,11 @@
 
 #include "DoubleTreeWidget.h"
 #include "BlameEditor.h"
+#include "TreeModel.h"
+#include "TreeProxy.h"
+#include "TreeView.h"
+#include "ViewDelegate.h"
 
-#include <QTreeView>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>

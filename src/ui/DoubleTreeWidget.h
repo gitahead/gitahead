@@ -39,8 +39,8 @@ protected:
 
 private:
 
-  QTreeView* stagedFiles{nullptr};
-  QTreeView* unstagedFiles{nullptr};
+  TreeView* stagedFiles{nullptr};
+  TreeView* unstagedFiles{nullptr};
   BlameEditor *mEditor{nullptr};
 };
 #endif // DOUBLETREEWIDGET_H
