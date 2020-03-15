@@ -38,7 +38,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 	TreeProxy* treewrapperStaged = new TreeProxy(true, this);
 	treewrapperStaged->setSourceModel(treemodel);
 	stagedFiles->setModel(treewrapperStaged);
-	stagedFiles->setHeaderHidden(false);
+	stagedFiles->setHeaderHidden(true);
 	stagedFiles->setItemDelegateForColumn(0, new ViewDelegate());
 	vBoxLayout->addLayout(hBoxLayout);
 	vBoxLayout->addWidget(stagedFiles);
