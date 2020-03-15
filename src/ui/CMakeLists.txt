@@ -44,6 +44,7 @@ add_library(ui
   TabWidget.cpp
   ToolBar.cpp
   TreeModel.cpp
+  TreeProxy.cpp
   TreeWidget.cpp
   DoubleTreeWidget.cpp
   ${IMPL_FILES}
