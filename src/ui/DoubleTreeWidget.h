@@ -38,7 +38,8 @@ public:
 protected:
 
 private:
-	void selectFile(const QString &file);
+	void selectFile(const QString& file);
+ void fileSelected(const QModelIndex &index);
   void loadEditorContent(const QModelIndex &index);
 
   TreeView* stagedFiles{nullptr};

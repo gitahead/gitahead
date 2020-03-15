@@ -82,10 +82,10 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 	setLayout(layout);
 
 	connect(stagedFiles, &TreeView::fileSelected,
-			this, &DoubleTreeWidget::loadEditorContent);
+			this, &DoubleTreeWidget::fileSelected);
 
 	connect(unstagedFiles, &TreeView::fileSelected,
-			this, &DoubleTreeWidget::loadEditorContent);
+			this, &DoubleTreeWidget::fileSelected);
 }
 
 QString DoubleTreeWidget::selectedFile() const {
@@ -155,6 +155,26 @@ void DoubleTreeWidget::selectFile(const QString &file)
 
 //  // FIXME: Selection does not draw correctly in the last column.
 //  // Scrolling down to an invisible index is also broken.
+}
+
+void DoubleTreeWidget::fileSelected(const QModelIndex &index) {
+
+	if (!index.isValid())
+		return;
+
+	QObject* obj = QObject::sender();
+	if (obj) {
+		TreeView* treeview = static_cast<TreeView*>(obj);
+		if (treeview == stagedFiles) {
+			unstagedFiles->deselectAll();
+			stagedFiles->setFocus();
+		} else if (treeview == unstagedFiles) {
+			stagedFiles->deselectAll();
+			unstagedFiles->setFocus();
+		}
+	}
+
+	loadEditorContent(index);
 }
 
 void DoubleTreeWidget::loadEditorContent(const QModelIndex &index)

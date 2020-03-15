@@ -23,6 +23,7 @@ public:
 
   void setModel(QAbstractItemModel *model) override;
   bool eventFilter(QObject *obj, QEvent *event) override;
+  void deselectAll();
 
 signals:
   void linkActivated(const QString &link);
@@ -31,8 +32,8 @@ signals:
 private:
   void handleSelectionChange(
     const QItemSelection &selected,
-    const QItemSelection &deselected);
-  void deselectAll();
+	const QItemSelection &deselected);
+  bool suppressDeselectionHandling{false};
 
   QItemDelegate *mSharedDelegate;
 };

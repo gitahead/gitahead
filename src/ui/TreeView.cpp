@@ -66,8 +66,16 @@ void TreeView::handleSelectionChange(
 {
   // FIXME: The argument sent by Qt doesn't contain the whole selection.
   QModelIndexList indexes = selectionModel()->selectedIndexes();
-  QModelIndex index = (indexes.size() == 1) ? indexes.first() : QModelIndex();
-  emit fileSelected(index);
+  if (indexes.length() > 0) {
+	  QModelIndex index = (indexes.size() == 1) ? indexes.first() : QModelIndex();
+	  emit fileSelected(index);
+  }
+
+  // ignore deselection handling, because when selecting an item in the second
+  // TreeView (staged/unstaged files), the root should not be set selected. Anything
+  // should be selected in this View
+  if (suppressDeselectionHandling)
+	  return;
 
   // Handle deselection.
   if (indexes.isEmpty() && !deselected.indexes().isEmpty()) {
@@ -79,8 +87,7 @@ void TreeView::handleSelectionChange(
 }
 
 void TreeView::deselectAll() {
-//	QModelIndexList indexes = selectionModel()->selectedIndexes();
-//	for (auto index : indexes) {
-//		index
-//	}
+	suppressDeselectionHandling = true;
+	selectionModel()->clearSelection();
+	suppressDeselectionHandling = false;
 }
