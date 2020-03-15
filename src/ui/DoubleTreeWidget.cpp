@@ -19,6 +19,13 @@
 #include <QLabel>
 #include <QPushButton>
 
+namespace {
+
+const QString kNameFmt = "<p style='font-size: large'>%1</p>";
+const QString kLabelFmt = "<p style='color: gray; font-weight: bold'>%1</p>";
+
+} // anon. namespace
+
 DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
   : ContentWidget(parent)
 {
@@ -73,14 +80,89 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 	layout->addWidget(splitter);
 
 	setLayout(layout);
+
+	connect(stagedFiles, &TreeView::fileSelected,
+			this, &DoubleTreeWidget::loadEditorContent);
+
+	connect(unstagedFiles, &TreeView::fileSelected,
+			this, &DoubleTreeWidget::loadEditorContent);
 }
 
 QString DoubleTreeWidget::selectedFile() const {
 
 }
 
+/*!
+ * \brief DoubleTreeWidget::setDiff
+ * \param diff
+ * \param file
+ * \param pathspec
+ */
 void DoubleTreeWidget::setDiff(const git::Diff &diff,
 									const QString &file,
 									const QString &pathspec) {
+	// Remember selection.
+	QString name = file;
+	if (name.isEmpty()) {
+	  QModelIndexList indexes = stagedFiles->selectionModel()->selectedIndexes();
+	  if (!indexes.isEmpty())
+		name = indexes.first().data(Qt::EditRole).toString();
+	}
 
+	// Reset model.
+	git::Tree tree = RepoView::parentView(this)->tree();
+	TreeProxy* proxy = static_cast<TreeProxy *>(stagedFiles->model());
+	TreeModel* model = static_cast<TreeModel*>(proxy->sourceModel());
+	model->setTree(tree, diff);
+
+	// because of this, the content in the view is shown.
+	proxy = static_cast<TreeProxy *>(unstagedFiles->model());
+	model = static_cast<TreeModel*>(proxy->sourceModel());
+	model->setTree(tree, diff);
+
+	// Clear editor.
+	mEditor->clear();
+
+	// Restore selection.
+	//selectFile(name);
+
+	// Show the tree view.
+	stagedFiles->setVisible(true);
+}
+
+void DoubleTreeWidget::selectFile(const QString &file)
+{
+//  if (file.isEmpty())
+//	return;
+
+//  QModelIndex index;
+//  QStringList path = file.split("/");
+//  QAbstractItemModel *model = mView->model();
+//  while (!path.isEmpty()) {
+//	QString elem = path.takeFirst();
+//	for (int row = 0; row < model->rowCount(index); ++row) {
+//	  QModelIndex current = model->index(row, 0, index);
+//	  if (model->data(current, Qt::DisplayRole).toString() == elem) {
+//		mView->selectionModel()->setCurrentIndex(current, kSelectionFlags);
+//		index = current;
+//		break;
+//	  }
+//	}
+//  }
+
+//  if (index.isValid())
+//	loadEditorContent(index);
+
+//  // FIXME: Selection does not draw correctly in the last column.
+//  // Scrolling down to an invisible index is also broken.
+}
+
+void DoubleTreeWidget::loadEditorContent(const QModelIndex &index)
+{
+  QString name = index.data(Qt::EditRole).toString();
+  git::Blob blob = index.data(TreeModel::BlobRole).value<git::Blob>();
+
+  QList<git::Commit> commits = RepoView::parentView(this)->commits();
+  git::Commit commit = !commits.isEmpty() ? commits.first() : git::Commit();
+  mEditor->load(name, blob, commit);
 }

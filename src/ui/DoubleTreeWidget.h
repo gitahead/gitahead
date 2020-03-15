@@ -38,6 +38,8 @@ public:
 protected:
 
 private:
+	void selectFile(const QString &file);
+  void loadEditorContent(const QModelIndex &index);
 
   TreeView* stagedFiles{nullptr};
   TreeView* unstagedFiles{nullptr};
