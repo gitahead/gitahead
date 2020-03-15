@@ -54,7 +54,7 @@ public:
   {
     Diff,
 	Tree,
-	AlternativeTree
+	DoubleTree
   };
 
   enum MergeFlag
