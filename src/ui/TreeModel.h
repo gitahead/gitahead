@@ -59,7 +59,7 @@ public:
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 
 private:
-  class Node
+  class Node // item of the model
   {
   public:
     Node(const QString &name, const git::Object &obj, Node *parent = nullptr);
