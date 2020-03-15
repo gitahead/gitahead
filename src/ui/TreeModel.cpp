@@ -205,6 +205,13 @@ bool TreeModel::setData(
       }
 
       mDiff.index().setStaged(files, value.toBool());
+	  if (hasChildren(index)) {
+		  int count = rowCount(index);
+		  for (int row = 0; row < count; row++) {
+			  QModelIndex child = this->index(row, 0, index);
+			  emit dataChanged(child, child, {role});
+		  }
+	  }
       emit dataChanged(index, index, {role});
       return true;
     }
