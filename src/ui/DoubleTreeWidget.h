@@ -14,6 +14,7 @@
 
 class TreeView;
 class BlameEditor;
+class StatePushButton;
 
 // button in treeview: https://stackoverflow.com/questions/40716138/how-to-add-a-button-to-a-qtreeview-row
 
@@ -41,11 +42,13 @@ private:
 	void selectFile(const QString& file);
  void fileSelected(const QModelIndex &index);
   void loadEditorContent(const QModelIndex &index);
+  void toggleCollapseStagedFiles();
+  void toggleCollapseUnstagedFiles();
 
   TreeView* stagedFiles{nullptr};
   TreeView* unstagedFiles{nullptr};
-  QPushButton* collapseButtonStagedFiles{nullptr};
-  QPushButton* collapseButtonUnstagedFiles{nullptr};
+  StatePushButton* collapseButtonStagedFiles{nullptr};
+  StatePushButton* collapseButtonUnstagedFiles{nullptr};
   BlameEditor *mEditor{nullptr};
 };
 #endif // DOUBLETREEWIDGET_H

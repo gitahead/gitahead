@@ -13,6 +13,7 @@
 #include "TreeProxy.h"
 #include "TreeView.h"
 #include "ViewDelegate.h"
+#include "StatePushButton.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -43,7 +44,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 	stagedFiles->setItemDelegateForColumn(0, new ViewDelegate());
 	vBoxLayout->addLayout(hBoxLayout);
 	hBoxLayout = new QHBoxLayout();
-	collapseButtonStagedFiles = new QPushButton("Collapse all", this);
+	collapseButtonStagedFiles = new StatePushButton("Collapse all", "Expand all", this);
 	hBoxLayout->addWidget(collapseButtonStagedFiles);
 	//hBoxLayout->addItem(new QSpacerItem(40,20));
 	vBoxLayout->addLayout(hBoxLayout);
@@ -63,7 +64,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 	unstagedFiles->setItemDelegateForColumn(0, new ViewDelegate());
 	vBoxLayout->addLayout(hBoxLayout);
 	hBoxLayout = new QHBoxLayout();
-	collapseButtonUnstagedFiles = new QPushButton("Collapse all", this);
+	collapseButtonUnstagedFiles = new StatePushButton("Collapse all", "Expand all", this);
 	hBoxLayout->addWidget(collapseButtonUnstagedFiles);
 	//hBoxLayout->addItem(new QSpacerItem(40,20));
 	vBoxLayout->addWidget(collapseButtonUnstagedFiles);
@@ -98,9 +99,8 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 	connect(unstagedFiles, &TreeView::fileSelected,
 			this, &DoubleTreeWidget::fileSelected);
 
-	connect(collapseButtonStagedFiles, &QPushButton::clicked, [=](){
-
-	});
+	connect(collapseButtonStagedFiles, &StatePushButton::clicked, this, &DoubleTreeWidget::toggleCollapseStagedFiles);
+	connect(collapseButtonUnstagedFiles, &StatePushButton::clicked, this, &DoubleTreeWidget::toggleCollapseUnstagedFiles);
 }
 
 QString DoubleTreeWidget::selectedFile() const {
@@ -129,11 +129,13 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff,
 	TreeProxy* proxy = static_cast<TreeProxy *>(stagedFiles->model());
 	TreeModel* model = static_cast<TreeModel*>(proxy->sourceModel());
 	model->setTree(tree, diff);
+	stagedFiles->expandAll();
 
 	// because of this, the content in the view is shown.
 	proxy = static_cast<TreeProxy *>(unstagedFiles->model());
 	model = static_cast<TreeModel*>(proxy->sourceModel());
 	model->setTree(tree, diff);
+	unstagedFiles->expandAll();
 
 	// Clear editor.
 	mEditor->clear();
@@ -200,4 +202,20 @@ void DoubleTreeWidget::loadEditorContent(const QModelIndex &index)
   QList<git::Commit> commits = RepoView::parentView(this)->commits();
   git::Commit commit = !commits.isEmpty() ? commits.first() : git::Commit();
   mEditor->load(name, blob, commit);
+}
+
+void DoubleTreeWidget::toggleCollapseStagedFiles() {
+
+	if (collapseButtonStagedFiles->toggleState())
+		stagedFiles->expandAll();
+	else
+		stagedFiles->collapseAll();
+}
+
+void DoubleTreeWidget::toggleCollapseUnstagedFiles() {
+
+	if (collapseButtonUnstagedFiles->toggleState())
+		unstagedFiles->expandAll();
+	else
+		unstagedFiles->collapseAll();
 }
