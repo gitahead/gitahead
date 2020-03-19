@@ -108,6 +108,8 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
 
       QStringList paths;
       QString prefix = node->path(true);
+	  // from these files the checkstate for the folders is created,
+	  // because the folder it self cannot be staged
       for (int i = 0; i < mDiff.count(); ++i) {
         QString path = mDiff.name(i);
         if (path.startsWith(prefix))
@@ -120,6 +122,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
       int count = 0;
       git::Index index = mDiff.index();
       foreach (const QString &path, paths) {
+		// isStaged on folders does not work, because folder cannot be staged
         switch (index.isStaged(path)) {
           case git::Index::Disabled:
           case git::Index::Unstaged:
