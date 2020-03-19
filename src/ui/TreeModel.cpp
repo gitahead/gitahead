@@ -208,14 +208,30 @@ bool TreeModel::setData(
       }
 
       mDiff.index().setStaged(files, value.toBool());
+
+	  // childs
 	  if (hasChildren(index)) {
+		  // emit dataChanged() for all files in the folder
+		  // all children changed too. TODO: only the tracked files should emit a signal
 		  int count = rowCount(index);
 		  for (int row = 0; row < count; row++) {
 			  QModelIndex child = this->index(row, 0, index);
 			  emit dataChanged(child, child, {role});
 		  }
 	  }
-      emit dataChanged(index, index, {role});
+	  // parents
+	  // recursive approach to emit signal dataChanged also for the parents.
+	  // Because when a file in a folder is staged, the state of the folder changes too
+	  QModelIndex parent = this->parent(index);
+	  while (parent.isValid()) {
+		  emit dataChanged(parent, parent, {role});
+		  parent = this->parent(parent);
+	  }
+
+	  // file/folder it self
+	  // emit dataChanged() for folder or file it self
+	  emit dataChanged(index, index, {role});
+
       return true;
     }
   }
