@@ -18,6 +18,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QSpacerItem>
 
 namespace {
 
@@ -41,6 +42,11 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 	stagedFiles->setHeaderHidden(true);
 	stagedFiles->setItemDelegateForColumn(0, new ViewDelegate());
 	vBoxLayout->addLayout(hBoxLayout);
+	hBoxLayout = new QHBoxLayout();
+	collapseButtonStagedFiles = new QPushButton("Collapse all", this);
+	hBoxLayout->addWidget(collapseButtonStagedFiles);
+	//hBoxLayout->addItem(new QSpacerItem(40,20));
+	vBoxLayout->addLayout(hBoxLayout);
 	vBoxLayout->addWidget(stagedFiles);
 	QWidget* stagedWidget = new QWidget();
 	stagedWidget->setLayout(vBoxLayout);
@@ -56,6 +62,11 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 	unstagedFiles->setHeaderHidden(true);
 	unstagedFiles->setItemDelegateForColumn(0, new ViewDelegate());
 	vBoxLayout->addLayout(hBoxLayout);
+	hBoxLayout = new QHBoxLayout();
+	collapseButtonUnstagedFiles = new QPushButton("Collapse all", this);
+	hBoxLayout->addWidget(collapseButtonUnstagedFiles);
+	//hBoxLayout->addItem(new QSpacerItem(40,20));
+	vBoxLayout->addWidget(collapseButtonUnstagedFiles);
 	vBoxLayout->addWidget(unstagedFiles);
 	QWidget* unstagedWidget = new QWidget();
 	unstagedWidget->setLayout(vBoxLayout);
@@ -86,6 +97,10 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 
 	connect(unstagedFiles, &TreeView::fileSelected,
 			this, &DoubleTreeWidget::fileSelected);
+
+	connect(collapseButtonStagedFiles, &QPushButton::clicked, [=](){
+
+	});
 }
 
 QString DoubleTreeWidget::selectedFile() const {

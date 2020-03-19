@@ -44,6 +44,8 @@ private:
 
   TreeView* stagedFiles{nullptr};
   TreeView* unstagedFiles{nullptr};
+  QPushButton* collapseButtonStagedFiles{nullptr};
+  QPushButton* collapseButtonUnstagedFiles{nullptr};
   BlameEditor *mEditor{nullptr};
 };
 #endif // DOUBLETREEWIDGET_H
