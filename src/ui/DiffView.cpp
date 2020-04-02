@@ -1511,6 +1511,10 @@ public:
     setFont(font);
   }
 
+  void setName(const QString& name) {
+      mName = name;
+  }
+
   void setOldName(const QString &oldName)
   {
     mOldName = oldName;
