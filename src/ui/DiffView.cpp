@@ -1857,7 +1857,6 @@ public:
     }
 
     bool lfs = patch.isLfsPointer();
-
     mHeader = new Header(diff, patch, binary, lfs, submodule, parent);
     layout->addWidget(mHeader);
 
@@ -1900,28 +1899,11 @@ public:
       return;
     }
 
-    // Add untracked file content.
-    if (patch.isUntracked()) {
-      if (!QFileInfo(path).isDir())
-        layout->addWidget(addHunk(diff, patch, -1, lfs, submodule));
-      return;
-    }
 
-    // Generate a diff between the head tree and index.
-    QSet<int> stagedHunks;
-    if (staged.isValid()) {
-      for (int i = 0; i < staged.count(); ++i)
-        stagedHunks.insert(staged.lineNumber(i, 0, git::Diff::OldFile));
-    }
+    mHunkLayout = new QVBoxLayout();
+    layout->addLayout(mHunkLayout);
 
-    // Add diff hunks.
-    int hunkCount = patch.count();
-    for (int hidx = 0; hidx < hunkCount; ++hidx) {
-      HunkWidget *hunk = addHunk(diff, patch, hidx, lfs, submodule);
-      int startLine = patch.lineNumber(hidx, 0, git::Diff::OldFile);
-      hunk->header()->check()->setChecked(stagedHunks.contains(startLine));
-      layout->addWidget(hunk);
-    }
+    updatePatch(patch, staged);
 
     // LFS
     if (QToolButton *lfsButton = mHeader->lfsButton()) {
@@ -1958,6 +1940,45 @@ public:
   bool isEmpty()
   {
     return (mHunks.isEmpty() && mImages.isEmpty());
+  }
+
+  void updatePatch(const git::Patch &patch, const git::Patch &staged) {
+    mHeader->updatePatch(patch);
+
+    git::Repository repo = RepoView::parentView(this)->repo();
+
+    QString name = patch.name();
+    QString path = repo.workdir().filePath(name);
+    bool submodule = repo.lookupSubmodule(name).isValid();
+    bool lfs = patch.isLfsPointer();
+
+    // remove all hunks
+    QLayoutItem *child;
+    while ((child = mHunkLayout->takeAt(0)) != 0) {
+          delete child;
+    }
+    // Add untracked file content.
+    if (patch.isUntracked()) {
+      if (!QFileInfo(path).isDir())
+        mHunkLayout->addWidget(addHunk(mDiff, patch, -1, lfs, submodule));
+      return;
+    }
+
+    // Generate a diff between the head tree and index.
+    QSet<int> stagedHunks;
+    if (staged.isValid()) {
+      for (int i = 0; i < staged.count(); ++i)
+        stagedHunks.insert(staged.lineNumber(i, 0, git::Diff::OldFile));
+    }
+
+    // Add diff hunks.
+    int hunkCount = patch.count();
+    for (int hidx = 0; hidx < hunkCount; ++hidx) {
+      HunkWidget *hunk = addHunk(mDiff, patch, hidx, lfs, submodule);
+      int startLine = patch.lineNumber(hidx, 0, git::Diff::OldFile);
+      hunk->header()->check()->setChecked(stagedHunks.contains(startLine));
+      mHunkLayout->addWidget(hunk);
+    }
   }
 
   Header *header() const { return mHeader; }
@@ -2039,14 +2060,15 @@ signals:
   void diagnosticAdded(TextEditor::DiagnosticKind kind);
 
 private:
-  DiffView *mView;
+  DiffView *mView{nullptr};
 
   git::Diff mDiff;
   git::Patch mPatch;
 
-  Header *mHeader;
+  Header *mHeader{nullptr};
   QList<QWidget *> mImages;
   QList<HunkWidget *> mHunks;
+  QVBoxLayout* mHunkLayout{nullptr};
 };
 
 } // anon. namespace
