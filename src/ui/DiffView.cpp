@@ -1637,7 +1637,7 @@ public:
       bool lfs,
       bool submodule,
       QWidget *parent = nullptr)
-      : QFrame(parent), mDiff(diff), mPatch(patch)
+      : QFrame(parent), mDiff(diff), mPatch(patch), mSubmodule(submodule)
     {
       setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
@@ -1645,17 +1645,15 @@ public:
       mCheck = new QCheckBox(this);
       mCheck->setVisible(diff.isStatusDiff());
 
-      char status = git::Diff::statusChar(patch.status());
-      Badge *badge = new Badge({Badge::Label(QChar(status))}, this);
+      mStatusBadge = new Badge({}, this);
 
-      LineStats *stats = nullptr;
-      git::Patch::LineStats lineStats = patch.lineStats();
-      if (lineStats.additions > 0 || lineStats.deletions > 0)
-        stats = new LineStats(lineStats, this);
+      git::Patch::LineStats lineStats;
+      lineStats.additions = 0;
+      lineStats.deletions = 0;
+      mStats = new LineStats(lineStats, this);
+      mStats->setVisible(false);
 
-      FileLabel *label = new FileLabel(name, submodule, this);
-      if (patch.status() == GIT_DELTA_RENAMED)
-        label->setOldName(patch.name(git::Diff::OldFile));
+      mFileLabel = new FileLabel(name, submodule, this);
 
       QHBoxLayout *buttons = new QHBoxLayout;
       buttons->setContentsMargins(0,0,0,0);
@@ -1665,10 +1663,9 @@ public:
       layout->setContentsMargins(4,4,4,4);
       layout->addWidget(mCheck);
       layout->addSpacing(4);
-      layout->addWidget(badge);
-      if (stats)
-        layout->addWidget(stats);
-      layout->addWidget(label, 1);
+      layout->addWidget(mStatusBadge);
+      layout->addWidget(mStats);
+      layout->addWidget(mFileLabel, 1);
       layout->addStretch();
       layout->addLayout(buttons);
 
@@ -1708,56 +1705,54 @@ public:
       buttons->addWidget(mEdit);
 
       // Add discard button.
-      if (diff.isStatusDiff() && !submodule && !patch.isConflicted()) {
-        DiscardButton *discard = new DiscardButton(this);
-        discard->setToolTip(FileWidget::tr("Discard File"));
-        buttons->addWidget(discard);
+      mDiscardButton = new DiscardButton(this);
+      mDiscardButton->setVisible(false);
+      mDiscardButton->setToolTip(FileWidget::tr("Discard File"));
+      buttons->addWidget(mDiscardButton);
+      connect(mDiscardButton, &QToolButton::clicked, [this] {
+        QString name = mPatch.name();
+        bool untracked = mPatch.isUntracked();
+        QString path = mPatch.repo().workdir().filePath(name);
+        QString arg = QFileInfo(path).isDir() ? FileWidget::tr("Directory") : FileWidget::tr("File");
+        QString title =
+          untracked ? FileWidget::tr("Remove %1?").arg(arg) : FileWidget::tr("Discard Changes?");
+        QString text = untracked ?
+          FileWidget::tr("Are you sure you want to remove '%1'?") :
+          FileWidget::tr("Are you sure you want to discard all changes in '%1'?");
+        QMessageBox *dialog = new QMessageBox(
+          QMessageBox::Warning, title, text.arg(name),
+          QMessageBox::Cancel, this);
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+        dialog->setInformativeText(FileWidget::tr("This action cannot be undone."));
 
-        connect(discard, &QToolButton::clicked, [this] {
+        QString button =
+          untracked ? FileWidget::tr("Remove %1").arg(arg) : FileWidget::tr("Discard Changes");
+        QPushButton *discard =
+          dialog->addButton(button, QMessageBox::AcceptRole);
+        connect(discard, &QPushButton::clicked, [this, untracked] {
+          RepoView *view = RepoView::parentView(this);
+          git::Repository repo = mPatch.repo();
           QString name = mPatch.name();
-          bool untracked = mPatch.isUntracked();
-          QString path = mPatch.repo().workdir().filePath(name);
-          QString arg = QFileInfo(path).isDir() ? FileWidget::tr("Directory") : FileWidget::tr("File");
-          QString title =
-            untracked ? FileWidget::tr("Remove %1?").arg(arg) : FileWidget::tr("Discard Changes?");
-          QString text = untracked ?
-            FileWidget::tr("Are you sure you want to remove '%1'?") :
-            FileWidget::tr("Are you sure you want to discard all changes in '%1'?");
-          QMessageBox *dialog = new QMessageBox(
-            QMessageBox::Warning, title, text.arg(name),
-            QMessageBox::Cancel, this);
-          dialog->setAttribute(Qt::WA_DeleteOnClose);
-          dialog->setInformativeText(FileWidget::tr("This action cannot be undone."));
-
-          QString button =
-            untracked ? FileWidget::tr("Remove %1").arg(arg) : FileWidget::tr("Discard Changes");
-          QPushButton *discard =
-            dialog->addButton(button, QMessageBox::AcceptRole);
-          connect(discard, &QPushButton::clicked, [this, untracked] {
-            RepoView *view = RepoView::parentView(this);
-            git::Repository repo = mPatch.repo();
-            QString name = mPatch.name();
-            int strategy = GIT_CHECKOUT_FORCE;
-            if (untracked) {
-              QDir dir = repo.workdir();
-              if (QFileInfo(dir.filePath(name)).isDir()) {
-                if (dir.cd(name))
-                  dir.removeRecursively();
-              } else {
-                dir.remove(name);
-              }
-            } else if (!repo.checkout(git::Commit(), nullptr, {name}, strategy)) {
-              LogEntry *parent = view->addLogEntry(mPatch.name(), FileWidget::tr("Discard"));
-              view->error(parent, FileWidget::tr("discard"), mPatch.name());
+          int strategy = GIT_CHECKOUT_FORCE;
+          if (untracked) {
+            QDir dir = repo.workdir();
+            if (QFileInfo(dir.filePath(name)).isDir()) {
+              if (dir.cd(name))
+                dir.removeRecursively();
+            } else {
+              dir.remove(name);
             }
+          } else if (!repo.checkout(git::Commit(), nullptr, {name}, strategy)) {
+            LogEntry *parent = view->addLogEntry(mPatch.name(), FileWidget::tr("Discard"));
+            view->error(parent, FileWidget::tr("discard"), mPatch.name());
+          }
 
-            // FIXME: Work dir changed?
-            view->refresh();
-          });
-
-          dialog->open();
+          // FIXME: Work dir changed?
+          view->refresh();
         });
-      }
+
+        dialog->open();
+      });
 
       mDisclosureButton = new DisclosureButton(this);
       mDisclosureButton->setToolTip(
@@ -1767,6 +1762,8 @@ public:
           mDisclosureButton->isChecked() ? FileWidget::tr("Collapse File") : FileWidget::tr("Expand File"));
       });
       buttons->addWidget(mDisclosureButton);
+
+      updatePatch(patch);
 
       if (!diff.isStatusDiff())
         return;
@@ -1789,6 +1786,23 @@ public:
       updateCheckState();
     }
 
+    void updatePatch(const git::Patch &patch) {
+        char status = git::Diff::statusChar(patch.status());
+        mStatusBadge->setLabels({Badge::Label(QChar(status))});
+
+        git::Patch::LineStats lineStats = patch.lineStats();
+        mStats->setStats(lineStats);
+        mStats->setVisible(lineStats.additions > 0 || lineStats.deletions > 0);
+
+        mFileLabel->setName(patch.name());
+        if (patch.status() == GIT_DELTA_RENAMED)
+          mFileLabel->setOldName(patch.name(git::Diff::OldFile));
+
+        mEdit->updatePatch(patch, -1);
+
+        mDiscardButton->setVisible(mDiff.isStatusDiff() && !mSubmodule && !patch.isConflicted());
+
+    }
     QCheckBox *check() const { return mCheck; }
 
     DisclosureButton *disclosureButton() const { return mDisclosureButton; }
@@ -1841,11 +1855,16 @@ public:
 
     git::Diff mDiff;
     git::Patch mPatch;
+    bool mSubmodule;
 
-    QCheckBox *mCheck;
+    QCheckBox *mCheck{nullptr};
     QToolButton *mLfsButton = nullptr;
-    EditButton *mEdit;
-    DisclosureButton *mDisclosureButton;
+    EditButton *mEdit{nullptr};
+    DiscardButton *mDiscardButton{nullptr};
+    DisclosureButton *mDisclosureButton{nullptr};
+    LineStats* mStats{nullptr};
+    Badge *mStatusBadge{nullptr};
+    FileLabel *mFileLabel{nullptr};
   };
 
   FileWidget(
