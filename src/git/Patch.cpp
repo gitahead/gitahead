@@ -174,6 +174,24 @@ Patch::LineStats Patch::lineStats() const
   return stats;
 }
 
+QByteArray Patch::print() const
+{
+    if (!this->d) {
+        // can occur, when the object is created with the default
+        // constructor.
+        // this is done for example in DiffView::fetchMore()
+        // git::Patch staged = mStagedPatches.value(patch.name());
+        // if no staged patch with this name is available, an empty
+        // patch is created
+        return QByteArray();
+    }
+
+    int count = this->count();
+
+    QBitArray hunks(count, true);
+    return apply(hunks);
+}
+
 int Patch::count() const
 {
   if (isConflicted())
