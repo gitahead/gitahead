@@ -25,9 +25,10 @@ class TextEditor : public Scintilla::ScintillaIFace
 
 public:
   enum Margin {
+    Staged, // indicates staged or not
     LineNumber,
     LineNumbers,
-    ErrorMargin
+    ErrorMargin,
   };
 
   enum Marker {
@@ -38,7 +39,9 @@ public:
     Deletion,
     NoteMarker,
     WarningMarker,
-    ErrorMarker
+    ErrorMarker,
+    StagedMarker,
+    UnstagedMarker,
   };
 
   enum Indicator {
@@ -121,8 +124,8 @@ signals:
   void settingsChanged();
   void highlightActivated(bool active);
   void diagnosticAdded(int line, const Diagnostic &diag);
-  void stageSelectedSignal();
-  void unstageSelectedSignal();
+  void stageSelectedSignal(int startPos, int end);
+  void unstageSelectedSignal(int startPos, int end);
   void revertSelectedSignal();
 
 protected:
@@ -147,6 +150,7 @@ private:
   QIcon mNoteIcon;
   QIcon mWarningIcon;
   QIcon mErrorIcon;
+  QIcon mStagedIcon;
 
   QMap<int,QList<Diagnostic>> mDiagnostics;
 };
