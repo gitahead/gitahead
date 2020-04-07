@@ -54,6 +54,13 @@ public:
   Blob blob(Diff::File file) const;
 
   LineStats lineStats() const;
+  /*!
+   * Returns the complete patch as string.
+   * Used for debugging
+   * \brief print
+   * \return
+   */
+  QByteArray print() const;
 
   int count() const;
   QByteArray header(int index) const;
