@@ -38,6 +38,7 @@ TextEditor::TextEditor(QWidget *parent)
   mNoteIcon = style->standardIcon(QStyle::SP_MessageBoxInformation);
   mWarningIcon = style->standardIcon(QStyle::SP_MessageBoxWarning);
   mErrorIcon = style->standardIcon(QStyle::SP_MessageBoxCritical);
+  mStagedIcon = style->standardIcon(QStyle::SP_ArrowUp);
 
   // Register the LPeg lexer.
   static bool initialized = false;
@@ -51,6 +52,7 @@ TextEditor::TextEditor(QWidget *parent)
   setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
   setMarginLeft(4);
+  setMarginTypeN(Staged, SC_MARGIN_SYMBOL);
   setMarginTypeN(LineNumber, SC_MARGIN_NUMBER);
   setMarginTypeN(LineNumbers, SC_MARGIN_TEXT);
   setMarginTypeN(ErrorMargin, SC_MARGIN_SYMBOL);
@@ -58,6 +60,11 @@ TextEditor::TextEditor(QWidget *parent)
     setMarginWidthN(i, 0);
     setMarginMaskN(i, 0);
   }
+
+  // fixed width, because it indicates only if staged or not
+  setMarginWidthN(Staged, 30);
+  setMarginMaskN(Staged, 1 << StagedMarker);
+  setMarginSensitiveN(Staged, true); // to change by mouseclick staged/unstaged
 
   int mask = 0;
   for (int i = NoteMarker; i <= ErrorMarker; ++i)
@@ -160,6 +167,7 @@ void TextEditor::applySettings()
   settings->endGroup(); // editor
 
   // Initialize markers.
+  // used to colorize the background of the text
   markerDefine(Context, SC_MARK_EMPTY);
   markerDefine(Ours, SC_MARK_BACKGROUND);
   markerDefine(Theirs, SC_MARK_BACKGROUND);
@@ -175,6 +183,7 @@ void TextEditor::applySettings()
   loadMarkerIcon(NoteMarker, mNoteIcon);
   loadMarkerIcon(WarningMarker, mWarningIcon);
   loadMarkerIcon(ErrorMarker, mErrorIcon);
+  loadMarkerIcon(StagedMarker, mStagedIcon);
 
   // Set LPeg lexer language.
   QByteArray lexer = this->lexer().toUtf8();
@@ -382,9 +391,9 @@ void TextEditor::ContextMenu(Scintilla::Point pt) {
         AddToPopUp("Paste", idcmdPaste, writable && WndProc(SCI_CANPASTE, 0, 0));
         AddToPopUp("Delete", idcmdDelete, writable && !sel.Empty());
         AddToPopUp("");
-        AddToPopUp("Stage selected", 20, true);
-        AddToPopUp("Unstage selected", 21, true);
-        AddToPopUp("Revert selected", 22, true);
+        AddToPopUp("Stage selected", stageSelected, true);
+        AddToPopUp("Unstage selected", unstageSelected, true);
+        AddToPopUp("Revert selected", revertSelected, true);
         AddToPopUp("");
         AddToPopUp("Select All", idcmdSelectAll);
         popup.Show(pt, wMain);
@@ -430,15 +439,19 @@ void TextEditor::AddToPopUp(const char *label, int cmd, bool enabled)
 void TextEditor::Command(int cmdId) {
 
     switch (cmdId) {
-    case stageSelected:
-        emit stageSelectedSignal();
+    case stageSelected: {
+        int startLine = lineFromPosition(selectionStart());
+        int end = lineFromPosition(selectionEnd()) + 1;
+        emit stageSelectedSignal(startLine, end);
         break;
 
-    case unstageSelected:
-        emit unstageSelectedSignal();
+    } case unstageSelected: {
+        int startLine = lineFromPosition(selectionStart());
+        int end = lineFromPosition(selectionEnd()) + 1;
+        emit unstageSelectedSignal(startLine, end);
         break;
 
-    case revertSelected:
+    } case revertSelected:
         emit revertSelectedSignal();
         break;
 
