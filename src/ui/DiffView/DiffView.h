@@ -17,11 +17,61 @@
 #include "git/Index.h"
 #include "host/Account.h"
 #include "plugins/Plugin.h"
+#include "app/Application.h"
+#include "app/Theme.h"
 #include <QMap>
 #include <QScrollArea>
 
 class QCheckBox;
 class QVBoxLayout;
+
+namespace DiffViewStyle {
+    const int kIndent = 2;
+    const int kArrowWidth = 20;
+    const int kArrowMargin = 6;
+    const QString kHunkFmt = "<h4>%1</h4>";
+
+    const QString kStyleSheet =
+      "DiffView {"
+      "  border-image: url(:/sunken.png) 4 4 4 4;"
+      "  border-left-width: 4;"
+      "  border-top-width: 4;"
+      "  padding-left: -4;"
+      "  padding-top: -4"
+      "}"
+      "DiffView HunkWidget, DiffView .QFrame {"
+      "  background-clip: content;"
+      "  border-image: url(:/shadow.png) 8 8 8 8;"
+      "  border-width: 8;"
+      "  padding-left: -2;"
+      "  padding-top: -2"
+      "}";
+
+    const QString kButtonStyleFmt =
+      "QToolButton {"
+      "  background: %1"
+      "}"
+      "QToolButton:pressed {"
+      "  background: %2"
+      "}";
+
+    const QDir::Filters kFilters =
+      QDir::Files |
+      QDir::Dirs |
+      QDir::Hidden |
+      QDir::NoDotAndDotDot;
+
+    const QUrl::FormattingOptions kUrlFormat =
+      QUrl::PreferLocalFile |
+      QUrl::StripTrailingSlash |
+      QUrl::NormalizePathSegments;
+}
+
+struct Annotation
+{
+  QString text;
+  QByteArray styles;
+};
 
 class DiffView : public QScrollArea, public EditorProvider
 {
