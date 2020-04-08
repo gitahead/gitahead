@@ -271,41 +271,93 @@ void Patch::setConflictResolution(int index, ConflictResolution resolution)
   writeConflictResolutions(repo, map);
 }
 
+void Patch::populatePreimage(QList<QList<QByteArray>>& image) const{
+    // Populate preimage.
+    // image holds the text and changes are made in this list
+    // this list is written afterwards back into the file
+    QByteArray source = blob(Diff::OldFile).content();
+
+    int index = 0;
+    int newline = source.indexOf('\n');
+    while (newline >= 0) {
+      image.append({source.mid(index, newline - index + 1)});
+      index = newline + 1;
+      newline = source.indexOf('\n', index);
+    }
+
+    image.append({source.mid(index)});
+}
+
+QByteArray Patch::generateResult(QList<QList<QByteArray>>& image, const FilterList &filters) const{
+    // Generate result.
+    QByteArray result;
+    foreach (const QList<QByteArray> &lines, image) {
+      foreach (const QByteArray &line, lines)
+        result.append(line);
+    }
+
+    if (!filters.isValid())
+      return result;
+
+    // Apply filters.
+    git_buf out = GIT_BUF_INIT_CONST(nullptr, 0);
+    git_buf raw = GIT_BUF_INIT_CONST(result.constData(), result.length());
+      (&out, filters, &raw);
+    git_buf_dispose(&raw);
+
+    QByteArray filtered(out.ptr, out.size);
+    git_buf_dispose(&out);
+    return filtered;
+}
+
 QByteArray Patch::apply(
   const QBitArray &hunks,
   const FilterList &filters) const
 {
-  // Populate preimage.
   QList<QList<QByteArray>> image;
-  QByteArray source = blob(Diff::OldFile).content();
-
-  int index = 0;
-  int newline = source.indexOf('\n');
-  while (newline >= 0) {
-    image.append({source.mid(index, newline - index + 1)});
-    index = newline + 1;
-    newline = source.indexOf('\n', index);
-  }
-
-  image.append({source.mid(index)});
+  populatePreimage(image);
 
   // Apply hunks.
   for (int i = 0; i < hunks.size(); ++i) {
     if (!hunks.at(i))
-      continue;
+      continue; // ignore all hunks which should be discarded
+
+    apply(image, i, -1, -1);
+  }
+
+  return generateResult(image, filters);
+}
+
+QByteArray Patch::apply(int hidx, int start_line, int end_line, const FilterList &filters) const
+{
+    QList<QList<QByteArray>> image;
+    populatePreimage(image);
+    apply(image, hidx, start_line, end_line);
+    return generateResult(image, filters);
+}
+
+void Patch::apply(QList<QList<QByteArray>> &image, int hidx, int start_line, int end_line) const {
+    if(start_line == -1 && end_line == -1) {
+        start_line = 0;
+        end_line = image.length();
+    } else if (start_line == -1 || end_line == -1)
+        return; // not valid that only one is -1
+
+    if (start_line > end_line || end_line > image.length())
+        return;
 
     size_t lines = 0;
     const git_diff_hunk *hunk = nullptr;
-    if (git_patch_get_hunk(&hunk, &lines, d.data(), i))
-      continue;
+    if (git_patch_get_hunk(&hunk, &lines, d.data(), hidx)) // returns hunk_idx hunk
+      return;
 
     // FIXME: Incorrectly prepends when there are zero lines
     // of context and there's an addition after the first line.
     int index = hunk->old_start ? hunk->old_start - 1 : 0;
     bool prepend = (index == 0);
-    for (int j = 0; j < lines; ++j) {
+    for (int j = start_line; j < end_line; ++j) {
       const git_diff_line *line = nullptr;
-      if (git_patch_get_line_in_hunk(&line, d.data(), i, j))
+      if (git_patch_get_line_in_hunk(&line, d.data(), hidx, j))
         continue;
 
       if (line->old_lineno > 0)
@@ -331,27 +383,6 @@ QByteArray Patch::apply(
           break;
       }
     }
-  }
-
-  // Generate result.
-  QByteArray result;
-  foreach (const QList<QByteArray> &lines, image) {
-    foreach (const QByteArray &line, lines)
-      result.append(line);
-  }
-
-  if (!filters.isValid())
-    return result;
-
-  // Apply filters.
-  git_buf out = GIT_BUF_INIT_CONST(nullptr, 0);
-  git_buf raw = GIT_BUF_INIT_CONST(result.constData(), result.length());
-  git_filter_list_apply_to_data(&out, filters, &raw);
-  git_buf_dispose(&raw);
-
-  QByteArray filtered(out.ptr, out.size);
-  git_buf_dispose(&out);
-  return filtered;
 }
 
 Patch Patch::fromBuffers(

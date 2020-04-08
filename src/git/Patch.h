@@ -70,6 +70,10 @@ public:
   QByteArray apply(
     const QBitArray &hunks,
     const FilterList &filters = FilterList()) const;
+  QByteArray apply(int hidx,
+                   int start_line,
+                   int end_line,
+                   const FilterList &filters = FilterList()) const;
 
   static Patch fromBuffers(
     const QByteArray &oldBuffer,
