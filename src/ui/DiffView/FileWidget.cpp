@@ -381,7 +381,7 @@ void FileWidget::updatePatch(const git::Patch &patch, const git::Patch &staged) 
   // Add untracked file content.
   if (patch.isUntracked()) {
     if (!QFileInfo(path).isDir())
-      mHunkLayout->addWidget(addHunk(mDiff, patch, -1, lfs, submodule));
+      mHunkLayout->addWidget(addHunk(mDiff, patch, staged, -1, lfs, submodule));
     return;
   }
 
@@ -395,9 +395,9 @@ void FileWidget::updatePatch(const git::Patch &patch, const git::Patch &staged) 
   // Add diff hunks.
   int hunkCount = patch.count();
   for (int hidx = 0; hidx < hunkCount; ++hidx) {
-    HunkWidget *hunk = addHunk(mDiff, patch, hidx, lfs, submodule);
+    HunkWidget *hunk = addHunk(mDiff, patch, staged, hidx, lfs, submodule);
     int startLine = patch.lineNumber(hidx, 0, git::Diff::OldFile);
-    hunk->header()->check()->setChecked(stagedHunks.contains(startLine));
+    hunk->header()->check()->setChecked(stagedHunks.contains(startLine)); // not correct, because it could also only a part of the hunk staged (single lines)
     mHunkLayout->addWidget(hunk);
   }
 }
@@ -431,6 +431,7 @@ QWidget *FileWidget::addImage(
 HunkWidget *FileWidget::addHunk(
   const git::Diff &diff,
   const git::Patch &patch,
+  const git::Patch &staged,
   int index,
   bool lfs,
   bool submodule)
@@ -444,8 +445,6 @@ HunkWidget *FileWidget::addHunk(
   connect(check, &QCheckBox::clicked, this, &FileWidget::stageHunks);
   connect(hunk, &HunkWidget::updated, this, &FileWidget::stageBuffer);
   TextEditor* editor = hunk->editor(false);
-  connect(editor, &TextEditor::stageSelectedSignal, this, &FileWidget::stageHunks);
-  connect(editor, &TextEditor::unstageSelectedSignal, this, &FileWidget::stageHunks);
 
   // Respond to editor diagnostic signal.
   connect(editor, &TextEditor::diagnosticAdded,

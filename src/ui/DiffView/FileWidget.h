@@ -89,6 +89,7 @@ public:
   HunkWidget *addHunk(
     const git::Diff &diff,
     const git::Patch &patch,
+    const git::Patch &staged,
     int index,
     bool lfs,
     bool submodule);
