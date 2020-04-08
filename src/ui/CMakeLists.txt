@@ -13,6 +13,12 @@ add_library(ui
   ContextMenuButton.cpp
   DetailView.cpp
   DiffView/DiffView.cpp
+  DiffView/HunkWidget.cpp
+  DiffView/FileWidget.cpp
+  DiffView/FileLabel.cpp
+  DiffView/Images.cpp
+  DiffView/Comment.cpp
+  DiffView/EditButton.cpp
   DiffWidget.cpp
   EditorWindow.cpp
   ExpandButton.cpp
