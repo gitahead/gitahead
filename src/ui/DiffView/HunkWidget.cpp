@@ -246,6 +246,9 @@ HunkWidget::HunkWidget(
 
   connect(mEditor, &TextEditor::updateUi,
           MenuBar::instance(this), &MenuBar::updateCutCopyPaste);
+  connect(mEditor, &TextEditor::stageSelectedSignal, this, &HunkWidget::stageSelected);
+  connect(mEditor, &TextEditor::unstageSelectedSignal, this, &HunkWidget::stageSelected);
+  connect(mEditor, &TextEditor::marginClicked, this, &HunkWidget::marginClicked);
 
   // Ensure that text margin reacts to settings changes.
   connect(mEditor, &TextEditor::settingsChanged, [this] {
@@ -338,7 +341,9 @@ HunkWidget::HunkWidget(
 
   // Hook up error margin click.
   bool status = diff.isStatusDiff();
-  connect(mEditor, &TextEditor::marginClicked, [this, status](int pos) {
+  connect(mEditor, &TextEditor::marginClicked, [this, status](int pos, int modifier, int margin) {
+        if (margin != TextEditor::Margin::ErrorMargin) // Handle only Error margin
+            return;
     int line = mEditor->lineFromPosition(pos);
     QList<TextEditor::Diagnostic> diags = mEditor->diagnostics(line);
     if (diags.isEmpty())
@@ -492,6 +497,58 @@ void HunkWidget::paintEvent(QPaintEvent *event)
   load();
   QFrame::paintEvent(event);
 }
+
+void HunkWidget::stageSelected(int startLine, int end) {
+     // trying to implement like in the git-gui reference implementation in the git repository
+     QByteArray source = mPatch.blob(git::Diff::OldFile).content();
+
+     QByteArray buffer = mPatch.apply(mIndex, startLine, end);
+     if (buffer.isEmpty())
+       return;
+
+     emit updated(mPatch.name(), buffer);
+
+ }
+
+ void HunkWidget::unstageSelected(int startLine, int end) {
+    QByteArray buffer = mPatch.apply(mIndex, startLine, end);
+    if (buffer.isEmpty())
+      return;
+    emit updated(mPatch.name(), buffer);
+ }
+
+ void HunkWidget::setStaged(int lidx, bool staged) {
+     int markers = mEditor->markers(lidx);
+     if (!(markers & (1 << TextEditor::Marker::Addition | 1 << TextEditor::Marker::Deletion)))
+         return;
+
+     if (staged == (markers & 1 << TextEditor::Marker::StagedMarker) > 0)
+         return;
+
+     if (staged)
+         mEditor->markerAdd(lidx, TextEditor::StagedMarker);
+     else
+       mEditor->markerDelete(lidx, TextEditor::StagedMarker);
+ }
+
+ void HunkWidget::marginClicked(int pos, int modifier, int margin) {
+     if (margin != TextEditor::Margin::Staged)
+         return;
+
+     int lidx = mEditor->lineFromPosition(pos);
+
+     int markers = mEditor->markers(lidx);
+
+     if (!(markers & (1 << TextEditor::Marker::Addition | 1 << TextEditor::Marker::Deletion)))
+         return;
+
+     if (markers & 1 << TextEditor::Marker::StagedMarker)
+         mEditor->markerDelete(lidx, TextEditor::Marker::StagedMarker);
+     else
+       mEditor->markerAdd(lidx, TextEditor::Marker::StagedMarker);
+
+     //stageSelected()
+ }
 
 int HunkWidget::tokenEndPosition(int pos) const
 {

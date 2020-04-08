@@ -92,6 +92,7 @@ public:
     int index,
     bool lfs,
     bool submodule);
+  void stageBuffer(QString name, QByteArray buffer);
   void stageHunks();
 
 signals:

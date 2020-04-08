@@ -66,8 +66,16 @@ public:
   TextEditor *editor(bool ensureLoaded = true);
   void invalidate();
 
+signals:
+  void updated(QString name, QByteArray& buffer);
+
 protected:
   void paintEvent(QPaintEvent *event);
+
+private slots:
+  void stageSelected(int startLine, int end);
+   void setStaged(int lidx, bool staged);
+   void marginClicked(int pos, int modifier, int margin);
 
 private:
   struct Token
