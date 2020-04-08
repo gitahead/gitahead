@@ -219,16 +219,23 @@ void _HunkWidget::Header::mouseDoubleClickEvent(QMouseEvent *event)
     mButton->toggle();
 }
 
+//#############################################################################
+//##########     HunkWidget     ###############################################
+//#############################################################################
+
 HunkWidget::HunkWidget(
   DiffView *view,
   const git::Diff &diff,
   const git::Patch &patch,
+  const git::Patch &staged,
   int index,
   bool lfs,
   bool submodule,
   QWidget *parent)
-  : QFrame(parent), mView(view), mPatch(patch), mIndex(index)
+  : QFrame(parent), mView(view), mPatch(patch), mStaged(staged), mIndex(index)
 {
+  QByteArray patch_temp = mPatch.print();
+  QByteArray staged_temp = mStaged.print();
   setObjectName("HunkWidget");
   QVBoxLayout *layout = new QVBoxLayout(this);
   layout->setContentsMargins(0,0,0,0);
@@ -627,12 +634,18 @@ void HunkWidget::load()
     return;
   }
 
+  QByteArray patch = mPatch.print();
+  QByteArray staged = mStaged.print();
+
   // Load hunk.
   QList<Line> lines;
+  QList<Line> linesStaged;
   QByteArray content;
+  QByteArray contentStaged;
   int patchCount = mPatch.lineCount(mIndex);
   for (int lidx = 0; lidx < patchCount; ++lidx) {
     char origin = mPatch.lineOrigin(mIndex, lidx);
+    bool EOL = false;
     if (origin == GIT_DIFF_LINE_CONTEXT_EOFNL ||
         origin == GIT_DIFF_LINE_ADD_EOFNL ||
         origin == GIT_DIFF_LINE_DEL_EOFNL) {
@@ -671,6 +684,7 @@ void HunkWidget::load()
   Account::FileComments comments = mView->comments().files.value(mPatch.name());
 
   // Add markers and line numbers.
+  // old line number and new line number are written in the same margin
   int additions = 0;
   int deletions = 0;
   int count = lines.size();

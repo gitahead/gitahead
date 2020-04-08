@@ -186,7 +186,10 @@ QByteArray Patch::print() const
         return QByteArray();
     }
 
+
     int count = this->count();
+    if (!count)
+      return QByteArray();
 
     QBitArray hunks(count, true);
     return apply(hunks);

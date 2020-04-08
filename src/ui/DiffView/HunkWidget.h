@@ -74,6 +74,7 @@ protected:
 
 private slots:
   void stageSelected(int startLine, int end);
+  void unstageSelected(int startLine, int end);
    void setStaged(int lidx, bool staged);
    void marginClicked(int pos, int modifier, int margin);
 
@@ -93,6 +94,7 @@ private:
 
   DiffView *mView;
   git::Patch mPatch;
+  git::Patch mStaged;
   int mIndex;
 
   _HunkWidget::Header *mHeader;
