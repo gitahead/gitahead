@@ -459,6 +459,12 @@ HunkWidget *FileWidget::addHunk(
   return hunk;
 }
 
+void FileWidget::stageBuffer(QString name, QByteArray buffer) {
+      git::Index index = mDiff.index();
+      // Add the buffer to the index.
+      index.add(name, buffer);
+  }
+
 void FileWidget::stageHunks()
 {
   QBitArray hunks(mHunks.size());
