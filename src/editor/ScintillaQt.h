@@ -139,6 +139,9 @@ protected:
   void inputMethodEvent(QInputMethodEvent *event) override;
   QVariant inputMethodQuery(Qt::InputMethodQuery query) const override;
   void scrollContentsBy(int dx, int dy) override {}
+  static sptr_t DirectFunction(
+    sptr_t ptr, unsigned int iMessage, uptr_t wParam, sptr_t lParam);
+  sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;
 
 private:
   void PasteFromMode(QClipboard::Mode);
@@ -173,11 +176,7 @@ private:
   std::string CaseMapString(const std::string &s, int caseMapping) override;
   void CreateCallTipWindow(PRectangle rc) override;
   void AddToPopUp(const char *label, int cmd = 0, bool enabled = true) override;
-  sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;
   sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;
-
-  static sptr_t DirectFunction(
-    sptr_t ptr, unsigned int iMessage, uptr_t wParam, sptr_t lParam);
 
 private:
   QElapsedTimer timer;
