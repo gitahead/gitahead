@@ -8,7 +8,7 @@
 //
 
 #include "DiffWidget.h"
-#include "DiffView.h"
+#include "DiffView/DiffView.h"
 #include "FileList.h"
 #include "FindWidget.h"
 #include "RepoView.h"
