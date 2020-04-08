@@ -62,18 +62,57 @@ public:
    */
   QByteArray print() const;
 
+  /*!
+   * \brief count
+   * \return Number of hunks in the patch
+   */
   int count() const;
-  QByteArray header(int index) const;
+  /*!
+   * Header of hunk \p index
+   * \brief header
+   * \param index Index of hunk
+   * \return
+   */
+  QByteArray header(int hidx) const;
 
-  int lineCount(int index) const;
-  char lineOrigin(int index, int line) const;
-  int lineNumber(int index, int line, Diff::File file = Diff::NewFile) const;
-  QByteArray lineContent(int index, int line) const;
+  /*!
+   * Number of lines in hunk with index hidx
+   * \brief Patch::lineCount
+   * \param hidx Index of the hunk
+   * \return Number of lines in the hunk
+   */
+  int lineCount(int hidx) const;
+  /*!
+   * Origin character of hunk hidx and line line
+   * \brief lineOrigin
+   * \param hidx Index of the hunnk
+   * \param line
+   * \return
+   */
+  char lineOrigin(int hidx, int line) const;
+  int lineNumber(int hidx, int line, Diff::File file = Diff::NewFile) const;
 
-  ConflictResolution conflictResolution(int index);
-  void setConflictResolution(int index, ConflictResolution resolution);
+  /*!
+   * Returns the content of the line of hunk hidx and line line
+   * \brief lineContent
+   * \param hidx
+   * \param line
+   * \return
+   */
+  QByteArray lineContent(int hidx, int line) const;
 
+  ConflictResolution conflictResolution(int hidx);
+  void setConflictResolution(int hidx, ConflictResolution resolution);
+
+   void populatePreimage(QList<QList<QByteArray>>& image) const;
   // Apply the given hunk indexes to the old buffer.
+   /*!
+    * Apply all changes and return the edited file as ByteArray
+    * \brief Patch::apply
+    * \param hunks
+    * \param filters
+    * \return edited file
+    */
   QByteArray apply(
     const QBitArray &hunks,
     const FilterList &filters = FilterList()) const;
@@ -91,6 +130,17 @@ public:
   static void clearConflictResolutions(const Repository &repo);
 
 private:
+  QByteArray generateResult(QList<QList<QByteArray>>& image, const FilterList &filters) const;
+  /*!
+   * Applies changes to hunk and store result in image
+   * \brief Patch::apply
+   * \param image
+   * \param hunk_idx
+   * \param start_line
+   * \param end_line
+   */
+  void apply(QList<QList<QByteArray> > &image, int hidx, int start_line, int end_line) const;
+
   struct ConflictHunk
   {
     int line; // start line
