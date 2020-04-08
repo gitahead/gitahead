@@ -8,12 +8,12 @@
 //
 
 #include "DiffView.h"
-#include "Badge.h"
-#include "BlameEditor.h"
-#include "EditorWindow.h"
-#include "FileContextMenu.h"
-#include "MenuBar.h"
-#include "RepoView.h"
+#include "../Badge.h"
+#include "../BlameEditor.h"
+#include "../EditorWindow.h"
+#include "../FileContextMenu.h"
+#include "../MenuBar.h"
+#include "../RepoView.h"
 #include "app/Application.h"
 #include "conf/Settings.h"
 #include "git/Blame.h"
