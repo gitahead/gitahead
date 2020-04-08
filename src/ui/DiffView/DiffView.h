@@ -10,7 +10,7 @@
 #ifndef DIFFVIEW_H
 #define DIFFVIEW_H
 
-#include "FindWidget.h"
+#include "../FindWidget.h"
 #include "editor/TextEditor.h"
 #include "git/Commit.h"
 #include "git/Diff.h"
