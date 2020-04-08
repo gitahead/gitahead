@@ -52,7 +52,7 @@ public:
   };
 
   Diff();
-
+  QByteArray print();
   bool isValid() const { return d; }
   explicit operator bool() const { return isValid(); }
 

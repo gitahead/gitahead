@@ -52,11 +52,85 @@ Diff::Diff() {}
 
 Diff::Diff(git_diff *diff)
   : d(diff ? new Data(diff) : nullptr)
-{}
+{
+    QByteArray diff_ = print();
+}
 
 Diff::operator git_diff *() const
 {
   return d->diff;
+}
+
+typedef struct {
+    QString header;
+    QList<QString> lines;
+} _Hunk;
+
+typedef struct {
+    QList<_Hunk> hunks;
+} _File;
+
+typedef struct {
+    QList<_File> files;
+} diff_data;
+
+int each_file_cb(const git_diff_delta *delta,
+                 float progress,
+                 void *payload)
+{
+  diff_data *d = (diff_data*)payload;
+  _File file;
+  d->files.append(file);
+  return 0;
+}
+
+int each_hunk_cb(const git_diff_delta *delta,
+                 const git_diff_hunk *hunk,
+                 void *payload)
+{
+  diff_data *d = (diff_data*)payload;
+  _Hunk _hunk;
+  _hunk.header = hunk->header;
+  d->files.last().hunks.append(_hunk);
+  return 0;
+}
+
+int each_line_cb(const git_diff_delta *delta,
+                 const git_diff_hunk *hunk,
+                 const git_diff_line *line,
+                 void *payload)
+{
+  diff_data *d = (diff_data*)payload;
+  const char* chr = line->content;
+  const char origin = line->origin;
+
+
+  QByteArray ba(chr, line->content_len);
+  QString pld(origin);
+  pld.append(ba);
+
+  d->files.last().hunks.last().lines.append(pld);
+
+  return 0;
+}
+
+QByteArray Diff::print()
+{
+    diff_data data;
+    git_diff_foreach(d->diff, each_file_cb, nullptr, each_hunk_cb, each_line_cb, &data);
+
+    QByteArray diff;
+    for (auto file : data.files) {
+        for (auto hunk : file.hunks) {
+            diff.append(hunk.header);
+
+            for (auto line: hunk.lines)
+                diff.append(line);
+        }
+
+    }
+    qDebug(diff);
+    return diff;
 }
 
 bool Diff::isConflicted() const
