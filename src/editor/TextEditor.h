@@ -17,6 +17,7 @@
 #include "Catalogue.h"
 #include "SciLexer.h"
 #include "ScintillaIFace.h"
+#include "Platform.h"
 
 class TextEditor : public Scintilla::ScintillaIFace
 {
@@ -63,6 +64,12 @@ public:
     Error
   };
 
+  enum {
+      stageSelected = 30,
+      unstageSelected = 31,
+      revertSelected = 32,
+  };
+
   struct Range
   {
     int pos;
@@ -95,6 +102,7 @@ public:
 
   QList<Diagnostic> diagnostics(int line);
   void addDiagnostic(int line, const Diagnostic &diag);
+  sptr_t WndProc(unsigned int message, uptr_t wParam, sptr_t lParam);
 
   // Make wheel event public.
   // FIXME: This should be an event filter?
@@ -113,13 +121,20 @@ signals:
   void settingsChanged();
   void highlightActivated(bool active);
   void diagnosticAdded(int line, const Diagnostic &diag);
+  void stageSelectedSignal();
+  void unstageSelectedSignal();
+  void revertSelectedSignal();
 
 protected:
   QSize viewportSizeHint() const override;
+  void contextMenuEvent(QContextMenuEvent *event) override;
+  void Command(int cmdId);
 
 private:
   int diagnosticMarker(int line);
   void loadMarkerIcon(Marker marker, const QIcon &icon);
+  void AddToPopUp(const char *label, int cmd = 0, bool enabled = true);
+  void ContextMenu(Scintilla::Point pt);
 
   QString mPath;
   int mLineCount = -1;

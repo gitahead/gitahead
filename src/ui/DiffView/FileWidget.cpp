@@ -440,9 +440,12 @@ HunkWidget *FileWidget::addHunk(
   QCheckBox *check = hunk->header()->check();
   check->setVisible(diff.isStatusDiff() && !submodule && !patch.isConflicted());
   connect(check, &QCheckBox::clicked, this, &FileWidget::stageHunks);
+  TextEditor* editor = hunk->editor(false);
+  connect(editor, &TextEditor::stageSelectedSignal, this, &FileWidget::stageHunks);
+  connect(editor, &TextEditor::unstageSelectedSignal, this, &FileWidget::stageHunks);
 
   // Respond to editor diagnostic signal.
-  connect(hunk->editor(false), &TextEditor::diagnosticAdded,
+  connect(editor, &TextEditor::diagnosticAdded,
   [this](int line, const TextEditor::Diagnostic &diag) {
     emit diagnosticAdded(diag.kind);
   });
