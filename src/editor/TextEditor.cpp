@@ -15,6 +15,9 @@
 #include <QScrollBar>
 #include <QStyle>
 #include <QWindow>
+#include <QMenu>
+
+#include "PlatQt.h"
 
 using namespace Scintilla;
 
@@ -127,6 +130,15 @@ TextEditor::TextEditor(QWidget *parent)
   // Update geometry when the scroll bar becomes visible.
   connect(horizontalScrollBar(), &QScrollBar::rangeChanged,
           this, &TextEditor::updateGeometry);
+}
+
+void TextEditor::contextMenuEvent(QContextMenuEvent *event)
+{
+  Point pos = PointFromQPoint(event->globalPos());
+  Point pt = PointFromQPoint(event->pos());
+  if (!PointInSelection(pt))
+    SetEmptySelection(PositionFromLocation(pt));
+  ContextMenu(pos);
 }
 
 void TextEditor::applySettings()
@@ -248,6 +260,8 @@ void TextEditor::clearHighlights()
 
 int TextEditor::highlightAll(const QString &text)
 {
+
+
   clearHighlights();
   if (text.isEmpty())
     return 0;
@@ -349,6 +363,89 @@ void TextEditor::addDiagnostic(int line, const Diagnostic &diag)
 
   // Signal addition.
   emit diagnosticAdded(line, diag);
+}
+
+/*!
+ * reimplemented from ScintillaBase to support more actions
+ * \brief TextEditor::ContextMenu
+ * \param pt
+ */
+void TextEditor::ContextMenu(Scintilla::Point pt) {
+    if (displayPopupMenu) {
+        const bool writable = !WndProc(SCI_GETREADONLY, 0, 0);
+        popup.CreatePopUp();
+        AddToPopUp("Undo", idcmdUndo, writable && pdoc->CanUndo());
+        AddToPopUp("Redo", idcmdRedo, writable && pdoc->CanRedo());
+        AddToPopUp("");
+        AddToPopUp("Cut", idcmdCut, writable && !sel.Empty());
+        AddToPopUp("Copy", idcmdCopy, !sel.Empty());
+        AddToPopUp("Paste", idcmdPaste, writable && WndProc(SCI_CANPASTE, 0, 0));
+        AddToPopUp("Delete", idcmdDelete, writable && !sel.Empty());
+        AddToPopUp("");
+        AddToPopUp("Stage selected", 20, true);
+        AddToPopUp("Unstage selected", 21, true);
+        AddToPopUp("Revert selected", 22, true);
+        AddToPopUp("");
+        AddToPopUp("Select All", idcmdSelectAll);
+        popup.Show(pt, wMain);
+    }
+}
+
+sptr_t TextEditor::WndProc(unsigned int message, uptr_t wParam, sptr_t lParam)
+{
+  switch (message) {
+
+    case stageSelected:
+      // determine selected lines
+
+    case unstageSelected:
+      break;
+
+    default:
+      return ScintillaQt::WndProc(message, wParam, lParam);
+  }
+
+  return 0;
+}
+
+void TextEditor::AddToPopUp(const char *label, int cmd, bool enabled)
+{
+  QMenu *menu = static_cast<QMenu *>(popup.GetID());
+
+  if (!qstrlen(label)) {
+    menu->addSeparator();
+  } else {
+    QAction *action = menu->addAction(label);
+    action->setData(cmd);
+    action->setEnabled(enabled);
+  }
+
+  // Make sure the menu's signal is connected only once.
+  menu->disconnect();
+  connect(menu, &QMenu::triggered, this, [this](QAction *action) {
+    Command(action->data().toInt());
+  });
+}
+
+void TextEditor::Command(int cmdId) {
+
+    switch (cmdId) {
+    case stageSelected:
+        emit stageSelectedSignal();
+        break;
+
+    case unstageSelected:
+        emit unstageSelectedSignal();
+        break;
+
+    case revertSelected:
+        emit revertSelectedSignal();
+        break;
+
+    default:
+        ScintillaBase::Command(cmdId);
+        break;
+    }
 }
 
 QSize TextEditor::viewportSizeHint() const
