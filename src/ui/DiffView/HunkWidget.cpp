@@ -714,10 +714,15 @@ void HunkWidget::load(bool force)
   }
 
   // Trim final line end.
-  if (content.endsWith('\n'))
-    content.chop(1);
-  if (content.endsWith('\r'))
-    content.chop(1);
+  // Don't do that because then the editor line
+  // does not match anymore the blob line.
+  // this is a problem when copying the hunk
+  // back into the blob as done in the discardHunk()
+  // method in FileWidget
+  //  if (content.endsWith('\n'))
+  //    content.chop(1);
+  //  if (content.endsWith('\r'))
+  //    content.chop(1);
 
   // Add text.
   mEditor->setText(repo.decode(content));
