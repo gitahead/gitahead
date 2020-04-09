@@ -459,7 +459,7 @@ HunkWidget *FileWidget::addHunk(
   // TODO: move this to constructor of the header ??
   QCheckBox *check = hunk->header()->check();
   check->setVisible(diff.isStatusDiff() && !submodule && !patch.isConflicted());
-  connect(hunk, &HunkWidget::stageStageChanged, this, &FileWidget::stageHunks);
+  connect(hunk, &HunkWidget::stageStageChanged, this, &FileWidget::stageStateHunks);
   connect(hunk, &HunkWidget::discardSignal, this, &FileWidget::discardHunk);
   TextEditor* editor = hunk->editor(false);
 
@@ -475,7 +475,7 @@ HunkWidget *FileWidget::addHunk(
   return hunk;
 }
 
-void FileWidget::stageHunks()
+void FileWidget::stageStateHunks()
 {
   if (mIgnoreStaging)
       return;
@@ -583,5 +583,5 @@ void FileWidget::headerCheckStateChanged(int state)
         mHunks[i]->setStaged(staged);
     mIgnoreStaging = false;
 
-    stageHunks();
+    stageStateHunks();
 }
