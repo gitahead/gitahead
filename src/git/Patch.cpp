@@ -118,6 +118,12 @@ QString Patch::name(Diff::File file) const
 
 git_delta_t Patch::status() const
 {
+  if (!d) {
+      // can occur, when nothing is staged
+      // so the staged patch is empty
+      git_delta_t delta;
+      return delta;
+  }
   return git_patch_get_delta(d.data())->status;
 }
 
@@ -174,7 +180,7 @@ Patch::LineStats Patch::lineStats() const
   return stats;
 }
 
-QByteArray Patch::print() const
+QList<QString> Patch::print() const
 {
     if (!this->d) {
         // can occur, when the object is created with the default
@@ -183,16 +189,18 @@ QByteArray Patch::print() const
         // git::Patch staged = mStagedPatches.value(patch.name());
         // if no staged patch with this name is available, an empty
         // patch is created
-        return QByteArray();
+        return QList<QString>();
     }
 
 
     int count = this->count();
     if (!count)
-      return QByteArray();
+        return QList<QString>();
 
     QBitArray hunks(count, true);
-    return apply(hunks);
+    QByteArray array = apply(hunks);
+    QString str(array);
+    return str.split("\n");
 }
 
 int Patch::count() const
