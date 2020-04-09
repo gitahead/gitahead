@@ -120,6 +120,16 @@ public:
                    int start_line,
                    int end_line,
                    const FilterList &filters = FilterList()) const;
+  QByteArray apply(int hidx, QByteArray& hunkData, const FilterList &filters = FilterList()) const;
+  /*!
+   * applies all hunk data to the patch.
+   * Important: The length of hunkData must match with the number of hunks in the patch!
+   * \brief apply
+   * \param hunkData hunk contents
+   * \param filters
+   * \return
+   */
+  QByteArray apply(QList<QByteArray>& hunkData, const FilterList &filters = FilterList()) const;
 
   static Patch fromBuffers(
     const QByteArray &oldBuffer,
@@ -140,6 +150,16 @@ private:
    * \param end_line
    */
   void apply(QList<QList<QByteArray> > &image, int hidx, int start_line, int end_line) const;
+
+  /*!
+   * Applies changes of a hunk. Used to revert changes
+   * Does not change the length of the List, so other changes can be applied too
+   * \brief apply
+   * \param image
+   * \param hidx
+   * \param hunkData
+   */
+  void apply(QList<QList<QByteArray>> &image, int hidx, QByteArray& hunkData) const;
 
   struct ConflictHunk
   {
