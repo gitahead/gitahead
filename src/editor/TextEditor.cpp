@@ -375,6 +375,21 @@ void TextEditor::addDiagnostic(int line, const Diagnostic &diag)
  * \param pt
  */
 void TextEditor::ContextMenu(Scintilla::Point pt) {
+
+
+    int startLine = lineFromPosition(selectionStart());
+    int end = lineFromPosition(selectionEnd()) + 1;
+    int staged = 0;
+    int diffLines = 0;
+    for (int i = startLine; i < end; i ++) {
+        int mask = markers(i);
+        if (mask & (1 << TextEditor::Marker::Addition | 1 << TextEditor::Marker::Deletion)) {
+            diffLines++;
+            if (mask & 1 << TextEditor::Marker::StagedMarker)
+                staged++;
+        }
+    }
+
     if (displayPopupMenu) {
         const bool writable = !WndProc(SCI_GETREADONLY, 0, 0);
         popup.CreatePopUp();
@@ -386,9 +401,9 @@ void TextEditor::ContextMenu(Scintilla::Point pt) {
         AddToPopUp("Paste", idcmdPaste, writable && WndProc(SCI_CANPASTE, 0, 0));
         AddToPopUp("Delete", idcmdDelete, writable && !sel.Empty());
         AddToPopUp("");
-        AddToPopUp("Stage selected", stageSelected, true);
-        AddToPopUp("Unstage selected", unstageSelected, true);
-        AddToPopUp("Revert selected", revertSelected, true);
+        AddToPopUp("Stage selected", stageSelected, diffLines - staged > 0);
+        AddToPopUp("Unstage selected", unstageSelected, staged > 0);
+        AddToPopUp("Revert selected", revertSelected, diffLines > 0);
         AddToPopUp("");
         AddToPopUp("Select All", idcmdSelectAll);
         popup.Show(pt, wMain);
