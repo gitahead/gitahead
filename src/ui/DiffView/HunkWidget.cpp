@@ -46,6 +46,7 @@ _HunkWidget::Header::Header(
 {
   setObjectName("HunkHeader");
   mCheck = new QCheckBox(this);
+  mCheck->setTristate(true);
 
   QString header = (index >= 0) ? patch.header(index) : QString();
   QString escaped = header.trimmed().toHtmlEscaped();
@@ -180,7 +181,63 @@ _HunkWidget::Header::Header(
   // Collapse on check.
   connect(mCheck, &QCheckBox::clicked, [this](bool staged) {
     mButton->setChecked(!staged);
+    if (staged)
+        emit stageStageChanged(Qt::Checked);
+    else
+        emit stageStageChanged(Qt::Unchecked);
   });
+}
+
+void _HunkWidget::Header::discard()
+{
+//    QString name = patch.name();
+//    int line = patch.lineNumber(index, 0, git::Diff::NewFile);
+
+//    QString title = HunkWidget::tr("Discard Hunk?");
+//    QString text = patch.isUntracked() ?
+//      HunkWidget::tr("Are you sure you want to remove '%1'?").arg(name) :
+//      HunkWidget::tr("Are you sure you want to discard the "
+//         "hunk starting at line %1 in '%2'?").arg(line).arg(name);
+
+//    QMessageBox *dialog = new QMessageBox(
+//      QMessageBox::Warning, title, text, QMessageBox::Cancel, this);
+//    dialog->setAttribute(Qt::WA_DeleteOnClose);
+//    dialog->setInformativeText(HunkWidget::tr("This action cannot be undone."));
+
+//    QPushButton *discard =
+//      dialog->addButton(HunkWidget::tr("Discard Hunk"), QMessageBox::AcceptRole);
+//    connect(discard, &QPushButton::clicked, [this, patch, index] {
+//      git::Repository repo = patch.repo();
+//      if (patch.isUntracked()) {
+//        repo.workdir().remove(patch.name());
+//        return;
+//      }
+
+//      QString name = patch.name();
+//      QSaveFile file(repo.workdir().filePath(name));
+//      if (!file.open(QFile::WriteOnly))
+//        return;
+
+//      QBitArray hunks(patch.count(), true);
+//      hunks[index] = false;
+//      QByteArray buffer = patch.apply(hunks, repo.filters(name));
+//      if (buffer.isEmpty())
+//        return;
+
+//      file.write(buffer);
+//      if (!file.commit())
+//        return;
+
+//      // FIXME: Work dir changed?
+//      RepoView::parentView(this)->refresh();
+//    });
+
+//    dialog->open();
+//  });
+}
+
+void _HunkWidget::Header::stageStateChanged(int stageState) {
+    mCheck->setCheckState(static_cast<Qt::CheckState>(stageState));
 }
 
 QCheckBox *_HunkWidget::Header::check() const
@@ -234,8 +291,8 @@ HunkWidget::HunkWidget(
   QWidget *parent)
   : QFrame(parent), mView(view), mPatch(patch), mStaged(staged), mIndex(index)
 {
-  QByteArray patch_temp = mPatch.print();
-  QByteArray staged_temp = mStaged.print();
+  QList<QString> patch_temp = mPatch.print();
+  QList<QString> staged_temp = mStaged.print();
   setObjectName("HunkWidget");
   QVBoxLayout *layout = new QVBoxLayout(this);
   layout->setContentsMargins(0,0,0,0);
@@ -243,6 +300,7 @@ HunkWidget::HunkWidget(
 
   mHeader = new _HunkWidget::Header(diff, patch, index, lfs, submodule, this);
   layout->addWidget(mHeader);
+  connect(this, &HunkWidget::stageStageChanged, mHeader, &_HunkWidget::Header::stageStateChanged);
 
   mEditor = new Editor(this);
   mEditor->setLexer(patch.name());
@@ -273,6 +331,7 @@ HunkWidget::HunkWidget(
   layout->addWidget(mEditor);
   connect(mHeader->button(), &DisclosureButton::toggled,
           mEditor, &TextEditor::setVisible);
+  connect(mHeader, &_HunkWidget::Header::stageStageChanged, this , &HunkWidget::headerCheckStateChanged);
 
   // Handle conflict resolution.
   if (QToolButton *save = mHeader->saveButton()) {
@@ -513,15 +572,36 @@ void HunkWidget::stageSelected(int startLine, int end) {
      if (buffer.isEmpty())
        return;
 
-     emit updated(mPatch.name(), buffer);
-
+     mStagedStateLoaded = false;
+     emit stageStageChanged(stageState());
  }
 
  void HunkWidget::unstageSelected(int startLine, int end) {
     QByteArray buffer = mPatch.apply(mIndex, startLine, end);
     if (buffer.isEmpty())
       return;
-    emit updated(mPatch.name(), buffer);
+
+    mStagedStateLoaded = false;
+    emit stageStageChanged(stageState());
+ }
+
+ void HunkWidget::headerCheckStateChanged(int state) {
+
+     assert(state != Qt::PartiallyChecked); // makes no sense, that the user can select partially selected
+
+     mStagedStateLoaded = false;
+     bool staged = state == Qt::Checked ? true : false;
+     setStaged(staged);
+ }
+
+ void HunkWidget::setStaged(bool staged)
+ {
+     int lineCount = mEditor->lineCount();
+     for (int i = 0; i < lineCount; i++) {
+       int mask = mEditor->markers(i);
+       if (mask & (1 << TextEditor::Marker::Addition | 1 << TextEditor::Marker::Deletion))
+         setStaged(i, staged);
+     }
  }
 
  void HunkWidget::setStaged(int lidx, bool staged) {
@@ -532,10 +612,15 @@ void HunkWidget::stageSelected(int startLine, int end) {
      if (staged == (markers & 1 << TextEditor::Marker::StagedMarker) > 0)
          return;
 
-     if (staged)
+     if (staged) {
          mEditor->markerAdd(lidx, TextEditor::StagedMarker);
-     else
-       mEditor->markerDelete(lidx, TextEditor::StagedMarker);
+         stageSelected(lidx, lidx);
+         return;
+     }
+
+
+     mEditor->markerDelete(lidx, TextEditor::StagedMarker);
+     unstageSelected(lidx, lidx);
  }
 
  void HunkWidget::marginClicked(int pos, int modifier, int margin) {
@@ -550,11 +635,9 @@ void HunkWidget::stageSelected(int startLine, int end) {
          return;
 
      if (markers & 1 << TextEditor::Marker::StagedMarker)
-         mEditor->markerDelete(lidx, TextEditor::Marker::StagedMarker);
+       setStaged(lidx, false);
      else
-       mEditor->markerAdd(lidx, TextEditor::Marker::StagedMarker);
-
-     //stageSelected()
+       setStaged(lidx, true);
  }
 
 int HunkWidget::tokenEndPosition(int pos) const
@@ -634,8 +717,8 @@ void HunkWidget::load()
     return;
   }
 
-  QByteArray patch = mPatch.print();
-  QByteArray staged = mStaged.print();
+  QList<QString> _patch = mPatch.print();
+  QList<QString> _staged = mStaged.print();
 
   // Load hunk.
   QList<Line> lines;
@@ -652,13 +735,38 @@ void HunkWidget::load()
       Q_ASSERT(!lines.isEmpty());
       lines.last().setNewline(false);
       content += '\n';
+      EOL = true;
+    }
+
+    if (!EOL) {
+        int oldLine = mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile);
+        int newLine = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile);
+        lines << Line(origin, oldLine, newLine);
+        content += mPatch.lineContent(mIndex, lidx);
+    }
+
+    if (!mStaged.isValid()) {
+      // not valid, when not initialized with a patch
+      // this occurs, when nothing is staged
       continue;
     }
 
-    int oldLine = mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile);
-    int newLine = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile);
-    lines << Line(origin, oldLine, newLine);
-    content += mPatch.lineContent(mIndex, lidx);
+      EOL = false;
+      origin = mStaged.lineOrigin(mIndex, lidx);
+      if (origin == GIT_DIFF_LINE_CONTEXT_EOFNL ||
+          origin == GIT_DIFF_LINE_ADD_EOFNL ||
+          origin == GIT_DIFF_LINE_DEL_EOFNL) {
+        Q_ASSERT(!linesStaged.isEmpty());
+        linesStaged.last().setNewline(false);
+        contentStaged += '\n';
+        EOL = true;
+      }
+      if (!EOL) {
+          int oldLineStaged = mStaged.lineNumber(mIndex, lidx, git::Diff::OldFile);
+          int newLineStaged = mStaged.lineNumber(mIndex, lidx, git::Diff::NewFile);
+          linesStaged << Line(origin, oldLineStaged, newLineStaged);
+          contentStaged += mStaged.lineContent(mIndex, lidx);
+      }
   }
 
   // Trim final line end.
@@ -687,6 +795,8 @@ void HunkWidget::load()
   // old line number and new line number are written in the same margin
   int additions = 0;
   int deletions = 0;
+  int countDiffLines = 0;
+  int stagedIdx = 0;
   int count = lines.size();
   for (int lidx = 0; lidx < count; ++lidx) {
     const Line &line = lines.at(lidx);
@@ -773,6 +883,7 @@ void HunkWidget::load()
 
     // Find matching lines.
     int marker = -1;
+    bool staged = false;
     switch (line.origin()) {
       case GIT_DIFF_LINE_CONTEXT:
         marker = TextEditor::Context;
@@ -780,9 +891,10 @@ void HunkWidget::load()
         deletions = 0;
         break;
 
-      case GIT_DIFF_LINE_ADDITION:
+      case GIT_DIFF_LINE_ADDITION: {
         marker = TextEditor::Addition;
         ++additions;
+        countDiffLines ++;
         if (lidx + 1 >= count ||
             mPatch.lineOrigin(mIndex, lidx + 1) != GIT_DIFF_LINE_ADDITION) {
           // The heuristic is that matching blocks have
@@ -795,18 +907,46 @@ void HunkWidget::load()
               lines[match].setMatchingLine(current);
             }
           }
-
+          // reset not needed or?
           additions = 0;
           deletions = 0;
         }
+
+        // check if line is already staged
+          QByteArray newLine = lines[lidx].newLine();
+          // TODO: find less computational way
+          // check if line is in staged lines
+          for (int i = stagedIdx; i < linesStaged.count(); i++) {
+              if (linesStaged[i].newLine() == newLine) {
+                  staged = true;
+                  break;
+              }
+
+          }
+
+          stagedIdx = lidx + 1;
         break;
 
-      case GIT_DIFF_LINE_DELETION:
+      } case GIT_DIFF_LINE_DELETION: {
         marker = TextEditor::Deletion;
         ++deletions;
+        countDiffLines++;
+
+          // check if line is already staged
+          QByteArray oldLine = lines[lidx].oldLine();
+          // TODO: find less computational way
+          // check if line is in staged lines
+          for (int i = stagedIdx; i < linesStaged.count(); i++) {
+              if (linesStaged[i].oldLine() == oldLine) {
+                  staged = true;
+                  break;
+              }
+
+          }
+          stagedIdx = lidx + 1;
         break;
 
-      case 'O':
+      } case 'O':
         marker = TextEditor::Ours;
         break;
 
@@ -818,6 +958,9 @@ void HunkWidget::load()
     // Add marker.
     if (marker >= 0)
       mEditor->markerAdd(lidx, marker);
+
+    if (staged)
+        setStaged(lidx, true);
   }
 
   // Diff matching lines.
@@ -901,6 +1044,53 @@ void HunkWidget::load()
   }
 
   mEditor->updateGeometry();
+}
+
+QByteArray HunkWidget::hunk() const {
+    QByteArray ar;
+    int lineCount = mEditor->lineCount();
+    for (int i = 0; i < lineCount; i++) {
+        int mask = mEditor->markers(i);
+        if (mask & 1 << TextEditor::Marker::Addition) {
+            if (mask & 1 << TextEditor::Marker::StagedMarker)
+                ar.append(mEditor->line(i));
+        } else if (mask & 1 << TextEditor::Marker::Deletion) {
+            if (!(mask & 1 << TextEditor::Marker::StagedMarker))
+                ar.append(mEditor->line(i));
+        } else
+          ar.append(mEditor->line(i));
+    }
+  return ar;
+}
+
+git::Index::StagedState HunkWidget::stageState()
+{
+  if (mStagedStateLoaded)
+      return mStagedStage;
+
+  int lineCount = mEditor->lineCount();
+  int staged = 0;
+  int diffLines = 0;
+  for (int i = 0; i < lineCount; i++) {
+      int mask = mEditor->markers(i);
+      if (!(mask & (1 << TextEditor::Marker::Addition | 1 << TextEditor::Marker::Deletion)))
+          continue;
+
+      diffLines++;
+      if (mask & 1 << TextEditor::Marker::StagedMarker)
+          staged++;
+  }
+
+  if (!staged)
+      mStagedStage = git::Index::Unstaged;
+  else if (staged == diffLines)
+      mStagedStage = git::Index::Staged;
+  else
+      mStagedStage = git::Index::PartiallyStaged;
+
+  mStagedStateLoaded = true;
+
+  return mStagedStage;
 }
 
 void HunkWidget::chooseLines(TextEditor::Marker kind)
