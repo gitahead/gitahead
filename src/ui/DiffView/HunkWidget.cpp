@@ -484,7 +484,6 @@ void HunkWidget::stageSelected(int startLine, int end) {
      if (!mLoading)
         emit stageStageChanged(stageState());
  }
-
  void HunkWidget::unstageSelected(int startLine, int end) {
     for (int i=startLine; i < end; i++) {
         int mask = mEditor->markers(i);
@@ -496,7 +495,6 @@ void HunkWidget::stageSelected(int startLine, int end) {
     if (!mLoading)
         emit stageStageChanged(stageState());
  }
-
  void HunkWidget::discardDialog(int startLine, int end) {
      QString name = mPatch.name();
      int line = mPatch.lineNumber(mIndex, 0, git::Diff::NewFile);
@@ -505,14 +503,13 @@ void HunkWidget::stageSelected(int startLine, int end) {
      QString text = mPatch.isUntracked() ?
        HunkWidget::tr("Are you sure you want to remove '%1'?").arg(name) :
        HunkWidget::tr("Are you sure you want to discard the "
-          "changes in hunk from %1 to %2 in '%3'?").arg(startLine).arg(end - 1).arg(name);
+          "changes in hunk from line %1 to %2 in '%3'?").arg(startLine).arg(end - 1).arg(name);
 
      QMessageBox *dialog = new QMessageBox(
        QMessageBox::Warning, title, text, QMessageBox::Cancel, this);     dialog->setAttribute(Qt::WA_DeleteOnClose);
      dialog->setInformativeText(HunkWidget::tr("This action cannot be undone."));
 
-     QPushButton *discard =
-       dialog->addButton(HunkWidget::tr("Discard Hunk"), QMessageBox::AcceptRole);
+     QPushButton *discard =       dialog->addButton(HunkWidget::tr("Discard Hunk"), QMessageBox::AcceptRole);
      connect(discard, &QPushButton::clicked, [this, startLine, end] {
          discardSelected(startLine, end);
      });
