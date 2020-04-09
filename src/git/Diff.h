@@ -52,6 +52,12 @@ public:
   };
 
   Diff();
+  /*!
+   * Writes the complete diff into an array.
+   * Usefull for testing and checking
+   * \brief print
+   * \return
+   */
   QByteArray print();
   bool isValid() const { return d; }
   explicit operator bool() const { return isValid(); }
