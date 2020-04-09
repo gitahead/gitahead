@@ -561,11 +561,11 @@ void HunkWidget::stageSelected(int startLine, int end) {
          return;
 
      if (staged) {
-         stageSelected(lidx, lidx);
+         stageSelected(lidx, lidx + 1);
          return;
      }
 
-     unstageSelected(lidx, lidx);
+     unstageSelected(lidx, lidx + 1);
  }
 
  void HunkWidget::marginClicked(int pos, int modifier, int margin) {
