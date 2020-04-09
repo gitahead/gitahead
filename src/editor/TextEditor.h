@@ -42,6 +42,7 @@ public:
     ErrorMarker,
     StagedMarker,
     UnstagedMarker,
+    DiscardMarker,
   };
 
   enum Indicator {
@@ -70,7 +71,7 @@ public:
   enum {
       stageSelected = 30,
       unstageSelected = 31,
-      revertSelected = 32,
+      discardSelected = 32,
   };
 
   struct Range
@@ -124,9 +125,27 @@ signals:
   void settingsChanged();
   void highlightActivated(bool active);
   void diagnosticAdded(int line, const Diagnostic &diag);
+  /*!
+   * Emitted when in the context menu "stage selected" is triggered
+   * \brief stageSelectedSignal
+   * \param startPos Start line of selection
+   * \param end End line of selection + 1
+   */
   void stageSelectedSignal(int startPos, int end);
+  /*!
+   * Emitted when in the context menu "unstage selected" is triggered
+   * \brief unstageSelectedSignal
+   * \param startPos Start line of selection
+   * \param end End line of selection + 1
+   */
   void unstageSelectedSignal(int startPos, int end);
-  void revertSelectedSignal();
+  /*!
+   * Emitted when in the context menu "revert selected" is triggered
+   * \brief discardSelectedSignal
+   * \param startPos Start line of selection
+   * \param end End line of selection + 1
+   */
+  void discardSelectedSignal(int startPos, int end);
 
 protected:
   QSize viewportSizeHint() const override;

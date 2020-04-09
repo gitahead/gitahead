@@ -37,8 +37,6 @@ namespace _HunkWidget {
       QToolButton *oursButton() const;
       QToolButton *theirsButton() const;
 
-      void discard();
-
     public slots:
       void stageStateChanged(int stageState);
 
@@ -47,6 +45,7 @@ namespace _HunkWidget {
 
     signals:
       void stageStageChanged(int stageState);
+      void discard();
 
     private:
       QCheckBox *mCheck;
@@ -76,13 +75,21 @@ public:
   TextEditor *editor(bool ensureLoaded = true);
   void invalidate();
   /*!
-   * Return hunk retrieved from the editor
+   * Return hunk retrieved from the editor with removed discard lines
    * Idea is to store the changes only in the texteditor
    * and provide the data to the patch if needed
    * \brief hunk
    * \return
    */
   QByteArray hunk() const;
+  /*!
+   * Return hunk retrieved from the editor to apply patch
+   * Idea is to store the changes only in the texteditor
+   * and provide the data to the patch if needed
+   * \brief hunk
+   * \return
+   */
+  QByteArray apply() const;
   git::Index::StagedState stageState();
   /*!
    * Stage/Unstage all
@@ -90,9 +97,15 @@ public:
    * \param staged
    */
   void setStaged(bool staged);
+  /*!
+   * Called by the hunk header
+   * \brief discard
+   */
+  void discard();
 
 signals:
   void stageStageChanged(int stageState);
+  void discardSignal();
 
 protected:
   void paintEvent(QPaintEvent *event);
@@ -100,6 +113,7 @@ protected:
 private slots:
   void stageSelected(int startLine, int end);
   void unstageSelected(int startLine, int end);
+  void discardSelected(int startLine, int end);
   void headerCheckStateChanged(int state);
   /*!
    * Stage/Unstage line with index lidx

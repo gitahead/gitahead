@@ -98,6 +98,7 @@ _HunkWidget::Header::Header(
   if (diff.isStatusDiff() && !submodule && !patch.isConflicted()) {
     discard = new DiscardButton(this);
     discard->setToolTip(HunkWidget::tr("Discard Hunk"));
+
     connect(discard, &DiscardButton::clicked, [this, patch, index] {
       QString name = patch.name();
       int line = patch.lineNumber(index, 0, git::Diff::NewFile);
@@ -115,31 +116,7 @@ _HunkWidget::Header::Header(
 
       QPushButton *discard =
         dialog->addButton(HunkWidget::tr("Discard Hunk"), QMessageBox::AcceptRole);
-      connect(discard, &QPushButton::clicked, [this, patch, index] {
-        git::Repository repo = patch.repo();
-        if (patch.isUntracked()) {
-          repo.workdir().remove(patch.name());
-          return;
-        }
-
-        QString name = patch.name();
-        QSaveFile file(repo.workdir().filePath(name));
-        if (!file.open(QFile::WriteOnly))
-          return;
-
-        QBitArray hunks(patch.count(), true);
-        hunks[index] = false;
-        QByteArray buffer = patch.apply(hunks, repo.filters(name));
-        if (buffer.isEmpty())
-          return;
-
-        file.write(buffer);
-        if (!file.commit())
-          return;
-
-        // FIXME: Work dir changed?
-        RepoView::parentView(this)->refresh();
-      });
+      connect(discard, &QPushButton::clicked, this, &_HunkWidget::Header::discard);
 
       dialog->open();
     });
@@ -186,54 +163,6 @@ _HunkWidget::Header::Header(
     else
         emit stageStageChanged(Qt::Unchecked);
   });
-}
-
-void _HunkWidget::Header::discard()
-{
-//    QString name = patch.name();
-//    int line = patch.lineNumber(index, 0, git::Diff::NewFile);
-
-//    QString title = HunkWidget::tr("Discard Hunk?");
-//    QString text = patch.isUntracked() ?
-//      HunkWidget::tr("Are you sure you want to remove '%1'?").arg(name) :
-//      HunkWidget::tr("Are you sure you want to discard the "
-//         "hunk starting at line %1 in '%2'?").arg(line).arg(name);
-
-//    QMessageBox *dialog = new QMessageBox(
-//      QMessageBox::Warning, title, text, QMessageBox::Cancel, this);
-//    dialog->setAttribute(Qt::WA_DeleteOnClose);
-//    dialog->setInformativeText(HunkWidget::tr("This action cannot be undone."));
-
-//    QPushButton *discard =
-//      dialog->addButton(HunkWidget::tr("Discard Hunk"), QMessageBox::AcceptRole);
-//    connect(discard, &QPushButton::clicked, [this, patch, index] {
-//      git::Repository repo = patch.repo();
-//      if (patch.isUntracked()) {
-//        repo.workdir().remove(patch.name());
-//        return;
-//      }
-
-//      QString name = patch.name();
-//      QSaveFile file(repo.workdir().filePath(name));
-//      if (!file.open(QFile::WriteOnly))
-//        return;
-
-//      QBitArray hunks(patch.count(), true);
-//      hunks[index] = false;
-//      QByteArray buffer = patch.apply(hunks, repo.filters(name));
-//      if (buffer.isEmpty())
-//        return;
-
-//      file.write(buffer);
-//      if (!file.commit())
-//        return;
-
-//      // FIXME: Work dir changed?
-//      RepoView::parentView(this)->refresh();
-//    });
-
-//    dialog->open();
-//  });
 }
 
 void _HunkWidget::Header::stageStateChanged(int stageState) {
@@ -301,6 +230,7 @@ HunkWidget::HunkWidget(
   mHeader = new _HunkWidget::Header(diff, patch, index, lfs, submodule, this);
   layout->addWidget(mHeader);
   connect(this, &HunkWidget::stageStageChanged, mHeader, &_HunkWidget::Header::stageStateChanged);
+  connect(mHeader, &_HunkWidget::Header::discard, this, &HunkWidget::discard);
 
   mEditor = new Editor(this);
   mEditor->setLexer(patch.name());
@@ -312,7 +242,8 @@ HunkWidget::HunkWidget(
   connect(mEditor, &TextEditor::updateUi,
           MenuBar::instance(this), &MenuBar::updateCutCopyPaste);
   connect(mEditor, &TextEditor::stageSelectedSignal, this, &HunkWidget::stageSelected);
-  connect(mEditor, &TextEditor::unstageSelectedSignal, this, &HunkWidget::stageSelected);
+  connect(mEditor, &TextEditor::unstageSelectedSignal, this, &HunkWidget::unstageSelected);
+  connect(mEditor, &TextEditor::discardSelectedSignal, this, &HunkWidget::discardSelected);
   connect(mEditor, &TextEditor::marginClicked, this, &HunkWidget::marginClicked);
 
   // Ensure that text margin reacts to settings changes.
@@ -567,10 +498,13 @@ void HunkWidget::paintEvent(QPaintEvent *event)
 void HunkWidget::stageSelected(int startLine, int end) {
      // trying to implement like in the git-gui reference implementation in the git repository
      QByteArray source = mPatch.blob(git::Diff::OldFile).content();
-
+      // TODO: needed????
      QByteArray buffer = mPatch.apply(mIndex, startLine, end);
      if (buffer.isEmpty())
        return;
+
+     for (int i=startLine; i < end; i++)
+        mEditor->markerAdd(i, TextEditor::StagedMarker);
 
      mStagedStateLoaded = false;
 
@@ -583,10 +517,23 @@ void HunkWidget::stageSelected(int startLine, int end) {
     if (buffer.isEmpty())
       return;
 
+    for (int i=startLine; i < end; i++)
+       mEditor->markerDelete(i, TextEditor::StagedMarker);
+
     mStagedStateLoaded = false;
 
     if (!mLoading)
         emit stageStageChanged(stageState());
+ }
+
+ void HunkWidget::discardSelected(int startLine, int end)
+ {
+    for (int i = startLine; i < end; i++) {
+        int mask = mEditor->markers(i);
+        if (mask & (1 << TextEditor::Marker::Addition | 1 << TextEditor::Marker::Deletion))
+            mEditor->markerAdd(i, TextEditor::DiscardMarker);
+    }
+    emit discardSignal();
  }
 
  void HunkWidget::headerCheckStateChanged(int state) {
@@ -608,6 +555,12 @@ void HunkWidget::stageSelected(int startLine, int end) {
      }
  }
 
+ void HunkWidget::discard()
+ {
+     int count = mEditor->lineCount();
+     discardSelected(0, count);
+ }
+
  void HunkWidget::setStaged(int lidx, bool staged) {
      int markers = mEditor->markers(lidx);
      if (!(markers & (1 << TextEditor::Marker::Addition | 1 << TextEditor::Marker::Deletion)))
@@ -617,13 +570,10 @@ void HunkWidget::stageSelected(int startLine, int end) {
          return;
 
      if (staged) {
-         mEditor->markerAdd(lidx, TextEditor::StagedMarker);
          stageSelected(lidx, lidx);
          return;
      }
 
-
-     mEditor->markerDelete(lidx, TextEditor::StagedMarker);
      unstageSelected(lidx, lidx);
  }
 
@@ -1057,6 +1007,26 @@ void HunkWidget::load()
 }
 
 QByteArray HunkWidget::hunk() const {
+    QByteArray ar;
+    int lineCount = mEditor->lineCount();
+    for (int i = 0; i < lineCount; i++) {
+        int mask = mEditor->markers(i);
+        if (mask & 1 << TextEditor::Marker::Addition) {
+            if (!(mask & 1 << TextEditor::Marker::DiscardMarker))
+                ar.append(mEditor->line(i));
+        } else if (mask & 1 << TextEditor::Marker::Deletion) {
+            if (mask & 1 << TextEditor::Marker::DiscardMarker) {
+                // with a discard, a deletion becomes reverted
+                // and the line is still present
+                ar.append(mEditor->line(i));
+            }
+        } else
+          ar.append(mEditor->line(i));
+    }
+  return ar;
+}
+
+QByteArray HunkWidget::apply() const {
     QByteArray ar;
     int lineCount = mEditor->lineCount();
     for (int i = 0; i < lineCount; i++) {
