@@ -100,7 +100,13 @@ public:
     bool submodule);
 public slots:
   void headerCheckStateChanged(int state);
-  void stageHunks();
+  /*!
+   * Calculates the stage state of the file.
+   * emits signal "stageStateChanged" with the current
+   * state as parameter
+   * \brief stageStateHunks
+   */
+  void stageStateHunks();
   /*!
    * Discard specific hunk
    * Emitted by the hunk it self
