@@ -573,7 +573,9 @@ void HunkWidget::stageSelected(int startLine, int end) {
        return;
 
      mStagedStateLoaded = false;
-     emit stageStageChanged(stageState());
+
+     if (!mLoading)
+        emit stageStageChanged(stageState());
  }
 
  void HunkWidget::unstageSelected(int startLine, int end) {
@@ -582,7 +584,9 @@ void HunkWidget::stageSelected(int startLine, int end) {
       return;
 
     mStagedStateLoaded = false;
-    emit stageStageChanged(stageState());
+
+    if (!mLoading)
+        emit stageStageChanged(stageState());
  }
 
  void HunkWidget::headerCheckStateChanged(int state) {
@@ -695,6 +699,7 @@ void HunkWidget::load()
     return;
 
   mLoaded = true;
+  mLoading = true;
 
   // Load entire file.
   git::Repository repo = mPatch.repo();
@@ -1044,6 +1049,11 @@ void HunkWidget::load()
   }
 
   mEditor->updateGeometry();
+
+  mLoading = false;
+  // update stageState after everythin is loaded
+  stageStageChanged(stageState());
+
 }
 
 QByteArray HunkWidget::hunk() const {
