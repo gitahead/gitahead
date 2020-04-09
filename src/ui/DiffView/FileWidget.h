@@ -25,6 +25,8 @@ class HunkWidget;
 namespace _FileWidget {
 class Header : public QFrame
 {
+    Q_OBJECT
+
 public:
   Header(
     const git::Diff &diff,
@@ -39,7 +41,10 @@ public:
   DisclosureButton *disclosureButton() const;
 
   QToolButton *lfsButton() const;
+  void setStageState(git::Index::StagedState state);
 
+signals:
+  void stageStageChanged(int stageState);
 protected:
   void mouseDoubleClickEvent(QMouseEvent *event) override;
   void contextMenuEvent(QContextMenuEvent *event) override;
@@ -93,11 +98,13 @@ public:
     int index,
     bool lfs,
     bool submodule);
-  void stageBuffer(QString name, QByteArray buffer);
   void stageHunks();
+public slots:
+  void headerCheckStateChanged(int state);
 
 signals:
   void diagnosticAdded(TextEditor::DiagnosticKind kind);
+  void stageStateChanged(git::Index::StagedState state);
 
 private:
   DiffView *mView{nullptr};
@@ -109,6 +116,7 @@ private:
   QList<QWidget *> mImages;
   QList<HunkWidget *> mHunks;
   QVBoxLayout* mHunkLayout{nullptr};
+  bool mIgnoreStaging{false};
 };
 
 #endif // FILEWIDGET_H

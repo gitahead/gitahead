@@ -19,6 +19,7 @@ class DisclosureButton;
 namespace _HunkWidget {
     class Header : public QWidget
     {
+        Q_OBJECT
     public:
       Header(
         const git::Diff &diff,
@@ -36,8 +37,16 @@ namespace _HunkWidget {
       QToolButton *oursButton() const;
       QToolButton *theirsButton() const;
 
+      void discard();
+
+    public slots:
+      void stageStateChanged(int stageState);
+
     protected:
       void mouseDoubleClickEvent(QMouseEvent *event) override;
+
+    signals:
+      void stageStageChanged(int stageState);
 
     private:
       QCheckBox *mCheck;
@@ -58,6 +67,7 @@ public:
     DiffView *view,
     const git::Diff &diff,
     const git::Patch &patch,
+    const git::Patch &staged,
     int index,
     bool lfs,
     bool submodule,
@@ -65,9 +75,24 @@ public:
   _HunkWidget::Header *header() const;
   TextEditor *editor(bool ensureLoaded = true);
   void invalidate();
+  /*!
+   * Return hunk retrieved from the editor
+   * Idea is to store the changes only in the texteditor
+   * and provide the data to the patch if needed
+   * \brief hunk
+   * \return
+   */
+  QByteArray hunk() const;
+  git::Index::StagedState stageState();
+  /*!
+   * Stage/Unstage all
+   * \brief setStaged
+   * \param staged
+   */
+  void setStaged(bool staged);
 
 signals:
-  void updated(QString name, QByteArray& buffer);
+  void stageStageChanged(int stageState);
 
 protected:
   void paintEvent(QPaintEvent *event);
@@ -75,8 +100,15 @@ protected:
 private slots:
   void stageSelected(int startLine, int end);
   void unstageSelected(int startLine, int end);
-   void setStaged(int lidx, bool staged);
-   void marginClicked(int pos, int modifier, int margin);
+  void headerCheckStateChanged(int state);
+  /*!
+   * Stage/Unstage line with index lidx
+   * \brief setStaged
+   * \param lidx Line index
+   * \param staged Staged if true, else unstaged
+   */
+  void setStaged(int lidx, bool staged);
+  void marginClicked(int pos, int modifier, int margin);
 
 private:
   struct Token
@@ -99,7 +131,9 @@ private:
 
   _HunkWidget::Header *mHeader;
   TextEditor *mEditor;
-  bool mLoaded = false;
+  bool mLoaded{false};
+  bool mStagedStateLoaded{false};
+  git::Index::StagedState mStagedStage;
 };
 
 #endif // HUNKWIDGET_H

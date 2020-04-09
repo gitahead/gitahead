@@ -160,8 +160,13 @@ _FileWidget::Header::Header(
 
   // Respond to check changes.
   connect(mCheck, &QCheckBox::clicked, [this](bool staged) {
-    mCheck->setChecked(!staged); // Allow index to decide.
-    mDiff.index().setStaged({mPatch.name()}, staged);
+    //mCheck->setChecked(!staged); // Allow index to decide.
+    //mDiff.index().setStaged({mPatch.name()}, staged);
+
+      if (staged)
+          emit stageStageChanged(Qt::Checked);
+      else
+          emit stageStageChanged(Qt::Unchecked);
   });
 
   // Respond to index changes.
@@ -193,14 +198,29 @@ void _FileWidget::Header::updatePatch(const git::Patch &patch) {
     mDiscardButton->setVisible(mDiff.isStatusDiff() && !mSubmodule && !patch.isConflicted());
 
 }
-QCheckBox *_FileWidget::Header::check() const { return mCheck; }
+QCheckBox *_FileWidget::Header::check() const
+{
+    return mCheck;
+}
 
 DisclosureButton *_FileWidget::Header::disclosureButton() const
 {
     return mDisclosureButton;
 }
 
-QToolButton *_FileWidget::Header::lfsButton() const { return mLfsButton; }
+QToolButton *_FileWidget::Header::lfsButton() const
+{
+    return mLfsButton;
+}
+
+void _FileWidget::Header::setStageState(git::Index::StagedState state) {
+    if (state == git::Index::Staged)
+        mCheck->setCheckState(Qt::Checked);
+    else if (state == git::Index::Unstaged)
+        mCheck->setCheckState(Qt::Unchecked);
+    else
+        mCheck->setCheckState(Qt::PartiallyChecked);
+}
 
 void _FileWidget::Header::mouseDoubleClickEvent(QMouseEvent *event)
 {
@@ -277,6 +297,8 @@ FileWidget::FileWidget(
 
   bool lfs = patch.isLfsPointer();
   mHeader = new _FileWidget::Header(diff, patch, binary, lfs, submodule, parent);
+  connect(this, &FileWidget::stageStateChanged, mHeader, &_FileWidget::Header::setStageState);
+  connect(mHeader, &_FileWidget::Header::stageStageChanged, this, &FileWidget::headerCheckStateChanged);
   layout->addWidget(mHeader);
 
   DisclosureButton *disclosureButton = mHeader->disclosureButton();
@@ -305,10 +327,6 @@ FileWidget::FileWidget(
     // Collapse on check.
     connect(mHeader->check(), &QCheckBox::stateChanged, [this](int state) {
       mHeader->disclosureButton()->setChecked(state != Qt::Checked);
-      if (state != Qt::PartiallyChecked) {
-        foreach (HunkWidget *hunk, mHunks)
-          hunk->header()->check()->setChecked(state == Qt::Checked);
-      }
     });
   }
 
@@ -435,13 +453,13 @@ HunkWidget *FileWidget::addHunk(
   bool submodule)
 {
   HunkWidget *hunk =
-    new HunkWidget(mView, diff, patch, index, lfs, submodule, this);
+    new HunkWidget(mView, diff, patch, staged, index, lfs, submodule, this);
 
   // Respond to check box click.
+  // TODO: move this to constructor of the header ??
   QCheckBox *check = hunk->header()->check();
   check->setVisible(diff.isStatusDiff() && !submodule && !patch.isConflicted());
-  connect(check, &QCheckBox::clicked, this, &FileWidget::stageHunks);
-  connect(hunk, &HunkWidget::updated, this, &FileWidget::stageBuffer);
+  connect(hunk, &HunkWidget::stageStageChanged, this, &FileWidget::stageHunks);
   TextEditor* editor = hunk->editor(false);
 
   // Respond to editor diagnostic signal.
@@ -456,33 +474,55 @@ HunkWidget *FileWidget::addHunk(
   return hunk;
 }
 
-void FileWidget::stageBuffer(QString name, QByteArray buffer) {
-      git::Index index = mDiff.index();
-      // Add the buffer to the index.
-      index.add(name, buffer);
-  }
-
 void FileWidget::stageHunks()
 {
-  QBitArray hunks(mHunks.size());
-  for (int i = 0; i < mHunks.size(); ++i)
-    hunks[i] = mHunks.at(i)->header()->check()->isChecked();
+  if (mIgnoreStaging)
+      return;
+
+  int staged = 0;
+  int unstaged = 0;
+  for (int i = 0; i < mHunks.size(); ++i) {
+    git::Index::StagedState state = mHunks[i]->stageState();
+    if (state == git::Index::Staged)
+        staged++;
+    else if (state == git::Index::Unstaged)
+        unstaged ++;
+  }
 
   git::Index index = mDiff.index();
-  if (hunks == QBitArray(hunks.size(), true)) {
+  if (staged == mHunks.size()) {
     index.setStaged({mPatch.name()}, true);
+    emit stageStateChanged(git::Index::Staged);
     return;
   }
 
-  if (hunks == QBitArray(hunks.size(), false)) {
+  if (unstaged == mHunks.size()) {
     index.setStaged({mPatch.name()}, false);
+    emit stageStateChanged(git::Index::Unstaged);
     return;
   }
 
-  QByteArray buffer = mPatch.apply(hunks);
-  if (buffer.isEmpty())
-    return;
+  QByteArray buffer;
+  for (int i = 0; i < mHunks.size(); ++i)
+   buffer.append(mHunks[0]->hunk());
 
   // Add the buffer to the index.
   index.add(mPatch.name(), buffer);
+
+  emit stageStateChanged(git::Index::PartiallyStaged);
+
+
+}
+
+void FileWidget::headerCheckStateChanged(int state)
+{
+    assert(state != Qt::PartiallyChecked); // makes no sense, that the user can select partially selected
+
+    mIgnoreStaging = true;
+    bool staged = state == Qt::Checked ? true : false;
+    for (int i = 0; i < mHunks.size(); ++i)
+        mHunks[i]->setStaged(staged);
+    mIgnoreStaging = false;
+
+    stageHunks();
 }
