@@ -55,12 +55,12 @@ public:
 
   LineStats lineStats() const;
   /*!
-   * Returns the complete patch as string.
+   * Returns the complete patch as a list of strings.
    * Used for debugging
    * \brief print
    * \return
    */
-  QByteArray print() const;
+  QList<QString> print() const;
 
   /*!
    * \brief count
