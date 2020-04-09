@@ -114,6 +114,13 @@ private slots:
   void stageSelected(int startLine, int end);
   void unstageSelected(int startLine, int end);
   void discardSelected(int startLine, int end);
+  /*!
+   * Shows dialog if the changes should be discarded
+   * \brief discardDialog
+   * \param startLine
+   * \param end
+   */
+  void discardDialog(int startLine, int end);
   void headerCheckStateChanged(int state);
   /*!
    * Stage/Unstage line with index lidx
