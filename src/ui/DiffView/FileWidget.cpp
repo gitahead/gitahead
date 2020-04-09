@@ -19,6 +19,7 @@
 #include <QVBoxLayout>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QSaveFile>
 
 _FileWidget::Header::Header(
   const git::Diff &diff,
@@ -160,9 +161,6 @@ _FileWidget::Header::Header(
 
   // Respond to check changes.
   connect(mCheck, &QCheckBox::clicked, [this](bool staged) {
-    //mCheck->setChecked(!staged); // Allow index to decide.
-    //mDiff.index().setStaged({mPatch.name()}, staged);
-
       if (staged)
           emit stageStageChanged(Qt::Checked);
       else
@@ -460,6 +458,7 @@ HunkWidget *FileWidget::addHunk(
   QCheckBox *check = hunk->header()->check();
   check->setVisible(diff.isStatusDiff() && !submodule && !patch.isConflicted());
   connect(hunk, &HunkWidget::stageStageChanged, this, &FileWidget::stageHunks);
+  connect(hunk, &HunkWidget::discardSignal, this, &FileWidget::discardHunk);
   TextEditor* editor = hunk->editor(false);
 
   // Respond to editor diagnostic signal.
@@ -479,6 +478,10 @@ void FileWidget::stageHunks()
   if (mIgnoreStaging)
       return;
 
+  git::Index index = mDiff.index();
+  if (!index.isValid()) // why the index can be invalid?
+      return;
+
   int staged = 0;
   int unstaged = 0;
   for (int i = 0; i < mHunks.size(); ++i) {
@@ -489,7 +492,6 @@ void FileWidget::stageHunks()
         unstaged ++;
   }
 
-  git::Index index = mDiff.index();
   if (staged == mHunks.size()) {
     index.setStaged({mPatch.name()}, true);
     emit stageStateChanged(git::Index::Staged);
@@ -502,16 +504,71 @@ void FileWidget::stageHunks()
     return;
   }
 
-  QByteArray buffer;
-  for (int i = 0; i < mHunks.size(); ++i)
-   buffer.append(mHunks[0]->hunk());
+  QList<QByteArray> hunkContent;
+  for (auto hunk : mHunks)
+      hunkContent.append(hunk->apply());
+
+  QByteArray buffer = mPatch.apply(hunkContent);
 
   // Add the buffer to the index.
   index.add(mPatch.name(), buffer);
 
   emit stageStateChanged(git::Index::PartiallyStaged);
+}
+
+void FileWidget::discardHunk() {
+    HunkWidget* hunk = static_cast<HunkWidget*>(QObject::sender());
+    git::Repository repo = mPatch.repo();
+    if (mPatch.isUntracked()) {
+      repo.workdir().remove(mPatch.name());
+      return;
+    }
+
+    QString name = mPatch.name();
+    QSaveFile file(repo.workdir().filePath(name));
+    if (!file.open(QFile::WriteOnly))
+      return;
 
 
+    QByteArray buffer;
+    for (int i = 0; i < mHunks.size(); ++i) {
+      if (mHunks[i] == hunk) {
+        QByteArray hunk_content = hunk->hunk();
+        buffer = mPatch.apply(i, hunk_content);
+      }
+    }
+
+    file.write(buffer);
+    if (!file.commit())
+      return;
+
+    // FIXME: Work dir changed?
+    RepoView::parentView(this)->refresh();
+}
+
+void FileWidget::discard() {
+    git::Repository repo = mPatch.repo();
+    if (mPatch.isUntracked()) {
+      repo.workdir().remove(mPatch.name());
+      return;
+    }
+
+    QString name = mPatch.name();
+    QSaveFile file(repo.workdir().filePath(name));
+    if (!file.open(QFile::WriteOnly))
+      return;
+
+    QByteArray buffer;
+    for (int i = 0; i < mHunks.size(); ++i) {
+        buffer.append(mHunks[i]->hunk());
+    }
+
+    file.write(buffer);
+    if (!file.commit())
+      return;
+
+    // FIXME: Work dir changed?
+    RepoView::parentView(this)->refresh();
 }
 
 void FileWidget::headerCheckStateChanged(int state)

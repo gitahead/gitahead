@@ -365,6 +365,45 @@ QByteArray Patch::apply(int hidx, int start_line, int end_line, const FilterList
     return generateResult(image, filters);
 }
 
+QByteArray Patch::apply(int hidx, QByteArray& hunkData, const FilterList &filters) const
+{
+    QList<QList<QByteArray>> image;
+    populatePreimage(image);
+    apply(image, hidx, hunkData);
+    return generateResult(image, filters);
+}
+
+QByteArray Patch::apply(QList<QByteArray>& hunkData, const FilterList &filters) const
+{
+
+    assert(git_patch_num_hunks(d.data()) == hunkData.length());
+    QList<QList<QByteArray>> image;
+    populatePreimage(image);
+    for (int i = 0; i < hunkData.length(); i++) {
+        apply(image, i, hunkData[i]);
+    }
+    return generateResult(image, filters);
+}
+
+void Patch::apply(QList<QList<QByteArray>> &image, int hidx, QByteArray& hunkData) const
+{
+    size_t lines = 0;
+    const git_diff_hunk *hunk = nullptr;
+    if (git_patch_get_hunk(&hunk, &lines, d.data(), hidx)) // returns hunk_idx hunk
+      return;
+
+    assert(hunk->old_start - 1 + hunk->old_lines < image.length());
+
+    int len = image.length();
+    // delete old data
+    for (int i = hunk->old_start - 1; i < hunk->old_start - 1 + hunk->old_lines; i++) {
+        image[i].clear();
+    }
+    // the length of image is not changed, so the function can be applied for multiple hunks
+    image[hunk->old_start] = QList<QByteArray>();
+    image[hunk->old_start].append(hunkData); // at least the line for the old_start must be available
+}
+
 void Patch::apply(QList<QList<QByteArray>> &image, int hidx, int start_line, int end_line) const {
     if(start_line == -1 && end_line == -1) {
         start_line = 0;

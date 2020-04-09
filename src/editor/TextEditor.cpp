@@ -168,6 +168,8 @@ void TextEditor::applySettings()
   markerDefine(Theirs, SC_MARK_BACKGROUND);
   markerDefine(Addition, SC_MARK_BACKGROUND);
   markerDefine(Deletion, SC_MARK_BACKGROUND);
+  markerDefine(StagedMarker, SC_MARK_RGBAIMAGE);
+  markerDefine(DiscardMarker, SC_MARK_EMPTY);
 
   markerSetBack(Ours, mOursColor);
   markerSetBack(Theirs, mTheirsColor);
@@ -178,6 +180,8 @@ void TextEditor::applySettings()
   loadMarkerIcon(NoteMarker, mNoteIcon);
   loadMarkerIcon(WarningMarker, mWarningIcon);
   loadMarkerIcon(ErrorMarker, mErrorIcon);
+
+
   loadMarkerIcon(StagedMarker, mStagedIcon);
 
   // Set LPeg lexer language.
@@ -403,7 +407,7 @@ void TextEditor::ContextMenu(Scintilla::Point pt) {
         AddToPopUp("");
         AddToPopUp("Stage selected", stageSelected, diffLines - staged > 0);
         AddToPopUp("Unstage selected", unstageSelected, staged > 0);
-        AddToPopUp("Revert selected", revertSelected, diffLines > 0);
+        AddToPopUp("Discard selected", discardSelected, diffLines > 0);
         AddToPopUp("");
         AddToPopUp("Select All", idcmdSelectAll);
         popup.Show(pt, wMain);
@@ -461,11 +465,13 @@ void TextEditor::Command(int cmdId) {
         emit unstageSelectedSignal(startLine, end);
         break;
 
-    } case revertSelected:
-        emit revertSelectedSignal();
+    } case discardSelected: {
+        int startLine = lineFromPosition(selectionStart());
+        int end = lineFromPosition(selectionEnd()) + 1;
+        emit discardSelectedSignal(startLine, end);
         break;
 
-    default:
+    } default:
         ScintillaBase::Command(cmdId);
         break;
     }

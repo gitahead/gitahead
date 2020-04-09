@@ -98,9 +98,21 @@ public:
     int index,
     bool lfs,
     bool submodule);
-  void stageHunks();
 public slots:
   void headerCheckStateChanged(int state);
+  void stageHunks();
+  /*!
+   * Discard specific hunk
+   * Emitted by the hunk it self
+   * \brief discardHunk
+   */
+  void discardHunk();
+  /*!
+   * Discard all changes in the file
+   * Emitted by the _FileWidget::Header
+   * \brief discard
+   */
+  void discard();
 
 signals:
   void diagnosticAdded(TextEditor::DiagnosticKind kind);
