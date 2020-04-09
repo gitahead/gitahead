@@ -474,32 +474,25 @@ void HunkWidget::paintEvent(QPaintEvent *event)
 }
 
 void HunkWidget::stageSelected(int startLine, int end) {
-     // trying to implement like in the git-gui reference implementation in the git repository
-     QByteArray source = mPatch.blob(git::Diff::OldFile).content();
-      // TODO: needed????
-     QByteArray buffer = mPatch.apply(mIndex, startLine, end);
-     if (buffer.isEmpty())
-       return;
-
-     for (int i=startLine; i < end; i++)
-        mEditor->markerAdd(i, TextEditor::StagedMarker);
+     for (int i=startLine; i < end; i++) {
+         int mask = mEditor->markers(i);
+         if (mask & (1 << TextEditor::Marker::Addition | 1 << TextEditor::Marker::Deletion))
+            mEditor->markerAdd(i, TextEditor::StagedMarker);
+     }
 
      mStagedStateLoaded = false;
-
      if (!mLoading)
         emit stageStageChanged(stageState());
  }
 
  void HunkWidget::unstageSelected(int startLine, int end) {
-    QByteArray buffer = mPatch.apply(mIndex, startLine, end);
-    if (buffer.isEmpty())
-      return;
-
-    for (int i=startLine; i < end; i++)
-       mEditor->markerDelete(i, TextEditor::StagedMarker);
+    for (int i=startLine; i < end; i++) {
+        int mask = mEditor->markers(i);
+        if (mask & (1 << TextEditor::Marker::Addition | 1 << TextEditor::Marker::Deletion))
+            mEditor->markerDelete(i, TextEditor::StagedMarker);
+    }
 
     mStagedStateLoaded = false;
-
     if (!mLoading)
         emit stageStageChanged(stageState());
  }
@@ -515,8 +508,7 @@ void HunkWidget::stageSelected(int startLine, int end) {
           "changes in hunk from %1 to %2 in '%3'?").arg(startLine).arg(end - 1).arg(name);
 
      QMessageBox *dialog = new QMessageBox(
-       QMessageBox::Warning, title, text, QMessageBox::Cancel, this);
-     dialog->setAttribute(Qt::WA_DeleteOnClose);
+       QMessageBox::Warning, title, text, QMessageBox::Cancel, this);     dialog->setAttribute(Qt::WA_DeleteOnClose);
      dialog->setInformativeText(HunkWidget::tr("This action cannot be undone."));
 
      QPushButton *discard =
