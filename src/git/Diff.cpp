@@ -52,9 +52,7 @@ Diff::Diff() {}
 
 Diff::Diff(git_diff *diff)
   : d(diff ? new Data(diff) : nullptr)
-{
-    QByteArray diff_ = print();
-}
+{}
 
 Diff::operator git_diff *() const
 {

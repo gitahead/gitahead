@@ -200,8 +200,6 @@ HunkWidget::HunkWidget(
   QWidget *parent)
   : QFrame(parent), mView(view), mPatch(patch), mStaged(staged), mIndex(index)
 {
-  QList<QString> patch_temp = mPatch.print();
-  QList<QString> staged_temp = mStaged.print();
   setObjectName("HunkWidget");
   QVBoxLayout *layout = new QVBoxLayout(this);
   layout->setContentsMargins(0,0,0,0);
@@ -675,9 +673,6 @@ void HunkWidget::load()
 
     return;
   }
-
-  QList<QString> _patch = mPatch.print();
-  QList<QString> _staged = mStaged.print();
 
   // Load hunk.
   QList<Line> lines;
