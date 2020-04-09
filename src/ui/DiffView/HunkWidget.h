@@ -102,8 +102,21 @@ public:
    * \brief discard
    */
   void discard();
+  /*!
+   * update hunk content
+   * \brief load
+   * \param force Set to true to force reloading
+   */
+  void load(bool force = false);
 
 signals:
+  /*!
+   * It is not possible to stage single hunks.
+   * So the complete file must be staged. Inform the FileWidget
+   * about changes and it will perform a stage
+   * \brief stageStageChanged
+   * \param stageState
+   */
   void stageStageChanged(int stageState);
   void discardSignal();
 
@@ -142,7 +155,6 @@ private:
 
   QList<Token> tokens(int line) const;
   QByteArray tokenBuffer(const QList<Token> &tokens);
-  void load();
   void chooseLines(TextEditor::Marker kind);
 
   DiffView *mView;

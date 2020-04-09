@@ -495,6 +495,7 @@ void HunkWidget::stageSelected(int startLine, int end) {
     if (!mLoading)
         emit stageStageChanged(stageState());
  }
+
  void HunkWidget::discardDialog(int startLine, int end) {
      QString name = mPatch.name();
      int line = mPatch.lineNumber(mIndex, 0, git::Diff::NewFile);
@@ -634,9 +635,9 @@ QByteArray HunkWidget::tokenBuffer(const QList<HunkWidget::Token> &tokens)
   return list.join('\n');
 }
 
-void HunkWidget::load()
+void HunkWidget::load(bool force)
 {
-  if (mLoaded)
+  if (!force && mLoaded )
     return;
 
   mLoaded = true;

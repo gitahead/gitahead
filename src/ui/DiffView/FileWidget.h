@@ -82,6 +82,11 @@ public:
     QWidget *parent = nullptr);
   bool isEmpty();
   void updatePatch(const git::Patch &patch, const git::Patch &staged);
+  /*!
+   * Update hunks after index change
+   * \brief updateHunks
+   */
+  void updateHunks();
   _FileWidget::Header *header() const;
   QString name() const;
 
@@ -101,12 +106,12 @@ public:
 public slots:
   void headerCheckStateChanged(int state);
   /*!
-   * Calculates the stage state of the file.
-   * emits signal "stageStateChanged" with the current
-   * state as parameter
-   * \brief stageStateHunks
+   * Stages the changes of the hunk
+   * emits signal "stageStateChanged" with the
+   * current state of the hunk as parameter
+   * \brief stageHunks
    */
-  void stageStateHunks();
+  void stageHunks();
   /*!
    * Discard specific hunk
    * Emitted by the hunk it self
@@ -134,7 +139,7 @@ private:
   QList<QWidget *> mImages;
   QList<HunkWidget *> mHunks;
   QVBoxLayout* mHunkLayout{nullptr};
-  bool mIgnoreStaging{false};
+  bool mSupressStaging{false};
 };
 
 #endif // FILEWIDGET_H

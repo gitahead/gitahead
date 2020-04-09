@@ -167,13 +167,13 @@ _FileWidget::Header::Header(
           emit stageStageChanged(Qt::Unchecked);
   });
 
-  // Respond to index changes.
-  git::Repository repo = RepoView::parentView(this)->repo();
-  connect(repo.notifier(), &git::RepositoryNotifier::indexChanged, this,
-  [this](const QStringList &paths) {
-    if (paths.contains(mPatch.name()))
-      updateCheckState();
-  });
+//  // Respond to index changes.
+//  git::Repository repo = RepoView::parentView(this)->repo();
+//  connect(repo.notifier(), &git::RepositoryNotifier::indexChanged, this,
+//  [this](const QStringList &paths) {
+//    if (paths.contains(mPatch.name()))
+//      updateCheckState();
+//  });
 
   // Set initial check state.
   updateCheckState();
@@ -278,6 +278,13 @@ FileWidget::FileWidget(
   QVBoxLayout *layout = new QVBoxLayout(this);
 
   git::Repository repo = RepoView::parentView(this)->repo();
+  // Respond to index changes.
+  connect(repo.notifier(), &git::RepositoryNotifier::indexChanged, this,
+  [this](const QStringList &paths) {
+    if (paths.contains(mPatch.name()))
+      updateHunks();
+  });
+
 
   QString name = patch.name();
   QString path = repo.workdir().filePath(name);
@@ -372,6 +379,36 @@ FileWidget::FileWidget(
   disclosureButton->setChecked(expand);
 }
 
+void FileWidget::updateHunks()
+{
+    mSupressStaging = true;
+    for (auto hunk: mHunks)
+     hunk->load(true);
+    mSupressStaging = false;
+
+    int staged = 0;
+    int unstaged = 0;
+    for (int i = 0; i < mHunks.size(); ++i) {
+      git::Index::StagedState state = mHunks[i]->stageState();
+      if (state == git::Index::Staged)
+          staged++;
+      else if (state == git::Index::Unstaged)
+          unstaged ++;
+    }
+
+    if (staged == mHunks.size()) {
+      emit stageStateChanged(git::Index::Staged);
+      return;
+    }
+
+    if (unstaged == mHunks.size()) {
+      emit stageStateChanged(git::Index::Unstaged);
+      return;
+    }
+
+    emit stageStateChanged(git::Index::PartiallyStaged);
+}
+
 bool FileWidget::isEmpty()
 {
   return (mHunks.isEmpty() && mImages.isEmpty());
@@ -457,7 +494,7 @@ HunkWidget *FileWidget::addHunk(
   // TODO: move this to constructor of the header ??
   QCheckBox *check = hunk->header()->check();
   check->setVisible(diff.isStatusDiff() && !submodule && !patch.isConflicted());
-  connect(hunk, &HunkWidget::stageStageChanged, this, &FileWidget::stageStateHunks);
+  connect(hunk, &HunkWidget::stageStageChanged, this, &FileWidget::stageHunks);
   connect(hunk, &HunkWidget::discardSignal, this, &FileWidget::discardHunk);
   TextEditor* editor = hunk->editor(false);
 
@@ -473,9 +510,9 @@ HunkWidget *FileWidget::addHunk(
   return hunk;
 }
 
-void FileWidget::stageStateHunks()
+void FileWidget::stageHunks()
 {
-  if (mIgnoreStaging)
+  if (mSupressStaging)
       return;
 
   git::Index index = mDiff.index();
@@ -575,11 +612,11 @@ void FileWidget::headerCheckStateChanged(int state)
 {
     assert(state != Qt::PartiallyChecked); // makes no sense, that the user can select partially selected
 
-    mIgnoreStaging = true;
+    mSupressStaging = true;
     bool staged = state == Qt::Checked ? true : false;
     for (int i = 0; i < mHunks.size(); ++i)
         mHunks[i]->setStaged(staged);
-    mIgnoreStaging = false;
+    mSupressStaging = false;
 
-    stageStateHunks();
+    stageHunks();
 }
