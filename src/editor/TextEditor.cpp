@@ -538,3 +538,17 @@ void TextEditor::loadMarkerIcon(Marker marker, const QIcon &icon)
     scaled, scaled, Qt::KeepAspectRatio, Qt::SmoothTransformation);
   markerDefineImage(marker, scaledPixmap.toImage());
 }
+
+void TextEditor::keyPressEvent(QKeyEvent * event) {
+    QKeyEvent *ke = static_cast<QKeyEvent *>(event);
+    if (ke->key() == Qt::Key_S) {
+        Command(stageSelected);
+        return;
+    } else if (ke->key() == Qt::Key_U) {
+        Command(unstageSelected);
+        return;
+    } else if (ke->key() == Qt::Key_R) {
+        Command(discardSelected);
+        return;
+    }
+}

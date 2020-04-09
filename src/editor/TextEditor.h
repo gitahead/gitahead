@@ -114,6 +114,7 @@ public:
   {
     ScintillaIFace::wheelEvent(event);
   }
+  void keyPressEvent(QKeyEvent * event) override;
 
   QRect textRectangle() const
   {
