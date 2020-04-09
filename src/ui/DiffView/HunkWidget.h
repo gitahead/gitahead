@@ -132,6 +132,7 @@ private:
   _HunkWidget::Header *mHeader;
   TextEditor *mEditor;
   bool mLoaded{false};
+  bool mLoading{false}; // during execution of the load() method
   bool mStagedStateLoaded{false};
   git::Index::StagedState mStagedStage;
 };
