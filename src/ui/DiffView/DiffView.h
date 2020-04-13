@@ -24,6 +24,7 @@
 
 class QCheckBox;
 class QVBoxLayout;
+class FileWidget;
 
 namespace DiffViewStyle {
     const int kIndent = 2;
@@ -105,11 +106,12 @@ private:
   bool canFetchMore();
   void fetchMore();
   void fetchAll(int index = -1);
+  void indexChanged(const QStringList& paths);
 
   git::Diff mDiff;
   QMap<QString,git::Patch> mStagedPatches;
 
-  QList<QWidget *> mFiles;
+  QList<FileWidget *> mFiles;
   QList<QMetaObject::Connection> mConnections;
 
   QList<PluginRef> mPlugins;
