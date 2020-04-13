@@ -100,50 +100,7 @@ _FileWidget::Header::Header(
   mDiscardButton->setVisible(false);
   mDiscardButton->setToolTip(FileWidget::tr("Discard File"));
   buttons->addWidget(mDiscardButton);
-  connect(mDiscardButton, &QToolButton::clicked, [this] {
-    QString name = mPatch.name();
-    bool untracked = mPatch.isUntracked();
-    QString path = mPatch.repo().workdir().filePath(name);
-    QString arg = QFileInfo(path).isDir() ? FileWidget::tr("Directory") : FileWidget::tr("File");
-    QString title =
-      untracked ? FileWidget::tr("Remove %1?").arg(arg) : FileWidget::tr("Discard Changes?");
-    QString text = untracked ?
-      FileWidget::tr("Are you sure you want to remove '%1'?") :
-      FileWidget::tr("Are you sure you want to discard all changes in '%1'?");
-    QMessageBox *dialog = new QMessageBox(
-      QMessageBox::Warning, title, text.arg(name),
-      QMessageBox::Cancel, this);
-    dialog->setAttribute(Qt::WA_DeleteOnClose);
-    dialog->setInformativeText(FileWidget::tr("This action cannot be undone."));
-
-    QString button =
-      untracked ? FileWidget::tr("Remove %1").arg(arg) : FileWidget::tr("Discard Changes");
-    QPushButton *discard =
-      dialog->addButton(button, QMessageBox::AcceptRole);
-    connect(discard, &QPushButton::clicked, [this, untracked] {
-      RepoView *view = RepoView::parentView(this);
-      git::Repository repo = mPatch.repo();
-      QString name = mPatch.name();
-      int strategy = GIT_CHECKOUT_FORCE;
-      if (untracked) {
-        QDir dir = repo.workdir();
-        if (QFileInfo(dir.filePath(name)).isDir()) {
-          if (dir.cd(name))
-            dir.removeRecursively();
-        } else {
-          dir.remove(name);
-        }
-      } else if (!repo.checkout(git::Commit(), nullptr, {name}, strategy)) {
-        LogEntry *parent = view->addLogEntry(mPatch.name(), FileWidget::tr("Discard"));
-        view->error(parent, FileWidget::tr("discard"), mPatch.name());
-      }
-
-      // FIXME: Work dir changed?
-      view->refresh();
-    });
-
-    dialog->open();
-  });
+  connect(mDiscardButton, &QToolButton::clicked, this, &_FileWidget::Header::discard);
 
   mDisclosureButton = new DisclosureButton(this);
   mDisclosureButton->setToolTip(
@@ -306,6 +263,7 @@ FileWidget::FileWidget(
   mHeader = new _FileWidget::Header(diff, patch, binary, lfs, submodule, parent);
   connect(this, &FileWidget::stageStateChanged, mHeader, &_FileWidget::Header::setStageState);
   connect(mHeader, &_FileWidget::Header::stageStageChanged, this, &FileWidget::headerCheckStateChanged);
+  connect(mHeader, &_FileWidget::Header::discard, this, &FileWidget::discard);
   layout->addWidget(mHeader);
 
   DisclosureButton *disclosureButton = mHeader->disclosureButton();
@@ -586,28 +544,47 @@ void FileWidget::discardHunk() {
 }
 
 void FileWidget::discard() {
-    git::Repository repo = mPatch.repo();
-    if (mPatch.isUntracked()) {
-      repo.workdir().remove(mPatch.name());
-      return;
-    }
-
     QString name = mPatch.name();
-    QSaveFile file(repo.workdir().filePath(name));
-    if (!file.open(QFile::WriteOnly))
-      return;
+    bool untracked = mPatch.isUntracked();
+    QString path = mPatch.repo().workdir().filePath(name);
+    QString arg = QFileInfo(path).isDir() ? FileWidget::tr("Directory") : FileWidget::tr("File");
+    QString title = untracked ? FileWidget::tr("Remove %1?").arg(arg) : FileWidget::tr("Discard Changes?");
+    QString text = untracked ?
+      FileWidget::tr("Are you sure you want to remove '%1'?") :
+      FileWidget::tr("Are you sure you want to discard all changes in '%1'?");
+    QMessageBox *dialog = new QMessageBox(
+      QMessageBox::Warning, title, text.arg(name),
+      QMessageBox::Cancel, this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setInformativeText(FileWidget::tr("This action cannot be undone."));
 
-    QByteArray buffer;
-    for (int i = 0; i < mHunks.size(); ++i) {
-        buffer.append(mHunks[i]->hunk());
-    }
+    QString button =
+      untracked ? FileWidget::tr("Remove %1").arg(arg) : FileWidget::tr("Discard Changes");
+    QPushButton *discard =
+      dialog->addButton(button, QMessageBox::AcceptRole);
+    connect(discard, &QPushButton::clicked, [this, untracked] {
+      RepoView *view = RepoView::parentView(this);
+      git::Repository repo = mPatch.repo();
+      QString name = mPatch.name();
+      int strategy = GIT_CHECKOUT_FORCE;
+      if (untracked) {
+        QDir dir = repo.workdir();
+        if (QFileInfo(dir.filePath(name)).isDir()) {
+          if (dir.cd(name))
+            dir.removeRecursively();
+        } else {
+          dir.remove(name);
+        }
+      } else if (!repo.checkout(git::Commit(), nullptr, {name}, strategy)) {
+        LogEntry *parent = view->addLogEntry(mPatch.name(), FileWidget::tr("Discard"));
+        view->error(parent, FileWidget::tr("discard"), mPatch.name());
+      }
 
-    file.write(buffer);
-    if (!file.commit())
-      return;
+      // FIXME: Work dir changed?
+      view->refresh();
+    });
 
-    // FIXME: Work dir changed?
-    RepoView::parentView(this)->refresh();
+    dialog->open();
 }
 
 void FileWidget::headerCheckStateChanged(int state)
