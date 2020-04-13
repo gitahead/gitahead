@@ -45,6 +45,7 @@ public:
 
 signals:
   void stageStageChanged(int stageState);
+  void discard();
 protected:
   void mouseDoubleClickEvent(QMouseEvent *event) override;
   void contextMenuEvent(QContextMenuEvent *event) override;
@@ -118,18 +119,15 @@ public slots:
    * \brief discardHunk
    */
   void discardHunk();
-  /*!
-   * Discard all changes in the file
-   * Emitted by the _FileWidget::Header
-   * \brief discard
-   */
-  void discard();
 
 signals:
   void diagnosticAdded(TextEditor::DiagnosticKind kind);
   void stageStateChanged(git::Index::StagedState state);
 
 private:
+  void discard();
+
+
   DiffView *mView{nullptr};
 
   git::Diff mDiff;
