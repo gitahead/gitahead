@@ -406,14 +406,13 @@ void Patch::apply(QList<QList<QByteArray>> &image, int hidx, QByteArray& hunkDat
 
     assert(hunk->new_start - 1 + hunk->new_lines < image.length());
 
-    int len = image.length();
+
     // delete old data
     for (int i = hunk->new_start - 1; i < hunk->new_start - 1 + hunk->new_lines; i++) {
         image[i].clear();
     }
     // the length of image is not changed, so the function can be applied for multiple hunks
-    image[hunk->old_start] = QList<QByteArray>();
-    image[hunk->old_start].append(hunkData); // at least the line for the old_start must be available
+    image[hunk->new_start - 1].append(hunkData); // at least the line for the old_start must be available
 }
 
 void Patch::apply(QList<QList<QByteArray>> &image, int hidx, int start_line, int end_line) const {
