@@ -133,7 +133,7 @@ public:
                    int start_line,
                    int end_line,
                    const FilterList &filters = FilterList()) const;
-  QByteArray apply(int hidx, QByteArray& hunkData, Diff::File file = Diff::File::OldFile, const FilterList &filters = FilterList()) const;
+  QByteArray apply(int hidx, QByteArray& hunkData, const FilterList &filters = FilterList()) const;
   QByteArray apply(int hidx, QByteArray& hunkData, QByteArray fileContent, const FilterList &filters = FilterList()) const;
   /*!
    * applies all hunk data to the patch.
