@@ -107,7 +107,7 @@ public:
    * \brief load
    * \param force Set to true to force reloading
    */
-  void load(bool force = false);
+  void load(git::Patch &staged, bool force = false);
 
 signals:
   /*!
