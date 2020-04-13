@@ -369,10 +369,10 @@ QByteArray Patch::apply(int hidx, int start_line, int end_line, const FilterList
     return generateResult(image, filters);
 }
 
-QByteArray Patch::apply(int hidx, QByteArray& hunkData, Diff::File file, const FilterList &filters) const
+QByteArray Patch::apply(int hidx, QByteArray& hunkData, const FilterList &filters) const
 {
     QList<QList<QByteArray>> image;
-    populatePreimage(image, file);
+    populatePreimage(image);
     apply(image, hidx, hunkData);
     return generateResult(image, filters);
 }
