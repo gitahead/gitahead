@@ -404,11 +404,11 @@ void Patch::apply(QList<QList<QByteArray>> &image, int hidx, QByteArray& hunkDat
     if (git_patch_get_hunk(&hunk, &lines, d.data(), hidx)) // returns hunk_idx hunk
       return;
 
-    assert(hunk->old_start - 1 + hunk->old_lines < image.length());
+    assert(hunk->new_start - 1 + hunk->new_lines < image.length());
 
     int len = image.length();
     // delete old data
-    for (int i = hunk->old_start - 1; i < hunk->old_start - 1 + hunk->old_lines; i++) {
+    for (int i = hunk->new_start - 1; i < hunk->new_start - 1 + hunk->new_lines; i++) {
         image[i].clear();
     }
     // the length of image is not changed, so the function can be applied for multiple hunks
