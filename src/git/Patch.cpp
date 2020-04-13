@@ -306,15 +306,19 @@ void Patch::populatePreimage(QList<QList<QByteArray>>& image) const{
     // this list is written afterwards back into the file
     QByteArray source = blob(Diff::OldFile).content();
 
+    populatePreimage(image, source);
+}
+
+void Patch::populatePreimage(QList<QList<QByteArray> > &image, QByteArray fileContent) const {
     int index = 0;
-    int newline = source.indexOf('\n');
+    int newline = fileContent.indexOf('\n');
     while (newline >= 0) {
-      image.append({source.mid(index, newline - index + 1)});
+      image.append({fileContent.mid(index, newline - index + 1)});
       index = newline + 1;
-      newline = source.indexOf('\n', index);
+      newline = fileContent.indexOf('\n', index);
     }
 
-    image.append({source.mid(index)});
+    image.append({fileContent.mid(index)});
 }
 
 QByteArray Patch::generateResult(QList<QList<QByteArray>>& image, const FilterList &filters) const{
@@ -365,10 +369,18 @@ QByteArray Patch::apply(int hidx, int start_line, int end_line, const FilterList
     return generateResult(image, filters);
 }
 
-QByteArray Patch::apply(int hidx, QByteArray& hunkData, const FilterList &filters) const
+QByteArray Patch::apply(int hidx, QByteArray& hunkData, Diff::File file, const FilterList &filters) const
 {
     QList<QList<QByteArray>> image;
-    populatePreimage(image);
+    populatePreimage(image, file);
+    apply(image, hidx, hunkData);
+    return generateResult(image, filters);
+}
+
+QByteArray Patch::apply(int hidx, QByteArray& hunkData, QByteArray fileContent, const FilterList &filters) const
+{
+    QList<QList<QByteArray>> image;
+    populatePreimage(image, fileContent);
     apply(image, hidx, hunkData);
     return generateResult(image, filters);
 }
