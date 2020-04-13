@@ -197,6 +197,8 @@ void DiffView::setDiff(const git::Diff &diff)
       remoteRepo->account()->requestComments(remoteRepo, oid);
     }
   }
+
+  connect(repo.notifier(), &git::RepositoryNotifier::indexChanged, this, &DiffView::indexChanged);
 }
 
 bool DiffView::scrollToFile(int index)
@@ -337,4 +339,30 @@ void DiffView::fetchAll(int index)
   // Load all patches up to and including index.
   while ((index < 0 || mFiles.size() <= index) && canFetchMore())
     fetchMore();
+}
+
+void DiffView::indexChanged(const QStringList &paths) {
+    // Respond to index changes.
+    RepoView *view = RepoView::parentView(this);
+    git::Repository repo = view->repo();
+
+    mStagedPatches.clear();
+    // Generate a diff between the head tree and index.
+    if (mDiff.isStatusDiff()) {
+      if (git::Reference head = repo.head()) {
+        if (git::Commit commit = head.target()) {
+          git::Diff stagedDiff = repo.diffTreeToIndex(commit.tree());
+          for (int i = 0; i < stagedDiff.count(); ++i)
+            mStagedPatches[stagedDiff.name(i)] = stagedDiff.patch(i);
+        }
+      }
+    }
+
+    for (auto* file : mFiles) {
+        for (auto path : paths) {
+            git::Patch stagedPatch = mStagedPatches[path];
+            if (file->name() == path)
+                file->updateHunks(stagedPatch);
+        }
+    }
 }

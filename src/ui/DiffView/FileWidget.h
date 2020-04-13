@@ -84,10 +84,10 @@ public:
   bool isEmpty();
   void updatePatch(const git::Patch &patch, const git::Patch &staged);
   /*!
-   * Update hunks after index change
+   * Update hunks after index change and emits the current stage state of the hunks
    * \brief updateHunks
    */
-  void updateHunks();
+  void updateHunks(git::Patch stagedPatch);
   _FileWidget::Header *header() const;
   QString name() const;
 
@@ -137,6 +137,7 @@ private:
   QList<QWidget *> mImages;
   QList<HunkWidget *> mHunks;
   QVBoxLayout* mHunkLayout{nullptr};
+  bool mSuppressUpdate{false};
   bool mSupressStaging{false};
 };
 

@@ -235,13 +235,6 @@ FileWidget::FileWidget(
   QVBoxLayout *layout = new QVBoxLayout(this);
 
   git::Repository repo = RepoView::parentView(this)->repo();
-  // Respond to index changes.
-  connect(repo.notifier(), &git::RepositoryNotifier::indexChanged, this,
-  [this](const QStringList &paths) {
-    if (paths.contains(mPatch.name()))
-      updateHunks();
-  });
-
 
   QString name = patch.name();
   QString path = repo.workdir().filePath(name);
@@ -337,11 +330,15 @@ FileWidget::FileWidget(
   disclosureButton->setChecked(expand);
 }
 
-void FileWidget::updateHunks()
+void FileWidget::updateHunks(git::Patch stagedPatch)
 {
+    if (mSuppressUpdate)
+        return;
+
+    mSuppressUpdate = true;
     mSupressStaging = true;
     for (auto hunk: mHunks)
-     hunk->load(true);
+     hunk->load(stagedPatch, true);
     mSupressStaging = false;
 
     int staged = 0;
@@ -353,6 +350,8 @@ void FileWidget::updateHunks()
       else if (state == git::Index::Unstaged)
           unstaged ++;
     }
+
+    mSuppressUpdate = false;
 
     if (staged == mHunks.size()) {
       emit stageStateChanged(git::Index::Staged);
@@ -505,8 +504,10 @@ void FileWidget::stageHunks()
 
   QByteArray buffer = mPatch.apply(hunkContent);
 
+  mSuppressUpdate = true;
   // Add the buffer to the index.
   index.add(mPatch.name(), buffer);
+  mSuppressUpdate = false;
 
   emit stageStateChanged(git::Index::PartiallyStaged);
 }

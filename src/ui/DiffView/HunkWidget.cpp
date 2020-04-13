@@ -455,7 +455,7 @@ _HunkWidget::Header* HunkWidget::header() const
 TextEditor* HunkWidget::editor(bool ensureLoaded)
 {
   if (ensureLoaded)
-    load();
+    load(mPatch);
   return mEditor;
 }
 
@@ -469,7 +469,7 @@ void HunkWidget::invalidate()
 
 void HunkWidget::paintEvent(QPaintEvent *event)
 {
-  load();
+  load(mStaged);
   QFrame::paintEvent(event);
 }
 
@@ -635,13 +635,18 @@ QByteArray HunkWidget::tokenBuffer(const QList<HunkWidget::Token> &tokens)
   return list.join('\n');
 }
 
-void HunkWidget::load(bool force)
+void HunkWidget::load(git::Patch &staged, bool force)
 {
   if (!force && mLoaded )
     return;
 
   mLoaded = true;
   mLoading = true;
+  mStagedStateLoaded = false;
+
+  mStaged = staged;
+
+  mEditor->markerDeleteAll(-1); // delete all markers on each line
 
   // Load entire file.
   git::Repository repo = mPatch.repo();
