@@ -440,10 +440,6 @@ HunkWidget *FileWidget::addHunk(
   HunkWidget *hunk =
     new HunkWidget(mView, diff, patch, staged, index, lfs, submodule, this);
 
-  // Respond to check box click.
-  // TODO: move this to constructor of the header ??
-  QCheckBox *check = hunk->header()->check();
-  check->setVisible(diff.isStatusDiff() && !submodule && !patch.isConflicted());
   connect(hunk, &HunkWidget::stageStageChanged, this, &FileWidget::stageHunks);
   connect(hunk, &HunkWidget::discardSignal, this, &FileWidget::discardHunk);
   TextEditor* editor = hunk->editor(false);
