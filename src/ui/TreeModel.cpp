@@ -191,10 +191,9 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
   return QVariant();
 }
 
-bool TreeModel::setData(
-  const QModelIndex &index,
+bool TreeModel::setData(const QModelIndex &index,
   const QVariant &value,
-  int role)
+  int role, bool ignoreIndexChanges)
 {
   switch (role) {
     case Qt::CheckStateRole: {
@@ -207,7 +206,8 @@ bool TreeModel::setData(
           files.append(file);
       }
 
-      mDiff.index().setStaged(files, value.toBool());
+      if (!ignoreIndexChanges)
+        mDiff.index().setStaged(files, value.toBool());
 
 	  // childs
 	  if (hasChildren(index)) {
