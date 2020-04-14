@@ -47,6 +47,7 @@ _HunkWidget::Header::Header(
   setObjectName("HunkHeader");
   mCheck = new QCheckBox(this);
   mCheck->setTristate(true);
+  mCheck->setVisible(diff.isStatusDiff() && !submodule && !patch.isConflicted());
 
   QString header = (index >= 0) ? patch.header(index) : QString();
   QString escaped = header.trimmed().toHtmlEscaped();
