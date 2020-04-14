@@ -322,6 +322,8 @@ void DiffView::fetchMore()
     // Respond to diagnostic signal.
     connect(file, &FileWidget::diagnosticAdded,
             this, &DiffView::diagnosticAdded);
+    connect(file, &FileWidget::stageStateChanged,
+            [this] (git::Index::StagedState state) {emit fileStageStateChanged(state);});
   }
 
   // Finish layout.
