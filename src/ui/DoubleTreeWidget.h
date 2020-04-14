@@ -37,6 +37,9 @@ public:
     const QString &file = QString(),
     const QString &pathspec = QString()) override;
 
+public slots:
+  void updateTreeModel(git::Index::StagedState state);
+
 
 protected:
 
