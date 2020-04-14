@@ -125,14 +125,6 @@ _FileWidget::Header::Header(
           emit stageStageChanged(Qt::Unchecked);
   });
 
-//  // Respond to index changes.
-//  git::Repository repo = RepoView::parentView(this)->repo();
-//  connect(repo.notifier(), &git::RepositoryNotifier::indexChanged, this,
-//  [this](const QStringList &paths) {
-//    if (paths.contains(mPatch.name()))
-//      updateCheckState();
-//  });
-
   // Set initial check state.
   updateCheckState();
 }
