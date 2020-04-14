@@ -130,6 +130,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
             break;
 
           case git::Index::PartiallyStaged:
+            //return Qt::PartiallyChecked;
           case git::Index::Staged:
             ++count;
             break;
