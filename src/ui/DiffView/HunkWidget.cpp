@@ -718,6 +718,10 @@ void HunkWidget::load(git::Patch &staged, bool force)
       }
   }
 
+  // a patch contains only 3 lines before and 3 lines after the changes.
+  // So the stagedPatch and the unstagedPatch must be alligned
+  int offset = determineLineOffset(lines, linesStaged);
+
   // Trim final line end.
   // Don't do that because then the editor line
   // does not match anymore the blob line.
@@ -749,172 +753,28 @@ void HunkWidget::load(git::Patch &staged, bool force)
   // old line number and new line number are written in the same margin
   int additions = 0;
   int deletions = 0;
+  int additions2 = 0;
+  int stagedAdditions = 0;
   int countDiffLines = 0;
-  int stagedIdx = 0;
   int count = lines.size();
   for (int lidx = 0; lidx < count; ++lidx) {
-    const Line &line = lines.at(lidx);
-    QByteArray oldLine = line.oldLine();
-    QByteArray newLine = line.newLine();
-    int spaces = width - (oldLine.length() + newLine.length());
-    QByteArray text = oldLine + QByteArray(spaces, ' ') + newLine;
-    mEditor->marginSetText(lidx, text);
-    mEditor->marginSetStyle(lidx, STYLE_LINENUMBER);
+    const Line& line = lines.at(lidx);
+    createMarkersAndLineNumbers(line, lidx, comments, width);
 
-    // Build annotations.
-    QList<Annotation> annotations;
-    if (!line.newline()) {
-      QString text = tr("No newline at end of file");
-      QByteArray styles =
-        QByteArray(text.toUtf8().size(), TextEditor::EofNewline);
-      annotations.append({text, styles});
-    }
-
-    auto it = comments.constFind(lidx);
-    if (it != comments.constEnd()) {
-      QString whitespace(DiffViewStyle::kIndent, ' ');
-      QFont font = mEditor->styleFont(TextEditor::CommentBody);
-      int margin = QFontMetrics(font).horizontalAdvance(' ') * DiffViewStyle::kIndent * 2;
-      int width = mEditor->textRectangle().width() - margin - 50;
-
-      foreach (const QDateTime &key, it->keys()) {
-        QStringList paragraphs;
-        Account::Comment comment = it->value(key);
-        foreach (const QString &paragraph, comment.body.split('\n')) {
-          if (paragraph.isEmpty()) {
-            paragraphs.append(QString());
-            continue;
-          }
-
-          QStringList lines;
-          QTextLayout layout(paragraph, font);
-          layout.beginLayout();
-
-          forever {
-            QTextLine line = layout.createLine();
-            if (!line.isValid())
-              break;
-
-            line.setLineWidth(width);
-            QString text = paragraph.mid(line.textStart(), line.textLength());
-            lines.append(whitespace + text.trimmed() + whitespace);
-          }
-
-          layout.endLayout();
-          paragraphs.append(lines.join('\n'));
-        }
-
-        QString author = comment.author;
-        QString time = key.toString(Qt::DefaultLocaleLongDate);
-        QString body = paragraphs.join('\n');
-        QString text = author + ' ' + time + '\n' + body;
-        QByteArray styles =
-          QByteArray(author.toUtf8().size() + 1, TextEditor::CommentAuthor) +
-          QByteArray(time.toUtf8().size() + 1, TextEditor::CommentTimestamp) +
-          QByteArray(body.toUtf8().size(), TextEditor::CommentBody);
-        annotations.append({text, styles});
-      }
-    }
-
-    QString atnText;
-    QByteArray atnStyles;
-    foreach (const Annotation &annotation, annotations) {
-      if (!atnText.isEmpty()) {
-        atnText.append("\n\n");
-        atnStyles.append(QByteArray(2, TextEditor::CommentBody));
-      }
-
-      atnText.append(annotation.text);
-      atnStyles.append(annotation.styles);
-    }
-
-    // Set annotations.
-    if (!atnText.isEmpty()) {
-      mEditor->annotationSetText(lidx, atnText);
-      mEditor->annotationSetStyles(lidx, atnStyles);
-      mEditor->annotationSetVisible(ANNOTATION_STANDARD);
-    }
-
-    // Find matching lines.
     int marker = -1;
     bool staged = false;
-    switch (line.origin()) {
-      case GIT_DIFF_LINE_CONTEXT:
-        marker = TextEditor::Context;
-        additions = 0;
-        deletions = 0;
-        break;
-
-      case GIT_DIFF_LINE_ADDITION: {
-        marker = TextEditor::Addition;
-        ++additions;
-        countDiffLines ++;
-        if (lidx + 1 >= count ||
-            mPatch.lineOrigin(mIndex, lidx + 1) != GIT_DIFF_LINE_ADDITION) {
-          // The heuristic is that matching blocks have
-          // the same number of additions as deletions.
-          if (additions == deletions) {
-            for (int i = 0; i < additions; ++i) {
-              int current = lidx - i;
-              int match = current - additions;
-              lines[current].setMatchingLine(match);
-              lines[match].setMatchingLine(current);
-            }
-          }
-          // reset not needed or?
-          additions = 0;
-          deletions = 0;
-        }
-
-        // check if line is already staged
-          QByteArray newLine = lines[lidx].newLine();
-          // TODO: find less computational way
-          // check if line is in staged lines
-          for (int i = stagedIdx; i < linesStaged.count(); i++) {
-              if (linesStaged[i].newLine() == newLine) {
-                  staged = true;
-                  break;
-              }
-
-          }
-
-          stagedIdx = lidx + 1;
-        break;
-
-      } case GIT_DIFF_LINE_DELETION: {
-        marker = TextEditor::Deletion;
-        ++deletions;
-        countDiffLines++;
-
-          // check if line is already staged
-          QByteArray oldLine = lines[lidx].oldLine();
-          // TODO: find less computational way
-          // check if line is in staged lines
-          for (int i = stagedIdx; i < linesStaged.count(); i++) {
-              if (linesStaged[i].oldLine() == oldLine) {
-                  staged = true;
-                  break;
-              }
-
-          }
-          stagedIdx = lidx + 1;
-        break;
-
-      } case 'O':
-        marker = TextEditor::Ours;
-        break;
-
-      case 'T':
-        marker = TextEditor::Theirs;
-        break;
-    }
+    findMatchingLines(lines, lidx, count, marker, countDiffLines, additions, deletions, staged);
 
     // Add marker.
     if (marker >= 0)
       mEditor->markerAdd(lidx, marker);
 
-    if (staged)
-        setStaged(lidx, true);
+
+    if (linesStaged.count()) {
+        findStagedLines(lines, additions2, lidx, offset, linesStaged, stagedAdditions, staged);
+        if (staged)
+            setStaged(lidx, true);
+    }
   }
 
   // Diff matching lines.
@@ -1003,6 +863,205 @@ void HunkWidget::load(git::Patch &staged, bool force)
   // update stageState after everythin is loaded
   stageStageChanged(stageState());
 
+}
+
+void HunkWidget::findMatchingLines(QList<Line>& lines, int lidx, int count, int& marker, int& countDiffLines, int& additions, int& deletions, bool& staged) const {
+    // Find matching lines.
+    switch (lines[lidx].origin()) {
+      case GIT_DIFF_LINE_CONTEXT:
+        marker = TextEditor::Context;
+        additions = 0;
+        deletions = 0;
+        break;
+
+      case GIT_DIFF_LINE_ADDITION: {
+        marker = TextEditor::Addition;
+        ++additions;
+        countDiffLines ++;
+        if (lidx + 1 >= count ||
+            mPatch.lineOrigin(mIndex, lidx + 1) != GIT_DIFF_LINE_ADDITION) { // same as lines[lidx + 1].origin()????
+          // The heuristic is that matching blocks have
+          // the same number of additions as deletions.
+          if (additions == deletions) {
+            for (int i = 0; i < additions; ++i) {
+              int current = lidx - i;
+              int match = current - additions;
+              lines[current].setMatchingLine(match);
+              lines[match].setMatchingLine(current);
+            }
+          }
+          // Only for performance reason, because the above loop
+          // iterates over all additions
+          additions = 0;
+          deletions = 0;
+        }
+        break;
+
+      } case GIT_DIFF_LINE_DELETION: {
+        marker = TextEditor::Deletion;
+        ++deletions;
+        countDiffLines++;
+        break;
+
+      } case 'O':
+        marker = TextEditor::Ours;
+        break;
+
+      case 'T':
+        marker = TextEditor::Theirs;
+        break;
+    }
+}
+
+void HunkWidget::findStagedLines(QList<Line>& lines, int &additions, int lidx, int offset, QList<Line>& linesStaged, int& stagedAdditions, bool& staged)
+{
+    assert(offset >= 0);
+
+    staged = false;
+
+    if (lidx + offset < 0 || lidx + offset > lines.count())
+        return;
+
+    // Find matching lines.
+    switch (lines[lidx].origin()) {
+      case GIT_DIFF_LINE_CONTEXT:
+        break;
+
+      case GIT_DIFF_LINE_ADDITION: {
+        // check if line is already staged
+          QByteArray newLine = lines[lidx].newLine();
+          // TODO: find less computational way
+          // check if line is in staged lines
+          Line lineStaged = linesStaged[lidx - offset - (additions - stagedAdditions)];
+          if (lineStaged.origin() == '+') {
+              stagedAdditions++;
+              staged = true;
+          }
+          additions++;
+        break;
+
+      } case GIT_DIFF_LINE_DELETION: {
+          Line lineStaged = linesStaged[lidx - offset - (additions - stagedAdditions)];
+          QByteArray oldLine = lines[lidx].oldLine();
+
+          assert(lineStaged.oldLine() == oldLine);
+          if (lineStaged.origin() == '-') {
+              staged = true;
+          }
+        break;
+    }
+    }
+}
+
+int HunkWidget::determineLineOffset(QList<Line>& lines, QList<Line>& stagedLines)
+{
+    for (int slidx = 0; slidx < stagedLines.count(); slidx++) {
+        for (int lidx = 0; lidx < lines.count(); lidx++) {
+            switch (lines[lidx].origin()) {
+              case GIT_DIFF_LINE_CONTEXT:
+                if (lines[lidx].oldLine() == stagedLines[slidx].oldLine())
+                    return lidx - slidx;
+                break;
+
+              case GIT_DIFF_LINE_ADDITION: {
+                if (lines[lidx].newLine() == stagedLines[slidx].newLine())
+                    return lidx - slidx;
+                break;
+
+              } case GIT_DIFF_LINE_DELETION: {
+                if (lines[lidx].oldLine() == stagedLines[slidx].oldLine())
+                    return lidx - slidx;
+                break;
+            }
+        }
+      }
+    assert(-1); // should not occur. Just for checkig if the logic is correct
+    return -1;
+    }
+}
+
+void HunkWidget::createMarkersAndLineNumbers(const Line& line, int lidx, Account::FileComments& comments, int width) const
+{
+    QByteArray oldLine = line.oldLine();
+    QByteArray newLine = line.newLine();
+    int spaces = width - (oldLine.length() + newLine.length());
+    QByteArray text = oldLine + QByteArray(spaces, ' ') + newLine;
+    mEditor->marginSetText(lidx, text);
+    mEditor->marginSetStyle(lidx, STYLE_LINENUMBER);
+
+    // Build annotations.
+    QList<Annotation> annotations;
+    if (!line.newline()) {
+      QString text = tr("No newline at end of file");
+      QByteArray styles =
+        QByteArray(text.toUtf8().size(), TextEditor::EofNewline);
+      annotations.append({text, styles});
+    }
+
+    auto it = comments.constFind(lidx);
+    if (it != comments.constEnd()) {
+      QString whitespace(DiffViewStyle::kIndent, ' ');
+      QFont font = mEditor->styleFont(TextEditor::CommentBody);
+      int margin = QFontMetrics(font).horizontalAdvance(' ') * DiffViewStyle::kIndent * 2;
+      int width = mEditor->textRectangle().width() - margin - 50;
+
+      foreach (const QDateTime &key, it->keys()) {
+        QStringList paragraphs;
+        Account::Comment comment = it->value(key);
+        foreach (const QString &paragraph, comment.body.split('\n')) {
+          if (paragraph.isEmpty()) {
+            paragraphs.append(QString());
+            continue;
+          }
+
+          QStringList lines;
+          QTextLayout layout(paragraph, font);
+          layout.beginLayout();
+
+          forever {
+            QTextLine line = layout.createLine();
+            if (!line.isValid())
+              break;
+
+            line.setLineWidth(width);
+            QString text = paragraph.mid(line.textStart(), line.textLength());
+            lines.append(whitespace + text.trimmed() + whitespace);
+          }
+
+          layout.endLayout();
+          paragraphs.append(lines.join('\n'));
+        }
+
+        QString author = comment.author;
+        QString time = key.toString(Qt::DefaultLocaleLongDate);
+        QString body = paragraphs.join('\n');
+        QString text = author + ' ' + time + '\n' + body;
+        QByteArray styles =
+          QByteArray(author.toUtf8().size() + 1, TextEditor::CommentAuthor) +
+          QByteArray(time.toUtf8().size() + 1, TextEditor::CommentTimestamp) +
+          QByteArray(body.toUtf8().size(), TextEditor::CommentBody);
+        annotations.append({text, styles});
+      }
+    }
+
+    QString atnText;
+    QByteArray atnStyles;
+    foreach (const Annotation &annotation, annotations) {
+      if (!atnText.isEmpty()) {
+        atnText.append("\n\n");
+        atnStyles.append(QByteArray(2, TextEditor::CommentBody));
+      }
+
+      atnText.append(annotation.text);
+      atnStyles.append(annotation.styles);
+    }
+
+    // Set annotations.
+    if (!atnText.isEmpty()) {
+      mEditor->annotationSetText(lidx, atnText);
+      mEditor->annotationSetStyles(lidx, atnStyles);
+      mEditor->annotationSetVisible(ANNOTATION_STANDARD);
+    }
 }
 
 QByteArray HunkWidget::hunk() const {
