@@ -257,6 +257,11 @@ void TextEditor::load(const QString &path, const QString &text)
   updateGeometry();
 }
 
+void TextEditor::setStatusDiff(bool statusDiff)
+{
+    mStatusDiff = statusDiff;
+}
+
 void TextEditor::clearHighlights()
 {
   setIndicatorCurrent(FindAll);
@@ -409,10 +414,12 @@ void TextEditor::ContextMenu(Scintilla::Point pt) {
         AddToPopUp("Copy", idcmdCopy, !sel.Empty());
         AddToPopUp("Paste", idcmdPaste, writable && WndProc(SCI_CANPASTE, 0, 0));
         AddToPopUp("Delete", idcmdDelete, writable && !sel.Empty());
-        AddToPopUp("");
-        AddToPopUp("Stage selected", stageSelected, diffLines - staged > 0);
-        AddToPopUp("Unstage selected", unstageSelected, staged > 0);
-        AddToPopUp("Discard selected", discardSelected, diffLines > 0);
+        if (mStatusDiff) {
+            AddToPopUp("");
+            AddToPopUp("Stage selected", stageSelected, diffLines - staged > 0);
+            AddToPopUp("Unstage selected", unstageSelected, staged > 0);
+            AddToPopUp("Discard selected", discardSelected, diffLines > 0);
+        }
         AddToPopUp("");
         AddToPopUp("Select All", idcmdSelectAll);
         popup.Show(pt, wMain);

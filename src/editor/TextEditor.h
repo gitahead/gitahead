@@ -99,6 +99,12 @@ public:
   void setLineCount(int lines);
   void setLexer(const QString &path);
   void load(const QString &path, const QString &text);
+  /*!
+   * sets the statusDiff flag
+   * \brief setStatusDiff
+   * \param statusDiff See \variable mStatusDiff for more information
+   */
+  void setStatusDiff(bool statusDiff);
 
   void clearHighlights();
   int highlightAll(const QString &text);
@@ -161,6 +167,11 @@ private:
 
   QString mPath;
   int mLineCount = -1;
+  /*!
+   * statusDiff Flag which determines if in the contextmenu stage actions are shown or not
+   * Because when checking out commits, it should not possible to select these actions.
+   */
+  bool mStatusDiff{false};
 
   QColor mOursColor;
   QColor mTheirsColor;
