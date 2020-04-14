@@ -51,10 +51,22 @@ public:
   QVariant data(
     const QModelIndex &index,
     int role = Qt::DisplayRole) const override;
+  /*!
+   * Setting the data to the item
+   * \brief setData
+   * \param index
+   * \param value
+   * \param role
+   * \param ignoreIndexChanges If index changes should be ignored or not.
+   * In normal case it is desired that the index is changed when checking an item,
+   * but when the data was changed outside of the model (like in the DiffView) the
+   * index must not be updated anymore because it is done already.
+   * \return
+   */
   bool setData(
     const QModelIndex &index,
     const QVariant &value,
-    int role = Qt::EditRole) override;
+    int role = Qt::EditRole, bool ignoreIndexChanges = false);
 
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 
