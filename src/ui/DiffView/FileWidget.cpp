@@ -512,10 +512,6 @@ void FileWidget::stageHunks()
   QByteArray fileContent = dev.readAll();
   dev.close();
 
-  QSaveFile file(repo.workdir().filePath(name));
-  if (!file.open(QFile::WriteOnly))
-    return;
-
   QByteArray buffer;
   QList<QList<QByteArray>> image;
   mPatch.populatePreimage(image, fileContent);
