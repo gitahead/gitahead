@@ -12,9 +12,11 @@
 
 #include "DetailView.h" // ContentWidget
 
+class TreeModel;
 class TreeView;
 class BlameEditor;
 class StatePushButton;
+class DiffView;
 
 // button in treeview: https://stackoverflow.com/questions/40716138/how-to-add-a-button-to-a-qtreeview-row
 
@@ -39,16 +41,34 @@ public:
 protected:
 
 private:
-	void selectFile(const QString& file);
- void fileSelected(const QModelIndex &index);
+  enum View {
+      Blame,
+      Diff,
+  };
+
+  void selectFile(const QString& file);
+  void fileSelected(const QModelIndex &index);
   void loadEditorContent(const QModelIndex &index);
   void toggleCollapseStagedFiles();
   void toggleCollapseUnstagedFiles();
 
+  TreeModel* mTreeModel{nullptr};
   TreeView* stagedFiles{nullptr};
   TreeView* unstagedFiles{nullptr};
   StatePushButton* collapseButtonStagedFiles{nullptr};
   StatePushButton* collapseButtonUnstagedFiles{nullptr};
+  /*!
+   * Shows file content
+   */
   BlameEditor *mEditor{nullptr};
+  /*!
+   * Shows the diff of a file
+   */
+  DiffView* mDiffView{nullptr};
+
+  /*!
+   * Shows BlameEditor or DiffView
+   */
+  QStackedWidget* mFileView{nullptr};
 };
 #endif // DOUBLETREEWIDGET_H
