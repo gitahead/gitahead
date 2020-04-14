@@ -33,6 +33,12 @@ TreeProxy::~TreeProxy()
 {
 }
 
+//bool TreeProxy::setData(const QModelIndex &index, const QVariant &value, int role, bool ignoreIndexChanges)
+//{
+//    QModelIndex sourceIndex = mapToSource(index);
+//    static_cast<TreeModel*>(sourceModel())->setData(sourceIndex, value, role, ignoreIndexChanges);
+//}
+
 bool TreeProxy::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
 {
 	QModelIndex index = sourceModel()->index(source_row, 0, source_parent);
