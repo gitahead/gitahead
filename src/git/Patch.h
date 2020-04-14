@@ -154,7 +154,7 @@ public:
    * \param hunkData
    */
   void apply(QList<QList<QByteArray>> &image, int hidx, QByteArray& hunkData) const;
-  QByteArray generateResult(QList<QList<QByteArray>>& image, const FilterList &filters) const;
+  QByteArray generateResult(QList<QList<QByteArray>>& image, const FilterList &filters = FilterList()) const;
   static Patch fromBuffers(
     const QByteArray &oldBuffer,
     const QByteArray &newBuffer,
