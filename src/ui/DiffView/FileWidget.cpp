@@ -10,6 +10,7 @@
 #include "ui/RepoView.h"
 #include "ui/Badge.h"
 #include "ui/FileContextMenu.h"
+#include "git/Repository.h"
 
 #include "git/Buffer.h"
 
@@ -486,25 +487,52 @@ void FileWidget::stageHunks()
         unstaged ++;
   }
 
+  mSuppressUpdate = true;
+
   if (staged == mHunks.size()) {
     index.setStaged({mPatch.name()}, true);
     emit stageStateChanged(git::Index::Staged);
+    mSuppressUpdate = false;
     return;
   }
 
   if (unstaged == mHunks.size()) {
     index.setStaged({mPatch.name()}, false);
     emit stageStateChanged(git::Index::Unstaged);
+    mSuppressUpdate = false;
     return;
   }
 
-  QList<QByteArray> hunkContent;
-  for (auto hunk : mHunks)
-      hunkContent.append(hunk->apply());
 
-  QByteArray buffer = mPatch.apply(hunkContent);
+  // when changing a line in a file,
+  // two lines are visible, the old one and the new one.
+  // When staging only one line, for example the added line,
+  // then the unstaged (removed line) and the added line shall be
+  // available in the file.
+  QString name = mPatch.name();
+  git::Repository repo = mPatch.repo();
+  QFile dev(repo.workdir().filePath(name));
+  if (!dev.open(QFile::ReadOnly))
+      return;
 
-  mSuppressUpdate = true;
+  QByteArray fileContent = dev.readAll();
+  dev.close();
+
+  QSaveFile file(repo.workdir().filePath(name));
+  if (!file.open(QFile::WriteOnly))
+    return;
+
+  QByteArray buffer;
+  QList<QList<QByteArray>> image;
+  mPatch.populatePreimage(image, fileContent);
+  for (int i = 0; i < mHunks.size(); ++i) {
+
+    QByteArray hunk_content;
+      hunk_content = mHunks[i]->apply();
+      mPatch.apply(image, i, hunk_content);
+  }
+  buffer = mPatch.generateResult(image);
+
   // Add the buffer to the index.
   index.add(mPatch.name(), buffer);
   mSuppressUpdate = false;
