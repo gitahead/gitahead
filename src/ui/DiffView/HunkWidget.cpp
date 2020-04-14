@@ -217,6 +217,7 @@ HunkWidget::HunkWidget(
   mEditor->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   if (index >= 0)
     mEditor->setLineCount(patch.lineCount(index));
+  mEditor->setStatusDiff(diff.isStatusDiff());
 
   connect(mEditor, &TextEditor::updateUi,
           MenuBar::instance(this), &MenuBar::updateCutCopyPaste);
