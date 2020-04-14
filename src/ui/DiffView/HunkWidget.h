@@ -8,6 +8,7 @@
 
 #include "../../editor/TextEditor.h"
 #include "../../git/Patch.h"
+#include "host/Account.h"
 
 #include "git/Diff.h"
 
@@ -15,6 +16,7 @@ class DiffView;
 class Header;
 class QToolButton;
 class DisclosureButton;
+class Line;
 
 namespace _HunkWidget {
     class Header : public QFrame
@@ -108,6 +110,26 @@ public:
    * \param force Set to true to force reloading
    */
   void load(git::Patch &staged, bool force = false);
+  /*!
+   * Determines if the line is staged or not. The result is written into the \p staged variable
+   * \brief findStagedLines
+   * \param lines Lines of the diff patch (staged and unstaged)
+   * \param additions Number of additions until the current line. This variable is increased in this function if it is an addition.
+   * \param lidx Index of the current line
+   * \param offset Line offset between the diff patch and the staged patch, because a patch contains only 3 lines before and after the changes.
+   * \param linesStaged Lines of the staged patch
+   * \param stagedAdditions Number of additions which are staged until current line. This variable is increased in this function if it is staged.
+   * \param staged Determines if the line is staged or not
+   */
+  static void findStagedLines(QList<Line>& lines, int& additions, int lidx, int offset, QList<Line> &linesStaged, int &stagedAdditions, bool &staged);
+  /*!
+   * Determines the line offset between the lines in the patch and the staged Lines
+   * \brief determineLineOffset
+   * \param lines Lines of the diff patch (staged and unstaged)
+   * \param stagedLines Lines of the staged patch
+   * \return
+   */
+  static int determineLineOffset(QList<Line> &lines, QList<Line> &stagedLines);
 
 signals:
   /*!
@@ -145,6 +167,8 @@ private slots:
   void marginClicked(int pos, int modifier, int margin);
 
 private:
+  void createMarkersAndLineNumbers(const Line& line, int lidx, Account::FileComments& comments, int width) const;
+  void findMatchingLines(QList<Line> &lines, int lidx, int count, int& marker, int &countDiffLines, int& additions, int& deletions, bool& staged) const;
   struct Token
   {
     int pos;
