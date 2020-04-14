@@ -22,6 +22,7 @@ macro(test TEST_NAME)
       ENVIRONMENT "PATH=${CMAKE_BINARY_DIR}\;${NEWPATH}"
     )
   endif()
+  message("PATH: " ${CMAKE_BINARY_DIR})
 endmacro()
 
 # Add check target.
@@ -53,3 +54,4 @@ test(log)
 test(main_window)
 test(new_branch_dialog)
 test(sanity)
+test(HunkWidget)
