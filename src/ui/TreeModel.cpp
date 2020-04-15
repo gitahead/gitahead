@@ -193,8 +193,16 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
 }
 
 bool TreeModel::setData(const QModelIndex &index,
-  const QVariant &value,
-  int role, bool ignoreIndexChanges)
+                        const QVariant &value,
+                        int role)
+{
+    setData(index, value, role, false);
+}
+
+bool TreeModel::setData(const QModelIndex &index,
+                        const QVariant &value,
+                        int role,
+                        bool ignoreIndexChanges)
 {
   switch (role) {
     case Qt::CheckStateRole: {
