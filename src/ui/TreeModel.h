@@ -74,6 +74,9 @@ public:
 
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 
+signals:
+  void checkStateChanged(const QModelIndex& index, int state);
+
 private:
   class Node // item of the model
   {

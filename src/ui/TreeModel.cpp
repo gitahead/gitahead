@@ -130,7 +130,7 @@ QVariant TreeModel::data(const QModelIndex &index, int role) const
             break;
 
           case git::Index::PartiallyStaged:
-            //return Qt::PartiallyChecked;
+            return Qt::PartiallyChecked;
           case git::Index::Staged:
             ++count;
             break;
@@ -240,6 +240,7 @@ bool TreeModel::setData(const QModelIndex &index,
 	  // file/folder it self
 	  // emit dataChanged() for folder or file it self
 	  emit dataChanged(index, index, {role});
+      emit checkStateChanged(index, value.toInt());
 
       return true;
     }

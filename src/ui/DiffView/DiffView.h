@@ -99,6 +99,12 @@ public:
 
   QList<TextEditor *> editors() override;
   void ensureVisible(TextEditor *editor, int pos) override;
+  /*!
+   * Enables/disables showing diffs
+   * \brief enable
+   * \param enable
+   */
+  void enable(bool enable);
 
 signals:
   void diagnosticAdded(TextEditor::DiagnosticKind kind);
@@ -127,6 +133,8 @@ private:
 
   QList<PluginRef> mPlugins;
   Account::CommitComments mComments;
+
+  bool mEnabled{true};
 };
 
 #endif

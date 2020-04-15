@@ -218,13 +218,19 @@ bool DiffView::scrollToFile(int index)
   return true;
 }
 
+void DiffView::enable(bool enable)
+{
+    mEnabled = enable;
+    setFilter(QStringList());
+}
+
 void DiffView::setFilter(const QStringList &paths)
 {
   fetchAll();
   QSet<QString> set = QSet<QString>::fromList(paths);
   foreach (QWidget *widget, mFiles) {
     FileWidget *file = static_cast<FileWidget *>(widget);
-    file->setVisible(set.isEmpty() || set.contains(file->name()));
+    file->setVisible(mEnabled && (set.isEmpty() || set.contains(file->name())));
   }
 }
 

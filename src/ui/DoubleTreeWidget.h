@@ -50,6 +50,7 @@ private:
   };
 
   void selectFile(const QString& file);
+  void treeModelStateChanged(const QModelIndex& index, int checkState);
   void fileSelected(const QModelIndex &index);
   void loadEditorContent(const QModelIndex &index);
   void toggleCollapseStagedFiles();

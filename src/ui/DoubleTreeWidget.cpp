@@ -166,6 +166,8 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
         mFileView->setCurrentIndex(idx);
     });
 
+    connect(mTreeModel, &TreeModel::checkStateChanged, this, &DoubleTreeWidget::treeModelStateChanged);
+
     connect(mDiffView, &DiffView::fileStageStateChanged, this, &DoubleTreeWidget::updateTreeModel);
 
 	connect(stagedFiles, &TreeView::fileSelected,
@@ -227,18 +229,38 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff,
 void DoubleTreeWidget::updateTreeModel(git::Index::StagedState state)
 {
     // the selected index must be the file which is visible in the diffView!
-//    QModelIndexList indexes = stagedFiles->selectionModel()->selectedIndexes();
-//    if (!indexes.isEmpty()) {
-//        //----- proxy ------
-//        static_cast<TreeProxy*>(stagedFiles->model())->setData(indexes.first(), state, Qt::CheckStateRole, true);
-//      return;
-//    }
+    QModelIndexList indexes = stagedFiles->selectionModel()->selectedIndexes();
+    if (!indexes.isEmpty()) {
+        static_cast<TreeProxy*>(stagedFiles->model())->setData(indexes.first(), state, Qt::CheckStateRole, true);
+      return;
+    }
 
-//    indexes = unstagedFiles->selectionModel()->selectedIndexes();
-//    if (!indexes.isEmpty()) {
-//      static_cast<TreeProxy*>(unstagedFiles->model())->setData(indexes.first(), state, Qt::CheckStateRole, true);
-//      return;
-//    }
+    indexes = unstagedFiles->selectionModel()->selectedIndexes();
+    if (!indexes.isEmpty()) {
+      static_cast<TreeProxy*>(unstagedFiles->model())->setData(indexes.first(), state, Qt::CheckStateRole, true);
+      return;
+    }
+
+}
+
+void DoubleTreeWidget::treeModelStateChanged(const QModelIndex& index, int checkState) {
+    // when in one of the treeview the state of an item is changed, the item disapears in the one and
+    // appears in the other. Clear the diffview and the blame editor.
+    Qt::CheckState cs = static_cast<Qt::CheckState>(checkState);
+    QModelIndexList stagedSelections = stagedFiles->selectionModel()->selectedIndexes();
+    if (cs == Qt::Checked && !stagedSelections.count()) {
+        mDiffView->enable(false);
+        mEditor->clear();
+        return;
+    }
+
+    QModelIndexList unstagedSelections = stagedFiles->selectionModel()->selectedIndexes();
+    if (cs == Qt::Unchecked && !unstagedSelections.count()) {
+        mDiffView->enable(false);
+        mEditor->clear();
+        return;
+    }
+
 
 }
 
@@ -297,6 +319,7 @@ void DoubleTreeWidget::loadEditorContent(const QModelIndex &index)
   QList<git::Commit> commits = RepoView::parentView(this)->commits();
   git::Commit commit = !commits.isEmpty() ? commits.first() : git::Commit();
   mEditor->load(name, blob, commit);
+  mDiffView->enable(true);
   mDiffView->setFilter(QStringList(name));
 }
 
