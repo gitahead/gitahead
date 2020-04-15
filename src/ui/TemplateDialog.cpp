@@ -148,7 +148,8 @@ void TemplateDialog::removeTemplate()
 
    mSupress = false;
 
-   showTemplate(mTemplateList->currentRow());
+   if (mNew.count())
+    showTemplate(mTemplateList->currentRow());
 }
 
 void TemplateDialog::moveTemplateUp()
