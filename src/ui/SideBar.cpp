@@ -503,6 +503,33 @@ public:
         }
       }
 
+      case Qt::ToolTipRole: {
+        if (!parent.isValid() || mShowFullPath) // makes no sense to show tooltip when path is already shown completely
+            return "";
+
+        switch (parent.row()) {
+          case Repo:
+            if (mTabs->count()) {
+              RepoView *view = static_cast<RepoView *>(mTabs->widget(row));
+              return view->repo().workdir().path();
+            }
+
+            return "";
+
+          case Recent: {
+            RecentRepositories *recent = RecentRepositories::instance();
+            if (recent->count()) {
+              RecentRepository *repo = repos->repository(row);
+              return repo->path();
+            }
+
+            return "";
+          }
+
+          default:
+            return QVariant();
+        }
+      }
       default:
         return QVariant();
     }
