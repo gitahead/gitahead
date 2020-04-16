@@ -77,68 +77,22 @@ private:
 DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
   : ContentWidget(parent)
 {
-	QVBoxLayout* vBoxLayout = new QVBoxLayout();
-	QHBoxLayout* hBoxLayout = new QHBoxLayout();
-	QLabel* label = new QLabel(tr("Staged Files"));
-	hBoxLayout->addWidget(label);
-	stagedFiles = new TreeView(this);
-    mTreeModel = new TreeModel(repo, this);
-	TreeProxy* treewrapperStaged = new TreeProxy(true, this);
-    treewrapperStaged->setSourceModel(mTreeModel);
-	stagedFiles->setModel(treewrapperStaged);
-	stagedFiles->setHeaderHidden(true);
-	stagedFiles->setItemDelegateForColumn(0, new ViewDelegate());
-	vBoxLayout->addLayout(hBoxLayout);
-	hBoxLayout = new QHBoxLayout();
-    collapseButtonStagedFiles = new StatePushButton(kCollapseAll, kExpandAll, this);
-	hBoxLayout->addWidget(collapseButtonStagedFiles);
-	//hBoxLayout->addItem(new QSpacerItem(40,20));
-	vBoxLayout->addLayout(hBoxLayout);
-	vBoxLayout->addWidget(stagedFiles);
-	QWidget* stagedWidget = new QWidget();
-	stagedWidget->setLayout(vBoxLayout);
-
-	vBoxLayout = new QVBoxLayout();
-	hBoxLayout = new QHBoxLayout();
-	label = new QLabel(tr("Unstaged Files"));
-	hBoxLayout->addWidget(label);
-	unstagedFiles = new TreeView(this);
-	TreeProxy* treewrapperUnstaged = new TreeProxy(false, this);
-    treewrapperUnstaged->setSourceModel(mTreeModel);
-	unstagedFiles->setModel(treewrapperUnstaged);
-	unstagedFiles->setHeaderHidden(true);
-	unstagedFiles->setItemDelegateForColumn(0, new ViewDelegate());
-	vBoxLayout->addLayout(hBoxLayout);
-	hBoxLayout = new QHBoxLayout();
-    collapseButtonUnstagedFiles = new StatePushButton(kCollapseAll, kExpandAll, this);
-	hBoxLayout->addWidget(collapseButtonUnstagedFiles);
-	//hBoxLayout->addItem(new QSpacerItem(40,20));
-	vBoxLayout->addWidget(collapseButtonUnstagedFiles);
-	vBoxLayout->addWidget(unstagedFiles);
-	QWidget* unstagedWidget = new QWidget();
-	unstagedWidget->setLayout(vBoxLayout);
-
-    // second column
-	QSplitter *treeViewSplitter = new QSplitter(Qt::Vertical, this);
-	treeViewSplitter->setHandleWidth(10);
-	treeViewSplitter->addWidget(stagedWidget);
-	treeViewSplitter->addWidget(unstagedWidget);
-	treeViewSplitter->setStretchFactor(1, 1);
-
-
-
-    QVBoxLayout* fileViewLayout = new QVBoxLayout();
-    mFileView = new QStackedWidget(this);
-	mEditor = new BlameEditor(repo, this);
-    mDiffView = new DiffView(repo, this);
-    assert(mFileView->addWidget(mEditor) == DoubleTreeWidget::Blame);
-    assert(mFileView->addWidget(mDiffView) == DoubleTreeWidget::Diff);
+    // first column
+        // top (Buttons to switch between Blame editor and DiffView)
     SegmentedButton* segmentedButton = new SegmentedButton(this);
     QPushButton* blameView = new QPushButton("Blame", this);
     segmentedButton->addButton(blameView, "Blame", true);
     blameView->setChecked(true);
     QPushButton* diffView = new QPushButton("Diff", this);
     segmentedButton->addButton(diffView, "Diff", true);
+        // bottom (Stacked widget with Blame editor and DiffView)
+    QVBoxLayout* fileViewLayout = new QVBoxLayout();
+    mFileView = new QStackedWidget(this);
+    mEditor = new BlameEditor(repo, this);
+    mDiffView = new DiffView(repo, this);
+    assert(mFileView->addWidget(mEditor) == DoubleTreeWidget::Blame);
+    assert(mFileView->addWidget(mDiffView) == DoubleTreeWidget::Diff);
+
     const QButtonGroup* viewGroup = segmentedButton->buttonGroup();
     QHBoxLayout* buttonLayout = new QHBoxLayout();
     buttonLayout->addItem(new QSpacerItem(279, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
@@ -152,7 +106,61 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
     QWidget* fileView = new QWidget(this);
     fileView->setLayout(fileViewLayout);
 
+    // second column
+        // staged files
+	QVBoxLayout* vBoxLayout = new QVBoxLayout();
+	QLabel* label = new QLabel(tr("Staged Files"));
+	stagedFiles = new TreeView(this);
+    mTreeModel = new TreeModel(repo, this);
+	TreeProxy* treewrapperStaged = new TreeProxy(true, this);
+    treewrapperStaged->setSourceModel(mTreeModel);
+	stagedFiles->setModel(treewrapperStaged);
+	stagedFiles->setHeaderHidden(true);
+	stagedFiles->setItemDelegateForColumn(0, new ViewDelegate());
 
+    QHBoxLayout* hBoxLayout = new QHBoxLayout();
+    collapseButtonStagedFiles = new StatePushButton(kCollapseAll, kExpandAll, this);
+    hBoxLayout->addWidget(collapseButtonStagedFiles);
+    hBoxLayout->addItem(new QSpacerItem(40,20, QSizePolicy::Expanding, QSizePolicy::Minimum));
+
+    vBoxLayout->addWidget(label);
+    vBoxLayout->addLayout(hBoxLayout);
+    vBoxLayout->addWidget(stagedFiles);
+    QWidget* stagedWidget = new QWidget();
+    stagedWidget->setLayout(vBoxLayout);
+
+
+        // unstaged files
+	vBoxLayout = new QVBoxLayout();
+	label = new QLabel(tr("Unstaged Files"));
+	unstagedFiles = new TreeView(this);
+	TreeProxy* treewrapperUnstaged = new TreeProxy(false, this);
+    treewrapperUnstaged->setSourceModel(mTreeModel);
+	unstagedFiles->setModel(treewrapperUnstaged);
+	unstagedFiles->setHeaderHidden(true);
+	unstagedFiles->setItemDelegateForColumn(0, new ViewDelegate());
+
+    hBoxLayout = new QHBoxLayout();
+    collapseButtonUnstagedFiles = new StatePushButton(kCollapseAll, kExpandAll, this);
+    hBoxLayout->addWidget(collapseButtonUnstagedFiles);
+    hBoxLayout->addItem(new QSpacerItem(40,20, QSizePolicy::Expanding, QSizePolicy::Minimum));
+
+    vBoxLayout->addWidget(label);
+    vBoxLayout->addLayout(hBoxLayout);
+	vBoxLayout->addWidget(unstagedFiles);
+	QWidget* unstagedWidget = new QWidget();
+	unstagedWidget->setLayout(vBoxLayout);
+
+    // splitter between the staged and unstaged section
+	QSplitter *treeViewSplitter = new QSplitter(Qt::Vertical, this);
+	treeViewSplitter->setHandleWidth(10);
+	treeViewSplitter->addWidget(stagedWidget);
+	treeViewSplitter->addWidget(unstagedWidget);
+	treeViewSplitter->setStretchFactor(1, 1);
+
+
+
+    // splitter between editor/diffview and TreeViews
 	QSplitter* splitter = new QSplitter(Qt::Horizontal, this);
 	splitter->setHandleWidth(0);
     splitter->addWidget(fileView);
