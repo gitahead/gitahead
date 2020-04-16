@@ -184,6 +184,9 @@ void TemplateDialog::moveTemplateUp()
 void TemplateDialog::moveTemplateDown()
 {
     QListWidgetItem* curr = mTemplateList->currentItem();
+    if (!curr)
+        return;
+
     QString name = curr->text();
 
     for (int i = 0; i < mNew.count(); i++) {
