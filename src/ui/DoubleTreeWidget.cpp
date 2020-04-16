@@ -28,6 +28,8 @@ namespace {
 
 const QString kNameFmt = "<p style='font-size: large'>%1</p>";
 const QString kLabelFmt = "<p style='color: gray; font-weight: bold'>%1</p>";
+QString kExpandAll = QString(QObject::tr("Expand all"));
+QString kCollapseAll = QString(QObject::tr("Collapse all"));
 
 class SegmentedButton : public QWidget
 {
@@ -88,7 +90,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 	stagedFiles->setItemDelegateForColumn(0, new ViewDelegate());
 	vBoxLayout->addLayout(hBoxLayout);
 	hBoxLayout = new QHBoxLayout();
-	collapseButtonStagedFiles = new StatePushButton("Collapse all", "Expand all", this);
+    collapseButtonStagedFiles = new StatePushButton(kCollapseAll, kExpandAll, this);
 	hBoxLayout->addWidget(collapseButtonStagedFiles);
 	//hBoxLayout->addItem(new QSpacerItem(40,20));
 	vBoxLayout->addLayout(hBoxLayout);
@@ -108,7 +110,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 	unstagedFiles->setItemDelegateForColumn(0, new ViewDelegate());
 	vBoxLayout->addLayout(hBoxLayout);
 	hBoxLayout = new QHBoxLayout();
-	collapseButtonUnstagedFiles = new StatePushButton("Collapse all", "Expand all", this);
+    collapseButtonUnstagedFiles = new StatePushButton(kCollapseAll, kExpandAll, this);
 	hBoxLayout->addWidget(collapseButtonUnstagedFiles);
 	//hBoxLayout->addItem(new QSpacerItem(40,20));
 	vBoxLayout->addWidget(collapseButtonUnstagedFiles);
@@ -116,6 +118,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 	QWidget* unstagedWidget = new QWidget();
 	unstagedWidget->setLayout(vBoxLayout);
 
+    // second column
 	QSplitter *treeViewSplitter = new QSplitter(Qt::Vertical, this);
 	treeViewSplitter->setHandleWidth(10);
 	treeViewSplitter->addWidget(stagedWidget);
