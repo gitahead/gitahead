@@ -310,6 +310,8 @@ public:
   void selectCommit(const git::Commit &commit, const QString &file);
 
   static RepoView *parentView(const QWidget *widget);
+public slots:
+  void diffSelected(const git::Diff diff, const QString &file, bool spontaneous);
 
 signals:
   void statusChanged(bool dirty);
