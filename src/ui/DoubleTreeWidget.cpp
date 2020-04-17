@@ -30,6 +30,7 @@ const QString kNameFmt = "<p style='font-size: large'>%1</p>";
 const QString kLabelFmt = "<p style='color: gray; font-weight: bold'>%1</p>";
 QString kExpandAll = QString(QObject::tr("Expand all"));
 QString kCollapseAll = QString(QObject::tr("Collapse all"));
+QString kUnstagedFiles = QString(QObject::tr("Unstaged Files"));
 
 class SegmentedButton : public QWidget
 {
@@ -126,13 +127,13 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
     vBoxLayout->addWidget(label);
     vBoxLayout->addLayout(hBoxLayout);
     vBoxLayout->addWidget(stagedFiles);
-    QWidget* stagedWidget = new QWidget();
-    stagedWidget->setLayout(vBoxLayout);
+    mStagedWidget = new QWidget();
+    mStagedWidget->setLayout(vBoxLayout);
 
 
         // unstaged files
 	vBoxLayout = new QVBoxLayout();
-	label = new QLabel(tr("Unstaged Files"));
+    mUnstagedCommitedFiles = new QLabel(kUnstagedFiles);
 	unstagedFiles = new TreeView(this);
 	TreeProxy* treewrapperUnstaged = new TreeProxy(false, this);
     treewrapperUnstaged->setSourceModel(mTreeModel);
@@ -145,7 +146,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
     hBoxLayout->addWidget(collapseButtonUnstagedFiles);
     hBoxLayout->addItem(new QSpacerItem(40,20, QSizePolicy::Expanding, QSizePolicy::Minimum));
 
-    vBoxLayout->addWidget(label);
+    vBoxLayout->addWidget(mUnstagedCommitedFiles);
     vBoxLayout->addLayout(hBoxLayout);
 	vBoxLayout->addWidget(unstagedFiles);
 	QWidget* unstagedWidget = new QWidget();
@@ -154,7 +155,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
     // splitter between the staged and unstaged section
 	QSplitter *treeViewSplitter = new QSplitter(Qt::Vertical, this);
 	treeViewSplitter->setHandleWidth(10);
-	treeViewSplitter->addWidget(stagedWidget);
+    treeViewSplitter->addWidget(mStagedWidget);
 	treeViewSplitter->addWidget(unstagedWidget);
 	treeViewSplitter->setStretchFactor(1, 1);
 
@@ -212,18 +213,26 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff,
 		name = indexes.first().data(Qt::EditRole).toString();
 	}
 
-	// Reset model.
-	git::Tree tree = RepoView::parentView(this)->tree();
-	TreeProxy* proxy = static_cast<TreeProxy *>(stagedFiles->model());
-	TreeModel* model = static_cast<TreeModel*>(proxy->sourceModel());
-	model->setTree(tree, diff);
-	stagedFiles->expandAll();
+    // Reset model.
+    git::Tree tree = RepoView::parentView(this)->tree();
+    // because of this, the content in the view is shown.
+    TreeProxy* proxy = static_cast<TreeProxy *>(unstagedFiles->model());
+    TreeModel* model = static_cast<TreeModel*>(proxy->sourceModel());
+    model->setTree(tree, diff);
+    unstagedFiles->expandAll();
 
-	// because of this, the content in the view is shown.
-	proxy = static_cast<TreeProxy *>(unstagedFiles->model());
-	model = static_cast<TreeModel*>(proxy->sourceModel());
-	model->setTree(tree, diff);
-	unstagedFiles->expandAll();
+    if (!diff.isValid() || diff.isStatusDiff()) {
+        mUnstagedCommitedFiles->setText(kUnstagedFiles);
+        proxy = static_cast<TreeProxy *>(stagedFiles->model());
+        model = static_cast<TreeModel*>(proxy->sourceModel());
+        model->setTree(tree, diff);
+        stagedFiles->expandAll();
+        mStagedWidget->setVisible(true);
+
+    } else {
+        mUnstagedCommitedFiles->setText(tr("Committed Files"));
+        mStagedWidget->setVisible(false);
+    }
 
 	// Clear editor.
 	mEditor->clear();

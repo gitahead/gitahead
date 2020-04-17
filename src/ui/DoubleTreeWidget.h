@@ -17,6 +17,7 @@ class TreeView;
 class BlameEditor;
 class StatePushButton;
 class DiffView;
+class QLabel;
 
 // button in treeview: https://stackoverflow.com/questions/40716138/how-to-add-a-button-to-a-qtreeview-row
 
@@ -61,6 +62,12 @@ private:
   TreeView* unstagedFiles{nullptr};
   StatePushButton* collapseButtonStagedFiles{nullptr};
   StatePushButton* collapseButtonUnstagedFiles{nullptr};
+  QLabel* mUnstagedCommitedFiles{nullptr};
+  /*!
+   * needed to set the visibility. When the diff is a commit, no need for
+   * a second TreeView. So the staged one gets hidden.
+   */
+  QWidget* mStagedWidget{nullptr};
   /*!
    * Shows file content
    */
