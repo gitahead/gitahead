@@ -478,8 +478,11 @@ void HunkWidget::paintEvent(QPaintEvent *event)
 void HunkWidget::stageSelected(int startLine, int end) {
      for (int i=startLine; i < end; i++) {
          int mask = mEditor->markers(i);
-         if (mask & (1 << TextEditor::Marker::Addition | 1 << TextEditor::Marker::Deletion))
-            mEditor->markerAdd(i, TextEditor::StagedMarker);
+         if (mask & (1 << TextEditor::Marker::Addition | 1 << TextEditor::Marker::Deletion)) {
+            // stage only when not already staged
+            if ((mask & 1 << TextEditor::Marker::StagedMarker) == 0)
+                mEditor->markerAdd(i, TextEditor::StagedMarker);
+         }
      }
 
      mStagedStateLoaded = false;
