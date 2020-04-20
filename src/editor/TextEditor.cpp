@@ -539,6 +539,9 @@ void TextEditor::loadMarkerIcon(Marker marker, const QIcon &icon)
 void TextEditor::keyPressEvent(QKeyEvent * event) {
     QKeyEvent *ke = static_cast<QKeyEvent *>(event);
     if (ke->key() == Qt::Key_S || ke->key() == Qt::Key_U || ke->key() == Qt::Key_R) {
+        if (!mStatusDiff)
+            return;
+
         int startLine = lineFromPosition(selectionStart());
         int end = lineFromPosition(selectionEnd()) + 1;
         int staged = 0;
