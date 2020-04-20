@@ -679,6 +679,20 @@ void HunkWidget::load(git::Patch &staged, bool force)
   QList<Line> linesStaged;
   QByteArray content;
   QByteArray contentStaged;
+
+  // number of staged hunks must not match the
+  // number of total hunks.
+  int stagedIndex = -1;
+  QByteArray header = mPatch.header(mIndex);
+  if (mStaged.isValid()) {
+      for (int i = 0; i < mStaged.count(); i++) {
+          if (mStaged.header(i) == header) {
+              stagedIndex = i;
+              break;
+          }
+      }
+  }
+
   int patchCount = mPatch.lineCount(mIndex);
   for (int lidx = 0; lidx < patchCount; ++lidx) {
     char origin = mPatch.lineOrigin(mIndex, lidx);
@@ -699,14 +713,14 @@ void HunkWidget::load(git::Patch &staged, bool force)
         content += mPatch.lineContent(mIndex, lidx);
     }
 
-    if (!mStaged.isValid()) {
+    if (!mStaged.isValid() || stagedIndex < 0) {
       // not valid, when not initialized with a patch
       // this occurs, when nothing is staged
       continue;
     }
 
       EOL = false;
-      origin = mStaged.lineOrigin(mIndex, lidx);
+      origin = mStaged.lineOrigin(stagedIndex, lidx);
       if (origin == GIT_DIFF_LINE_CONTEXT_EOFNL ||
           origin == GIT_DIFF_LINE_ADD_EOFNL ||
           origin == GIT_DIFF_LINE_DEL_EOFNL) {
@@ -716,10 +730,10 @@ void HunkWidget::load(git::Patch &staged, bool force)
         EOL = true;
       }
       if (!EOL) {
-          int oldLineStaged = mStaged.lineNumber(mIndex, lidx, git::Diff::OldFile);
-          int newLineStaged = mStaged.lineNumber(mIndex, lidx, git::Diff::NewFile);
+          int oldLineStaged = mStaged.lineNumber(stagedIndex, lidx, git::Diff::OldFile);
+          int newLineStaged = mStaged.lineNumber(stagedIndex, lidx, git::Diff::NewFile);
           linesStaged << Line(origin, oldLineStaged, newLineStaged);
-          contentStaged += mStaged.lineContent(mIndex, lidx);
+          contentStaged += mStaged.lineContent(stagedIndex, lidx);
       }
   }
 
