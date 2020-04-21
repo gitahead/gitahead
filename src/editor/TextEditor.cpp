@@ -416,9 +416,9 @@ void TextEditor::ContextMenu(Scintilla::Point pt) {
         AddToPopUp("Delete", idcmdDelete, writable && !sel.Empty());
         if (mStatusDiff) {
             AddToPopUp("");
-            AddToPopUp("Stage selected", stageSelected, diffLines - staged > 0);
-            AddToPopUp("Unstage selected", unstageSelected, staged > 0);
-            AddToPopUp("Discard selected", discardSelected, diffLines > 0);
+            AddToPopUp("Stage selected\tS", stageSelected, diffLines - staged > 0);
+            AddToPopUp("Unstage selected\tU", unstageSelected, staged > 0);
+            AddToPopUp("Discard selected\tR", discardSelected, diffLines > 0);
         }
         AddToPopUp("");
         AddToPopUp("Select All", idcmdSelectAll);
