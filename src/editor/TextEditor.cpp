@@ -553,8 +553,7 @@ void TextEditor::loadMarkerIcon(Marker marker, const QIcon &icon)
   markerDefineImage(marker, scaledPixmap.toImage());
 }
 
-void TextEditor::keyPressEvent(QKeyEvent * event) {
-    QKeyEvent *ke = static_cast<QKeyEvent *>(event);
+void TextEditor::keyPressEvent(QKeyEvent * ke) {
     if (ke->key() == Qt::Key_S || ke->key() == Qt::Key_U || ke->key() == Qt::Key_R) {
         if (!mStatusDiff)
             return;
