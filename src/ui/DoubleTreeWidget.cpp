@@ -224,9 +224,6 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff,
 
     if (!diff.isValid() || diff.isStatusDiff()) {
         mUnstagedCommitedFiles->setText(kUnstagedFiles);
-        proxy = static_cast<TreeProxy *>(stagedFiles->model());
-        model = static_cast<TreeModel*>(proxy->sourceModel());
-        model->setTree(tree, diff);
         stagedFiles->expandAll();
         mStagedWidget->setVisible(true);
 
@@ -242,9 +239,6 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff,
 
 	// Restore selection.
 	//selectFile(name);
-
-	// Show the tree view.
-	stagedFiles->setVisible(true);
 }
 
 void DoubleTreeWidget::updateTreeModel(git::Index::StagedState state)
@@ -261,7 +255,6 @@ void DoubleTreeWidget::updateTreeModel(git::Index::StagedState state)
       static_cast<TreeProxy*>(unstagedFiles->model())->setData(indexes.first(), state, Qt::CheckStateRole, true);
       return;
     }
-
 }
 
 void DoubleTreeWidget::treeModelStateChanged(const QModelIndex& index, int checkState) {
