@@ -545,10 +545,25 @@ void HunkWidget::stageSelected(int startLine, int end) {
  void HunkWidget::setStaged(bool staged)
  {
      int lineCount = mEditor->lineCount();
+     int count = 0;
      for (int i = 0; i < lineCount; i++) {
        int mask = mEditor->markers(i);
-       if (mask & (1 << TextEditor::Marker::Addition | 1 << TextEditor::Marker::Deletion))
+       if (mask & (1 << TextEditor::Marker::Addition | 1 << TextEditor::Marker::Deletion)) {
          setStaged(i, staged);
+         count++;
+       }
+     }
+     if (count == 0) {
+         // it must be a new file!
+         // TODO: how to check it
+         git::Index::StagedState state;
+         if (!staged)
+             state = git::Index::Unstaged;
+         else
+             state = git::Index::Staged;
+         mStagedStage = state;
+         mStagedStateLoaded = true;
+         emit stageStageChanged(state);
      }
  }
 
