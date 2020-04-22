@@ -170,6 +170,8 @@ private:
   /*!
    * statusDiff Flag which determines if in the contextmenu stage actions are shown or not
    * Because when checking out commits, it should not possible to select these actions.
+   * true: not commited diff.
+   * false: already commited diff.
    */
   bool mStatusDiff{false};
 

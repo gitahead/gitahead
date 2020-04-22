@@ -61,10 +61,9 @@ TextEditor::TextEditor(QWidget *parent)
     setMarginMaskN(i, 0);
   }
 
-  // fixed width, because it indicates only if staged or not
-  setMarginWidthN(Staged, 30);
+
   setMarginMaskN(Staged, 1 << StagedMarker);
-  setMarginSensitiveN(Staged, true); // to change by mouseclick staged/unstaged
+  setStatusDiff(mStatusDiff); // to apply margin width
 
   int mask = 0;
   for (int i = NoteMarker; i <= ErrorMarker; ++i)
@@ -260,6 +259,14 @@ void TextEditor::load(const QString &path, const QString &text)
 void TextEditor::setStatusDiff(bool statusDiff)
 {
     mStatusDiff = statusDiff;
+    if (mStatusDiff) {
+        // fixed width, because it indicates only if staged or not
+        setMarginWidthN(Staged, 30);
+        setMarginSensitiveN(Staged, true); // to change by mouseclick staged/unstaged
+    } else {
+        setMarginWidthN(Staged, 0);
+        setMarginSensitiveN(Staged, false);
+    }
 }
 
 void TextEditor::clearHighlights()
