@@ -43,9 +43,10 @@ void TreeView::setModel(QAbstractItemModel *model)
   QTreeView::setModel(model);
   connect(selectionModel(), &QItemSelectionModel::selectionChanged,
 		  this, &TreeView::handleSelectionChange);
-  connect(this->model(), &QAbstractItemModel::dataChanged, this, &TreeView::updateCollapseCount);
+  connect(model, &QAbstractItemModel::dataChanged, this, QOverload<const QModelIndex &, const QModelIndex&, const QVector<int>&>::of(&TreeView::updateCollapseCount));
   connect(this, &QTreeView::collapsed, this, &TreeView::itemCollapsed);
   connect(this, &QTreeView::expanded, this, &TreeView::itemExpanded);
+  connect(model, &QAbstractItemModel::rowsInserted, this, QOverload<const QModelIndex &, int, int>::of(&TreeView::updateCollapseCount));
 }
 
 bool TreeView::eventFilter(QObject *obj, QEvent *event)
@@ -91,6 +92,7 @@ void TreeView::handleSelectionChange(
 
 void TreeView::setCollapseCount(int value)
 {
+    assert(value >= 0);
     mCollapseCount = value;
     emit collapseCountChanged(mCollapseCount);
 }
@@ -104,6 +106,11 @@ void TreeView::updateCollapseCount(const QModelIndex &topLeft, const QModelIndex
 
     setCollapseCount(countCollapsed());
 
+}
+
+void TreeView::updateCollapseCount(const QModelIndex &parent, int first, int last)
+{
+    setCollapseCount(countCollapsed());
 }
 
 int TreeView::countCollapsed(QModelIndex parent)

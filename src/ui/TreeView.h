@@ -80,6 +80,7 @@ private:
    * \param roles
    */
   void updateCollapseCount(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles = QVector<int>());
+  void updateCollapseCount(const QModelIndex &parent, int first, int last);
   void handleSelectionChange(
     const QItemSelection &selected,
 	const QItemSelection &deselected);
