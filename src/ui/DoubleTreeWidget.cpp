@@ -258,22 +258,18 @@ void DoubleTreeWidget::updateTreeModel(git::Index::StagedState state)
 }
 
 void DoubleTreeWidget::treeModelStateChanged(const QModelIndex& index, int checkState) {
-    // when in one of the treeview the state of an item is changed, the item disapears in the one and
-    // appears in the other. Clear the diffview and the blame editor.
+    // clear editor and disable diffView when no item is selected
     Qt::CheckState cs = static_cast<Qt::CheckState>(checkState);
     QModelIndexList stagedSelections = stagedFiles->selectionModel()->selectedIndexes();
-    if (cs == Qt::Checked && !stagedSelections.count()) {
-        mDiffView->enable(false);
-        mEditor->clear();
+    if (stagedSelections.count())
         return;
-    }
 
-    QModelIndexList unstagedSelections = stagedFiles->selectionModel()->selectedIndexes();
-    if (cs == Qt::Unchecked && !unstagedSelections.count()) {
-        mDiffView->enable(false);
-        mEditor->clear();
+    QModelIndexList unstagedSelections = unstagedFiles->selectionModel()->selectedIndexes();
+    if (unstagedSelections.count())
         return;
-    }
+
+    mDiffView->enable(false);
+    mEditor->clear();
 
 
 }
