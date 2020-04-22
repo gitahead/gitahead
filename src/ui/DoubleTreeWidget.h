@@ -12,6 +12,7 @@
 
 #include "DetailView.h" // ContentWidget
 
+class QTreeView;
 class TreeModel;
 class TreeView;
 class BlameEditor;
@@ -41,8 +42,8 @@ public:
 public slots:
   void updateTreeModel(git::Index::StagedState state);
 
-
-protected:
+private slots:
+  void collapseCountChanged(int count);
 
 private:
   enum View {

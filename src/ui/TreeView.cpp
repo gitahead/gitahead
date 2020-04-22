@@ -1,10 +1,10 @@
 //
-//          Copyright (c) 2016, Scientific Toolworks, Inc.
+//          Copyright (c) 2020
 //
 // This software is licensed under the MIT License. The LICENSE.md file
 // describes the conditions under which this software may be distributed.
 //
-// Author: Jason Haslam
+// Author: Martin Marmsoler
 //
 
 #include "TreeView.h"
@@ -43,6 +43,9 @@ void TreeView::setModel(QAbstractItemModel *model)
   QTreeView::setModel(model);
   connect(selectionModel(), &QItemSelectionModel::selectionChanged,
 		  this, &TreeView::handleSelectionChange);
+  connect(this->model(), &QAbstractItemModel::dataChanged, this, &TreeView::updateCollapseCount);
+  connect(this, &QTreeView::collapsed, this, &TreeView::itemCollapsed);
+  connect(this, &QTreeView::expanded, this, &TreeView::itemExpanded);
 }
 
 bool TreeView::eventFilter(QObject *obj, QEvent *event)
@@ -85,6 +88,71 @@ void TreeView::handleSelectionChange(
       setRootIndex(QModelIndex());
   }
 }
+
+void TreeView::setCollapseCount(int value)
+{
+    mCollapseCount = value;
+    emit collapseCountChanged(mCollapseCount);
+}
+
+void TreeView::updateCollapseCount(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles)
+{
+    assert(topLeft == bottomRight); // makes no sense that they are different here. See also the TreeModel
+
+    if (roles[0] != Qt::CheckStateRole)
+        return;
+
+    setCollapseCount(countCollapsed());
+
+}
+
+int TreeView::countCollapsed(QModelIndex parent)
+{
+    QAbstractItemModel* model = this->model();
+
+    int count = 0;
+    for (int i=0; i < model->rowCount(parent); i++) {
+        QModelIndex idx = model->index(i, 0, parent);
+        if (model->rowCount(idx) && !this->isExpanded(idx))
+            count++;
+        count += countCollapsed(idx);
+    }
+    return count;
+}
+
+void TreeView::expandAll()
+{
+    mSupressItemExpandStateChanged = true;
+    QTreeView::expandAll();
+    mSupressItemExpandStateChanged = false;
+    setCollapseCount(0);
+}
+
+void TreeView::collapseAll()
+{
+    mSupressItemExpandStateChanged = true;
+    QTreeView::collapseAll();
+    mSupressItemExpandStateChanged = false;
+    setCollapseCount(countCollapsed());
+}
+
+void TreeView::itemExpanded(const QModelIndex& index)
+{
+    if (mSupressItemExpandStateChanged)
+        return;
+
+    setCollapseCount(mCollapseCount - 1);
+}
+
+void TreeView::itemCollapsed(const QModelIndex& index)
+{
+    if (mSupressItemExpandStateChanged)
+        return;
+
+    setCollapseCount(mCollapseCount + 1);
+}
+
+
 
 void TreeView::deselectAll() {
 	suppressDeselectionHandling = true;

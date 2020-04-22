@@ -182,11 +182,12 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 
     connect(mDiffView, &DiffView::fileStageStateChanged, this, &DoubleTreeWidget::updateTreeModel);
 
-	connect(stagedFiles, &TreeView::fileSelected,
-			this, &DoubleTreeWidget::fileSelected);
+    connect(stagedFiles, &TreeView::fileSelected, this, &DoubleTreeWidget::fileSelected);
+    connect(stagedFiles, &TreeView::collapseCountChanged, this, &DoubleTreeWidget::collapseCountChanged);
 
-	connect(unstagedFiles, &TreeView::fileSelected,
-			this, &DoubleTreeWidget::fileSelected);
+
+    connect(unstagedFiles, &TreeView::fileSelected, this, &DoubleTreeWidget::fileSelected);
+    connect(unstagedFiles, &TreeView::collapseCountChanged, this, &DoubleTreeWidget::collapseCountChanged);
 
 	connect(collapseButtonStagedFiles, &StatePushButton::clicked, this, &DoubleTreeWidget::toggleCollapseStagedFiles);
 	connect(collapseButtonUnstagedFiles, &StatePushButton::clicked, this, &DoubleTreeWidget::toggleCollapseUnstagedFiles);
@@ -311,6 +312,17 @@ void DoubleTreeWidget::selectFile(const QString &file)
 //  // Scrolling down to an invisible index is also broken.
 }
 
+void DoubleTreeWidget::collapseCountChanged(int count)
+{
+    TreeView* view = static_cast<TreeView*>(QObject::sender());
+
+
+    if (view == stagedFiles)
+      collapseButtonStagedFiles->setState(count == 0);
+    else
+      collapseButtonUnstagedFiles->setState(count == 0);
+}
+
 void DoubleTreeWidget::fileSelected(const QModelIndex &index) {
 
 	if (!index.isValid())
@@ -345,16 +357,16 @@ void DoubleTreeWidget::loadEditorContent(const QModelIndex &index)
 
 void DoubleTreeWidget::toggleCollapseStagedFiles() {
 
-	if (collapseButtonStagedFiles->toggleState())
+    if (collapseButtonStagedFiles->toggleState())
 		stagedFiles->expandAll();
-	else
+    else
 		stagedFiles->collapseAll();
 }
 
 void DoubleTreeWidget::toggleCollapseUnstagedFiles() {
 
-	if (collapseButtonUnstagedFiles->toggleState())
-		unstagedFiles->expandAll();
-	else
+    if (collapseButtonUnstagedFiles->toggleState())
+        unstagedFiles->expandAll();
+    else
 		unstagedFiles->collapseAll();
 }
