@@ -83,9 +83,9 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
     SegmentedButton* segmentedButton = new SegmentedButton(this);
     QPushButton* blameView = new QPushButton("Blame", this);
     segmentedButton->addButton(blameView, "Blame", true);
-    blameView->setChecked(true);
     QPushButton* diffView = new QPushButton("Diff", this);
     segmentedButton->addButton(diffView, "Diff", true);
+    diffView->setChecked(true);
         // bottom (Stacked widget with Blame editor and DiffView)
     QVBoxLayout* fileViewLayout = new QVBoxLayout();
     mFileView = new QStackedWidget(this);
@@ -102,7 +102,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 
     fileViewLayout->addLayout(buttonLayout);
     fileViewLayout->addWidget(mFileView);
-    mFileView->setCurrentIndex(0);
+    mFileView->setCurrentIndex(1);
     mFileView->show();
     QWidget* fileView = new QWidget(this);
     fileView->setLayout(fileViewLayout);
