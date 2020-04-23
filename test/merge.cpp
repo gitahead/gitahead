@@ -11,7 +11,7 @@
 #include "ui/FileList.h"
 #include "ui/MainWindow.h"
 #include "ui/DetailView.h"
-#include "ui/DiffView.h"
+#include "ui/DiffView/DiffView.h"
 #include "ui/RepoView.h"
 #include <QFile>
 #include <QPushButton>
