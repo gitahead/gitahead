@@ -333,14 +333,19 @@ void FileContextMenu::ignoreFile()
 {
   QString ignore;
 
+  if (!mFiles.count())
+      return;
+
   for (int i=0; i < mFiles.count() - 1; i++) {
      ignore.append(mFiles[i] + "\n");
   }
   ignore.append(mFiles.last());
 
  IgnoreDialog d(ignore, this);
- if (d.exec())
-    mView->ignore(ignore);
+ if (d.exec()) {
+    if (!ignore.isEmpty())
+        mView->ignore(ignore);
+ }
 }
 
 void FileContextMenu::addExternalToolsAction(
