@@ -12,7 +12,7 @@
 #include "dialogs/StartDialog.h"
 #include "ui/CommitList.h"
 #include "ui/DetailView.h"
-#include "ui/DiffView.h"
+#include "ui/DiffView/DiffView.h"
 #include "ui/FileList.h"
 #include "ui/Footer.h"
 #include "ui/MainWindow.h"
