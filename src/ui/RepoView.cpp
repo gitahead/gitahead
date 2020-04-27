@@ -330,8 +330,8 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
 
   // large file size warning
   connect(notifier, &git::RepositoryNotifier::largeFileAboutToBeStaged,
-  [this](const QString &file, int size, bool &allow, bool &prompt) {
-    if (!prompt)
+  [this](const QString &file, int size, bool &allow) {
+    if (!Settings::instance()->prompt(Settings::PromptLargeFiles))
       return;
 
     QString title = tr("Stage Large File?");
@@ -356,7 +356,7 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
     dialog.exec();
     allow = (dialog.clickedButton() == stage);
     if (cb->isChecked())
-      prompt = false;
+      Settings::instance()->setPrompt(Settings::PromptLargeFiles, false);
 
     if (dialog.clickedButton() == track)
       configureSettings(ConfigDialog::Lfs);

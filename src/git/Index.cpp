@@ -154,7 +154,6 @@ Index::StagedState Index::isStaged(const QString &path) const
 void Index::setStaged(const QStringList &files, bool staged, bool yieldFocus)
 {
   bool promptDir = true;
-  bool promptSize = true;
   bool dirAdded = false;
   QStringList changedFiles;
   Repository repo(git_index_owner(d->index));
@@ -249,7 +248,7 @@ void Index::setStaged(const QStringList &files, bool staged, bool yieldFocus)
           bool allow = true;
           if (size > 10000000) // 10MB
             emit notifier->largeFileAboutToBeStaged(
-              file, size, allow, promptSize);
+              file, size, allow);
 
           if (!allow)
             continue;

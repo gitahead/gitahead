@@ -313,7 +313,7 @@ signals:
   void directoryAboutToBeStaged(
     const QString &dir, int count, bool &allow, bool &prompt);
   void largeFileAboutToBeStaged(
-    const QString &path, int size, bool &allow, bool &prompt);
+    const QString &path, int size, bool &allow);
   void indexChanged(const QStringList &paths, bool yieldFocus = true);
   void indexStageError(const QString &path);
 
