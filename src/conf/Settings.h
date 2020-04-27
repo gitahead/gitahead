@@ -24,7 +24,8 @@ public:
     PromptStash,
     PromptMerge,
     PromptRevert,
-    PromptCherryPick
+    PromptCherryPick,
+    PromptLargeFiles
   };
 
   QString group() const;

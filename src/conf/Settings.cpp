@@ -209,6 +209,9 @@ QString Settings::promptDescription(PromptKind kind) const
 
     case PromptCherryPick:
       return tr("Prompt to edit commit message before cherry-picking");
+
+    case PromptLargeFiles:
+      return tr("Prompt to stage large files");
   }
 }
 
