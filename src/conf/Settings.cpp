@@ -66,6 +66,10 @@ QString promptKey(Settings::PromptKind kind)
     case Settings::PromptCherryPick:
       key = "cherrypick";
       break;
+
+    case Settings::PromptLargeFiles:
+      key = "largeFiles";
+      break;
   }
 
   return QString("window/prompt/%1").arg(key);
