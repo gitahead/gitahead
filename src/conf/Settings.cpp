@@ -66,6 +66,14 @@ QString promptKey(Settings::PromptKind kind)
     case Settings::PromptCherryPick:
       key = "cherrypick";
       break;
+
+    case Settings::PromptDirectories:
+      key = "directories";
+      break;
+
+    case Settings::PromptLargeFiles:
+      key = "largeFiles";
+      break;
   }
 
   return QString("window/prompt/%1").arg(key);
@@ -209,6 +217,9 @@ QString Settings::promptDescription(PromptKind kind) const
 
     case PromptCherryPick:
       return tr("Prompt to edit commit message before cherry-picking");
+
+    case PromptDirectories:
+      return tr("Prompt to stage directories");
 
     case PromptLargeFiles:
       return tr("Prompt to stage large files");

@@ -494,6 +494,13 @@ public:
       Settings::instance()->setPrompt(Settings::PromptStash, checked);
     });
 
+    QString directoriesText = settings->promptDescription(Settings::PromptDirectories);
+    QCheckBox *directories = new QCheckBox(directoriesText, this);
+    directories->setChecked(settings->prompt(Settings::PromptDirectories));
+    connect(directories, &QCheckBox::toggled, [](bool checked) {
+      Settings::instance()->setPrompt(Settings::PromptDirectories, checked);
+    });
+
     QString largeFilesText = settings->promptDescription(Settings::PromptLargeFiles);
     QCheckBox *largeFiles = new QCheckBox(largeFilesText, this);
     largeFiles->setChecked(settings->prompt(Settings::PromptLargeFiles));
@@ -512,6 +519,7 @@ public:
     layout->addRow(QString(), revert);
     layout->addRow(QString(), cherryPick);
     layout->addRow(QString(), stash);
+    layout->addRow(QString(), directories);
     layout->addRow(QString(), largeFiles);
   }
 };

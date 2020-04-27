@@ -25,6 +25,7 @@ public:
     PromptMerge,
     PromptRevert,
     PromptCherryPick,
+    PromptDirectories,
     PromptLargeFiles
   };
 
