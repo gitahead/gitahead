@@ -153,7 +153,6 @@ Index::StagedState Index::isStaged(const QString &path) const
 
 void Index::setStaged(const QStringList &files, bool staged, bool yieldFocus)
 {
-  bool promptDir = true;
   bool promptSize = true;
   bool dirAdded = false;
   QStringList changedFiles;
@@ -234,7 +233,7 @@ void Index::setStaged(const QStringList &files, bool staged, bool yieldFocus)
           bool allow = true;
           countDirectoryEntries(file, count);
           emit notifier->directoryAboutToBeStaged(
-            file, count, allow, promptDir);
+            file, count, allow);
           bool added = (allow && addDirectory(file));
 
           QDir::setCurrent(current);
