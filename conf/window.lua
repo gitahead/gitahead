@@ -14,6 +14,6 @@ return {
     revert = true,
     cherrypick = true,
     stash = false,
-	directories = true
+    directories = true
   }
 }
