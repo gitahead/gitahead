@@ -13,6 +13,8 @@ return {
     merge = true,
     revert = true,
     cherrypick = true,
-    stash = false
+    stash = false,
+	directories = true,
+	largeFiles = true
   }
 }
