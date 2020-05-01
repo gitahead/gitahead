@@ -73,7 +73,7 @@ const QString kStyleSheet =
   "  padding-left: -4;"
   "  padding-top: -4"
   "}"
-  "DiffView HunkWidget, DiffView .QFrame {"
+  "DiffView FileWidget {"
   "  background-clip: content;"
   "  border-image: url(:/shadow.png) 8 8 8 8;"
   "  border-width: 8;"
@@ -603,7 +603,7 @@ class HunkWidget : public QFrame
   Q_OBJECT
 
 public:
-  class Header : public QWidget
+  class Header : public QFrame
   {
   public:
     Header(
@@ -613,7 +613,7 @@ public:
       bool lfs,
       bool submodule,
       QWidget *parent = nullptr)
-      : QWidget(parent)
+      : QFrame(parent)
     {
       setObjectName("HunkHeader");
       mCheck = new QCheckBox(this);
@@ -792,7 +792,7 @@ public:
     setObjectName("HunkWidget");
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0,0,0,0);
-    layout->setSpacing(4);
+    layout->setSpacing(0);
 
     mHeader = new Header(diff, patch, index, lfs, submodule, this);
     layout->addWidget(mHeader);
@@ -1577,7 +1577,7 @@ private:
   QString mOldName;
 };
 
-class FileWidget : public QWidget
+class FileWidget : public QFrame
 {
   Q_OBJECT
 
@@ -1809,10 +1809,12 @@ public:
     const git::Patch &patch,
     const git::Patch &staged,
     QWidget *parent = nullptr)
-    : QWidget(parent), mView(view), mDiff(diff), mPatch(patch)
+    : QFrame(parent), mView(view), mDiff(diff), mPatch(patch)
   {
     setObjectName("FileWidget");
     QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0,0,0,0);
+    layout->setSpacing(0);
 
     git::Repository repo = RepoView::parentView(this)->repo();
 
