@@ -538,30 +538,30 @@
         <translation>Mensaje de confirmación selectiva</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/CommitDialog.cpp" line="67"/>
+        <location filename="../src/dialogs/CommitDialog.cpp" line="71"/>
         <source>Merge</source>
         <translation>Fusionar</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/CommitDialog.cpp" line="68"/>
-        <location filename="../src/dialogs/CommitDialog.cpp" line="78"/>
-        <location filename="../src/dialogs/CommitDialog.cpp" line="83"/>
+        <location filename="../src/dialogs/CommitDialog.cpp" line="72"/>
+        <location filename="../src/dialogs/CommitDialog.cpp" line="82"/>
+        <location filename="../src/dialogs/CommitDialog.cpp" line="87"/>
         <source>Abort</source>
         <translation>Abortar</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/CommitDialog.cpp" line="72"/>
+        <location filename="../src/dialogs/CommitDialog.cpp" line="76"/>
         <source>Stash</source>
         <translatorcomment>Revisar otros términos para &quot;stash&quot;</translatorcomment>
         <translation>Guardado Rápido</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/CommitDialog.cpp" line="77"/>
+        <location filename="../src/dialogs/CommitDialog.cpp" line="81"/>
         <source>Revert</source>
         <translation>Revertir</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/CommitDialog.cpp" line="82"/>
+        <location filename="../src/dialogs/CommitDialog.cpp" line="86"/>
         <source>Cherry-pick</source>
         <translatorcomment>Revisar otros términos para &quot;Cherry-pick&quot;</translatorcomment>
         <translation>Escoger</translation>
@@ -1063,12 +1063,12 @@
 <context>
     <name>DiffView</name>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="2111"/>
+        <location filename="../src/ui/DiffView.cpp" line="2113"/>
         <source>Add new file</source>
         <translation>Añadir nuevo archivo</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="2125"/>
+        <location filename="../src/ui/DiffView.cpp" line="2127"/>
         <source>Or drag files here to copy into the repository</source>
         <translation>O arrastra archivos aquí para copiarlos al repositorio</translation>
     </message>
@@ -1107,47 +1107,47 @@
 <context>
     <name>EditorPanel</name>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="544"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="560"/>
         <source>Tabs</source>
         <translation>Pestañas</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="545"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="561"/>
         <source>Spaces</source>
         <translation>Espacios</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="566"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="582"/>
         <source>Show heat map</source>
         <translation>Mostrar mapa de calor</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="575"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="591"/>
         <source>Font:</source>
         <translation>Fuente:</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="576"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="592"/>
         <source>Font size:</source>
         <translation>Tamaño de fuente:</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="577"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="593"/>
         <source>Indent using:</source>
         <translation>Indentar usando:</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="578"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="594"/>
         <source>Indent width:</source>
         <translation>Ancho de indentación:</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="579"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="595"/>
         <source>Tab width:</source>
         <translation>Ancho de la tabulación:</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="580"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="596"/>
         <source>Blame margin:</source>
         <translation>Márgen de culpa:</translation>
     </message>
@@ -1479,7 +1479,7 @@
     </message>
     <message>
         <location filename="../src/ui/DiffView.cpp" line="1653"/>
-        <location filename="../src/ui/DiffView.cpp" line="1904"/>
+        <location filename="../src/ui/DiffView.cpp" line="1906"/>
         <source>Show Object</source>
         <translation>Mostrar Objeto</translation>
     </message>
@@ -1561,7 +1561,7 @@
         <translation>Expandir Archivo</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1904"/>
+        <location filename="../src/ui/DiffView.cpp" line="1906"/>
         <source>Show Pointer</source>
         <translation>Mostrar Puntero</translation>
     </message>
@@ -2730,12 +2730,12 @@ Ejemplos
 <context>
     <name>MiscPanel</name>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="641"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="659"/>
         <source>Path to SSH config file:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="642"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="660"/>
         <source>Path to default / fallback SSH key file:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4197,85 +4197,95 @@ Esto revierte la confirmación %2.</translation>
 <context>
     <name>Settings</name>
     <message>
-        <location filename="../src/conf/Settings.cpp" line="202"/>
+        <location filename="../src/conf/Settings.cpp" line="210"/>
         <source>Prompt to edit stash message before stashing</source>
         <translation>Preguntar para editar el mensaje de guardado rápido antes de hacerlo</translation>
     </message>
     <message>
-        <location filename="../src/conf/Settings.cpp" line="205"/>
+        <location filename="../src/conf/Settings.cpp" line="213"/>
         <source>Prompt to edit commit message before merging</source>
         <translation>Preguntar para editar el mensaje de confirmación antes de fusionar</translation>
     </message>
     <message>
-        <location filename="../src/conf/Settings.cpp" line="208"/>
+        <location filename="../src/conf/Settings.cpp" line="216"/>
         <source>Prompt to edit commit message before reverting</source>
         <translation>Preguntar para editar el mensaje de guardado rápido antes de revertir</translation>
     </message>
     <message>
-        <location filename="../src/conf/Settings.cpp" line="211"/>
+        <location filename="../src/conf/Settings.cpp" line="219"/>
         <source>Prompt to edit commit message before cherry-picking</source>
         <translation>Preguntar para editar el mensaje de confirmación antes de escoger</translation>
+    </message>
+    <message>
+        <location filename="../src/conf/Settings.cpp" line="222"/>
+        <source>Prompt to stage directories</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/conf/Settings.cpp" line="225"/>
+        <source>Prompt to stage large files</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>SettingsDialog</name>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="718"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="736"/>
         <source>Esc</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="733"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="751"/>
         <source>Global git settings can be overridden for each repository in the corresponding repository configuration page.</source>
         <translation>La configuración global de git puede ser anulada por cada repositorio en la página de configuración de repositorio correspondiente.</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="752"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="770"/>
         <source>Edit Config File...</source>
         <translation>Editar Archivo de Configuración...</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="780"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="798"/>
         <source>General</source>
         <translation>General</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="788"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="806"/>
         <source>Diff</source>
         <translation>Diferencia</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="796"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="814"/>
         <source>Tools</source>
         <translation>Herramientas</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="806"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="824"/>
         <source>Window</source>
         <translation>Ventana</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="814"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="832"/>
         <source>Editor</source>
         <translation>Editor</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="822"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="840"/>
         <source>Update</source>
         <translation>Actualizar</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="830"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="848"/>
         <source>Plugins</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="838"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="856"/>
         <source>Misc</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="847"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="865"/>
         <source>Terminal</source>
         <translation></translation>
     </message>
@@ -4567,23 +4577,23 @@ Esto revierte la confirmación %2.</translation>
 <context>
     <name>TerminalPanel</name>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="672"/>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="697"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="690"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="715"/>
         <source>Install</source>
         <translation>Instalar</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="685"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="703"/>
         <source>Name:</source>
         <translation>Nombre:</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="686"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="704"/>
         <source>Location:</source>
         <translation>Ubicación:</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="697"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="715"/>
         <source>Uninstall</source>
         <translation>Desinstalar</translation>
     </message>
@@ -4780,22 +4790,22 @@ Esto revierte la confirmación %2.</translation>
 <context>
     <name>UpdatePanel</name>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="595"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="611"/>
         <source>Check for updates automatically</source>
         <translation>Revisar por actualizaciones automáticamente</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="602"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="618"/>
         <source>Automatically download and install updates</source>
         <translation>Descargar e instalar actualizaciones automáticamente</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="609"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="625"/>
         <source>Check Now</source>
         <translation>Revisar Ahora</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="614"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="630"/>
         <source>Software Update:</source>
         <translation>Actualización de Software:</translation>
     </message>
@@ -4955,27 +4965,27 @@ Esto revierte la confirmación %2.</translation>
         <translation>Abrir todos los repositorios en pestañas</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="499"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="513"/>
         <source>Theme:</source>
         <translation>Tema:</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="500"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="514"/>
         <source>Title:</source>
         <translation>Título:</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="501"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="515"/>
         <source>Log:</source>
         <translation>Histórico:</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="502"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="516"/>
         <source>Tabs:</source>
         <translation>Pestañas:</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="504"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="518"/>
         <source>Prompt:</source>
         <translation>Pregunta:</translation>
     </message>

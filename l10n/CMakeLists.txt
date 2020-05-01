@@ -6,6 +6,7 @@ set(LANGUAGES
   de
   en
   es
+  pt_BR
 )
 
 set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)

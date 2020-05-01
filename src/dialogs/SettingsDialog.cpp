@@ -637,6 +637,8 @@ public:
 
 class MiscPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   MiscPanel(QWidget *parent = nullptr)
     : QWidget(parent)
