@@ -494,6 +494,20 @@ public:
       Settings::instance()->setPrompt(Settings::PromptStash, checked);
     });
 
+    QString largeFilesText = settings->promptDescription(Settings::PromptLargeFiles);
+    QCheckBox *largeFiles = new QCheckBox(largeFilesText, this);
+    largeFiles->setChecked(settings->prompt(Settings::PromptLargeFiles));
+    connect(largeFiles, &QCheckBox::toggled, [](bool checked) {
+      Settings::instance()->setPrompt(Settings::PromptLargeFiles, checked);
+    });
+
+    QString directoriesText = settings->promptDescription(Settings::PromptDirectories);
+    QCheckBox *directories = new QCheckBox(directoriesText, this);
+    directories->setChecked(settings->prompt(Settings::PromptDirectories));
+    connect(directories, &QCheckBox::toggled, [](bool checked) {
+      Settings::instance()->setPrompt(Settings::PromptDirectories, checked);
+    });
+
     QFormLayout *layout = new QFormLayout(this);
 
     layout->addRow(tr("Theme:"), comboBox);
@@ -505,6 +519,8 @@ public:
     layout->addRow(QString(), revert);
     layout->addRow(QString(), cherryPick);
     layout->addRow(QString(), stash);
+    layout->addRow(QString(), directories);
+    layout->addRow(QString(), largeFiles);
   }
 };
 

@@ -304,8 +304,8 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   connect(notifier, &git::RepositoryNotifier::directoryStaged,
           this, &RepoView::refresh, Qt::QueuedConnection);
   connect(notifier, &git::RepositoryNotifier::directoryAboutToBeStaged,
-  [this](const QString &dir, int count, bool &allow, bool &prompt) {
-    if (!prompt)
+  [this](const QString &dir, int count, bool &allow) {
+    if (!Settings::instance()->prompt(Settings::PromptDirectories))
       return;
 
     QString title = tr("Stage Directory?");
@@ -325,13 +325,13 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
     dialog.exec();
     allow = (dialog.clickedButton() == button);
     if (cb->isChecked())
-      prompt = false;
+      Settings::instance()->setPrompt(Settings::PromptDirectories, false);
   });
 
   // large file size warning
   connect(notifier, &git::RepositoryNotifier::largeFileAboutToBeStaged,
-  [this](const QString &file, int size, bool &allow, bool &prompt) {
-    if (!prompt)
+  [this](const QString &file, int size, bool &allow) {
+    if (!Settings::instance()->prompt(Settings::PromptLargeFiles))
       return;
 
     QString title = tr("Stage Large File?");
@@ -356,7 +356,7 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
     dialog.exec();
     allow = (dialog.clickedButton() == stage);
     if (cb->isChecked())
-      prompt = false;
+      Settings::instance()->setPrompt(Settings::PromptLargeFiles, false);
 
     if (dialog.clickedButton() == track)
       configureSettings(ConfigDialog::Lfs);
