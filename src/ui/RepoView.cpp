@@ -697,6 +697,11 @@ void RepoView::visitLink(const QString &link)
     return;
   }
 
+  if (action == "squash") {
+    merge(flags | Squash, ref);
+    return;
+  }
+
   if (action == "config") {
     if (query.queryItemValue("global") == "true") {
       SettingsDialog::openSharedInstance();
@@ -1199,6 +1204,8 @@ void RepoView::merge(
   } else if (flags & Rebase) {
     title = tr("Rebase");
     textFmt = tr("%2 on %1");
+  } else if (squashflag) {
+    title = tr("Squash");
   }
 
   QString headName = head.name();
@@ -1503,7 +1510,7 @@ void RepoView::squash(
       if (kind == GIT_ERROR_MERGE && msg.contains("overwritten by merge")) {
         QString text =
           tr("You may be able to rebase by <a href='action:stash'>stashing</a> "
-             "before trying to <a href='action:merge'>merge</a>. Then "
+             "before trying to <a href='action:squash'>squash</a>. Then "
              "<a href='action:unstash'>unstash</a> to restore your changes.");
         err->addEntry(LogEntry::Hint, text);
       }
