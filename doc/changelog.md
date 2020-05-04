@@ -1,3 +1,26 @@
+### v2.6.2 - 2020-05-03
+
+#### Added
+
+* Added Spanish translation. (Gustavo Velasco-Hernandez)
+* Added command line flag (--no-translation) to disable automatic loading of translation files.
+* Added option to create a squash merge (git merge --squash). (Maickonn Richard)
+* Added settings to specify SHH config and key file paths. (Kas)
+* Added settings for prompt to stage directories and large files. (Maickonn Richard)
+
+#### Fixed
+
+* Fixed crash on Fetch All without an open repo. (Maickonn Richard)
+* (Mac) Fixed crash on window close.
+* (Linux) Fixed failure to quit from the menu. (Kas)
+
+#### Changed
+
+* Changed layout of diff view to more clearly group hunks with their file.
+* (Mac) Quit when the last window is closed.
+
+----
+
 ### v2.6.1 - 2019-12-26
 
 #### Fixed
