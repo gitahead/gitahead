@@ -2,15 +2,15 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="pt_BR">
 <context>
-    <name>AboutDialog</name>
+    <name>Sobre o diálago</name>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="68"/>
-        <source>About %1</source>
+        <source>Sobre %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="76"/>
-        <source>Understand your history!</source>
+        <source>Entenda sua história!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -20,22 +20,22 @@
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="97"/>
-        <source>Acknowledgments</source>
+        <source>Agradecimentos</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="98"/>
-        <source>Privacy</source>
+        <source>Privacidade</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="109"/>
-        <source>Usage reporting has been disabled. Restart the application for changes to take effect.</source>
+        <source>Os relatórios de uso foram desativados. Reinicie o aplicativo para que as alterações entrem em vigor.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="111"/>
-        <source>Usage Reporting Disabled</source>
+        <source>Relatório de uso desativado</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -43,7 +43,7 @@
     <name>Account</name>
     <message>
         <location filename="../src/host/Account.cpp" line="181"/>
-        <source>&lt;b&gt;Note:&lt;/b&gt; Basic authentication is not supported if you have two-factor authentication enabled. Use a &lt;a href=&apos;https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/&apos;&gt;personal access token&lt;/a&gt; in the password field instead.</source>
+        <source>&lt;b&gt;Note:&lt;/b&gt; A autenticação básica não é suportada se você tiver a autenticação de dois fatores ativada. Use um &lt;a href=&apos;https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/&apos;&gt;personal access token&lt;/a&gt; no campo de senha.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
