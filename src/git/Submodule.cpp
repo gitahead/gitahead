@@ -121,6 +121,43 @@ int Submodule::status() const
   return status;
 }
 
+Result Submodule::reset(Remote::Callbacks *callbacks,
+                      git_reset_t type) const
+{
+    git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+    opts.checkout_strategy |= GIT_CHECKOUT_DISABLE_PATHSPEC_MATCH;
+
+    git_repository *repo;
+    if (git_submodule_open(&repo, d.data()) < 0) {
+        // TODO: how to show message?
+        // problem
+        return -1;
+    }
+
+    git_reference* ref;
+    git_repository_head(&ref, repo);
+
+    /* Look up the target commit in the submodule. */
+    git_object* commit = nullptr;
+    int error;
+    error = git_object_lookup(&commit, repo, git_reference_target(ref), GIT_OBJECT_COMMIT);
+    git_reference_free(ref);
+    if (error < 0) {
+        // if an error occurs commit must not be freed
+        // TODO: how to show message?
+        return !error;
+    }
+
+    // for debugging
+    //const git_signature * signature = git_commit_author(reinterpret_cast<const git_commit*>(commit));
+
+
+    error = git_reset(repo, commit, type, &opts);
+
+    git_object_free(commit);
+    return !error;
+}
+
 Result Submodule::update(Remote::Callbacks *callbacks, bool init)
 {
   git_submodule_update_options opts = GIT_SUBMODULE_UPDATE_OPTIONS_INIT;

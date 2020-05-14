@@ -2227,6 +2227,136 @@ void RepoView::reset(
 
   if (!commit.reset(type))
     error(entry, commitToAmend ? tr("amend") : tr("reset"), head.name());
+
+  resetSubmodules(mRepo.submodules(), true, type, entry);
+
+
+}
+
+void RepoView::resetSubmodules(const QList<git::Submodule> &submodules,
+                               bool recursive,
+                               git_reset_t type,
+                               LogEntry *parent)
+{
+    if (mWatcher) {
+      // Queue update. synchrone
+      connect(mWatcher, &QFutureWatcher<git::Result>::finished, mWatcher,
+      [this, submodules, recursive, type, parent] {
+        resetSubmodules(submodules, recursive, type, parent);
+      });
+
+      return;
+    }
+
+    QList<git::Submodule> modules =
+      !submodules.isEmpty() ? submodules : mRepo.submodules();
+    if (modules.isEmpty())
+      return;
+
+    // Start updating asynchronously.
+    QList<SubmoduleInfo> infos = submoduleResetInfoList(mRepo, modules, parent);
+    resetSubmodulesAsync(infos, recursive, type);
+}
+
+/*!
+ * \brief RepoView::resetSubmodulesAsync
+ *
+ * \param submodules
+ * \param recursive
+ * \param type
+ * \param parent
+ */
+void RepoView::resetSubmodulesAsync(const QList<SubmoduleInfo> &submodules, bool recursive, git_reset_t type)
+{
+    if (submodules.isEmpty()) {
+      refresh();
+      return;
+    }
+
+    // Remove first submodule from the list.
+    QList<SubmoduleInfo> tail = submodules;
+    SubmoduleInfo info = tail.takeFirst();
+    git::Submodule submodule = info.submodule;
+    LogEntry *entry = info.entry->addEntry(submodule.name(), tr("Reset"));
+
+    mWatcher = new QFutureWatcher<git::Result>(this);
+    connect(mWatcher, &QFutureWatcher<git::Result>::finished, mWatcher,
+    [this, recursive, tail, type, info, entry] {
+      entry->setBusy(false);
+
+      git::Result result = mWatcher->result();
+      if (mCallbacks->isCanceled()) {
+        entry->addEntry(LogEntry::Error, tr("Reset canceled."));
+      } else if (!result) {
+        QString name = info.submodule.name();
+        error(entry, tr("update submodule"), name, result.errorString());
+      } else {
+        mCallbacks->storeDeferredCredentials();
+      }
+
+      mWatcher->deleteLater();
+      mWatcher = nullptr;
+      mCallbacks = nullptr;
+
+      // Build list of submodules recursively.
+      QList<SubmoduleInfo> prefix;
+      if (recursive) {
+        if (git::Repository repo = info.submodule.open()) {
+          QList<git::Submodule> submodules = repo.submodules();
+          if (!submodules.isEmpty())
+            prefix = submoduleResetInfoList(repo, submodules, entry);
+        }
+      }
+
+      // Restart with smaller list.
+      resetSubmodulesAsync(prefix + tail, recursive, type);
+    });
+
+    QString url = submodule.url();
+    git::Repository repo = submodule.open();
+    mCallbacks = new RemoteCallbacks(
+      RemoteCallbacks::Receive, entry, url, QString(), mWatcher, repo);
+
+    entry->setBusy(true);
+    mWatcher->setFuture(QtConcurrent::run(
+      submodule, &git::Submodule::reset, mCallbacks, type));
+}
+
+/*!
+ * \brief RepoView::submoduleResetInfoList
+ * Return a list of Submodules which should be resetted
+ * Additionally create the log message
+ * \param repo
+ * \param submodules
+ * \param init
+ * \param parent
+ * \return
+ */
+QList<RepoView::SubmoduleInfo> RepoView::submoduleResetInfoList(
+  const git::Repository &repo,
+  const QList<git::Submodule> &submodules,
+  LogEntry *parent)
+{
+  // Only reset modified submodules
+  QList<git::Submodule> modules;
+  foreach (const git::Submodule &submodule, submodules) {
+    int status = submodule.status();
+
+    if (status & (GIT_SUBMODULE_STATUS_WD_WD_MODIFIED | GIT_SUBMODULE_STATUS_WD_INDEX_MODIFIED))
+        modules.append(submodule);
+  }
+
+  QString text =
+    tr("%1 of %2 submodules").arg(modules.size()).arg(submodules.size());
+  LogEntry *entry = addLogEntry(text, tr("Reset"), parent);
+
+  if (modules.isEmpty())
+    entry->addEntry(tr("Untouched"));
+
+  QList<SubmoduleInfo> list;
+  foreach (const git::Submodule &module, modules)
+    list.append({module, repo, entry});
+  return list;
 }
 
 void RepoView::updateSubmodules(
@@ -2236,7 +2366,7 @@ void RepoView::updateSubmodules(
   LogEntry *parent)
 {
   if (mWatcher) {
-    // Queue update.
+    // Queue update. synchrone
     connect(mWatcher, &QFutureWatcher<git::Result>::finished, mWatcher,
     [this, submodules, recursive, init, parent] {
       updateSubmodules(submodules, recursive, init, parent);
@@ -2251,11 +2381,21 @@ void RepoView::updateSubmodules(
     return;
 
   // Start updating asynchronously.
-  QList<SubmoduleInfo> infos = submoduleInfoList(mRepo, modules, init, parent);
+  QList<SubmoduleInfo> infos = submoduleUpdateInfoList(mRepo, modules, init, parent);
   updateSubmodulesAsync(infos, recursive, init);
 }
 
-QList<RepoView::SubmoduleInfo> RepoView::submoduleInfoList(
+/*!
+ * \brief RepoView::submoduleUpdateInfoList
+ * Return a list of Submodules which should be updated
+ * Additionally create the log message
+ * \param repo
+ * \param submodules
+ * \param init
+ * \param parent
+ * \return
+ */
+QList<RepoView::SubmoduleInfo> RepoView::submoduleUpdateInfoList(
   const git::Repository &repo,
   const QList<git::Submodule> &submodules,
   bool init,
@@ -2328,7 +2468,7 @@ void RepoView::updateSubmodulesAsync(
       if (git::Repository repo = info.submodule.open()) {
         QList<git::Submodule> submodules = repo.submodules();
         if (!submodules.isEmpty())
-          prefix = submoduleInfoList(repo, submodules, init, entry);
+          prefix = submoduleUpdateInfoList(repo, submodules, init, entry);
       }
     }
 
