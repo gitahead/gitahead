@@ -2253,9 +2253,11 @@ void RepoView::resetSubmodules(const QList<git::Submodule> &submodules,
     if (modules.isEmpty())
       return;
 
-    // Start updating asynchronously.
-    QList<SubmoduleInfo> infos = submoduleResetInfoList(mRepo, modules, parent);
-    resetSubmodulesAsync(infos, recursive, type);
+    if (type == GIT_RESET_HARD) {
+        // Start updating asynchronously.
+        QList<SubmoduleInfo> infos = submoduleResetInfoList(mRepo, modules, parent);
+        resetSubmodulesAsync(infos, recursive, type);
+    }
 }
 
 /*!
