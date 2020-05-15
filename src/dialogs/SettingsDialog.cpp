@@ -202,7 +202,7 @@ public:
 
     mPushCommit->setChecked(settings->value("autopush/enable").toBool());
     mPullUpdate->setChecked(settings->value("autoupdate/enable").toBool());
-    mPullUpdate->setChecked(settings->value("autoprune/enable").toBool());
+    mAutoPrune->setChecked(settings->value("autoprune/enable").toBool());
     settings->endGroup();
 
     mStoreCredentials->setChecked(settings->value("credential/store").toBool());
