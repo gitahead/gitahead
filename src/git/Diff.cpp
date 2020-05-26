@@ -130,9 +130,13 @@ void Diff::merge(const Diff &diff)
   d->resetMap();
 }
 
-void Diff::findSimilar()
+void Diff::findSimilar(bool untracked)
 {
-  git_diff_find_similar(d->diff, nullptr);
+  git_diff_find_options opts = GIT_DIFF_FIND_OPTIONS_INIT;
+  if (untracked)
+    opts.flags = GIT_DIFF_FIND_FOR_UNTRACKED;
+
+  git_diff_find_similar(d->diff, &opts);
   d->resetMap();
 }
 

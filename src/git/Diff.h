@@ -73,7 +73,7 @@ public:
   void merge(const Diff &diff);
 
   // Detect renames, copies, etc. This is expensive.
-  void findSimilar();
+  void findSimilar(bool untracked = false);
 
   void sort(SortRole role, Qt::SortOrder order = Qt::AscendingOrder);
 
