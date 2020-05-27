@@ -1,60 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="pt_BR">
+<TS version="2.1" language="pt_BR" sourcelanguage="en_US">
 <context>
-    <name>Sobre o diálago</name>
+    <name>AboutDialog</name>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="68"/>
-        <source>Sobre %1</source>
-        <translation type="unfinished"></translation>
+        <source>About %1</source>
+        <translation>Sobre %1</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="76"/>
-        <source>Entenda sua história!</source>
-        <translation type="unfinished"></translation>
+        <source>Understand your history!</source>
+        <translation>Entenda sua história!</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="96"/>
         <source>Changelog</source>
-        <translation type="unfinished"></translation>
+        <translation>Log de alterações</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="97"/>
-        <source>Agradecimentos</source>
-        <translation type="unfinished"></translation>
+        <source>Acknowledgments</source>
+        <translation>Agradecimentos</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="98"/>
-        <source>Privacidade</source>
-        <translation type="unfinished"></translation>
+        <source>Privacy</source>
+        <translation>Privacidade</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="109"/>
-        <source>Os relatórios de uso foram desativados. Reinicie o aplicativo para que as alterações entrem em vigor.</source>
-        <translation type="unfinished"></translation>
+        <source>Usage reporting has been disabled. Restart the application for changes to take effect.</source>
+        <translation>Os relatórios de uso foram desativados. Reinicie o aplicativo para que as alterações entrem em vigor.</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="111"/>
-        <source>Relatório de uso desativado</source>
-        <translation type="unfinished"></translation>
+        <source>Usage Reporting Disabled</source>
+        <translation>Relatório de uso desativado</translation>
     </message>
 </context>
 <context>
     <name>Account</name>
     <message>
         <location filename="../src/host/Account.cpp" line="181"/>
-        <source>&lt;b&gt;Note:&lt;/b&gt; A autenticação básica não é suportada se você tiver a autenticação de dois fatores ativada. Use um &lt;a href=&apos;https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/&apos;&gt;personal access token&lt;/a&gt; no campo de senha.</source>
-        <translation type="unfinished"></translation>
+        <source>&lt;b&gt;Note:&lt;/b&gt; Basic authentication is not supported if you have two-factor authentication enabled. Use a &lt;a href=&apos;https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/&apos;&gt;personal access token&lt;/a&gt; in the password field instead.</source>
+        <translation>&lt;b&gt;Nota:&lt;/b&gt; A autenticação básica não é suportada se você tiver a autenticação de dois fatores ativada. Use um &lt;a href=&apos;https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/&apos;&gt;token de acesso pessoal&lt;/a&gt; no campo de senha.</translation>
     </message>
     <message>
         <location filename="../src/host/Account.cpp" line="188"/>
         <source>&lt;b&gt;Note:&lt;/b&gt; Basic authentication is not supported. Use a &lt;a href=&apos;https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html&apos;&gt;personal access token&lt;/a&gt; in the password field instead.</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;b&gt;Nota:&lt;/b&gt; A autenticação básica não é suportada. Use um &lt;a href=&apos;https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html&apos;&gt;token de acesso pessoal&lt;/a&gt; no campo de senha.</translation>
     </message>
     <message>
         <location filename="../src/host/Account.cpp" line="233"/>
         <source>Authentication failed</source>
-        <translation type="unfinished"></translation>
+        <translation>Falha na autenticação</translation>
     </message>
 </context>
 <context>
@@ -62,62 +62,62 @@
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="23"/>
         <source>Add Remote Account</source>
-        <translation type="unfinished"></translation>
+        <translation>Add Conta Remota</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="64"/>
         <source>Host:</source>
-        <translation type="unfinished"></translation>
+        <translation>Host:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="65"/>
         <source>Username:</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome do usuário:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="66"/>
         <source>Password:</source>
-        <translation type="unfinished"></translation>
+        <translation>Senha:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="68"/>
         <source>Advanced:</source>
-        <translation type="unfinished"></translation>
+        <translation>Avançado:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="83"/>
         <source>URL:</source>
-        <translation type="unfinished"></translation>
+        <translation>URL:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="116"/>
         <source>Replace?</source>
-        <translation type="unfinished"></translation>
+        <translation>Substituir?</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="117"/>
         <source>An account of this type already exists.</source>
-        <translation type="unfinished"></translation>
+        <translation>Uma conta desse tipo já existe.</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="118"/>
         <source>Would you like to replace the previous account?</source>
-        <translation type="unfinished"></translation>
+        <translation>Deseja substituir a conta anterior?</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="120"/>
         <source>Replace</source>
-        <translation type="unfinished"></translation>
+        <translation>Substituir</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="121"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelar</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="137"/>
         <source>Connection Failed</source>
-        <translation type="unfinished"></translation>
+        <translation>Falha na conexão</translation>
     </message>
 </context>
 <context>
