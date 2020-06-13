@@ -387,17 +387,17 @@
     <message>
         <location filename="../src/dialogs/BranchTableModel.cpp" line="84"/>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome</translation>
     </message>
     <message>
         <location filename="../src/dialogs/BranchTableModel.cpp" line="85"/>
         <source>Upstream</source>
-        <translation type="unfinished"></translation>
+        <translation>Upstream</translation>
     </message>
     <message>
         <location filename="../src/dialogs/BranchTableModel.cpp" line="86"/>
         <source>Rebase</source>
-        <translation type="unfinished"></translation>
+        <translation>Rebase</translation>
     </message>
 </context>
 <context>
@@ -405,17 +405,18 @@
     <message>
         <location filename="../src/dialogs/CheckoutDialog.cpp" line="31"/>
         <source>Detach HEAD</source>
-        <translation type="unfinished"></translation>
+        <translation>Separar HEAD</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CheckoutDialog.cpp" line="40"/>
         <source>References:</source>
-        <translation type="unfinished"></translation>
+        <translation>Referências:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CheckoutDialog.cpp" line="45"/>
         <source>Checkout</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Verifica branch pai e atualiza o branch local.</translatorcomment>
+        <translation>Checkout</translation>
     </message>
 </context>
 <context>
@@ -423,7 +424,7 @@
     <message>
         <location filename="../src/ui/SearchField.cpp" line="81"/>
         <source>Clear</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpar</translation>
     </message>
 </context>
 <context>
