@@ -9,6 +9,7 @@
 
 #include "ExpandButton.h"
 #include <QPainter>
+#include <QPainterPath>
 
 ExpandButton::ExpandButton(QWidget *parent)
   : QToolButton(parent)

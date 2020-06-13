@@ -22,6 +22,7 @@
 #include <QApplication>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QPainterPath>
 #include <QSettings>
 #include <QStyledItemDelegate>
 #include <QWindow>
@@ -215,7 +216,7 @@ FileList::FileList(const git::Repository &repo, QWidget *parent)
 {
   Theme *theme = Application::theme();
   setPalette(theme->fileList());
-  
+
   setAlternatingRowColors(true);
   setFrameShape(QFrame::NoFrame);
   setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -436,7 +437,7 @@ void FileList::updateMenu(const git::Diff &diff)
   QSet<git_delta_t> kinds;
   for (int i = 0; i < diff.count(); ++i)
     kinds.insert(diff.status(i));
-  foreach (git_delta_t kind, kinds) {    
+  foreach (git_delta_t kind, kinds) {
     QString name;
     switch (kind) {
       case GIT_DELTA_ADDED:      name = tr("Added");       break;
@@ -462,7 +463,7 @@ void FileList::updateMenu(const git::Diff &diff)
       }
 
       selectionModel()->select(selection, QItemSelectionModel::ClearAndSelect);
-    }); 
+    });
   }
 
   // ignore whitespace

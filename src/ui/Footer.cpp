@@ -11,6 +11,7 @@
 #include <QHBoxLayout>
 #include <QMenu>
 #include <QPainter>
+#include <QPainterPath>
 #include <QPaintEvent>
 #include <QPen>
 #include <QStyleOption>
