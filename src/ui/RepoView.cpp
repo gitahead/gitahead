@@ -41,6 +41,7 @@
 #include "index/Index.h"
 #include "log/LogEntry.h"
 #include "log/LogView.h"
+#include "tools/ShowTool.h"
 #include "watcher/RepositoryWatcher.h"
 #include <QCheckBox>
 #include <QCloseEvent>
@@ -2377,25 +2378,7 @@ ConfigDialog *RepoView::configureSettings(ConfigDialog::Index index)
 
 void RepoView::openFileManager()
 {
-  QString fileManagerCmd = Settings::instance()->value("filemanager/command").toString();
-  QString arg = QDir::toNativeSeparators(mRepo.workdir().absolutePath());
-
-  if (fileManagerCmd.isEmpty()) {
-#if defined(Q_OS_WIN)
-    fileManagerCmd = "explorer \"%1\"";
-    arg = arg.replace("\"", "\"\"");
-
-#elif defined(Q_OS_MACOS)
-    fileManagerCmd = "open \"%1\"";
-    arg = arg.replace("\"", "\\\"");
-
-#elif defined(Q_OS_UNIX)
-    fileManagerCmd = "xdg-open \"%1\"";
-    arg = arg.replace("\"", "\\\"");
-#endif
-  }
-
-  QProcess::startDetached(fileManagerCmd.arg(arg));
+  ShowTool::openFileManager(mRepo.workdir().absolutePath());
 }
 
 void RepoView::ignore(const QString &name)
