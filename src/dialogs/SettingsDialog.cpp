@@ -115,6 +115,7 @@ public:
     mPushCommit = new QCheckBox(tr("Push after each commit"), this);
     mPullUpdate = new QCheckBox(tr("Update submodules after pull"), this);
     mAutoPrune = new QCheckBox(tr("Prune when fetching"), this);
+    mNoTranslation = new QCheckBox(tr("No translation"), this);
 
     mStoreCredentials = new QCheckBox(
       tr("Store credentials in secure storage"), this);
@@ -133,6 +134,7 @@ public:
     form->addRow(QString(), mPushCommit);
     form->addRow(QString(), mPullUpdate);
     form->addRow(QString(), mAutoPrune);
+    form->addRow(tr("Language:"), mNoTranslation);
     form->addRow(tr("Credentials:"), mStoreCredentials);
     form->addRow(tr("Usage reporting:"), mUsageReporting);
     form->addRow(QString(), privacy);
@@ -177,6 +179,10 @@ public:
       Settings::instance()->setValue("global/autoprune/enable", checked);
     });
 
+    connect(mNoTranslation, &QCheckBox::toggled, [](bool checked) {
+      Settings::instance()->setValue("translation/disable", checked);
+    });
+
     connect(mStoreCredentials, &QCheckBox::toggled, [](bool checked) {
       Settings::instance()->setValue("credential/store", checked);
       delete CredentialHelper::instance();
@@ -205,6 +211,7 @@ public:
     mAutoPrune->setChecked(settings->value("autoprune/enable").toBool());
     settings->endGroup();
 
+    mNoTranslation->setChecked(settings->value("translation/disable").toBool());
     mStoreCredentials->setChecked(settings->value("credential/store").toBool());
     mUsageReporting->setChecked(settings->value("tracking/enabled").toBool());
   }
@@ -218,6 +225,7 @@ private:
   QCheckBox *mPushCommit;
   QCheckBox *mPullUpdate;
   QCheckBox *mAutoPrune;
+  QCheckBox *mNoTranslation;
   QCheckBox *mStoreCredentials;
   QCheckBox *mUsageReporting;
 };

@@ -158,7 +158,10 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   setStyle(mTheme->style());
   setStyleSheet(mTheme->styleSheet());
 
-  if (!parser.isSet("no-translation")) {
+  // Read translation settings
+  QSettings settings;
+  if ((!settings.value("translation/disable", false).toBool()) &&
+      (!parser.isSet("no-translation"))) {
     // Load translation files.
     QLocale locale;
     QDir l10n = Settings::l10nDir();
@@ -227,7 +230,6 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   });
 
   // Read tracking settings.
-  QSettings settings;
   settings.beginGroup("tracking");
   QByteArray tid(GITAHEAD_TRACKING_ID);
   if (!tid.isEmpty() && settings.value("enabled", true).toBool()) {
