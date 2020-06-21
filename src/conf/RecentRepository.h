@@ -26,6 +26,7 @@ private:
   void increment();
 
   QString mPath;
+  QString mAlias;
   int mSections = 1;
 
   friend class RecentRepositories;

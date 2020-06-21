@@ -79,6 +79,7 @@ public:
   GeneralPanel(RepoView *view, QWidget *parent = nullptr)
     : QWidget(parent), mRepo(view->repo())
   {
+    mAlias = new QLineEdit(this);
     mName = new QLineEdit(this);
     mEmail = new QLineEdit(this);
 
@@ -98,6 +99,7 @@ public:
     mAutoPrune = new QCheckBox(tr("Prune when fetching"), this);
 
     QFormLayout *form = new QFormLayout(this);
+    form->addRow(tr("Repository alias:"), mAlias);
     form->addRow(tr("User name:"), mName);
     form->addRow(tr("User email:"), mEmail);
     form->addRow(tr("Automatic actions:"), fetchLayout);
@@ -108,6 +110,10 @@ public:
     init();
 
     // Connect signals after initializing fields.
+    connect(mAlias, &QLineEdit::textChanged, [this](const QString &text) {
+      mRepo.config().setValue("repository.alias", text);
+    });
+
     connect(mName, &QLineEdit::textChanged, [this](const QString &text) {
       mRepo.config().setValue("user.name", text);
     });
@@ -143,6 +149,7 @@ public:
   void init()
   {
     git::Config config = mRepo.config();
+    mAlias->setText(config.value<QString>("repository.alias"));
     mName->setText(config.value<QString>("user.name"));
     mEmail->setText(config.value<QString>("user.email"));
 
@@ -169,6 +176,7 @@ public:
 
 private:
   git::Repository mRepo;
+  QLineEdit *mAlias;
   QLineEdit *mName;
   QLineEdit *mEmail;
 

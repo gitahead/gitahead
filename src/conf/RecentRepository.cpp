@@ -8,10 +8,20 @@
 //
 
 #include "RecentRepository.h"
+#include "git/Repository.h"
+#include "git/Config.h"
 
 RecentRepository::RecentRepository(const QString &path, QObject *parent)
   : QObject(parent), mPath(path)
-{}
+{
+  git::Repository repo = git::Repository::open(mPath, false);
+  // Lookup [repository] alias =
+  if (repo.isValid()) {
+    mAlias = repo.config().value<QString>("repository.alias");
+  } else {
+    mAlias.clear();
+  }
+}
 
 QString RecentRepository::path() const
 {
@@ -20,10 +30,17 @@ QString RecentRepository::path() const
 
 QString RecentRepository::name() const
 {
+  if (!mAlias.isEmpty())
+    return mAlias;
+
   return mPath.section('/', -mSections);
 }
 
 void RecentRepository::increment()
 {
-  ++mSections;
+  if (mAlias.isEmpty()) {
+    ++mSections;
+  } else {
+    mAlias.clear();
+  }
 }
