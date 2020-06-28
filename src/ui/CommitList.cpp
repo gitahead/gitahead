@@ -1485,12 +1485,35 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
       menu.addSeparator();
 
       menu.addAction(tr("Add Tag..."), [view, commit] {
-        view->promptToTag(commit);
+        view->promptToAddTag(commit);
       });
 
       menu.addAction(tr("New Branch..."), [view, commit] {
         view->promptToCreateBranch(commit);
       });
+
+      bool separator = true;
+      foreach (const git::Reference &ref, commit.refs()) {
+        if (ref.isTag()) {
+          if (separator) {
+            menu.addSeparator();
+            separator = false;
+          }
+          menu.addAction(tr("Delete tag %1").arg(ref.name()), [view, ref] {
+            view->promptToDeleteTag(ref);
+          });
+        }
+        if (ref.isLocalBranch() &&
+           (view->repo().head().name() != ref.name())) {
+          if (separator) {
+            menu.addSeparator();
+            separator = false;
+          }
+          menu.addAction(tr("Delete branch %1").arg(ref.name()), [view, ref] {
+            view->promptToDeleteBranch(ref);
+          });
+        }
+      }
 
       menu.addSeparator();
 
