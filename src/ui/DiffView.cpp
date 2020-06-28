@@ -613,6 +613,7 @@ public:
       int index,
       bool lfs,
       bool submodule,
+      bool filemode,
       QWidget *parent = nullptr)
       : QFrame(parent)
     {
@@ -621,9 +622,9 @@ public:
 
       QString header = (index >= 0) ? patch.header(index) : QString();
       QString escaped = header.trimmed().toHtmlEscaped();
-      QLabel *label = new QLabel(kHunkFmt.arg(escaped), this);
+      mLabel = new QLabel(kHunkFmt.arg(escaped), this);
 
-      if (patch.isConflicted()) {
+      if (patch.isConflicted() && !filemode) {
         mSave = new QToolButton(this);
         mSave->setObjectName("ConflictSave");
         mSave->setText(HunkWidget::tr("Save"));
@@ -666,7 +667,7 @@ public:
 
       // Add discard button.
       DiscardButton *discard = nullptr;
-      if (diff.isStatusDiff() && !submodule && !patch.isConflicted()) {
+      if (diff.isStatusDiff() && !submodule && !patch.isConflicted() && !filemode) {
         discard = new DiscardButton(this);
         discard->setToolTip(HunkWidget::tr("Discard Hunk"));
         connect(discard, &DiscardButton::clicked, [this, patch, index] {
@@ -724,35 +725,55 @@ public:
           mButton->isChecked() ? HunkWidget::tr("Collapse Hunk") : HunkWidget::tr("Expand Hunk"));
       });
 
-      QHBoxLayout *buttons = new QHBoxLayout;
-      buttons->setContentsMargins(0,0,0,0);
-      buttons->setSpacing(4);
+      mButtons = new QHBoxLayout;
+      mButtons->setContentsMargins(0,0,0,0);
+      mButtons->setSpacing(4);
       if (mSave && mUndo && mOurs && mTheirs) {
         mSave->setVisible(false);
         mUndo->setVisible(false);
-        buttons->addWidget(mSave);
-        buttons->addWidget(mUndo);
-        buttons->addWidget(mOurs);
-        buttons->addWidget(mTheirs);
-        buttons->addSpacing(8);
+        mButtons->addWidget(mSave);
+        mButtons->addWidget(mUndo);
+        mButtons->addWidget(mOurs);
+        mButtons->addWidget(mTheirs);
+        mButtons->addSpacing(8);
       }
 
-      buttons->addWidget(edit);
+      mButtons->addWidget(edit);
       if (discard)
-        buttons->addWidget(discard);
-      buttons->addWidget(mButton);
+        mButtons->addWidget(discard);
+      mButtons->addWidget(mButton);
 
       QHBoxLayout *layout = new QHBoxLayout(this);
       layout->setContentsMargins(4,4,4,4);
       layout->addWidget(mCheck);
-      layout->addWidget(label);
+      layout->addWidget(mLabel);
       layout->addStretch();
-      layout->addLayout(buttons);
+      layout->addLayout(mButtons);
 
       // Collapse on check.
       connect(mCheck, &QCheckBox::clicked, [this](bool staged) {
         mButton->setChecked(!staged);
       });
+
+      // Show file mode diff
+      if (filemode || header.isEmpty()) {
+        mOldMode = diff.old_mode(index);
+        mNewMode = diff.new_mode(index);
+
+        if (mOldMode != mNewMode) {
+          QString header = "Filemode changed";
+          QString escaped = header.trimmed().toHtmlEscaped();
+          mLabel->setText(kHunkFmt.arg(escaped));
+
+          // Hide buttons
+          if (filemode) {
+            edit->setVisible(false);
+            if (discard)
+              discard->setVisible(false);
+            mButton->setVisible(false);
+          }
+        }
+      }
     }
 
     QCheckBox *check() const { return mCheck; }
@@ -771,13 +792,57 @@ public:
         mButton->toggle();
     }
 
+    void paintEvent(QPaintEvent *event) override
+    {
+      if (mOldMode != mNewMode) {
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing);
+
+        QRect rect = this->rect();
+        QFontMetrics fm = fontMetrics();
+
+        // Draw old mode
+        rect.adjust(mLabel->geometry().right(), 0, -8, -1);
+        rect.adjust(8, 0, -mButtons->geometry().width(), 0);
+        QString oMode = fm.elidedText(QString::number(mOldMode, 8), Qt::ElideLeft, rect.width());
+        painter.drawText(rect, Qt::AlignLeft | Qt::AlignVCenter, oMode);
+        rect.adjust(fm.boundingRect(oMode).width(), 0, 0, 0);
+
+        // Draw arrow.
+        int x1 = rect.x() + kArrowMargin;
+        int x2 = rect.x() + kArrowWidth - kArrowMargin;
+        int y = rect.height() / 2;
+        QPainterPath path;
+        path.moveTo(x1, y);
+        path.lineTo(x2, y);
+        path.moveTo(x2 - 3, y - 3);
+        path.lineTo(x2, y);
+        path.lineTo(x2 - 3, y + 3);
+        QPen pen = painter.pen();
+        pen.setWidthF(1.5);
+        painter.setPen(pen);
+        painter.drawPath(path);
+        rect.adjust(kArrowWidth, 0, 0, 0);
+
+        // Draw new mode
+        QString nMode = fm.elidedText(QString::number(mNewMode, 8), Qt::ElideLeft, rect.width());
+        painter.drawText(rect, Qt::AlignLeft | Qt::AlignVCenter, nMode);
+      }
+      QFrame::paintEvent(event);
+    }
+
   private:
     QCheckBox *mCheck;
+    QLabel *mLabel;
     DisclosureButton *mButton;
+    QHBoxLayout *mButtons;
     QToolButton *mSave = nullptr;
     QToolButton *mUndo = nullptr;
     QToolButton *mOurs = nullptr;
     QToolButton *mTheirs = nullptr;
+
+    uint16_t mOldMode = 0;
+    uint16_t mNewMode = 0;
   };
 
   HunkWidget(
@@ -787,6 +852,7 @@ public:
     int index,
     bool lfs,
     bool submodule,
+    bool filemode = false,
     QWidget *parent = nullptr)
     : QFrame(parent), mView(view), mPatch(patch), mIndex(index)
   {
@@ -795,35 +861,41 @@ public:
     layout->setContentsMargins(0,0,0,0);
     layout->setSpacing(0);
 
-    mHeader = new Header(diff, patch, index, lfs, submodule, this);
+    mHeader = new Header(diff, patch, index, lfs, submodule, filemode, this);
     layout->addWidget(mHeader);
 
     mEditor = new Editor(this);
-    mEditor->setLexer(patch.name());
-    mEditor->setCaretStyle(CARETSTYLE_INVISIBLE);
-    mEditor->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    if (index >= 0)
-      mEditor->setLineCount(patch.lineCount(index));
 
-    connect(mEditor, &TextEditor::updateUi,
-            MenuBar::instance(this), &MenuBar::updateCutCopyPaste);
+    if (!filemode) {
+      mEditor->setLexer(patch.name());
+      mEditor->setCaretStyle(CARETSTYLE_INVISIBLE);
+      mEditor->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+      if (index >= 0)
+        mEditor->setLineCount(patch.lineCount(index));
 
-    // Ensure that text margin reacts to settings changes.
-    connect(mEditor, &TextEditor::settingsChanged, [this] {
-      int width = mEditor->textWidth(STYLE_LINENUMBER, mEditor->marginText(0));
-      mEditor->setMarginWidthN(TextEditor::LineNumbers, width);
-    });
+      connect(mEditor, &TextEditor::updateUi,
+              MenuBar::instance(this), &MenuBar::updateCutCopyPaste);
 
-    // Darken background when find highlight is active.
-    connect(mEditor, &TextEditor::highlightActivated,
-            this, &HunkWidget::setDisabled);
+      // Ensure that text margin reacts to settings changes.
+      connect(mEditor, &TextEditor::settingsChanged, [this] {
+        int width = mEditor->textWidth(STYLE_LINENUMBER, mEditor->marginText(0));
+        mEditor->setMarginWidthN(TextEditor::LineNumbers, width);
+      });
 
-    // Disable vertical resize.
-    mEditor->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+      // Darken background when find highlight is active.
+      connect(mEditor, &TextEditor::highlightActivated,
+              this, &HunkWidget::setDisabled);
 
-    layout->addWidget(mEditor);
-    connect(mHeader->button(), &DisclosureButton::toggled,
-            mEditor, &TextEditor::setVisible);
+      // Disable vertical resize.
+      mEditor->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+
+      layout->addWidget(mEditor);
+      connect(mHeader->button(), &DisclosureButton::toggled,
+              mEditor, &TextEditor::setVisible);
+    } else {
+      mEditor->setVisible(false);
+      return;
+    }
 
     // Handle conflict resolution.
     if (QToolButton *save = mHeader->saveButton()) {
@@ -1877,6 +1949,17 @@ public:
       return;
     }
 
+    // Add filemode hunk
+    int midx = mDiff.indexOf(name);
+    if (midx >= 0) {
+      uint16_t old_mode = mDiff.old_mode(midx);
+      uint16_t new_mode = mDiff.new_mode(midx);
+      if (old_mode && new_mode && (old_mode != new_mode)) {
+        HunkWidget *hunk = addHunk(diff, patch, midx, lfs, submodule, true);
+        layout->addWidget(hunk);
+      }
+    }
+
     // Add untracked file content.
     if (patch.isUntracked()) {
       if (!QFileInfo(path).isDir())
@@ -1965,14 +2048,15 @@ public:
     const git::Patch &patch,
     int index,
     bool lfs,
-    bool submodule)
+    bool submodule,
+    bool filemode = false)
   {
     HunkWidget *hunk =
-      new HunkWidget(mView, diff, patch, index, lfs, submodule, this);
+      new HunkWidget(mView, diff, patch, index, lfs, submodule, filemode, this);
 
     // Respond to check box click.
     QCheckBox *check = hunk->header()->check();
-    check->setVisible(diff.isStatusDiff() && !submodule && !patch.isConflicted());
+    check->setVisible(diff.isStatusDiff() && !submodule && !patch.isConflicted() && !filemode);
     connect(check, &QCheckBox::clicked, this, &FileWidget::stageHunks);
 
     // Respond to editor diagnostic signal.
