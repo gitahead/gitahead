@@ -1469,7 +1469,7 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
     // multiple selection
     bool anyStarred = false;
     foreach (const QModelIndex &index, selectionModel()->selectedIndexes()) {
-      if (index.data(CommitRole).value<git::Commit>().isStarred()) {
+      if (index.data(CommitRole).isValid() && index.data(CommitRole).value<git::Commit>().isStarred()) {
         anyStarred = true;
         break;
       }
@@ -1477,7 +1477,8 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
 
     menu.addAction(anyStarred ? tr("Unstar") : tr("Star"), [this, anyStarred] {
       foreach (const QModelIndex &index, selectionModel()->selectedIndexes())
-        index.data(CommitRole).value<git::Commit>().setStarred(!anyStarred);
+        if (index.data(CommitRole).isValid())
+          index.data(CommitRole).value<git::Commit>().setStarred(!anyStarred);
     });
 
     // single selection
