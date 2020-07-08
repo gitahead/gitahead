@@ -43,7 +43,8 @@ public:
     setTitle(tr("Remote Repository URL"));
     setSubTitle(repo ?
       tr("Choose protocol to authenticate with the remote.") :
-      tr("Enter the URL of the remote repository."));
+      tr("Enter the URL of the remote repository or browse for a local "
+         "directory"));
 
     if (repo) {
       mProtocol = new QComboBox(this);
@@ -70,6 +71,7 @@ public:
     }
 
     QLabel *label = nullptr;
+    QPushButton *browse = nullptr;
     if (!repo) {
       label = new QLabel(
         tr("Examples of valid URLs include:<table cellspacing='8'>"
@@ -81,6 +83,20 @@ public:
            "<td>git://hostname/path/to/repo.git</td></tr>"
            "<tr><td align='right'><b>Local</b></td>"
            "<td>/path/to/repo, C:\\path\\to\\repo</td></tr></table>"), this);
+
+      browse = new QPushButton(tr("Local Directory"), mUrl);
+      connect(browse, &QPushButton::clicked, [this]() {
+        QString title = tr("Choose Directory");
+        QFileDialog *dialog = new QFileDialog(this, title, mUrl->text(), QString());
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+        dialog->setFileMode(QFileDialog::Directory);
+        dialog->setOption(QFileDialog::ShowDirsOnly);
+        connect(dialog, &QFileDialog::fileSelected, [this](const QString &file) {
+          mUrl->setText(file);
+        });
+
+        dialog->open();
+      });
     }
 
     QFormLayout *form = new QFormLayout(this);
@@ -89,6 +105,8 @@ public:
     form->addRow(tr("URL:"), mUrl);
     if (label)
       form->addRow(label);
+    if (browse)
+      form->addRow(browse);
 
     // Register field.
     registerField("url", mUrl);
