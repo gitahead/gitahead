@@ -1,42 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="pt_BR">
+<TS version="2.1" language="pt_BR" sourcelanguage="en_US">
 <context>
     <name>AboutDialog</name>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="68"/>
         <source>About %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Sobre %1</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="76"/>
         <source>Understand your history!</source>
-        <translation type="unfinished"></translation>
+        <translation>Entenda sua história!</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="96"/>
         <source>Changelog</source>
-        <translation type="unfinished"></translation>
+        <translation>Log de alterações</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="97"/>
         <source>Acknowledgments</source>
-        <translation type="unfinished"></translation>
+        <translation>Agradecimentos</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="98"/>
         <source>Privacy</source>
-        <translation type="unfinished"></translation>
+        <translation>Privacidade</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="109"/>
         <source>Usage reporting has been disabled. Restart the application for changes to take effect.</source>
-        <translation type="unfinished"></translation>
+        <translation>Os relatórios de uso foram desativados. Reinicie o aplicativo para que as alterações entrem em vigor.</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="111"/>
         <source>Usage Reporting Disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Relatório de uso desativado</translation>
     </message>
 </context>
 <context>
@@ -44,17 +44,17 @@
     <message>
         <location filename="../src/host/Account.cpp" line="181"/>
         <source>&lt;b&gt;Note:&lt;/b&gt; Basic authentication is not supported if you have two-factor authentication enabled. Use a &lt;a href=&apos;https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/&apos;&gt;personal access token&lt;/a&gt; in the password field instead.</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;b&gt;Nota:&lt;/b&gt; A autenticação básica não é suportada se você tiver a autenticação de dois fatores ativada. Use um &lt;a href=&apos;https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/&apos;&gt;token de acesso pessoal&lt;/a&gt; no campo de senha.</translation>
     </message>
     <message>
         <location filename="../src/host/Account.cpp" line="188"/>
         <source>&lt;b&gt;Note:&lt;/b&gt; Basic authentication is not supported. Use a &lt;a href=&apos;https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html&apos;&gt;personal access token&lt;/a&gt; in the password field instead.</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;b&gt;Nota:&lt;/b&gt; A autenticação básica não é suportada. Use um &lt;a href=&apos;https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html&apos;&gt;token de acesso pessoal&lt;/a&gt; no campo de senha.</translation>
     </message>
     <message>
         <location filename="../src/host/Account.cpp" line="233"/>
         <source>Authentication failed</source>
-        <translation type="unfinished"></translation>
+        <translation>Falha na autenticação</translation>
     </message>
 </context>
 <context>
@@ -62,62 +62,62 @@
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="23"/>
         <source>Add Remote Account</source>
-        <translation type="unfinished"></translation>
+        <translation>Add Conta Remota</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="64"/>
         <source>Host:</source>
-        <translation type="unfinished"></translation>
+        <translation>Host:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="65"/>
         <source>Username:</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome do usuário:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="66"/>
         <source>Password:</source>
-        <translation type="unfinished"></translation>
+        <translation>Senha:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="68"/>
         <source>Advanced:</source>
-        <translation type="unfinished"></translation>
+        <translation>Avançado:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="83"/>
         <source>URL:</source>
-        <translation type="unfinished"></translation>
+        <translation>URL:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="116"/>
         <source>Replace?</source>
-        <translation type="unfinished"></translation>
+        <translation>Substituir?</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="117"/>
         <source>An account of this type already exists.</source>
-        <translation type="unfinished"></translation>
+        <translation>Uma conta desse tipo já existe.</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="118"/>
         <source>Would you like to replace the previous account?</source>
-        <translation type="unfinished"></translation>
+        <translation>Deseja substituir a conta anterior?</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="120"/>
         <source>Replace</source>
-        <translation type="unfinished"></translation>
+        <translation>Substituir</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="121"/>
         <source>Cancel</source>
-        <translation type="unfinished"></translation>
+        <translation>Cancelar</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="137"/>
         <source>Connection Failed</source>
-        <translation type="unfinished"></translation>
+        <translation>Falha na conexão</translation>
     </message>
 </context>
 <context>
@@ -126,17 +126,18 @@
         <location filename="../src/dialogs/AddRemoteDialog.cpp" line="19"/>
         <location filename="../src/dialogs/AddRemoteDialog.cpp" line="32"/>
         <source>Add Remote</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Adiciona repositório remoto.</translatorcomment>
+        <translation>Add Remoto</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AddRemoteDialog.cpp" line="35"/>
         <source>Name:</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AddRemoteDialog.cpp" line="36"/>
         <source>URL:</source>
-        <translation type="unfinished"></translation>
+        <translation>URL:</translation>
     </message>
 </context>
 <context>
@@ -144,7 +145,7 @@
     <message>
         <location filename="../src/ui/SearchField.cpp" line="52"/>
         <source>Advanced Search</source>
-        <translation type="unfinished"></translation>
+        <translation>Busca Avançada</translation>
     </message>
 </context>
 <context>
@@ -152,162 +153,162 @@
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="90"/>
         <source>Author:</source>
-        <translation type="unfinished"></translation>
+        <translation>Autor:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="90"/>
         <source>Author name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome do autor</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="91"/>
         <source>Email:</source>
-        <translation type="unfinished"></translation>
+        <translation>E-mail:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="91"/>
         <source>Author email</source>
-        <translation type="unfinished"></translation>
+        <translation>E-mail do autor</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="92"/>
         <source>Message:</source>
-        <translation type="unfinished"></translation>
+        <translation>Mensagem:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="92"/>
         <source>Commit message</source>
-        <translation type="unfinished"></translation>
+        <translation>Commit mensagem</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="96"/>
         <source>Date:</source>
-        <translation type="unfinished"></translation>
+        <translation>Data:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="96"/>
         <source>Specific commit date</source>
-        <translation type="unfinished"></translation>
+        <translation>Data específica do commit</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="97"/>
         <source>After:</source>
-        <translation type="unfinished"></translation>
+        <translation>Após:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="97"/>
         <source>Commits after date</source>
-        <translation type="unfinished"></translation>
+        <translation>Commits após a data</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="98"/>
         <source>Before:</source>
-        <translation type="unfinished"></translation>
+        <translation>Antes:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="98"/>
         <source>Commits before date</source>
-        <translation type="unfinished"></translation>
+        <translation>Commits antes da data</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="102"/>
         <source>File:</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="102"/>
         <source>File name</source>
-        <translation type="unfinished"></translation>
+        <translation>Arquivo nome</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="103"/>
         <source>Path:</source>
-        <translation type="unfinished"></translation>
+        <translation>Caminho:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="103"/>
         <source>File path</source>
-        <translation type="unfinished"></translation>
+        <translation>Caminho do arquivo</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="104"/>
         <source>Scope:</source>
-        <translation type="unfinished"></translation>
+        <translation>Escopo:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="104"/>
         <source>Hunk header text</source>
-        <translation type="unfinished"></translation>
+        <translation>Pedaço de testo do cabeçalho</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="109"/>
         <source>Context:</source>
-        <translation type="unfinished"></translation>
+        <translation>Contexto:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="109"/>
         <source>Diff context (white)</source>
-        <translation type="unfinished"></translation>
+        <translation>Diff contexto (branco)</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="110"/>
         <source>Addition:</source>
-        <translation type="unfinished"></translation>
+        <translation>Adição:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="110"/>
         <source>Diff addition (green)</source>
-        <translation type="unfinished"></translation>
+        <translation>Diff adição (verde)</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="111"/>
         <source>Deletion:</source>
-        <translation type="unfinished"></translation>
+        <translation>Remoção:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="111"/>
         <source>Diff deletion (red)</source>
-        <translation type="unfinished"></translation>
+        <translation>Diff remoção (vermelho)</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="116"/>
         <source>Comment:</source>
-        <translation type="unfinished"></translation>
+        <translation>Comentário:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="116"/>
         <source>Source code comment</source>
-        <translation type="unfinished"></translation>
+        <translation>Comentário do código fonte</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="117"/>
         <source>String:</source>
-        <translation type="unfinished"></translation>
+        <translation>String:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="117"/>
         <source>Source code string literal</source>
-        <translation type="unfinished"></translation>
+        <translation>Código fonte string literal</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="118"/>
         <source>Identifier:</source>
-        <translation type="unfinished"></translation>
+        <translation>Identificador:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="118"/>
         <source>Source code identifier</source>
-        <translation type="unfinished"></translation>
+        <translation>Código fonte identificador</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="120"/>
         <source>Search</source>
-        <translation type="unfinished"></translation>
+        <translation>Procurar</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="128"/>
         <source>Return</source>
-        <translation type="unfinished"></translation>
+        <translation>Retorno</translation>
     </message>
 </context>
 <context>
@@ -315,12 +316,12 @@
     <message>
         <location filename="../src/app/Application.cpp" line="389"/>
         <source>SSL Errors</source>
-        <translation type="unfinished"></translation>
+        <translation>Erros SSL</translation>
     </message>
     <message>
         <location filename="../src/app/Application.cpp" line="391"/>
         <source>Failed to set up SSL session. Do you want to ignore these errors?</source>
-        <translation type="unfinished"></translation>
+        <translation>Falha ao configurar a sessão SSL. Deseja ignorar esses erros?</translation>
     </message>
 </context>
 <context>
@@ -328,7 +329,7 @@
     <message>
         <location filename="../src/host/Beanstalk.cpp" line="45"/>
         <source>Connection failed</source>
-        <translation type="unfinished"></translation>
+        <translation>Falha na conexão</translation>
     </message>
 </context>
 <context>
@@ -336,7 +337,7 @@
     <message>
         <location filename="../src/host/Bitbucket.cpp" line="40"/>
         <source>Connection failed</source>
-        <translation type="unfinished"></translation>
+        <translation>Falha na conexão</translation>
     </message>
 </context>
 <context>
@@ -344,27 +345,28 @@
     <message>
         <location filename="../src/ui/BlameEditor.cpp" line="107"/>
         <source>Untitled</source>
-        <translation type="unfinished"></translation>
+        <translation>Sem título</translation>
     </message>
     <message>
         <location filename="../src/ui/BlameEditor.cpp" line="123"/>
         <source>Not Tracked</source>
-        <translation type="unfinished"></translation>
+        <translation>Não rastreado</translation>
     </message>
     <message>
         <location filename="../src/ui/BlameEditor.cpp" line="144"/>
         <source>HEAD</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>HEAD</translatorcomment>
+        <translation>CABEÇALHO</translation>
     </message>
     <message>
         <location filename="../src/ui/BlameEditor.cpp" line="148"/>
         <source>Working Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>Cópia de trabalho</translation>
     </message>
     <message>
         <location filename="../src/ui/BlameEditor.cpp" line="192"/>
         <source>Save File</source>
-        <translation type="unfinished"></translation>
+        <translation>Salvar arquivo</translation>
     </message>
 </context>
 <context>
@@ -372,12 +374,12 @@
     <message>
         <location filename="../src/ui/BlameMargin.cpp" line="376"/>
         <source>Not Committed</source>
-        <translation type="unfinished"></translation>
+        <translation>Não comitado</translation>
     </message>
     <message>
         <location filename="../src/ui/BlameMargin.cpp" line="379"/>
         <source>Invalid Signature</source>
-        <translation type="unfinished"></translation>
+        <translation>Assinatura inválida</translation>
     </message>
 </context>
 <context>
@@ -385,17 +387,17 @@
     <message>
         <location filename="../src/dialogs/BranchTableModel.cpp" line="84"/>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome</translation>
     </message>
     <message>
         <location filename="../src/dialogs/BranchTableModel.cpp" line="85"/>
         <source>Upstream</source>
-        <translation type="unfinished"></translation>
+        <translation>Upstream</translation>
     </message>
     <message>
         <location filename="../src/dialogs/BranchTableModel.cpp" line="86"/>
         <source>Rebase</source>
-        <translation type="unfinished"></translation>
+        <translation>Rebase</translation>
     </message>
 </context>
 <context>
@@ -403,17 +405,18 @@
     <message>
         <location filename="../src/dialogs/CheckoutDialog.cpp" line="31"/>
         <source>Detach HEAD</source>
-        <translation type="unfinished"></translation>
+        <translation>Separar HEAD</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CheckoutDialog.cpp" line="40"/>
         <source>References:</source>
-        <translation type="unfinished"></translation>
+        <translation>Referências:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CheckoutDialog.cpp" line="45"/>
         <source>Checkout</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Verifica branch pai e atualiza o branch local.</translatorcomment>
+        <translation>Checkout</translation>
     </message>
 </context>
 <context>
@@ -421,7 +424,7 @@
     <message>
         <location filename="../src/ui/SearchField.cpp" line="81"/>
         <source>Clear</source>
-        <translation type="unfinished"></translation>
+        <translation>Limpar</translation>
     </message>
 </context>
 <context>
