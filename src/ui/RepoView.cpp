@@ -25,6 +25,8 @@
 #include "conf/Settings.h"
 #include "dialogs/CheckoutDialog.h"
 #include "dialogs/CommitDialog.h"
+#include "dialogs/DeleteBranchDialog.h"
+#include "dialogs/DeleteTagDialog.h"
 #include "dialogs/NewBranchDialog.h"
 #include "dialogs/RemoteDialog.h"
 #include "dialogs/SettingsDialog.h"
@@ -2054,6 +2056,13 @@ git::Branch RepoView::createBranch(
   return branch;
 }
 
+void RepoView::promptToDeleteBranch(const git::Reference &ref)
+{
+  DeleteBranchDialog *dialog = new DeleteBranchDialog(ref, this);
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+  dialog->open();
+}
+
 void RepoView::promptToStash()
 {
   // Prompt to edit stash commit message.
@@ -2133,7 +2142,7 @@ void RepoView::popStash(int index)
   refresh();
 }
 
-void RepoView::promptToTag(const git::Commit &commit)
+void RepoView::promptToAddTag(const git::Commit &commit)
 {
   TagDialog *dialog = new TagDialog(mRepo, commit.shortId(),
     mRepo.defaultRemote(), this);
@@ -2155,6 +2164,13 @@ void RepoView::promptToTag(const git::Commit &commit)
       push(remote, tag);
   });
 
+  dialog->open();
+}
+
+void RepoView::promptToDeleteTag(const git::Reference &ref)
+{
+  DeleteTagDialog *dialog = new DeleteTagDialog(ref, this);
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
   dialog->open();
 }
 
