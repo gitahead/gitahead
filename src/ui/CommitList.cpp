@@ -1499,7 +1499,7 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
             menu.addSeparator();
             separator = false;
           }
-          menu.addAction(tr("Delete tag %1").arg(ref.name()), [view, ref] {
+          menu.addAction(tr("Delete Tag %1").arg(ref.name()), [view, ref] {
             view->promptToDeleteTag(ref);
           });
         }
@@ -1509,7 +1509,7 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
             menu.addSeparator();
             separator = false;
           }
-          menu.addAction(tr("Delete branch %1").arg(ref.name()), [view, ref] {
+          menu.addAction(tr("Delete Branch %1").arg(ref.name()), [view, ref] {
             view->promptToDeleteBranch(ref);
           });
         }
