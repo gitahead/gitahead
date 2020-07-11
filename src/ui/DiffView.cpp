@@ -756,7 +756,7 @@ public:
       });
 
       // Show file mode diff
-      if (filemode || header.isEmpty()) {
+      if (filemode) {
         mOldMode = diff.old_mode(index);
         mNewMode = diff.new_mode(index);
 
@@ -766,12 +766,10 @@ public:
           mLabel->setText(kHunkFmt.arg(escaped));
 
           // Hide buttons
-          if (filemode) {
-            edit->setVisible(false);
-            if (discard)
-              discard->setVisible(false);
-            mButton->setVisible(false);
-          }
+          edit->setVisible(false);
+          if (discard)
+            discard->setVisible(false);
+          mButton->setVisible(false);
         }
       }
     }
