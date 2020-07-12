@@ -756,20 +756,22 @@ public:
       });
 
       // Show file mode diff
-      if (filemode) {
+      if (filemode || header.isEmpty()) {
         mOldMode = diff.old_mode(index);
         mNewMode = diff.new_mode(index);
 
-        if (mOldMode != mNewMode) {
-          QString header = "Filemode changed";
+        if ((mOldMode != mNewMode) && (mNewMode)) {
+          QString header = "Filemode";
           QString escaped = header.trimmed().toHtmlEscaped();
           mLabel->setText(kHunkFmt.arg(escaped));
 
           // Hide buttons
-          edit->setVisible(false);
-          if (discard)
-            discard->setVisible(false);
-          mButton->setVisible(false);
+          if (filemode) {
+            edit->setVisible(false);
+            if (discard)
+              discard->setVisible(false);
+            mButton->setVisible(false);
+          }
         }
       }
     }
@@ -793,34 +795,44 @@ public:
     void paintEvent(QPaintEvent *event) override
     {
       if (mOldMode != mNewMode) {
+        QFont font = this->font();
+        font.setBold(true);
+
+        QColor color = mLabel->palette().text().color();
+
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing);
+        painter.setFont(font);
+        painter.setPen(color);
 
         QRect rect = this->rect();
-        QFontMetrics fm = fontMetrics();
+        QFontMetrics fm = painter.fontMetrics();
 
-        // Draw old mode
-        rect.adjust(mLabel->geometry().right(), 0, -8, -1);
-        rect.adjust(8, 0, -mButtons->geometry().width(), 0);
-        QString oMode = fm.elidedText(QString::number(mOldMode, 8), Qt::ElideLeft, rect.width());
-        painter.drawText(rect, Qt::AlignLeft | Qt::AlignVCenter, oMode);
-        rect.adjust(fm.boundingRect(oMode).width(), 0, 0, 0);
+        rect.adjust(mLabel->geometry().right(), 0, -mButtons->geometry().width(), 0);
+        rect.adjust(fm.width(" "), 0, 0, 0);
 
-        // Draw arrow.
-        int x1 = rect.x() + kArrowMargin;
-        int x2 = rect.x() + kArrowWidth - kArrowMargin;
-        int y = rect.height() / 2;
-        QPainterPath path;
-        path.moveTo(x1, y);
-        path.lineTo(x2, y);
-        path.moveTo(x2 - 3, y - 3);
-        path.lineTo(x2, y);
-        path.lineTo(x2 - 3, y + 3);
-        QPen pen = painter.pen();
-        pen.setWidthF(1.5);
-        painter.setPen(pen);
-        painter.drawPath(path);
-        rect.adjust(kArrowWidth, 0, 0, 0);
+        if (mOldMode) {
+          // Draw old mode
+          QString oMode = fm.elidedText("changed " + QString::number(mOldMode, 8), Qt::ElideLeft, rect.width());
+          painter.drawText(rect, Qt::AlignLeft | Qt::AlignVCenter, oMode);
+          rect.adjust(fm.boundingRect(oMode).width(), 0, 0, 0);
+
+          // Draw arrow.
+          int x1 = rect.x() + kArrowMargin;
+          int x2 = rect.x() + kArrowWidth - kArrowMargin;
+          int y = rect.height() / 2;
+          QPainterPath path;
+          path.moveTo(x1, y);
+          path.lineTo(x2, y);
+          path.moveTo(x2 - 3, y - 3);
+          path.lineTo(x2, y);
+          path.lineTo(x2 - 3, y + 3);
+          QPen pen = painter.pen();
+          pen.setWidthF(1.5);
+          painter.setPen(pen);
+          painter.drawPath(path);
+          rect.adjust(kArrowWidth, 0, 0, 0);
+        }
 
         // Draw new mode
         QString nMode = fm.elidedText(QString::number(mNewMode, 8), Qt::ElideLeft, rect.width());
@@ -2054,7 +2066,7 @@ public:
 
     // Respond to check box click.
     QCheckBox *check = hunk->header()->check();
-    check->setVisible(diff.isStatusDiff() && !submodule && !patch.isConflicted() && !filemode);
+    check->setVisible(diff.isStatusDiff() && !submodule && !patch.isConflicted());
     connect(check, &QCheckBox::clicked, this, &FileWidget::stageHunks);
 
     // Respond to editor diagnostic signal.
