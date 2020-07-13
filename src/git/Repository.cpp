@@ -730,7 +730,7 @@ QList<Remote> Repository::remotes() const
       remotes.append(remote);
   }
 
-  git_strarray_free(&names);
+  git_strarray_dispose(&names);
 
   return remotes;
 }
