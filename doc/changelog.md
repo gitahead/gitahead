@@ -1,3 +1,23 @@
+### v2.6.3 - 2020-07-14
+
+#### Added
+
+* Added external tool definitions for Beyond Compare 4. (Stefan Knotzer)
+* Added option to disable translation. (Stefan Knotzer)
+* Added options to delete branches and tags from the commit list context menu. (Stefan Knotzer)
+* Added button to the clone dialog to navigate to a local directory. (Stefan Knotzer)
+* Added Brazilian Portuguese translation. (Francisco)
+
+#### Fixed
+
+* Fixed incorrect setting change when checking the "update submodules after pull" check box.
+* Fixed failure to stage some renames. (Maickonn Richard)
+* Fixed crash on right-click when a both the status diff and another commit are selected. (Stefan Knotzer)
+* Fixed the definition of an identifier in indexed search to include a dash followed a digit.
+* (Mac) Fixed failure to load translations.
+
+----
+
 ### v2.6.2 - 2020-05-03
 
 #### Added
