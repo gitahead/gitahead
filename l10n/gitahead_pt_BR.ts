@@ -432,32 +432,38 @@
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="328"/>
         <source>Initialize Repository</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Inicializa um repositório git no diretório especificado.</translatorcomment>
+        <translation>Inicializar repositório</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="328"/>
         <source>Clone Repository</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Clona o repositório especificado.</translatorcomment>
+        <translation>Clonar repositório</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="367"/>
         <source>Initialized empty repository into &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Inicializa um repositório vazio no diretório específicado.</translatorcomment>
+        <translation>Repositório vazio inicializado. em %1</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="368"/>
         <source>Cloned repository from &apos;%1&apos; into &apos;%2&apos;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Clona um repositório para um diretório específico.</translatorcomment>
+        <translation>Repositório clonado de %1 em %2</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="374"/>
         <source>Initialize</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Inicializa um repositório.</translatorcomment>
+        <translation>Inicializar</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="374"/>
         <source>Clone</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Clone</translatorcomment>
+        <translation>Clone</translation>
     </message>
 </context>
 <context>
@@ -465,33 +471,36 @@
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="234"/>
         <source>Clone Progress</source>
-        <translation type="unfinished"></translation>
+        <translation>Progresso do clone</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="235"/>
         <source>The new repository will open after the clone finishes.</source>
-        <translation type="unfinished"></translation>
+        <translation>O novo repositório será aberto após a conclusão do clone.</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="256"/>
         <source>Clone</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Clone</translatorcomment>
+        <translation>Clone</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="265"/>
         <location filename="../src/dialogs/CloneDialog.cpp" line="267"/>
         <source>clone</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Clone</translatorcomment>
+        <translation>Clone</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="265"/>
         <source>Clone canceled.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Clone cancelado.</translatorcomment>
+        <translation>Clone cancelado.</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="309"/>
         <source>Failed to %1 into &apos;%2&apos; - %3</source>
-        <translation type="unfinished"></translation>
+        <translation>Falha para %1 em %2 - %3</translation>
     </message>
 </context>
 <context>
@@ -499,22 +508,23 @@
     <message>
         <location filename="../src/ui/DetailView.cpp" line="213"/>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>Cópia</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="355"/>
         <source>Range:</source>
-        <translation type="unfinished"></translation>
+        <translation>Ordem:</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="372"/>
         <source>Id:</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Id de indentificação.</translatorcomment>
+        <translation>Id:</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="384"/>
         <source>initial commit</source>
-        <translation type="unfinished"></translation>
+        <translation>Commit inicial</translation>
     </message>
 </context>
 <context>
@@ -522,49 +532,58 @@
     <message>
         <location filename="../src/dialogs/CommitDialog.cpp" line="29"/>
         <source>Merge commit message</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Merge, mensagem do commit.</translatorcomment>
+        <translation>Mesclar, mensagem do commit</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CommitDialog.cpp" line="33"/>
         <source>Stash commit message</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Stash, salva as alterações não commitadas tanto a preparada quanto a não preparada para uso posterior.</translatorcomment>
+        <translation>Salvar, mensagem de commit</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CommitDialog.cpp" line="37"/>
         <source>Revert commit message</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Reverte</translatorcomment>
+        <translation>Reverter, mensagem de commit</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CommitDialog.cpp" line="41"/>
         <source>Cherry-pick commit message</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Mensagem do commit coletado via Cherry-pick.</translatorcomment>
+        <translation>Coletar-commit mensagem do commit</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CommitDialog.cpp" line="71"/>
         <source>Merge</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>(Merge) Mescla o branch selecionado ao branch atual.</translatorcomment>
+        <translation>Mesclar</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CommitDialog.cpp" line="72"/>
         <location filename="../src/dialogs/CommitDialog.cpp" line="82"/>
         <location filename="../src/dialogs/CommitDialog.cpp" line="87"/>
         <source>Abort</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Encerra operação.</translatorcomment>
+        <translation>Abortar</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CommitDialog.cpp" line="76"/>
         <source>Stash</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Stash, salva as alterações não commitadas tanto a preparada quanto a não preparada para uso posterior.</translatorcomment>
+        <translation>Salvar</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CommitDialog.cpp" line="81"/>
         <source>Revert</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Reverte um commit específico.</translatorcomment>
+        <translation>Reverter</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CommitDialog.cpp" line="86"/>
         <source>Cherry-pick</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>(Cherry-pick) Anexa o commit selecionado no branch atual.</translatorcomment>
+        <translation>Coletar-commit</translation>
     </message>
 </context>
 <context>
@@ -572,88 +591,105 @@
     <message>
         <location filename="../src/ui/DetailView.cpp" line="465"/>
         <source>&lt;b&gt;Commit Message:&lt;/b&gt;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Mensagem que irá ser apresentada nas alterações referente a esse commit.</translatorcomment>
+        <translation>&lt;b&gt;Mensagem da confirmação&lt;/b&gt;</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="502"/>
         <source>Stage All</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Mostra todos os arquivos na stage área.</translatorcomment>
+        <translation>Todos que estão preparados</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="506"/>
         <source>Unstage All</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Mostra todos os arquivos que não estão na stage área.</translatorcomment>
+        <translation>Todos que não estão preparados</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="509"/>
         <location filename="../src/ui/DetailView.cpp" line="692"/>
         <source>Commit</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Commit, confirma alterações.</translatorcomment>
+        <translation>Confirmar</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="635"/>
         <source>Update %1</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Atualizar %1</translatorcomment>
+        <translation>Atualizar %1</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="639"/>
         <source>Update %1 and %2</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Atualizar  %1 e %2</translatorcomment>
+        <translation>Atualizar %1 e %2</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="643"/>
         <source>Update %1, %2, and %3</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Atualizar %1, %2 e %3</translatorcomment>
+        <translation>Atualizar %1, %2 e %3</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="648"/>
         <source>Update %1, %2, and %3 more files...</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Atualizar %1, %2 e %3 mais arquivos...</translatorcomment>
+        <translation>Atualizar %1, %2 e %3 mais arquivos...</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="664"/>
         <source>Nothing staged</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Não há nada nada stagiado.</translatorcomment>
+        <translation>Nada preparado</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="667"/>
         <source>%1 of %2 file staged</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Adicionando arquivo na stage área.</translatorcomment>
+        <translation>%1 de %2 arquivo preparado</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="667"/>
         <source>%1 of %2 files staged</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Adicionando arquivos na stage área.</translatorcomment>
+        <translation>%1 de %2 arquivos preparados</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="672"/>
         <source>%1 file partially staged</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Preparando arquivo na stage área.</translatorcomment>
+        <translation>%1 arquivo parcialmente preparado</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="672"/>
         <source>%1 files partially staged</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Preparando arquivos na stage área.</translatorcomment>
+        <translation>%1 arquivos parcialmente preparados</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="678"/>
         <source>%1 unresolved conflict</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Há conflito não resolvido.</translatorcomment>
+        <translation>%1 conflito não resolvido</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="678"/>
         <source>%1 unresolved conflicts</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Há conflitos não resolvidos.</translatorcomment>
+        <translation>%1 conflitos não resolvidos</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="681"/>
         <source>all conflicts resolved</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Conflitos resolvidos.</translatorcomment>
+        <translation>Todos os conflitos foram resolvidos</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="692"/>
         <source>Commit Merge</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Commit Merge, confirmar a mesclagem. </translatorcomment>
+        <translation>Confirmar mesclagem</translation>
     </message>
 </context>
 <context>
@@ -661,104 +697,124 @@
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1438"/>
         <source>Remove Untracked Files</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Remover arquivos não rastreados</translatorcomment>
+        <translation>Remover arquivos não rastreados</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1455"/>
         <source>Apply</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Apply, deixa na lista de stash para possível reutilização posterior.</translatorcomment>
+        <translation>Aplique</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1459"/>
         <source>Pop</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Joga fora o stash (mais alto, por padrão) depois de aplicá-lo.</translatorcomment>
+        <translation>Pop</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1463"/>
         <source>Drop</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Remove um único estado escondido da lista de stash depois de aplica-lo, stash do topo da árvore de trabalho.</translatorcomment>
+        <translation>Drop</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1477"/>
         <source>Unstar</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Unstar, remove estrela do repositório selecionado.</translatorcomment>
+        <translation>Remover estrela</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1477"/>
         <source>Star</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Star, marca com estrela o repositório selecionado.</translatorcomment>
+        <translation>Aplicar estrela</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1486"/>
         <source>Add Tag...</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Adiciona uma Tag.</translatorcomment>
+        <translation>Add Tag...</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1490"/>
         <source>New Branch...</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Cria um novo Branch.</translatorcomment>
+        <translation>Novo Branch...</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1496"/>
         <source>Merge...</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Mescla o Branch atual no Branch específicado, cria sempre um commit referente a mesclagem.</translatorcomment>
+        <translation>Merge...</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1511"/>
         <source>Rebase...</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Isso move toda a ramificação de recurso para começar na ponta da ramificação específicada, mas em vez de usar um commit de mesclagem, o rebase reescreve o histórico do projeto criando commits totalmente novos para cada commit na ramificação original, diferenciando-se do (Merge) que gera um commit da mesclagem.</translatorcomment>
+        <translation>Rebase...</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1526"/>
         <source>Squash...</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Squash, uni commits semelhantes em um único commit.</translatorcomment>
+        <translation>(Squash) Unir commits...</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1543"/>
         <source>Revert</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Revert, a operação de reversão vai pegar o commit especificado, inverter as alterações dele e criar um &quot;commit de reversão&quot; novo. Os indicadores de referência são então atualizados para apontar para o commit de reversão novo, tornando o commit na ponta do branch.</translatorcomment>
+        <translation>Reverter</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1547"/>
         <source>Cherry-pick</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>(Cherry-pick) Anexa o commit selecionado no branch atual.</translatorcomment>
+        <translation>(Cherry-pick) Coletar-commit</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1556"/>
         <location filename="../src/ui/CommitList.cpp" line="1566"/>
         <location filename="../src/ui/CommitList.cpp" line="1586"/>
         <source>Checkout %1</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Verifica o branch pai e atualiza o branch local.</translatorcomment>
+        <translation>Checkout %1</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1577"/>
         <source>Local branch is already checked out</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>O Branch local já foi verificado na saída.</translatorcomment>
+        <translation>O Branch local já está verificado na saída</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1580"/>
         <source>This is a bare repository</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Este é um repositório vazio.</translatorcomment>
+        <translation>Este é um repositório vazio</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1597"/>
         <source>Reset</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Reset é um comando poderoso usado para desfazer alterações locais no estado de um repositório Git. O git reset opera nas &quot;três árvores do Git&quot;. </translatorcomment>
+        <translation>Redefinir</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1598"/>
         <source>Soft</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Atualiza os indicadores de ref e a redefinição para aí.</translatorcomment>
+        <translation>Soft</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1599"/>
         <source>Mixed</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Os indicadores de ref são atualizados. O Índice de staging é redefinido para o estado da confirmação especificada.</translatorcomment>
+        <translation>Mixed</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1600"/>
         <source>Hard</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Os indicadores de ref do Histórico de confirmações são atualizados para a confirmação especificada. Então, o Índice de staging e o Diretório de trabalho são redefinidos para corresponder à confirmação especificada.</translatorcomment>
+        <translation>Hard</translation>
     </message>
 </context>
 <context>
@@ -766,12 +822,14 @@
     <message>
         <location filename="../src/ui/CommitList.cpp" line="351"/>
         <source>Uncommitted changes</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Alterações não confirmadas</translatorcomment>
+        <translation>Alterações não confirmadas</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="352"/>
         <source>Checking for uncommitted changes</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Verificando alterações não confirmadas</translatorcomment>
+        <translation>Verificando alterações não confirmadas</translation>
     </message>
 </context>
 <context>
@@ -779,37 +837,44 @@
     <message>
         <location filename="../src/ui/CommitToolBar.cpp" line="137"/>
         <source>Show All Branches</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Mostrar todos os Branchs</translatorcomment>
+        <translation>Mostrar todos os Branchs</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitToolBar.cpp" line="138"/>
         <source>Show Selected Branch</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Mostrar Branch selecionado</translatorcomment>
+        <translation>Mostrar Branch selecionado</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitToolBar.cpp" line="142"/>
         <source>Sort by Date</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Classificar por data</translatorcomment>
+        <translation>Classificar por data</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitToolBar.cpp" line="143"/>
         <source>Sort Topologically</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Ordenar topologicamente</translatorcomment>
+        <translation>Ordenar topologicamente</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitToolBar.cpp" line="160"/>
         <source>Show Graph</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Mostrar gráfico</translatorcomment>
+        <translation>Mostrar gráfico</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitToolBar.cpp" line="170"/>
         <source>Show Clean Status</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Mostrar status da limpeza</translatorcomment>
+        <translation>Mostrar status da limpeza</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitToolBar.cpp" line="181"/>
         <source>Compact Mode</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Modo compacto</translatorcomment>
+        <translation>Modo compacto</translation>
     </message>
 </context>
 <context>
@@ -817,52 +882,62 @@
     <message>
         <location filename="../src/dialogs/ConfigDialog.cpp" line="741"/>
         <source>Esc</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Esc</translatorcomment>
+        <translation>Esc</translation>
     </message>
     <message>
         <location filename="../src/dialogs/ConfigDialog.cpp" line="765"/>
         <source>General</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Geral</translatorcomment>
+        <translation>Geral</translation>
     </message>
     <message>
         <location filename="../src/dialogs/ConfigDialog.cpp" line="773"/>
         <source>Diff</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Realiza uma função de comparação nas fontes de dados Git.</translatorcomment>
+        <translation>Diff</translation>
     </message>
     <message>
         <location filename="../src/dialogs/ConfigDialog.cpp" line="781"/>
         <source>Remotes</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Remotos</translatorcomment>
+        <translation>Remotos</translation>
     </message>
     <message>
         <location filename="../src/dialogs/ConfigDialog.cpp" line="789"/>
         <source>Branches</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Ramificações</translatorcomment>
+        <translation>Ramificações</translation>
     </message>
     <message>
         <location filename="../src/dialogs/ConfigDialog.cpp" line="797"/>
         <source>Submodules</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Submódulos</translatorcomment>
+        <translation>Submódulos</translation>
     </message>
     <message>
         <location filename="../src/dialogs/ConfigDialog.cpp" line="804"/>
         <source>Search</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Procurar</translatorcomment>
+        <translation>Procurar</translation>
     </message>
     <message>
         <location filename="../src/dialogs/ConfigDialog.cpp" line="811"/>
         <source>Plugins</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Plugins</translatorcomment>
+        <translation>Plugins</translation>
     </message>
     <message>
         <location filename="../src/dialogs/ConfigDialog.cpp" line="818"/>
         <source>LFS</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Armazenamento de arquivos grandes</translatorcomment>
+        <translation>LFS</translation>
     </message>
     <message>
         <location filename="../src/dialogs/ConfigDialog.cpp" line="833"/>
         <source>Edit Config File...</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Editar arquivo de configuração ...</translatorcomment>
+        <translation>Editar arquivo de configuração...</translation>
     </message>
 </context>
 <context>
@@ -870,37 +945,44 @@
     <message>
         <location filename="../src/ui/TabWidget.cpp" line="45"/>
         <source>Clone repository</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Clonar repositório</translatorcomment>
+        <translation>Clonar repositório</translation>
     </message>
     <message>
         <location filename="../src/ui/TabWidget.cpp" line="57"/>
         <source>Open existing repository</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Abrir repositório existente</translatorcomment>
+        <translation>Abrir repositório existente</translation>
     </message>
     <message>
         <location filename="../src/ui/TabWidget.cpp" line="61"/>
         <source>Open Repository</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Abrir Repositório</translatorcomment>
+        <translation>Abrir Repositório</translation>
     </message>
     <message>
         <location filename="../src/ui/TabWidget.cpp" line="72"/>
         <source>Initialize new repository</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Iniciar novo repositório</translatorcomment>
+        <translation>Iniciar novo repositório</translation>
     </message>
     <message>
         <location filename="../src/ui/TabWidget.cpp" line="92"/>
         <source>Add %1 account</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Adicionar %1 conta</translatorcomment>
+        <translation>Add %1 conta</translation>
     </message>
     <message>
         <location filename="../src/ui/TabWidget.cpp" line="104"/>
         <source>View getting started videos</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Vê vídeos de introdução</translatorcomment>
+        <translation>Vê vídeos de introdução</translation>
     </message>
     <message>
         <location filename="../src/ui/TabWidget.cpp" line="105"/>
         <source>Contact us for support</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Entre em contato conosco para suporte</translatorcomment>
+        <translation>Entre em contato conosco para suporte</translation>
     </message>
 </context>
 <context>
@@ -908,47 +990,56 @@
     <message>
         <location filename="../src/dialogs/DeleteBranchDialog.cpp" line="33"/>
         <source>Are you sure you want to delete local branch &apos;%1&apos;?</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Tem certeza de que deseja excluir o Branch local &apos;%1&apos;?</translatorcomment>
+        <translation>Tem certeza de que deseja excluir o Branch local &apos;%1&apos;?</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DeleteBranchDialog.cpp" line="34"/>
         <source>Delete Branch?</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Deleta o Branch.</translatorcomment>
+        <translation>Deletar Branch?</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DeleteBranchDialog.cpp" line="40"/>
         <source>Also delete the upstream branch from its remote</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Removerá também o branch remoto o qual faz referência a esse Branch.</translatorcomment>
+        <translation>Remova também o Branch remoto desta ramificação</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DeleteBranchDialog.cpp" line="44"/>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Deletar</translatorcomment>
+        <translation>Deletar</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DeleteBranchDialog.cpp" line="56"/>
         <source>delete &apos;%1&apos; from &apos;%2&apos;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Excluir &apos;%1&apos; de &apos;%2&apos;</translatorcomment>
+        <translation>Excluir &apos;%1&apos; de &apos;%2&apos;</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DeleteBranchDialog.cpp" line="57"/>
         <source>Push</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Envia as alterações para a ramificação pai.</translatorcomment>
+        <translation>Push</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DeleteBranchDialog.cpp" line="73"/>
         <source>Push canceled.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>O Push foi cancelado.</translatorcomment>
+        <translation>Push cancelado.</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DeleteBranchDialog.cpp" line="76"/>
         <source>Unable to push to %1 - %2</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Não foi possível enviar para %1 - %2</translatorcomment>
+        <translation>Não foi possível enviar para %1 - %2</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DeleteBranchDialog.cpp" line="91"/>
         <source>The branch is not fully merged. Deleting it may cause some commits to be lost.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>O Branch não está totalmente mesclado. A exclusão pode causar a perda de alguns commits.</translatorcomment>
+        <translation>O Branch não está totalmente mesclado. A exclusão pode causar a perda de alguns commits.</translation>
     </message>
 </context>
 <context>
@@ -956,52 +1047,61 @@
     <message>
         <location filename="../src/dialogs/DeleteTagDialog.cpp" line="27"/>
         <source>Are you sure you want to delete tag &apos;%1&apos;?</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Exclui a referida Tag.</translatorcomment>
+        <translation>Tem certeza de que deseja excluir a tag &apos;%1&apos;?</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DeleteTagDialog.cpp" line="28"/>
         <source>Delete Tag?</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Deleta a referida Tag.</translatorcomment>
+        <translation>Deletar Tag?</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DeleteTagDialog.cpp" line="35"/>
         <source>Also delete the upstream tag from %1</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Exclui a referida Tag e a Tag pai.</translatorcomment>
+        <translation>Exclua também a Tag pai de %1</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DeleteTagDialog.cpp" line="39"/>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Deletar</translatorcomment>
+        <translation>Deletar</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DeleteTagDialog.cpp" line="48"/>
         <source>delete &apos;%1&apos; from &apos;%2&apos;</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Deletar &apos;%1&apos; de &apos;%2&apos;</translatorcomment>
+        <translation>deletar &apos;%1&apos; de &apos;%2&apos;</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DeleteTagDialog.cpp" line="49"/>
         <source>Push</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Envia para o ramo remoto.</translatorcomment>
+        <translation>Push</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DeleteTagDialog.cpp" line="66"/>
         <source>Push canceled.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>o Push foi cancelado.</translatorcomment>
+        <translation>Push cancelado.</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DeleteTagDialog.cpp" line="69"/>
         <source>Unable to push to %1 - %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Não foi possível enviar para %1 - %2</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DeleteTagDialog.cpp" line="78"/>
         <source>Delete Tag</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Deleta a Tag</translatorcomment>
+        <translation>Deletar Tag</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DeleteTagDialog.cpp" line="79"/>
         <source>delete tag</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Deleta a Tag.</translatorcomment>
+        <translation>deletar tag</translation>
     </message>
 </context>
 <context>
@@ -1009,47 +1109,56 @@
     <message>
         <location filename="../src/dialogs/DiffPanel.cpp" line="31"/>
         <source>lines</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>linhas</translatorcomment>
+        <translation>linhas</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DiffPanel.cpp" line="49"/>
         <source>System Locale</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Localidade do sistema.</translatorcomment>
+        <translation>Localidade do sistema</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DiffPanel.cpp" line="73"/>
         <source>Context lines:</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Linhas de contexto.</translatorcomment>
+        <translation>Linhas de contexto:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DiffPanel.cpp" line="74"/>
         <source>Character Encoding:</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Codificação de caracteres:</translatorcomment>
+        <translation>Codificação de caracteres:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DiffPanel.cpp" line="83"/>
         <source>Ignore Whitespace (-w)</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Ignorar espaço em branco (-w)</translatorcomment>
+        <translation>Ignorar espaço em branco (-w)</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DiffPanel.cpp" line="91"/>
         <source>Added files</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Arquivos adicionados</translatorcomment>
+        <translation>Arquivos adicionados</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DiffPanel.cpp" line="97"/>
         <source>Deleted files</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Arquivos excluídos</translatorcomment>
+        <translation>Arquivos excluídos</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DiffPanel.cpp" line="103"/>
         <source>Whitespace:</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Espaço em branco.</translatorcomment>
+        <translation>Espaço em branco:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DiffPanel.cpp" line="104"/>
         <source>Auto Collapse:</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Recolhe automaticamente.</translatorcomment>
+        <translation>Recolher automaticamente:</translation>
     </message>
 </context>
 <context>
@@ -1057,7 +1166,8 @@
     <message>
         <location filename="../src/tools/DiffTool.cpp" line="36"/>
         <source>External Diff</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Efetua uma comparação externa.</translatorcomment>
+        <translation>Diff externa</translation>
     </message>
 </context>
 <context>
@@ -1065,12 +1175,14 @@
     <message>
         <location filename="../src/ui/DiffView.cpp" line="2113"/>
         <source>Add new file</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Adiciona novo arquivo.</translatorcomment>
+        <translation>Adicionar novo arquivo</translation>
     </message>
     <message>
         <location filename="../src/ui/DiffView.cpp" line="2127"/>
         <source>Or drag files here to copy into the repository</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Arraste os arquivos para copiar para o repositório.</translatorcomment>
+        <translation>Ou arraste os arquivos aqui para copiar para o repositório</translation>
     </message>
 </context>
 <context>
