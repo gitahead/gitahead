@@ -345,27 +345,31 @@
     <message>
         <location filename="../src/ui/BlameEditor.cpp" line="107"/>
         <source>Untitled</source>
+        <translatorcomment>Não há título.</translatorcomment>
         <translation>Sem título</translation>
     </message>
     <message>
         <location filename="../src/ui/BlameEditor.cpp" line="123"/>
         <source>Not Tracked</source>
+        <translatorcomment>Não rastreado.</translatorcomment>
         <translation>Não rastreado</translation>
     </message>
     <message>
         <location filename="../src/ui/BlameEditor.cpp" line="144"/>
         <source>HEAD</source>
         <translatorcomment>HEAD</translatorcomment>
-        <translation>CABEÇALHO</translation>
+        <translation>HEAD</translation>
     </message>
     <message>
         <location filename="../src/ui/BlameEditor.cpp" line="148"/>
         <source>Working Copy</source>
+        <translatorcomment>Cópia de trabalho.</translatorcomment>
         <translation>Cópia de trabalho</translation>
     </message>
     <message>
         <location filename="../src/ui/BlameEditor.cpp" line="192"/>
         <source>Save File</source>
+        <translatorcomment>Salva o arquivo.</translatorcomment>
         <translation>Salvar arquivo</translation>
     </message>
 </context>
@@ -374,11 +378,13 @@
     <message>
         <location filename="../src/ui/BlameMargin.cpp" line="376"/>
         <source>Not Committed</source>
+        <translatorcomment>Não comitado.</translatorcomment>
         <translation>Não comitado</translation>
     </message>
     <message>
         <location filename="../src/ui/BlameMargin.cpp" line="379"/>
         <source>Invalid Signature</source>
+        <translatorcomment>Assinatura inválida.</translatorcomment>
         <translation>Assinatura inválida</translation>
     </message>
 </context>
@@ -598,13 +604,13 @@
         <location filename="../src/ui/DetailView.cpp" line="502"/>
         <source>Stage All</source>
         <translatorcomment>Mostra todos os arquivos na stage área.</translatorcomment>
-        <translation>Todos que estão preparados</translation>
+        <translation>Todos na Stage área</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="506"/>
         <source>Unstage All</source>
-        <translatorcomment>Mostra todos os arquivos que não estão na stage área.</translatorcomment>
-        <translation>Todos que não estão preparados</translation>
+        <translatorcomment>Mostra todos os arquivos que não estão na Stage área.</translatorcomment>
+        <translation>Todos que não na Stage área</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="509"/>
@@ -1190,22 +1196,26 @@
     <message>
         <location filename="../src/update/DownloadDialog.cpp" line="27"/>
         <source>Update %1</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Atualizar...</translatorcomment>
+        <translation>Atualizar %1</translation>
     </message>
     <message>
         <location filename="../src/update/DownloadDialog.cpp" line="36"/>
         <source>Downloading %1...</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Baixando %1...</translatorcomment>
+        <translation>Baixando %1...</translation>
     </message>
     <message>
         <location filename="../src/update/DownloadDialog.cpp" line="64"/>
         <source>Download Complete!</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Download completo.</translatorcomment>
+        <translation>Download completo!</translation>
     </message>
     <message>
         <location filename="../src/update/DownloadDialog.cpp" line="66"/>
         <source>Install and Restart</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Instalar e reiniciar</translatorcomment>
+        <translation>Instalar e reiniciar</translation>
     </message>
 </context>
 <context>
@@ -1213,7 +1223,8 @@
     <message>
         <location filename="../src/tools/EditTool.cpp" line="33"/>
         <source>Edit in External Editor</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Edita no editor externo.</translatorcomment>
+        <translation>Editar no editor externo</translation>
     </message>
 </context>
 <context>
@@ -1221,47 +1232,56 @@
     <message>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="560"/>
         <source>Tabs</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Separadores</translatorcomment>
+        <translation>Separadores</translation>
     </message>
     <message>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="561"/>
         <source>Spaces</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Espaços</translatorcomment>
+        <translation>Espaços</translation>
     </message>
     <message>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="582"/>
         <source>Show heat map</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Mostrar mapa de calor.</translatorcomment>
+        <translation>Mostrar mapa de calor</translation>
     </message>
     <message>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="591"/>
         <source>Font:</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Fonte.</translatorcomment>
+        <translation>Fonte:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="592"/>
         <source>Font size:</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Tamanho da fonte.</translatorcomment>
+        <translation>Tamanho da fonte:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="593"/>
         <source>Indent using:</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Recuo...</translatorcomment>
+        <translation>Recuar usando:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="594"/>
         <source>Indent width:</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Largura do recuo.</translatorcomment>
+        <translation>Largura do recuo:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="595"/>
         <source>Tab width:</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Largura da guia.</translatorcomment>
+        <translation>Largura da guia:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="596"/>
         <source>Blame margin:</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Margem de culpa.</translatorcomment>
+        <translation>Margem de culpa:</translation>
     </message>
 </context>
 <context>
@@ -1269,12 +1289,14 @@
     <message>
         <location filename="../src/ui/EditorWindow.cpp" line="98"/>
         <source>&apos;%1&apos; has been modified. Do you want to save your changes?</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Salva as alterações.</translatorcomment>
+        <translation>&apos;%1&apos; foi modificado. Você quer salvar suas mudanças?</translation>
     </message>
     <message>
         <location filename="../src/ui/EditorWindow.cpp" line="100"/>
         <source>Save Changes?</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Salva as alterações.</translatorcomment>
+        <translation>Salvar alterações?</translation>
     </message>
 </context>
 <context>
@@ -1282,22 +1304,26 @@
     <message>
         <location filename="../src/dialogs/ExternalToolsDialog.cpp" line="25"/>
         <source>Configure External Tools</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Configura ferramentas externas.</translatorcomment>
+        <translation>Configurar ferramentas externas</translation>
     </message>
     <message>
         <location filename="../src/dialogs/ExternalToolsDialog.cpp" line="43"/>
         <source>Detected Tools</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Ferramentas detectadas.</translatorcomment>
+        <translation>Ferramentas detectadas</translation>
     </message>
     <message>
         <location filename="../src/dialogs/ExternalToolsDialog.cpp" line="68"/>
         <source>User Defined Tools</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Ferramentas definidas pelo usuário.</translatorcomment>
+        <translation>Ferramentas definidas pelo usuário</translation>
     </message>
     <message>
         <location filename="../src/dialogs/ExternalToolsDialog.cpp" line="87"/>
         <source>Select Executable</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Seleciona o executável.</translatorcomment>
+        <translation>Selecionar executável</translation>
     </message>
 </context>
 <context>
@@ -1305,17 +1331,20 @@
     <message>
         <location filename="../src/dialogs/ExternalToolsModel.cpp" line="63"/>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Nome.</translatorcomment>
+        <translation>Nome</translation>
     </message>
     <message>
         <location filename="../src/dialogs/ExternalToolsModel.cpp" line="64"/>
         <source>Command</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Comando.</translatorcomment>
+        <translation>Comando</translation>
     </message>
     <message>
         <location filename="../src/dialogs/ExternalToolsModel.cpp" line="65"/>
         <source>Arguments</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Argumentos.</translatorcomment>
+        <translation>Argumentos</translation>
     </message>
 </context>
 <context>
@@ -1323,43 +1352,51 @@
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="31"/>
         <source>Revision Not Found</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Revisão não foi encontrada.</translatorcomment>
+        <translation>Revisão não encontrada</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="32"/>
         <source>The selected file doesn&apos;t have a %1 revision.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>O arquivo selecionado não possui revisão.</translatorcomment>
+        <translation>O arquivo selecionado %1 não possui uma revisão.</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="87"/>
         <source>Bash Not Found</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>O Bash não foi encontrado.</translatorcomment>
+        <translation>Bash não encontrado</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="88"/>
         <source>Bash was not found on your PATH.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>O Bash não foi encontrado no seu PATH.</translatorcomment>
+        <translation>O Bash não foi encontrado no seu PATH.</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="90"/>
         <source>Bash is required to execute external tools.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>O Bash é necessário para executar ferramentas externas.</translatorcomment>
+        <translation>O Bash é necessário para executar ferramentas externas.</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="109"/>
         <source>Stage</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Stage área.</translatorcomment>
+        <translation>Stage</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="113"/>
         <source>Unstage</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Unstage.</translatorcomment>
+        <translation>Unstage</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="174"/>
         <location filename="../src/ui/FileContextMenu.cpp" line="183"/>
         <source>Discard Changes</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Descartar mudanças.</translatorcomment>
+        <translation>Descartar mudanças</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="176"/>
