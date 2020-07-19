@@ -1469,7 +1469,7 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
     // multiple selection
     bool anyStarred = false;
     foreach (const QModelIndex &index, selectionModel()->selectedIndexes()) {
-      if (index.data(CommitRole).value<git::Commit>().isStarred()) {
+      if (index.data(CommitRole).isValid() && index.data(CommitRole).value<git::Commit>().isStarred()) {
         anyStarred = true;
         break;
       }
@@ -1477,7 +1477,8 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
 
     menu.addAction(anyStarred ? tr("Unstar") : tr("Star"), [this, anyStarred] {
       foreach (const QModelIndex &index, selectionModel()->selectedIndexes())
-        index.data(CommitRole).value<git::Commit>().setStarred(!anyStarred);
+        if (index.data(CommitRole).isValid())
+          index.data(CommitRole).value<git::Commit>().setStarred(!anyStarred);
     });
 
     // single selection
@@ -1485,12 +1486,35 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
       menu.addSeparator();
 
       menu.addAction(tr("Add Tag..."), [view, commit] {
-        view->promptToTag(commit);
+        view->promptToAddTag(commit);
       });
 
       menu.addAction(tr("New Branch..."), [view, commit] {
         view->promptToCreateBranch(commit);
       });
+
+      bool separator = true;
+      foreach (const git::Reference &ref, commit.refs()) {
+        if (ref.isTag()) {
+          if (separator) {
+            menu.addSeparator();
+            separator = false;
+          }
+          menu.addAction(tr("Delete Tag %1").arg(ref.name()), [view, ref] {
+            view->promptToDeleteTag(ref);
+          });
+        }
+        if (ref.isLocalBranch() &&
+           (view->repo().head().name() != ref.name())) {
+          if (separator) {
+            menu.addSeparator();
+            separator = false;
+          }
+          menu.addAction(tr("Delete Branch %1").arg(ref.name()), [view, ref] {
+            view->promptToDeleteBranch(ref);
+          });
+        }
+      }
 
       menu.addSeparator();
 
