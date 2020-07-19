@@ -698,12 +698,12 @@
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1503"/>
         <source>Delete Tag %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Tag %1 löschen</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1513"/>
         <source>Delete Branch %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Branch %1 löschen</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1521"/>
@@ -1691,7 +1691,7 @@
     <message>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="118"/>
         <source>No translation</source>
-        <translation type="unfinished"></translation>
+        <translation>Keine Übersetzung</translation>
     </message>
     <message>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="131"/>
@@ -1714,7 +1714,7 @@
     <message>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="137"/>
         <source>Language:</source>
-        <translation type="unfinished"></translation>
+        <translation>Sprache:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="121"/>
@@ -3314,17 +3314,17 @@ Konflikt zu beheben</translation>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="46"/>
         <source>Enter the URL of the remote repository or browse for a local directory</source>
-        <translation type="unfinished"></translation>
+        <translation>Gib die URL des entfernten Repositories ein oder suche lokalen Ordner</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="74"/>
         <source>...</source>
-        <translation type="unfinished">...</translation>
+        <translation>...</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="76"/>
         <source>Choose Directory</source>
-        <translation type="unfinished">Ordner wählen</translation>
+        <translation>Ordner wählen</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="98"/>
@@ -4376,12 +4376,12 @@ Dies reverted den Commit %2.</translation>
     <message>
         <location filename="../src/conf/Settings.cpp" line="222"/>
         <source>Prompt to stage directories</source>
-        <translation type="unfinished"></translation>
+        <translation>Auffordern, Ordner zu stagen</translation>
     </message>
     <message>
         <location filename="../src/conf/Settings.cpp" line="225"/>
         <source>Prompt to stage large files</source>
-        <translation type="unfinished"></translation>
+        <translation>Auffordern, große Dateien zu stagen</translation>
     </message>
 </context>
 <context>
