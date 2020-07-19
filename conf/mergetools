@@ -10,6 +10,12 @@
 [mergetool "bc"]
   cmd = bcomp \"$LOCAL\" \"$REMOTE\" \"$BASE\" -mergeoutput=\"$MERGED\"
 
+[difftool "bc4"]
+  cmd = bcompare \"$LOCAL\" \"$REMOTE\"
+
+[mergetool "bc4"]
+  cmd = bcompare \"$LOCAL\" \"$REMOTE\" \"$BASE\" -mergeoutput=\"$MERGED\"
+
 [difftool "codecompare"]
   cmd = CodeCompare \"$LOCAL\" \"$REMOTE\"
 

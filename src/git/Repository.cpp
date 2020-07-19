@@ -294,7 +294,6 @@ Diff Repository::status(
     return Diff();
 
   diff.merge(workdir);
-  diff.findSimilar(true);
   diff.setIndex(index);
 
   return diff.count() ? diff : Diff();
@@ -731,7 +730,7 @@ QList<Remote> Repository::remotes() const
       remotes.append(remote);
   }
 
-  git_strarray_free(&names);
+  git_strarray_dispose(&names);
 
   return remotes;
 }

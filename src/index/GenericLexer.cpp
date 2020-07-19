@@ -85,7 +85,8 @@ Lexer::Lexeme GenericLexer::next()
 
       case Identifier: {
         char nextCh = safeAt(mBuffer, mIndex + 1);
-        bool compound = (ch == '-' || ch == '\'') && isAlpha(nextCh);
+        bool compound = ((ch == '\'' && isAlpha(nextCh)) ||
+                         (ch == '-' && (isAlpha(nextCh) || isDigit(nextCh))));
         if (ch != '_' && !alpha && !digit && !compound)
           return {Identifier, mBuffer.mid(startPos, mIndex - startPos)};
         break;

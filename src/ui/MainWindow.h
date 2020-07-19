@@ -29,7 +29,7 @@ public:
   MainWindow(
     const git::Repository &repo,
     QWidget *parent = nullptr,
-    Qt::WindowFlags flags = 0);
+    Qt::WindowFlags flags = Qt::WindowFlags());
 
   ToolBar *toolBar() const { return mToolBar; }
 

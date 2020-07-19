@@ -24,4 +24,4 @@ public:
   DeleteBranchDialog(const git::Branch &branch, QWidget *parent = nullptr);
 };
 
-#endif 
+#endif

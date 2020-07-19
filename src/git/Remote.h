@@ -141,7 +141,7 @@ public:
       void *payload);
 
     static int credentials(
-      git_cred **out,
+      git_credential **out,
       const char *url,
       const char *name,
       unsigned int types,

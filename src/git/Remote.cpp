@@ -247,7 +247,7 @@ int Remote::Callbacks::sideband(
 }
 
 int Remote::Callbacks::credentials(
-  git_cred **out,
+  git_credential **out,
   const char *url,
   const char *name,
   unsigned int types,
@@ -260,7 +260,7 @@ int Remote::Callbacks::credentials(
     return -1;
 
   Remote::Callbacks *cbs = reinterpret_cast<Remote::Callbacks *>(payload);
-  if (types & GIT_CREDTYPE_SSH_KEY) {
+  if (types & GIT_CREDENTIAL_SSH_KEY) {
     // First try to get key from agent.
     if (!cbs->mAgentNames.contains(name)) {
       log(QString("agent: %1").arg(name));
@@ -278,7 +278,7 @@ int Remote::Callbacks::credentials(
       libssh2_agent_free(agent);
       libssh2_session_free(session);
       if (error == LIBSSH2_ERROR_NONE)
-        return git_cred_ssh_key_from_agent(out, name);
+        return git_credential_ssh_key_from_agent(out, name);
 
     } else if (error) {
       log(error->message);
@@ -337,7 +337,7 @@ int Remote::Callbacks::credentials(
     if (!line.startsWith("Proc-Type:") || !line.endsWith("ENCRYPTED")) {
       QByteArray base64 = QByteArray::fromBase64(line.toLocal8Bit());
       if (!base64.contains("aes256-ctr") || !base64.contains("bcrypt"))
-        return git_cred_ssh_key_new(out, name,
+        return git_credential_ssh_key_new(out, name,
           !pub.isEmpty() ? pub.toLocal8Bit().constData() : nullptr,
           key.toLocal8Bit(), nullptr);
     }
@@ -348,17 +348,17 @@ int Remote::Callbacks::credentials(
     if (!cbs->credentials(url, username, passphrase))
       return -1;
 
-    return git_cred_ssh_key_new(out, username.toUtf8(),
+    return git_credential_ssh_key_new(out, username.toUtf8(),
       !pub.isEmpty() ? pub.toLocal8Bit().constData() : nullptr,
       key.toLocal8Bit(), passphrase.toUtf8());
 
-  } else if (types & GIT_CREDTYPE_USERPASS_PLAINTEXT) {
+  } else if (types & GIT_CREDENTIAL_USERPASS_PLAINTEXT) {
     QString password;
     QString username = QUrl::fromPercentEncoding(name);
     if (!cbs->credentials(url, username, password))
       return -1;
 
-    return git_cred_userpass_plaintext_new(
+    return git_credential_userpass_plaintext_new(
       out, username.toUtf8(), password.toUtf8());
   }
 
@@ -505,7 +505,7 @@ void Remote::setName(const QString &name)
     return;
 
   // FIXME: Report problems?
-  git_strarray_free(&problems);
+  git_strarray_dispose(&problems);
 }
 
 QString Remote::url() const
