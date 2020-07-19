@@ -6,36 +6,43 @@
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="68"/>
         <source>About %1</source>
+        <translatorcomment>Informações referente a remoção.</translatorcomment>
         <translation>Sobre %1</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="76"/>
         <source>Understand your history!</source>
+        <translatorcomment>Entenda a história da aplicação.</translatorcomment>
         <translation>Entenda sua história!</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="96"/>
         <source>Changelog</source>
+        <translatorcomment>Log com as alterações.</translatorcomment>
         <translation>Log de alterações</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="97"/>
         <source>Acknowledgments</source>
+        <translatorcomment>Agradecimentos.</translatorcomment>
         <translation>Agradecimentos</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="98"/>
         <source>Privacy</source>
+        <translatorcomment>Informações referente a privacidade.</translatorcomment>
         <translation>Privacidade</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="109"/>
         <source>Usage reporting has been disabled. Restart the application for changes to take effect.</source>
+        <translatorcomment>Relatório de uso foi desativado.</translatorcomment>
         <translation>Os relatórios de uso foram desativados. Reinicie o aplicativo para que as alterações entrem em vigor.</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AboutDialog.cpp" line="111"/>
         <source>Usage Reporting Disabled</source>
+        <translatorcomment>Relatório de uso desativado.</translatorcomment>
         <translation>Relatório de uso desativado</translation>
     </message>
 </context>
@@ -44,16 +51,19 @@
     <message>
         <location filename="../src/host/Account.cpp" line="181"/>
         <source>&lt;b&gt;Note:&lt;/b&gt; Basic authentication is not supported if you have two-factor authentication enabled. Use a &lt;a href=&apos;https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/&apos;&gt;personal access token&lt;/a&gt; in the password field instead.</source>
+        <translatorcomment>Informações sobre autenticação não suportada e solução para o problema.</translatorcomment>
         <translation>&lt;b&gt;Nota:&lt;/b&gt; A autenticação básica não é suportada se você tiver a autenticação de dois fatores ativada. Use um &lt;a href=&apos;https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/&apos;&gt;token de acesso pessoal&lt;/a&gt; no campo de senha.</translation>
     </message>
     <message>
         <location filename="../src/host/Account.cpp" line="188"/>
         <source>&lt;b&gt;Note:&lt;/b&gt; Basic authentication is not supported. Use a &lt;a href=&apos;https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html&apos;&gt;personal access token&lt;/a&gt; in the password field instead.</source>
+        <translatorcomment>Informações sobre autenticação não suportada e solução para o problema.</translatorcomment>
         <translation>&lt;b&gt;Nota:&lt;/b&gt; A autenticação básica não é suportada. Use um &lt;a href=&apos;https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html&apos;&gt;token de acesso pessoal&lt;/a&gt; no campo de senha.</translation>
     </message>
     <message>
         <location filename="../src/host/Account.cpp" line="233"/>
         <source>Authentication failed</source>
+        <translatorcomment>Houve falha na autenticação.</translatorcomment>
         <translation>Falha na autenticação</translation>
     </message>
 </context>
@@ -62,61 +72,73 @@
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="23"/>
         <source>Add Remote Account</source>
-        <translation>Add Conta Remota</translation>
+        <translatorcomment>Adiciona conta remota.</translatorcomment>
+        <translation>Add Conta remota</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="64"/>
         <source>Host:</source>
+        <translatorcomment>Host.</translatorcomment>
         <translation>Host:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="65"/>
         <source>Username:</source>
-        <translation>Nome do usuário:</translation>
+        <translatorcomment>Nome do usuário.</translatorcomment>
+        <translation>Nome de usuário:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="66"/>
         <source>Password:</source>
+        <translatorcomment>Senha.</translatorcomment>
         <translation>Senha:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="68"/>
         <source>Advanced:</source>
+        <translatorcomment>Avançado.</translatorcomment>
         <translation>Avançado:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="83"/>
         <source>URL:</source>
+        <translatorcomment>Endereço web.</translatorcomment>
         <translation>URL:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="116"/>
         <source>Replace?</source>
+        <translatorcomment>Substitui.</translatorcomment>
         <translation>Substituir?</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="117"/>
         <source>An account of this type already exists.</source>
+        <translatorcomment>Informe de conta já existente.</translatorcomment>
         <translation>Uma conta desse tipo já existe.</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="118"/>
         <source>Would you like to replace the previous account?</source>
+        <translatorcomment>Informe de substituição de conta.</translatorcomment>
         <translation>Deseja substituir a conta anterior?</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="120"/>
         <source>Replace</source>
+        <translatorcomment>Substituir.</translatorcomment>
         <translation>Substituir</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="121"/>
         <source>Cancel</source>
+        <translatorcomment>Cancelar</translatorcomment>
         <translation>Cancelar</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AccountDialog.cpp" line="137"/>
         <source>Connection Failed</source>
+        <translatorcomment>Houve falha na conexão.</translatorcomment>
         <translation>Falha na conexão</translation>
     </message>
 </context>
@@ -132,11 +154,13 @@
     <message>
         <location filename="../src/dialogs/AddRemoteDialog.cpp" line="35"/>
         <source>Name:</source>
+        <translatorcomment>Nome.</translatorcomment>
         <translation>Nome:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/AddRemoteDialog.cpp" line="36"/>
         <source>URL:</source>
+        <translatorcomment>Endereço web.</translatorcomment>
         <translation>URL:</translation>
     </message>
 </context>
@@ -145,7 +169,8 @@
     <message>
         <location filename="../src/ui/SearchField.cpp" line="52"/>
         <source>Advanced Search</source>
-        <translation>Busca Avançada</translation>
+        <translatorcomment>Efetua uma busca avançada.</translatorcomment>
+        <translation>Busca avançada</translation>
     </message>
 </context>
 <context>
@@ -153,161 +178,193 @@
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="90"/>
         <source>Author:</source>
+        <translatorcomment>Autor</translatorcomment>
         <translation>Autor:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="90"/>
         <source>Author name</source>
+        <translatorcomment>Nome do autor.</translatorcomment>
         <translation>Nome do autor</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="91"/>
         <source>Email:</source>
+        <translatorcomment>E-mail</translatorcomment>
         <translation>E-mail:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="91"/>
         <source>Author email</source>
+        <translatorcomment>E-mail do autor</translatorcomment>
         <translation>E-mail do autor</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="92"/>
         <source>Message:</source>
+        <translatorcomment>Mensagem</translatorcomment>
         <translation>Mensagem:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="92"/>
         <source>Commit message</source>
-        <translation>Commit mensagem</translation>
+        <translatorcomment>Mensagem do commit.</translatorcomment>
+        <translation>Mensagem do commit</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="96"/>
         <source>Date:</source>
+        <translatorcomment>Data...</translatorcomment>
         <translation>Data:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="96"/>
         <source>Specific commit date</source>
+        <translatorcomment>Data exata do commit.</translatorcomment>
         <translation>Data específica do commit</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="97"/>
         <source>After:</source>
+        <translatorcomment>Commit após determinada data.</translatorcomment>
         <translation>Após:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="97"/>
         <source>Commits after date</source>
+        <translatorcomment>Commit após determinada data.</translatorcomment>
         <translation>Commits após a data</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="98"/>
         <source>Before:</source>
+        <translatorcomment>Commit antes da data.</translatorcomment>
         <translation>Antes:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="98"/>
         <source>Commits before date</source>
+        <translatorcomment>Commits antes da data</translatorcomment>
         <translation>Commits antes da data</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="102"/>
         <source>File:</source>
+        <translatorcomment>Arquivo...</translatorcomment>
         <translation>Arquivo:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="102"/>
         <source>File name</source>
-        <translation>Arquivo nome</translation>
+        <translatorcomment>Nome do arquivo</translatorcomment>
+        <translation>Nome do arquivo</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="103"/>
         <source>Path:</source>
+        <translatorcomment>Caminho...</translatorcomment>
         <translation>Caminho:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="103"/>
         <source>File path</source>
+        <translatorcomment>Caminho do arquivo.</translatorcomment>
         <translation>Caminho do arquivo</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="104"/>
         <source>Scope:</source>
+        <translatorcomment>Escopo...</translatorcomment>
         <translation>Escopo:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="104"/>
         <source>Hunk header text</source>
+        <translatorcomment>Pedaço de testo do cabeçalho.</translatorcomment>
         <translation>Pedaço de testo do cabeçalho</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="109"/>
         <source>Context:</source>
+        <translatorcomment>Contexto...</translatorcomment>
         <translation>Contexto:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="109"/>
         <source>Diff context (white)</source>
+        <translatorcomment>Comparação, contexto (branco).</translatorcomment>
         <translation>Diff contexto (branco)</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="110"/>
         <source>Addition:</source>
-        <translation>Adição:</translation>
+        <translatorcomment>Acrescentado...</translatorcomment>
+        <translation>Acrescentado:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="110"/>
         <source>Diff addition (green)</source>
-        <translation>Diff adição (verde)</translation>
+        <translatorcomment>Comparação, acrescentado (verde).</translatorcomment>
+        <translation>Diff acrescentado (verde)</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="111"/>
         <source>Deletion:</source>
-        <translation>Remoção:</translation>
+        <translatorcomment>Removido...</translatorcomment>
+        <translation>Removido:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="111"/>
         <source>Diff deletion (red)</source>
-        <translation>Diff remoção (vermelho)</translation>
+        <translatorcomment>Comparação, removido (Vermelho)...</translatorcomment>
+        <translation>Diff removido (vermelho)</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="116"/>
         <source>Comment:</source>
+        <translatorcomment>Comentário...</translatorcomment>
         <translation>Comentário:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="116"/>
         <source>Source code comment</source>
+        <translatorcomment>Comentário do código fonte...</translatorcomment>
         <translation>Comentário do código fonte</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="117"/>
         <source>String:</source>
+        <translatorcomment>String...</translatorcomment>
         <translation>String:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="117"/>
         <source>Source code string literal</source>
+        <translatorcomment>Código fonte string literal.</translatorcomment>
         <translation>Código fonte string literal</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="118"/>
         <source>Identifier:</source>
+        <translatorcomment>Identificador...</translatorcomment>
         <translation>Identificador:</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="118"/>
         <source>Source code identifier</source>
-        <translation>Código fonte identificador</translation>
+        <translatorcomment>ID do código fonte...</translatorcomment>
+        <translation>Identificador do código fonte</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="120"/>
         <source>Search</source>
-        <translation>Procurar</translation>
+        <translatorcomment>Buscar...</translatorcomment>
+        <translation>Buscar</translation>
     </message>
     <message>
         <location filename="../src/ui/AdvancedSearchWidget.cpp" line="128"/>
         <source>Return</source>
+        <translatorcomment>Retorno...</translatorcomment>
         <translation>Retorno</translation>
     </message>
 </context>
@@ -316,11 +373,13 @@
     <message>
         <location filename="../src/app/Application.cpp" line="389"/>
         <source>SSL Errors</source>
+        <translatorcomment>Erros SSL...</translatorcomment>
         <translation>Erros SSL</translation>
     </message>
     <message>
         <location filename="../src/app/Application.cpp" line="391"/>
         <source>Failed to set up SSL session. Do you want to ignore these errors?</source>
+        <translatorcomment>Confirme para ignorar os erros.</translatorcomment>
         <translation>Falha ao configurar a sessão SSL. Deseja ignorar esses erros?</translation>
     </message>
 </context>
@@ -329,6 +388,7 @@
     <message>
         <location filename="../src/host/Beanstalk.cpp" line="45"/>
         <source>Connection failed</source>
+        <translatorcomment>Houve falha na conexão.</translatorcomment>
         <translation>Falha na conexão</translation>
     </message>
 </context>
@@ -337,6 +397,7 @@
     <message>
         <location filename="../src/host/Bitbucket.cpp" line="40"/>
         <source>Connection failed</source>
+        <translatorcomment>Houve falha na conexão.</translatorcomment>
         <translation>Falha na conexão</translation>
     </message>
 </context>
@@ -345,31 +406,31 @@
     <message>
         <location filename="../src/ui/BlameEditor.cpp" line="107"/>
         <source>Untitled</source>
-        <translatorcomment>Não há título.</translatorcomment>
+        <translatorcomment>Não há título...</translatorcomment>
         <translation>Sem título</translation>
     </message>
     <message>
         <location filename="../src/ui/BlameEditor.cpp" line="123"/>
         <source>Not Tracked</source>
-        <translatorcomment>Não rastreado.</translatorcomment>
+        <translatorcomment>Não rastreado...</translatorcomment>
         <translation>Não rastreado</translation>
     </message>
     <message>
         <location filename="../src/ui/BlameEditor.cpp" line="144"/>
         <source>HEAD</source>
-        <translatorcomment>HEAD</translatorcomment>
+        <translatorcomment>Cabeçalho...</translatorcomment>
         <translation>HEAD</translation>
     </message>
     <message>
         <location filename="../src/ui/BlameEditor.cpp" line="148"/>
         <source>Working Copy</source>
-        <translatorcomment>Cópia de trabalho.</translatorcomment>
+        <translatorcomment>Cópia de trabalho...</translatorcomment>
         <translation>Cópia de trabalho</translation>
     </message>
     <message>
         <location filename="../src/ui/BlameEditor.cpp" line="192"/>
         <source>Save File</source>
-        <translatorcomment>Salva o arquivo.</translatorcomment>
+        <translatorcomment>Salva o arquivo...</translatorcomment>
         <translation>Salvar arquivo</translation>
     </message>
 </context>
@@ -378,13 +439,13 @@
     <message>
         <location filename="../src/ui/BlameMargin.cpp" line="376"/>
         <source>Not Committed</source>
-        <translatorcomment>Não comitado.</translatorcomment>
+        <translatorcomment>Não comitado...</translatorcomment>
         <translation>Não comitado</translation>
     </message>
     <message>
         <location filename="../src/ui/BlameMargin.cpp" line="379"/>
         <source>Invalid Signature</source>
-        <translatorcomment>Assinatura inválida.</translatorcomment>
+        <translatorcomment>Assinatura inválida...</translatorcomment>
         <translation>Assinatura inválida</translation>
     </message>
 </context>
@@ -393,16 +454,19 @@
     <message>
         <location filename="../src/dialogs/BranchTableModel.cpp" line="84"/>
         <source>Name</source>
+        <translatorcomment>Nome...</translatorcomment>
         <translation>Nome</translation>
     </message>
     <message>
         <location filename="../src/dialogs/BranchTableModel.cpp" line="85"/>
         <source>Upstream</source>
+        <translatorcomment>Branch acima ou espelho (remoto)...</translatorcomment>
         <translation>Upstream</translation>
     </message>
     <message>
         <location filename="../src/dialogs/BranchTableModel.cpp" line="86"/>
         <source>Rebase</source>
+        <translatorcomment>Rebase...</translatorcomment>
         <translation>Rebase</translation>
     </message>
 </context>
@@ -411,17 +475,19 @@
     <message>
         <location filename="../src/dialogs/CheckoutDialog.cpp" line="31"/>
         <source>Detach HEAD</source>
+        <translatorcomment>Separa do cabeçalho...</translatorcomment>
         <translation>Separar HEAD</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CheckoutDialog.cpp" line="40"/>
         <source>References:</source>
+        <translatorcomment>Referências...</translatorcomment>
         <translation>Referências:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CheckoutDialog.cpp" line="45"/>
         <source>Checkout</source>
-        <translatorcomment>Verifica branch pai e atualiza o branch local.</translatorcomment>
+        <translatorcomment>Verificação de saída...</translatorcomment>
         <translation>Checkout</translation>
     </message>
 </context>
@@ -430,6 +496,7 @@
     <message>
         <location filename="../src/ui/SearchField.cpp" line="81"/>
         <source>Clear</source>
+        <translatorcomment>Limpar...</translatorcomment>
         <translation>Limpar</translation>
     </message>
 </context>
@@ -438,7 +505,7 @@
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="328"/>
         <source>Initialize Repository</source>
-        <translatorcomment>Inicializa um repositório git no diretório especificado.</translatorcomment>
+        <translatorcomment>Inicializa um repositório git no diretório especificado (cria repositório git).</translatorcomment>
         <translation>Inicializar repositório</translation>
     </message>
     <message>
@@ -462,14 +529,14 @@
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="374"/>
         <source>Initialize</source>
-        <translatorcomment>Inicializa um repositório.</translatorcomment>
+        <translatorcomment>Inicializar...</translatorcomment>
         <translation>Inicializar</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="374"/>
         <source>Clone</source>
-        <translatorcomment>Clone</translatorcomment>
-        <translation>Clone</translation>
+        <translatorcomment>Clonar...</translatorcomment>
+        <translation>Clonar</translation>
     </message>
 </context>
 <context>
@@ -477,35 +544,38 @@
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="234"/>
         <source>Clone Progress</source>
+        <translatorcomment>Progresso do clone...</translatorcomment>
         <translation>Progresso do clone</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="235"/>
         <source>The new repository will open after the clone finishes.</source>
+        <translatorcomment>Informe de ação após a conclusão do clone.</translatorcomment>
         <translation>O novo repositório será aberto após a conclusão do clone.</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="256"/>
         <source>Clone</source>
-        <translatorcomment>Clone</translatorcomment>
-        <translation>Clone</translation>
+        <translatorcomment>Clonar...</translatorcomment>
+        <translation>Clonar</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="265"/>
         <location filename="../src/dialogs/CloneDialog.cpp" line="267"/>
         <source>clone</source>
-        <translatorcomment>Clone</translatorcomment>
-        <translation>Clone</translation>
+        <translatorcomment>clonar...</translatorcomment>
+        <translation>clonar</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="265"/>
         <source>Clone canceled.</source>
-        <translatorcomment>Clone cancelado.</translatorcomment>
+        <translatorcomment>O clone foi cancelado...</translatorcomment>
         <translation>Clone cancelado.</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="309"/>
         <source>Failed to %1 into &apos;%2&apos; - %3</source>
+        <translatorcomment>Falha durante o clone.</translatorcomment>
         <translation>Falha para %1 em %2 - %3</translation>
     </message>
 </context>
@@ -514,11 +584,13 @@
     <message>
         <location filename="../src/ui/DetailView.cpp" line="213"/>
         <source>Copy</source>
+        <translatorcomment>Efetua um cópia...</translatorcomment>
         <translation>Cópia</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="355"/>
         <source>Range:</source>
+        <translatorcomment>Ordem...</translatorcomment>
         <translation>Ordem:</translation>
     </message>
     <message>
@@ -530,6 +602,7 @@
     <message>
         <location filename="../src/ui/DetailView.cpp" line="384"/>
         <source>initial commit</source>
+        <translatorcomment>Commit inicial...</translatorcomment>
         <translation>Commit inicial</translation>
     </message>
 </context>
@@ -538,7 +611,7 @@
     <message>
         <location filename="../src/dialogs/CommitDialog.cpp" line="29"/>
         <source>Merge commit message</source>
-        <translatorcomment>Merge, mensagem do commit.</translatorcomment>
+        <translatorcomment>Merge, mensagem do commit...</translatorcomment>
         <translation>Mesclar, mensagem do commit</translation>
     </message>
     <message>
@@ -556,13 +629,13 @@
     <message>
         <location filename="../src/dialogs/CommitDialog.cpp" line="41"/>
         <source>Cherry-pick commit message</source>
-        <translatorcomment>Mensagem do commit coletado via Cherry-pick.</translatorcomment>
-        <translation>Coletar-commit mensagem do commit</translation>
+        <translatorcomment>Mensagem do commit referente ao Cherry-pick.</translatorcomment>
+        <translation>Coletar-commit, mensagem do commit</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CommitDialog.cpp" line="71"/>
         <source>Merge</source>
-        <translatorcomment>(Merge) Mescla o branch selecionado ao branch atual.</translatorcomment>
+        <translatorcomment>(Merge) Mescla o branch específicado ao Branch atual.</translatorcomment>
         <translation>Mesclar</translation>
     </message>
     <message>
@@ -570,19 +643,19 @@
         <location filename="../src/dialogs/CommitDialog.cpp" line="82"/>
         <location filename="../src/dialogs/CommitDialog.cpp" line="87"/>
         <source>Abort</source>
-        <translatorcomment>Encerra operação.</translatorcomment>
+        <translatorcomment>Encerra a operação.</translatorcomment>
         <translation>Abortar</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CommitDialog.cpp" line="76"/>
         <source>Stash</source>
-        <translatorcomment>Stash, salva as alterações não commitadas tanto a preparada quanto a não preparada para uso posterior.</translatorcomment>
+        <translatorcomment>Stash, salva as alterações não commitadas tanto as preparadas quanto as não preparadas para uso posterior.</translatorcomment>
         <translation>Salvar</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CommitDialog.cpp" line="81"/>
         <source>Revert</source>
-        <translatorcomment>Reverte um commit específico.</translatorcomment>
+        <translatorcomment>Reverte para um determinado commit específicado...</translatorcomment>
         <translation>Reverter</translation>
     </message>
     <message>
@@ -603,21 +676,21 @@
     <message>
         <location filename="../src/ui/DetailView.cpp" line="502"/>
         <source>Stage All</source>
-        <translatorcomment>Mostra todos os arquivos na stage área.</translatorcomment>
-        <translation>Todos na Stage área</translation>
+        <translatorcomment>Mostra todas as alterações na stage área.</translatorcomment>
+        <translation>Todas as alterações na Stage área</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="506"/>
         <source>Unstage All</source>
         <translatorcomment>Mostra todos os arquivos que não estão na Stage área.</translatorcomment>
-        <translation>Todos que não na Stage área</translation>
+        <translation>Todas as alterações que não estão na Stage área</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="509"/>
         <location filename="../src/ui/DetailView.cpp" line="692"/>
         <source>Commit</source>
-        <translatorcomment>Commit, confirma alterações.</translatorcomment>
-        <translation>Confirmar</translation>
+        <translatorcomment>Confirma as alterações...</translatorcomment>
+        <translation>Commit</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="635"/>
@@ -646,7 +719,7 @@
     <message>
         <location filename="../src/ui/DetailView.cpp" line="664"/>
         <source>Nothing staged</source>
-        <translatorcomment>Não há nada nada stagiado.</translatorcomment>
+        <translatorcomment>Não há nada stagiado.</translatorcomment>
         <translation>Nada preparado</translation>
     </message>
     <message>
@@ -694,8 +767,8 @@
     <message>
         <location filename="../src/ui/DetailView.cpp" line="692"/>
         <source>Commit Merge</source>
-        <translatorcomment>Commit Merge, confirmar a mesclagem. </translatorcomment>
-        <translation>Confirmar mesclagem</translation>
+        <translatorcomment>Confirmar a Mesclagem...</translatorcomment>
+        <translation>Commit Merge</translation>
     </message>
 </context>
 <context>
@@ -1401,127 +1474,152 @@
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="176"/>
         <source>Discard Changes?</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Descarta mudanças.</translatorcomment>
+        <translation>Descartar mudanças?</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="177"/>
         <source>Are you sure you want to discard changes in the selected files?</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Confirmação de descarte de alterações.</translatorcomment>
+        <translation>Tem certeza de que deseja descartar as alterações nos arquivos selecionados?</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="180"/>
         <source>This action cannot be undone.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Essa ação não pode ser desfeita.</translatorcomment>
+        <translation>Essa ação não pode ser desfeita.</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="189"/>
         <source>%1 files</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>%1 arquivos</translatorcomment>
+        <translation>%1 arquivos</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="190"/>
         <source>Discard</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Descarta as alterações.</translatorcomment>
+        <translation>Descartar</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="191"/>
         <source>discard</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>descarta.</translatorcomment>
+        <translation>descartar</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="201"/>
         <source>Remove Untracked Files</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Remove arquivos não rastreados.</translatorcomment>
+        <translation>Remover arquivos não rastreados</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="209"/>
         <source>Ignore</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Ignora.</translatorcomment>
+        <translation>Ignorar</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="231"/>
         <source>Checkout</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Checkout</translatorcomment>
+        <translation>Checkout</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="259"/>
         <source>Unlock</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Desbloqueia.</translatorcomment>
+        <translation>Desbloquear</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="259"/>
         <source>Lock</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Bloqueia.</translatorcomment>
+        <translation>Bloquear</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="274"/>
         <source>Copy File Name</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Copia nome do arquivo.</translatorcomment>
+        <translation>Copiar nome do arquivo</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="290"/>
         <source>Filter History</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Filtra o histórico.</translatorcomment>
+        <translation>Filtrar histórico</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="295"/>
         <source>Navigate to</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Navega entre revisões.</translatorcomment>
+        <translation>Navegar para</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="296"/>
         <source>Next Revision</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Vai para a próxima revisão.</translatorcomment>
+        <translation>Próxima revisão</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="301"/>
         <source>next</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Próxima revisão.</translatorcomment>
+        <translation>próxima</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="305"/>
         <source>Previous Revision</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Vai para a revisão anterior.</translatorcomment>
+        <translation>Revisão anterior</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="310"/>
         <source>previous</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Revisão anterior.</translatorcomment>
+        <translation>anterior</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="320"/>
         <source>Unset Executable</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Desativa executável.</translatorcomment>
+        <translation>Desativar executável</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="320"/>
         <source>Set Executable</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Define executável</translatorcomment>
+        <translation>Definir executável</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="349"/>
         <source>edit</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Edita.</translatorcomment>
+        <translation>editar</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="353"/>
         <source>diff</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Compara fontes de dados.</translatorcomment>
+        <translation>diff</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="357"/>
         <source>merge</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Mescla ramificações.</translatorcomment>
+        <translation>merge</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="361"/>
         <source>External Tool Not Found</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Não foi encontrada a ferramenta externa.</translatorcomment>
+        <translation>Ferramenta externa não encontrada</translation>
     </message>
     <message>
         <location filename="../src/ui/FileContextMenu.cpp" line="362"/>
         <source>Failed to execute external %1 tool.</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Houve falha na execução da ferramenta externa.</translatorcomment>
+        <translation>Falha ao executar a ferramenta %1 externa.</translation>
     </message>
 </context>
 <context>
