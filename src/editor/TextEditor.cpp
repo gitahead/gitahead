@@ -14,6 +14,7 @@
 #include <QMainWindow>
 #include <QStyle>
 #include <QWindow>
+#include <QScrollBar>
 
 using namespace Scintilla;
 
@@ -362,6 +363,11 @@ QSize TextEditor::viewportSizeHint() const
   int lines = annotationLines(line) + 1;
   int height = const_cast<TextEditor *>(this)->textHeight(line);
   int y = const_cast<TextEditor *>(this)->pointFromPosition(length()).y();
+
+  // Add extra height for scrollbar.
+  if (horizontalScrollBarVisible)
+    y += horizontalScrollBar()->height();
+
   return QSize(size.width(), y + (lines * height));
 }
 
