@@ -1,0 +1,728 @@
+Overview
+========
+
+The LongTerm3 branch gets nearly all of its updates from default via
+backporting. The process is simple:
+
+  hg update LongTerm3
+  hg graft -e [changeset]
+
+This grafts (or cherry-picks) [changeset] from default into LongTerm3. The '-e'
+option allows for editing the commit message. Backported commit messages usually
+have the form:
+
+  Backport: [original commit message]
+
+  Backport of [revision]:[changeset].
+
+Any backport-specific additions, modifications, or deletions from the original
+changeset should be mentioned in the new message.
+
+Note: the '-e' option also gives you a chance to compile and/or test any adverse
+effects produced by the graft prior to commit. Any changes made to files before
+committing will reflect in the final graft.
+
+In order to back out of a graft:
+
+  hg rollback
+  hg revert --all [--no-backup]
+
+This can only be done ONCE, and affects the most recent graft, so make sure you
+test any questionable grafts first before attempting another one.
+
+Testing Backports
+=================
+
+Backporting a change is one thing, but ensuring the backport was successful is
+another. Currently, the measure of "success" is whether Scintilla compiles on
+all platforms after a backported change. This process can be automated using hg
+hooks and the "check.mak" makefile. By adding the following to .hg/hgrc:
+
+  [hooks]
+  pretxncommit.adddeps = test -z "`hg status | grep '^A' | grep '\.\(h\|cxx\)$'`" || make -f check.mak deps
+  pretxncommit.compile = make -f check.mak
+
+whenever a backported change is about to be committed, hg runs "check.mak",
+which attempts to compile Scintilla on all platforms. If successful, the commit
+is made. Otherwise, the commit fails and changes must be made before attempting
+to commit again.
+
+The file "check.mak" is designed to run on a Linux machine that has
+cross-compilers for Win32 and Mac OSX. It does not necessarily produce any
+binary builds of Scintilla that can be used -- it just ensures Scintilla can be
+built without compile errors. How to obtain a set of cross-compilers is beyond
+the scope of this document. At the time of writing, GCC 4.8 and 5.4 are used.
+
+Not only does "check.mak" perform platform compile checks, but it also has rules
+for manually running Scintilla's unit tests (which take too long to run
+automatically as a pre-commit hook), creating a LongTerm3 release archive set,
+and uploading documentation to the LongTerm3 website on SourceForge:
+
+  make test
+  make zip
+  make upload
+
+The last rule requires user credentials.
+
+Backport Status
+===============
+
+This section mentions all upstream changesets that have either NOT been
+backported, beginning at 6289:4c1084a571ff (Starting 3.x long term maintenance
+branch), or have information worth noting.
+
+6290:2378244bf3c7 Converted to Automatic Reference Counting.
+6291:31466630bccc Using instancetype for constructors.
+6292:7f58802368f4 Using modern Objective C literals and indexing.
+6294:e1301b1d2321 Use property dot syntax.
+6295:57988f82bf71 Indented consistently by using astyle.
+  Cocoa platform only.
+  None of these are backported since I am unsure if they are supported in C++11.
+  Despite finding references to ARC and some Modern Objective-C dating back to
+  2013ish, I also see that Clang 4.0 introduced support for some of this.
+  However, Clang 4.0 was released in early 2017.
+
+6304:b6cf154fe8d0 SciTE change log.
+  Not backported, as this applies only to SciTE.
+
+6309:2d4cb83e9297 Back down from gnu++17 to gnu++14 so can build with g++ on current Ubuntu.
+  Not backported since only C++11 is supported.
+
+6317:0f15d772bceb SciTE change log.
+6319:a3b66b2525e7 SciTE change log.
+  Not backported, as these apply only to SciTE.
+
+6328:3c87cf6d2599 Update IDocument for version 4. Drop IDocumentWithLineEnd interface to just have IDocument but with all the methods from IDocumentWithLineEnd. This removes version checking (for now). Use dvRelease4 ID. Drop mask argument to StartStyling.
+  Not backported since IDocument and ILexer interfaces should not change once
+  published according to Neil. Since the only substantial change is changing the
+  StartStyling() API, it does not seem worth creating a new IDocument4
+  interface with an option mask argument. It would likely cause compiler issues
+  too.
+
+6329:6468941ee017 Updated documentation to match changes to IDocument and ILexer.
+  Not backported since IDocument has not been changed.
+  It may be worth committed a modification of the first diff though, if 3.8.0
+  ends up using 64-bit types for Sci_Position and Sci_PositionU.
+
+6330:59f341b22087 Deprecate single phase drawing.
+6333:320418de6275 Clean whitespace.
+  Not backported since the curses platform relies on single-phase drawing for
+  now.
+
+6345:faecbd0078e5 Merge Ilexer and ILexerWithSubStyles into ILexer4 to avoid need for version checking in 4.0. Use lvRelease4 ID.
+  Partially backported with 6346:72bd27f81477 minus ILexer4, since the ILexer4
+  interface being added cannot co-exist with the existing ILexer interface.
+  (LexerModule.h uses a single typedef.)
+
+6357:96232b746342 SciTE change log.
+6361:69fddf8f8a15 SciTE changelog.
+  Not backported, as these apply only to SciTE.
+
+6372:cae69b34b92e Preparing for the 4.0.0 release.
+6374:ec8e68de4ddb Delaying a day due to change with Lua in SciTE.
+6375:4aaf170db91a Added tag rel-4-0-0 for changeset ec8e68de4ddb
+  Not backported, since this is LongTerm3.
+
+6394:dae03efac67d Update Xcode project files automatically for Xcode 9.
+  Not backported, since Xcode 9 was released in late 2017.
+
+6403:bd5c44cb0ab8 Updates for 4.0.1 release.
+6404:e04bd73927ea Added tag rel-4-0-1 for changeset bd5c44cb0ab8
+  Not backported, since this is LongTerm3.
+
+6407:f60756d22ff3 Fix bad formatting.
+  Not backported, as the bad formatting was not merged into the previous
+  backport.
+
+6409:c6a13f6eac24 Disable the animated find indicator on macOS 10.13 where it fails.
+6410:29e81816b889 Change log.
+  Not backported, since macOS 10.13 was released late 2017 and
+  NSAppKitVersionNumber10_12_2 is probably not defined on earlier macOSs. I
+  cannot find a good way to #ifdef around it.
+
+6411:96becb885ce4 Updates for 4.0.2.
+6412:ad210d76378f Added tag rel-4-0-2 for changeset 96becb885ce4
+6417:f78045efae20 Add section for 4.0.3 and move posr-4.0.2 items into it.
+  Not backported, since this is LongTerm3.
+
+6425:73343682cbda Start of bidirectional code - implement SCI_SETBIDIRECTIONAL.
+6426:0f7f5a382dbb Add ENABLE_BIDIRECTIONAL option to make files.
+  Not backported, since it is unknown whether or not this feature will have any
+  C++14 or C++17 features in it.
+
+6432:b25c127aa6c5 Ensure build allows C++17. ARC setting is matching same setting at different scope so no effect.
+6433:231ac99e1fdc Allow C++17 in all build and project files.
+6435:5dd1b26df75f Replace Sci::clamp with C++ standard std::clamp function. std::clamp is from C++17.
+  Not backported, since only C++11 is supported.
+
+6438:f635874b303b SciTE changelog.
+6439:0e036d7fa960 SciTE changelog.
+  Not backported, as these apply only to SciTE.
+
+6440:a1731ae83d2a Disable animated find indicator on macOS 10.12 as it causes drawing failures.
+  Not backported, since macOS 10.13 was released late 2017 and
+  NSAppKitVersionNumber10_12_2 is probably not defined on earlier macOSs. I
+  cannot find a good way to #ifdef around it.
+
+6446:f7abec3bbc7a SciTE change log.
+6447:44ff2195a202 SciTE change log.
+  Not backported, as these apply only to SciTE.
+
+6450:7295a806b4c4 Updating for 4.0.3.
+  Not backported, since this is LongTerm3.
+
+6452:1bf8b7c50995 Update Cocoa test app to Xcode 9.2 settings.
+  Not backported, since Xcode 9 was released in late 2017.
+
+6453:71a51a9a6048 Added tag rel-4-0-3 for changeset 1bf8b7c50995
+  Not backported, since this is LongTerm3.
+
+6454:c25d3cb37f7d SciTE change log.
+6455:b9e278677527 SciTE changelog.
+6459:0aef625a6ab0 SciTE changelog.
+  Not backported, as these apply only to SciTE.
+
+6460:b4500f60b593 Added string_view to order.
+  Not backported, since only C++11 is supported.
+
+6464:fe5f45df61ce SciTE change log.
+  Not backported, as this applies only to SciTE.
+
+6465:cdfd8b285278 Update to c++17 so make_unique is available.
+6476:59bafd0d2f77 Updated requied compiler versions.
+  Not backported, since only C++11 is supported.
+
+6632:8399b7723701 Change standard flag on MacOS as Xcode clang doesn't yet like c++17.
+  Not backported, since only C++11 is supported.
+
+6643:ebbb4e5aaf93 Update unit test Visual C++ builds to Visual C++ 2017 with /std:c++latest.
+  Not backported, since only C++11 is supported.
+
+6661:d03cd726962c New Xcode 9.3 so ran the updater which turned on some warnings and it fiddled with the projects and schemes.
+6662:3c001296c0a4 Reverted #6488 as Xcode clang 9.1 now likes --std=c++17.
+6664:0f1db0d9a0a6 Standardize on --std=c++17, avoiding GNU extensions and enabling clang 6.0.
+6666:9561714c303b Updated due to allowing C++17 code now.
+  Not backported, since only C++11 is supported.
+
+6676:d48bdae67b33 Updates for 4.0.4.
+6678:95fdb4c19b33 Added tag rel-4-0-4 for changeset d48bdae67b33
+  Not backported, since this is LongTerm3.
+
+6680:0161abb24da4 Bug [#2008]. Avoid warning unsigned >= 0.
+  Not backported, since it is unknown whether or not this feature will have any
+  C++14 or C++17 features in it.
+
+6689:41dbff5a4813 Make method const as it is just a reader.
+  Not backported, since return value depends on interface, which is different
+  from single interface in 4.x.
+
+6746:61e16d5c73cf Change log for SciTE for macOS.
+6749:85d99f7c5c6d SciTE change log.
+6757:56a46ce2e0b4 SciTE change log.
+6779:d5508bacbfd4 SciTE change log.
+  Not backported, as these apply only to SciTE.
+
+6786:68c8592fe333 Specify type of std::clamp to avoid casting arguments.
+  Not backported, since std::clamp is C++17 and Sci::clamp is not typed.
+
+6922:d97cb73c8da7 SciTE change log.
+  Not backported, as this applies only to SciTE.
+
+6924:b9ab83221b03 Updates for 4.0.5.
+6931:87dc832e3c94 Added tag rel-4-0-5 for changeset b9ab83221b03
+6932:cc470382029e Add stub for next release.
+  Not backported, since this is LongTerm3.
+
+6936:c98e38d29c46 Include <string_view> in tests in case needed.
+6937:5200f56c1494 Include <string_view> to allow future use in Platform interface and Unicode.
+6941:8a34096cd01e Modernize Platform.h (4) - update Surface to use string_view for text arguments.
+  Not backported, since only C++11 is supported.
+
+6942:adbc779db70a Modernize Platform.h (5) - remove ElapsedTime.
+  Not backported, since it was already removed in changeset 6876:a057d12cc6b9.
+
+6943:39f2ec3334c1 Use string_view for UniConversion functions.
+  Not backported, since only C++11 is supported.
+
+6946:959308676456 Fix warning.
+  Not backported, since it applies to a previous changeset not backported.
+
+6947:fb52ef66ed47 Remove dependency on StringCopy and simplify constructor.
+  Not backported, since only C++11 is supported.
+
+6949:7747dc29d8a0 Fix warnings in debug assertions.
+  Not backported, since it applies to a previous changeset not backported.
+
+6950:682b634df52b Encapsulate WideCharToMultiByte and MultiByteToWideChar to simplify calling sites and standardize use of options.
+  Not backported, since only C++11 is supported.
+
+6951:b2a17a08a1f8 Replace ELEMENTS with std::size and drop inclusion of StringCopy.h.
+  Backported only the latter bit since C++11 does not have std::size.
+
+6961:d2563c53ab4c SciTE change log.
+  Not backported, as this applies only to SciTE.
+
+6962:514fde42ccbf Draw invalid bytes in DBCS when detected as blobs in a similar way to UTF-8.
+  Backported, but replaced std::string_view usage with const char* and size_t
+  components.
+
+6964:d7ec2cdbcd16 If decoding DBCS text fails, use the MacRoman encoding to ensure something is visible.
+  Not backported, as it makes use of a previous changeset not backported and is
+  not easy for me to support if I patched it.
+
+6970:b78f7643ae73 Add definitions for bidirectional support to Platform.h and provide empty implementations for each platform.
+6971:e51e7a972b89 Implement bidirectional mode bidiL2R for DirectDraw on Win32.
+6972:f30d0a228046 Update for bidirectional support.
+6973:7570322b0219 Added credits.
+7006:a6d3cefd4f79 Add TabPositionAfter method to IScreenLine as this calculation is needed on each platform and it allows extension to custom tab stops.
+  Not backported, since previous bidirectional support was not backported.
+
+7009:e1100c6feaaf Add function to find a UTF-16 position in a UTF-8 string.
+  Not backported, since it is only used in bidirectional support at the moment.
+
+7011:23a98ab36601 Define IScreenLineLayout as the main interface for implementing bidirectional features by platform code.
+7012:5f4011e010f9 Implement IScreenLineLayout for Cocoa Core Text as ScreenLineLayout.
+7013:0d86879c5ca5 Make virtual space selections visible in bidirectional mode.
+7014:39d3e00c381a UpdateBidiData is called by EditView but doesn't use any EditView fields so make it static.
+7015:6a7459cd08f9 Updated to mention bidirectional works on Cocoa.
+  Not backported, since previous bidirectional support was not backported.
+
+7026:4377a8d710e1 Update Cocoa enumerations to current names instead of deprecated names.
+  Not backported, since many of these enumerations are not available for older SDKs.
+
+7027:b71248119e8b Remove compile-time ENABLE_BIDIRECTIONAL option as bidirectional feature is now controlled completely at run-time.
+  Not backported, since previous bidirectional support was not backported.
+
+7033:5da90aad11da Updates for 4.1.0.
+  Not backported, since this is LongTerm3.
+
+7034:0dc20d87a4f9 Note that Cocoa also supports bidirectional text.
+  Not backported, since previous bidirectional support was not backported.
+
+7055:bb3c92f403f7 Added tag rel-4-1-0 for changeset 0dc20d87a4f9
+7059:455f134efbc1 SciTE change log.
+7061:d744568dfaa5 SciTE change log.
+  Not backported, since this is LongTerm3.
+
+7063:0d5edc93e280 Optional indexing of line starts in UTF-8 documents by UTF-32 code points and
+  Backported, but replaced std::string_view usage with const char* and size_t
+  components. Also used const_cast where appropriate to fix compile errors.
+
+7066:ee645426b872 Add SciTE credit.
+7067:43101fb47a25 SciTE change log.
+  Not backported, since this is LongTerm3.
+
+7069:e65cfc5348a5 Change lifetime of textLayout for bidirectional so it is always released in
+7071:d9e28bcc6cf9 Bug [#2030]. Fix Win32 crash setting technology to default after bidirectional
+  Not backported, since previous bidirectional support was not backported.
+
+7074:b190647b5084 SciTE change log.
+7079:744cd6e004ae Updates for 4.1.1.
+7080:59fdd1f4d5cd Updated change list for 4.1.1.
+7082:058cd4b189e6 Added tag rel-4-1-1 for changeset 892c361b3969
+7083:d87b627094ad Fix version number.
+7084:cd27559c2a65 Moved tag because of doc fix.
+7085:fcf47c352832 Updated outdated text.
+7086:c8643589ba1d Added tag rel-4-1-1 for changeset fcf47c352832
+7091:575636ffe226 Added section for next release.
+7095:58524eea6d35 SciTE change log.
+7101:f4988dfccc31 Updates for 4.1.2 release.
+7103:20455b6997e3 Added tag rel-4-1-2 for changeset 927e7d62e917
+  Not backported, since this is LongTerm3.
+
+7104:9b7f24b1b150 Fix crash when particular patterns of invalid UTF-8 led to failure to create a
+  Not backported, since previous bidirectional support was not backported.
+
+7109:29f0ca6d2d1b Improve performance of Editor::RangeText by avoding per-character checks.
+  Backported, but with const_cast to file compile error.
+
+7121:2f5d50043861 Bug [#2055]. Use dark info bar background when system is set to Dark Appearance.
+  Not backported, since its parent changeset 7026:4377a8d710e1 was not
+  backported.
+
+7172:05e2d46ae4c0 SciTE change log.
+7177:08ccc2c490c2 SciTE change log.
+  Not backported, since this is LongTerm3.
+
+7187:29c12794f87e Stop specifying -std:c++latest as that is no longer needed to enable C++17
+  Not backported, since only C++11 is supported.
+
+7194:b428bfb5a730 Bug [#2022]. Fix incorrect horizontal offset on macOS 10.14 Mojave.
+  Not backported, since I have no easy way to test if this compiles. I'd also
+  like to assume LongTerm3 clients are only interested in earlier versions of
+  macOS.
+
+7197:1484a537b380 Updates for version 4.1.3.
+7198:974d0f564d0d Added tag rel-4-1-3 for changeset 1484a537b380
+  Not backported, since this is LongTerm3.
+
+7250:f77887e669fc SciTE history.
+  Not backported, since this is LongTerm3.
+
+7280:9cf6a15d6c85 Use noexcept and constexpr where possible and reasonable.
+  Backported, but removed use of constexpr, since it is a >= C++14 feature for
+  non-return-only functions.
+
+7281:4cb7fa260e77 SciTE changelog.
+7284:b52eed62fda9 SciTE change log.
+  Not backported, since this is LongTerm3.
+
+7289:3f930310a0de Use constexpr where reasonable and move groups of static functions into unnamed namespace.
+  Backported, but removed some instances of constexpr, since it is a >= C++14
+  feature for non-return-only functions
+
+7290:07b4e4192bb2 Updated version number for release.
+7292:20a944185079 Added tag rel-4-1-4 for changeset cd35899fef5e
+  Not backported, since this is LongTerm3.
+
+7293:3d4c60be1963 Update download sizes.
+  Not backported, since this is not applicable.
+
+7315:57ea0255c8aa Avoid hangs in idle styling modes caused by high-priority idle work styling.
+  Backported, but removed some instances of constexpr, since it is a >= C++14
+  feature for non-static data members.
+
+7319:6db11117d56f Use noexcept where allowed, not inherited from base class, and not a COM method.
+7320:304d26d7137f Minor warnings fixed - uninitialized, nullptr, type agreement, avoid casts.
+  Backported, but without the C++17 multi-byte helper functions from a previous
+  changeset.
+
+7322:b79d68be7e96 Credit for SciTE change.
+  Not backported, since this is LongTerm3.
+
+7325:6148329fb2f3 Implement WStringFromUTF8 to simplify code that creates wstring objects for regular expressions and calling the Win32 API.
+  Backported, but replaced std::string_view usage with const char* and size_t
+  components. Also used #ifdef instead of C++17 `if constexpr` at suggestion of
+  Neil.
+
+7326:2f9b5e1c97ae Use noexcept where sensible. Rename UTF8 string_view parameters for clarity.
+  Backported, but without the variable renames, since they are not applicable.
+
+7328:521b1e23bfe2 Fix warnings from MSVC Code Analysis.
+  Backported, but without C++17 std::size and `SymbolValue() = default` instead
+  of `SymbolValue() noexcept = default`, since the latter causes a compile
+  error.
+
+7329:2662ef098d93 Use generic versions of ceil, floor, round, lround, trunc from <cmath>.
+  Backported, but without std::round and std::lround, since older Mac OSX SDKs
+  may not have them.
+
+7332:982c5f3833bb Simplify with range for.
+  Not backported, since std::string_view from C++17 is not used.
+
+7333:3f381a0bbeff Use std::make_unique.
+  Not backported, since std::make_unique is not in C++11.
+
+7337:eeaddec85ecc Use size_t for consistency and to avoid casts.
+  Not backported, since std::string_view from C++17 is not used.
+
+7349:0b7800a19ed3 Updated ScintillaFramework internationalization to fix warnings from Xcode 10.2.
+  Backported, but only .cxx file reordering. Internationalization was not
+  backported in case it's not compatible with earlier versions of Xcode.
+
+7350:0b319d73d317 Updated ScintillaTest internationalization to fix warnings from Xcode 10.2.
+  Not backported in case it's not compatible with earlier versions of Xcode.
+
+7392:2832adedd0f4 Feature [feature-requests:#1259]. Add SCI_SETCHARACTERCATEGORYOPTIMIZATION API
+  Backported, but with added includes for Sci::clamp().
+
+7402:751b76b567f9 Move UniqueStringCopy into its own source file UniqueString.cxx to hide the implementation.
+7409:a70a4ee51448 Rename FontNames to UniqueStringSet and move into UniqueString.
+  Backported, but with an alternative to C++17's string_view.
+
+7411:c3bc2e4277b2 Make dependencies scripts work when called from scite/scripts/RegenerateSource.py.
+  Not backported, since it is for SciTE and it requires Python 3.x.
+
+7414:599d698f70bf Use noexcept in CaseConvert as well as std::string_view::copy.
+  Backported, but without std::string_view::copy.
+
+7416:76d7aeac3271 Updated required Python version due to differences in how imports work in 2.7.
+  Not backported, since it is for SciTE and it requires Python 3.x.
+
+7417:bbef7c52aecf Use views for input string parameters as that allows calling with more varied values and can avoid allocations.
+7418:bf93fe7f0940 Bug [#2093]. Use wstring_view to unify adding text and eliminate AddCharUTF16.
+  Not backported, since a previous commit to use C++17's std::string_view was
+  not backported.
+
+7423:2e2cf21cee0b Bug [#2093]. Remove restrictions on IME input length.
+  Not backported, since the lack of a previous backport still references
+  maxLenInputIME.
+
+7425:466a7bd45f06 Preparing for 4.1.5 release.
+7427:72074cd809c5 Added 4.1.5 blurb.
+7428:bebdebd489c6 Added tag rel-4-1-5 for changeset 72074cd809c5
+7430:6a6bf370ae9f Removed tag rel-4-1-5
+7431:fcecd4a96700 Added tag rel-4-1-5 for changeset 6a6bf370ae9f
+  Not backported, since this is LongTerm3.
+
+7479:be5a36866340 Switch from /std:c++latest to /std:c++17 as Visual C++ 2019 now includes some
+  Not backported, since only C++11 is supported.
+
+7480:1b7760e143911 SciTE change log.
+  Not backported, since this is LongTerm3.
+
+7486:a99fa007805f Feature [feature-requests:#1280]. Lexer added for X12.
+  Backported, but with LexerX12::Terminator struct definition not having default
+  values, which is a C++14 feature.
+
+7550:fb4a24eb8aec Preparing for 4.1.6 release.
+7551:4781ee00f04f Clarified large file support.
+7559:6ccb029fd955 Updated release date for 4.1.6.
+7561:0e040330cb60 Added tag rel-4-1-6 for changeset 6ccb029fd955
+7566:8fdc0159b0df Make a new release due to a regression in SciTE with 4.1.6.
+7567:8094a3e525d3 Added tag rel-4-1-7 for changeset 8fdc0159b0df
+7568:263aa618ce2a Add new section for version 4.1.8.
+  Not backported, since this is LongTerm3.
+
+7569:ab69548334b7 Feature [feature-requests:#1295]. Lexer added for DataFlex.
+  Backported, but with custom `_strnlen` function since `strnlen` is not part of
+  the C or C++ standard.
+
+7602:fa9114b5ea0e For encodings other than UTF-8, split input up into characters before calling InsertCharacter.
+  Not backported since its a Cocoa platform change I cannot easily test.
+
+7603:0b85654df4db Updating file download sizes to be in megabytes.
+  Not backported, since this is not applicable to LongTerm3.
+
+7619:a235c1b87d7e Readying 4.2.0 release.
+7620:7f8d008985d2 Updated version number.
+7622:62b5326b2e9d Added tag rel-4-2-0 for changeset 70fe3bd38a3d
+7623:62d3fe4a3f74 Added section for next release.
+7624:748edf13e588 SciTE changelog.
+  Not backported, since this is LongTerm3.
+
+7698:12655cf90e70 Update project to Xcode 11.
+  Not backported, since Xcode 11 was released in 2019.
+
+7709:4f8c3b19095a Readying 4.2.1 release.
+7710:3a9f0580c75e Added tag rel-4-2-1 for changeset 4f8c3b19095a
+  Not backported, since this is LongTerm3.
+
+7740:d72fb2dcb9dd Change from SciTE.
+7747:61057496b3e0 Change from SciTE.
+7783:1b8ce5991cb9 Readying 4.2.2 release.
+7784:60e957153834 Added tag rel-4-2-2 for changeset 1b8ce5991cb9
+  Not backported, since this is LongTerm3.
+
+7835:bebc5e0eb82a Bug [#2115]. Avoid Clang warnings with COM_DECLSPEC_NOTHROW from declaration.
+  Not backported, as its changes are in RTL code, which was not backported.
+
+7841:023ad180a294 Update comments.
+  Backported, but noted use with GCC 4.8 and Clang 3.4.
+
+7843:f5d966795469 Remove Clang option that is not needed with Clang 9.
+  Not backported, as this option was added in 2018.
+
+7854:ab518c9df18e Builds without GNU extensions so set to standard C++17.
+  Backported, but with c++11, not c++17.
+
+7858:f7e61139f379 gcc 9 has a new warning deprecated-copy which occurs many times in Qt headers.
+  Not backported, as GCC 9 is not supported.
+
+7862:f4cf92e43f48 Use safe mechanism to convert to function pointers.
+7863:507307a6c315 Use safe mechanism for converting between function pointers and void*.
+  Backported, but with the c++11 version of static_assert().
+
+7868:3b33632cad16 Lexilla implemented as loadable lexer.
+  Not backported, as there is no point supporting Lexilla until Scintilla 5.
+  Note: there is change to ScintillaBase.cxx at the end of the changeset that I
+  am unsure what to do with.
+
+7870:6ffcbd42288c Define ILexer5 with methods for retrieving name, ID, and property values.
+  Backported, but with new ILexerWithIdentity class that inherits from ILexer.
+  This is for compatibility and in-line with prior lexer versioning.
+
+7871:ff54e1fc74f3 Implement SCI_SETILEXER.
+  Not backported, since it utilizes the new ILexer5 interface, which is not
+  compatible with ILexerWithIdentity. Since Lexilla and external lexers only
+  create ILexer5* instances, supporting this does not make sense.
+
+7872:9aff497315aa Lexilla testing framework.
+7873:38866a74f665 Lexilla tests.
+7898:9e6fceb9c791 Add lexilla/src to include directories to find "Lexilla.h".
+7899:84655f8588ed Implement negative relative positions in GetRelativePosition.
+  Not backported, as Lexilla is not supported.
+
+7951:e7a1fca621ee Clean up the code changed with 7883 dropping CF_TEXT.
+  Not backported, as it relies on std::wstring_view and only C++11 is supported.
+
+7952:7137777f9be8 Readying 4.3.0 release.
+7953:2ff0c9f88f1c Added tag rel-4-3-0 for changeset 7137777f9be8
+  Not backported, since this is LongTerm3.
+
+7955:7a9b0cfd9e92 Adding test for batch lexer.
+  Not backported, as Lexilla is not supported.
+
+7956:c38e1a816a53 Bug [#2151]. Fix drag and drop between different encodings.
+  Not backported, as it relies on 7951:e7a1fca621ee, which was not backported.
+
+7957:14e6c7beab83 Don't include lexilla.so in source archive.
+7959:0f40bc8cf1ed Adding test for makefile lexer.
+7963:7acfe8254e53 Add version information resource to Lexilla.DLL on Win32.
+  Not backported, as Lexilla is not supported.
+
+7964:e01e845c6daa Small simplification and spelling fix.
+  Not backported, as it applies to non-LongTerm3 versioning.
+
+7969:6bef6331c9bb SciTE change log.
+  Not backported, as this is LongTerm3.
+
+7971:2b47b4061b51 Bug [#2139]. Add test case for compound decorator.
+7972:e4ee9ccc1be0 Add batch file to test lexers.
+7973:a299df5f83de Bug [#2143]. Add test case for comment start in number.
+  Not backported, as Lexilla is not supported.
+
+7983:5d4c40a72a72 Bug [#2151]. Minor improvements.
+  Not backported, as it relies on 7951:e7a1fca621ee, which was not backported.
+
+7994:32e2c934bcc6 Readying 4.3.1 release.
+7995:d7d6106e0cf6 Added tag rel-4-3-1 for changeset 32e2c934bcc6
+  Not backported, as this is LongTerm3.
+
+7996:d24ffc808e59 Fix bug where all drops were treated as rectangular.
+  Not backported, as it relies on 7951:e7a1fca621ee, which was not backported.
+
+7997:c4e53c985ef6 Readying 4.3.1 release.
+7998:91340ea3f89e Added tag rel-4-3-2 for changeset c4e53c985ef6
+  Not backported, as this is LongTerm3.
+
+8014:5e621040222d Use dynamic_cast and assertion to make bugs more obvious.
+  Backported, but without "static inline GdkAtom ... {}" declarations, which
+  are not supported in C++11.
+
+8027:6b1d13c2a6b9 SciTE change log.
+8107:19db953baba2 Fix typo.
+8108:5d8ef45011be Add Visual C++ project files for Lexilla.DLL and Scintilla.DLL with no lexers.
+  Not backported, as this is LongTerm3.
+
+8122:daf3a21a961e Change log.
+  Not backported, as SCI_SETILEXER has not been impemented.
+
+8135:463c3cd3d8b2 Fix some warnings from Clang-Tidy.
+  Backported, but without [[maybe_unused]], which is C++17 only.
+
+8136:5b6c787f30d4 Fix warning from g++.
+  Not backported, since [[maybe_unused]] is C++17 only.
+
+8145:0755bd39b628 Add test for differing styles between \r and \n.
+8146:db55dac10cfe Fix inverted test.
+8147:44af0edda8c3 Add test that illustrates all Python styles.
+8150:18be701f19b6 Remove dead code.
+  Not backported, as Lexilla is not supported.
+
+8152:3481e13acf88 Making dependencies now requires Python 3.6+.
+8153:5dfb47531eef Update Python versions.
+8154:7a8ff85aa5a8 Update Python versions for files that may involve PySide on Linux
+  Not backported in an attempt to keep support for Python 2.7.
+
+8204:f0951477de32 Added tag rel-4-3-3 for changeset 4c6aee014e72
+8206:fdfe04eeff0e Fixed link.
+  Not backported, as this is LongTerm3.
+
+8207:f2a312bb0ff9 Add tests for errorlist lexer.
+8208:51662a65c520 Add tests for mmixal lexer.
+8211:ede3d559ad4a Fix line ends on example files.
+8214:c6536b577dfe Add a script to make it easier to test lexers on Unix.
+  Not backported, as Lexilla is not supported.
+
+8229:c88f8cdede65 Feature [feature-requests:1347]. Optimize large insertions
+  Backported, but with a "reinterpret_cast<>" in place of "if constexpr()". This
+  shouldn't be an issue, but if so, it will be when largeDocument is true.
+
+8233:fe9919b45dde Support Windows XP.
+8234:47ee096230fe Set calling convention to stdcall to match clients and old DLL lexers and export names undecorated.
+8235:dcdc684baa3a On Unix call shared object liblexilla instead of lexilla to match platform convention.
+8236:1b4a98fe81fd Produce a shared object libscintilla.so that can be dynamically linked to.
+8237:9924c5344c5a Remove lexers from libscintilla.lib / libscintilla.a.
+8238:7563800da018 Ensure Lexilla built as well.
+  Not backported, as Lexilla is not supported.
+
+8240:1348ba71e4b6 Use pathlib in generator scripts.
+  Not backported in an attempt to keep support for Python 2.7.
+
+8241:711a07441bfc Update version.
+  Not backported, as Lexilla is not supported.
+
+8245:84f6361d238b SciTE change log.
+8247:42e7939c902b Update download sizes.
+  Not backported, as this is LongTerm3.
+
+8251:5e4fb5bdfc0a Add Xcode project for Lexilla.
+8252:40c090f1d8e3 Added Info.plist to hold name and version.
+8253:29e21f17c77f Update Lexilla Xcode project with new lexers and changed version number.
+8254:7680d60e4438 Hide Visual Studio solution files from Mercurial.
+  Not backported, as Lexilla is not supported.
+
+8255:96b4a77ad9db Add file that avoids extra upgrade checks.
+  Not backported, as it is for newer versions of XCode.
+
+8256:030106247f11 Add new project that builds a Scintilla framework with no lexers.
+  Not backported, as Lexilla is not supported.
+
+8259:9eb5513f9887 Regenerate version numbers in cocoa/Scintilla project.
+  Not backported, as cocoa versioning is probably not needed and would require some Python script backporting.
+
+8260:cd73c86aadae Save and restore current directory around dependency generation in source directory.
+8262:27dde1067ce0 Update instructions for separate Lexilla.
+  Not backported, as Lexilla is not supported.
+
+8269:02f64387e1e6 Updates for 4.4.0.
+8270:cf480284c27e Change log.
+8271:12e2a7acacec Change log.
+8272:2cec461c9531 Added tag rel-4-4-0 for changeset 12e2a7acacec
+  Not backported, as this is LongTerm3.
+
+8273:21000fa93341 Use @rpath as dylib install path as otherwise expects /usr/lib.
+8274:ad039bcac9a0 Make Lexilla run on old macOS by setting deployment target to 10.8.
+8275:23834927ce81 Specify the calling convention so that both dynamic and static linking work on 32-bit and 64-bit Win32.
+  Not backported, as Lexilla is not supported.
+
+8276:41a534b0add8 Updates for 4.4.2.
+8277:9e2209bc5dc8 Added tag rel-4-4-2 for changeset 41a534b0add8
+8278:464c94dd39c2 Updates for 4.4.3.
+8279:e454eae1f1eb Added bug reference.
+8280:a402218b9494 Added tag rel-4-4-3 for changeset e454eae1f1eb
+  Not backported, as this is LongTerm3.
+
+8281:24f3e50b1355 Fix list in documentation.
+  Not backported, as this applies to a Lexilla change that was not backported.
+
+8282:7dbe86a38c18 Use pathlib.
+  Not backported in an attempt to keep support for Python 2.7.
+
+8283:2a5262659fe0 Defer most initialisation until Scintilla window is created.
+8284:6ca6c0a02a93 Use call_once for initialising Direct2D so only done once even with threads.
+  Not backported, as my Windows compiler does not support C++11 threading
+  facilities, and I cannot test this.
+
+8287:f8749b773e12 Prefer .data() over &[0] as more explicit.
+  Backported, but without C++17 and C++20 features.
+
+8292:96f2097aebc7 Add test for latex lexer.
+  Not backported, as Lexilla is not supported.
+
+8294:82dc5f8e49ff Removed extra end tag.
+8303:dca178e47b29 Add include that defines back_inserter.
+  Not backported, as this applies to a change that was not backported.
+
+8304:c010c1851c8a Fixed path mentioned in comment.
+8311:f0910912700f Change log for SciTE.
+  Not backported, as Lexilla is not supported.
+
+8389:e0f48fde525f SciTE change log.
+  Not backported, as this is LongTerm3.
+
+8404:a1ec539e1585 Stronger argument validation in BlobInline methods.
+  Not backported, as this applies to changes that have not been backported.
+
+8402:efa2991d428f Make simple methods on simple classes constexpr.
+8416:06a43e06a8e0 Add constexpr, const, noexcept and make other small improvements to lexlib.
+  Backported, but without constexpr for complicated methods.
+
+8417:e46854ef9662 Fix truncation of locale due to not counting NUL. Add return code check.
+8418:c2b2e876bf7e Tidied up code using wstring, which will often avoid allocating, and fixing variable names.
+  Not backported, as this applies to changes that have not been backported.
+
+8419:ea29809cb3f5 Updates for 4.4.4.
+8421:f422793aa52f Update download size.
+  Not backported, as this is LongTerm3.

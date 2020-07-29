@@ -292,7 +292,7 @@ class LexerLPeg : public ILexer {
    */
   bool init(const char *lexer) {
     char lexers[FILENAME_MAX], themes[FILENAME_MAX], theme[FILENAME_MAX];
-    props.GetExpanded("lexer.lpeg.lexers", lexers);
+    props.GetExpanded("lexer.lpeg.home", lexers);
     props.GetExpanded("lexer.lpeg.themes", themes);
     props.GetExpanded("lexer.lpeg.theme", theme);
     if (!*lexers || !*lexer) return false;

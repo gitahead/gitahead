@@ -1143,12 +1143,6 @@ sptr_t ScintillaQt::WndProc(unsigned int message, uptr_t wParam, sptr_t lParam)
     case SCI_GETDIRECTPOINTER:
       return reinterpret_cast<sptr_t>(this);
 
-#ifdef SCI_LEXER
-      case SCI_LOADLEXERLIBRARY:
-        LexerManager::GetInstance()->Load(reinterpret_cast<const char *>(lParam));
-        break;
-#endif
-
     default:
       return ScintillaBase::WndProc(message, wParam, lParam);
   }

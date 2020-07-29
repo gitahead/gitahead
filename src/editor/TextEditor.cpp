@@ -112,7 +112,7 @@ TextEditor::TextEditor(QWidget *parent)
   bool dark = (text.lightnessF() > base.lightnessF());
 
   setLexerLanguage("lpeg");
-  setProperty("lexer.lpeg.lexers", Settings::lexerDir().path());
+  setProperty("lexer.lpeg.home", Settings::lexerDir().path());
   setProperty("lexer.lpeg.themes", theme->dir().path());
   setProperty("lexer.lpeg.theme", theme->name());
   setProperty("lexer.lpeg.theme.mode", dark ? "dark" : "light");
