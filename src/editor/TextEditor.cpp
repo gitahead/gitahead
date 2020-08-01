@@ -364,9 +364,10 @@ QSize TextEditor::viewportSizeHint() const
   int height = const_cast<TextEditor *>(this)->textHeight(line);
   int y = const_cast<TextEditor *>(this)->pointFromPosition(length()).y();
 
-  // Add extra height for scrollbar.
-  if (horizontalScrollBarVisible)
-    y += horizontalScrollBar()->height();
+#if defined(Q_OS_LINUX) || defined(Q_OS_MAC)
+  // FIXME: add height for horizontal scroll bar.
+  y += horizontalScrollBar()->height();
+#endif
 
   return QSize(size.width(), y + (lines * height));
 }
