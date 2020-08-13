@@ -613,7 +613,7 @@ StartDialog::StartDialog(QWidget *parent)
   QString text = tr("View Getting Started Video");
   QPushButton *help = mButtonBox->addButton(text, QDialogButtonBox::ResetRole);
   connect(help, &QPushButton::clicked, [] {
-    QDesktopServices::openUrl(QUrl("https://gitahead.com/#tutorials"));
+    QDesktopServices::openUrl(QUrl("https://www.youtube.com/playlist?list=PLkhgTa3ULplz_DgalwtORMviEJeHy07EB"));
   });
 
   QVBoxLayout *layout = new QVBoxLayout(this);

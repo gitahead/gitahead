@@ -27,7 +27,7 @@ namespace {
 
 const QString kLinkFmt = "<a href='%1'>%2</a>";
 const QString kSupportLink = "mailto:support@gitahead.com";
-const QString kVideoLink = "https://gitahead.com/#tutorials";
+const QString kVideoLink = "https://www.youtube.com/playlist?list=PLkhgTa3ULplz_DgalwtORMviEJeHy07EB";
 
 class DefaultWidget : public QFrame
 {
