@@ -1038,7 +1038,7 @@
     <message>
         <location filename="../src/dialogs/DiffPanel.cpp" line="31"/>
         <source>lines</source>
-        <translation>zeilen</translation>
+        <translation>Zeilen</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DiffPanel.cpp" line="49"/>
@@ -1086,7 +1086,7 @@
     <message>
         <location filename="../src/dialogs/DiffPanel.cpp" line="104"/>
         <source>Auto Collapse:</source>
-        <translation>Automatisch zusammenklappen:</translation>
+        <translation>Automatisch zuklappen:</translation>
     </message>
 </context>
 <context>
@@ -1609,13 +1609,13 @@
         <location filename="../src/ui/DiffView.cpp" line="1720"/>
         <location filename="../src/ui/DiffView.cpp" line="1723"/>
         <source>Collapse File</source>
-        <translation>Datei zusammenklappen</translation>
+        <translation>Datei zuklappen</translation>
     </message>
     <message>
         <location filename="../src/ui/DiffView.cpp" line="1720"/>
         <location filename="../src/ui/DiffView.cpp" line="1723"/>
         <source>Expand File</source>
-        <translation>Datei ausklappen</translation>
+        <translation>Datei aufklappen</translation>
     </message>
     <message>
         <location filename="../src/ui/DiffView.cpp" line="1907"/>
@@ -1873,13 +1873,13 @@
         <location filename="../src/ui/DiffView.cpp" line="721"/>
         <location filename="../src/ui/DiffView.cpp" line="724"/>
         <source>Collapse Hunk</source>
-        <translation>Hunk zusammenklappen</translation>
+        <translation>Hunk zuklappen</translation>
     </message>
     <message>
         <location filename="../src/ui/DiffView.cpp" line="721"/>
         <location filename="../src/ui/DiffView.cpp" line="724"/>
         <source>Expand Hunk</source>
-        <translation>Hunk ausklappen</translation>
+        <translation>Hunk aufklappen</translation>
     </message>
     <message>
         <location filename="../src/ui/DiffView.cpp" line="947"/>
