@@ -17,7 +17,7 @@ string(TIMESTAMP GITAHEAD_BUILD_DATE)
 find_package(Git)
 if(GIT_FOUND)
   execute_process(
-    COMMAND ${GIT_EXECUTABLE} show -s --format=%h HEAD
+    COMMAND ${GIT_EXECUTABLE} --git-dir=${CMAKE_SOURCE_DIR}/.git show -s --format=%h HEAD
     OUTPUT_VARIABLE GITAHEAD_BUILD_REVISION
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
