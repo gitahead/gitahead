@@ -166,6 +166,11 @@ Config Config::appGlobal()
     return Config();
 
   QDir dir = Settings::userDir();
+
+  // Create missing path.
+  if (!dir.exists())
+    dir.mkpath(dir.path());
+
   QByteArray path = dir.filePath(kConfigFile).toUtf8();
   if (git_config_add_file_ondisk(
         config, path, GIT_CONFIG_LEVEL_GLOBAL, nullptr, 0)) {
