@@ -3314,7 +3314,7 @@ Konflikt zu beheben</translation>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="46"/>
         <source>Enter the URL of the remote repository or browse for a local directory</source>
-        <translation>Gib die URL des entfernten Repositories ein oder suche lokalen Ordner</translation>
+        <translation>Gib die URL des entfernten Repositories ein oder suche nach einem lokalen Ordner</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="74"/>
