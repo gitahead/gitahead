@@ -9,11 +9,14 @@
 
 #include "DetailView.h"
 #include "Badge.h"
+#include "ContextMenuButton.h"
 #include "DiffWidget.h"
 #include "MenuBar.h"
 #include "TreeWidget.h"
+#include "app/Application.h"
 #include "git/Branch.h"
 #include "git/Commit.h"
+#include "git/Config.h"
 #include "git/Diff.h"
 #include "git/Index.h"
 #include "git/Repository.h"
@@ -33,8 +36,10 @@
 #include <QPainterPath>
 #include <QPushButton>
 #include <QRegularExpression>
+#include <QSpinBox>
 #include <QStackedWidget>
 #include <QStyle>
+#include <QTextDocumentFragment>
 #include <QTextEdit>
 #include <QToolButton>
 #include <QUrl>
@@ -55,6 +60,33 @@ const QString kAuthorFmt = "<b>%1 &lt;%2&gt;</b>";
 const QString kAltFmt = "<span style='color: %1'>%2</span>";
 const QString kUrl = "http://www.gravatar.com/avatar/%1?s=%2&d=mm";
 
+const QString kLimitFmt =
+  "QLabel {"
+  "  border: 1px solid %1;"
+  "}";
+const QString kMessageFmt =
+  "QTextEdit {"
+  "  border: 3px solid %1;"
+  "}";
+const QString kSpin =
+  "QSpinBox {"
+  "  border: none;"
+  "}"
+  "QSpinBox::up-button {"
+  "  top: 0px;"
+  "}"
+  "QSpinBox::down-button {"
+  "  bottom: 0px;"
+  "}";
+
+const QString kSubjectWarnKey = "commit.subject.warn";
+const QString kSubjectProtectKey = "commit.subject.protect";
+const QString kSubjectLimitKey = "commit.subject.limit";
+const QString kBlankKey = "commit.blank.insert";
+const QString kBodyWarnKey = "commit.body.warn";
+const QString kBodyWrapKey = "commit.body.wordwrap";
+const QString kBodyLimitKey = "commit.body.limit";
+
 const Qt::TextInteractionFlags kTextFlags =
   Qt::TextSelectableByMouse | Qt::LinksAccessibleByMouse;
 
@@ -63,6 +95,13 @@ QString brightText(const QString &text)
   return kAltFmt.arg(QPalette().color(QPalette::BrightText).name(), text);
 }
 
+QString warningStyle(const QString &style, bool warning)
+{
+  if (warning)
+    return style.arg(Application::theme()->diff(Theme::Diff::Warning).name());
+  else
+    return style.arg("none");
+}
 class MessageLabel : public QTextEdit
 {
 public:
@@ -455,21 +494,237 @@ private:
   QFutureWatcher<QString> mWatcher;
 };
 
+class ElidedLabel : public QLabel
+{
+public:
+  ElidedLabel(const QString &text,
+              const QString &shorttext = QString(),
+              const Qt::TextElideMode &elidemode = Qt::ElideMiddle,
+              QWidget *parent = nullptr)
+    : QLabel(parent), mText(text), mShortText(shorttext), mElideMode(elidemode)
+  {
+    QLabel(text, parent);
+    setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
+  }
+
+  ElidedLabel(const QString &text,
+              const Qt::TextElideMode &elidemode = Qt::ElideMiddle,
+              QWidget *parent = nullptr)
+    : QLabel(parent), mText(text), mElideMode(elidemode)
+  {
+    QLabel(text, parent);
+    setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
+  }
+
+  void setText(const QString &text,
+               const QString &shorttext = QString())
+  {
+    mText = text;
+    mShortText = shorttext;
+
+    QFontMetrics fm = getFontMetric();
+    QString plain = QTextDocumentFragment::fromHtml(text).toPlainText();
+    mWidth = fm.boundingRect(plain).width() + fm.averageCharWidth();
+
+    QLabel::setText(text);
+  }
+
+  void setElideMode(const Qt::TextElideMode &elidemode)
+  {
+    mElideMode = elidemode;
+    repaint();
+  }
+
+  QSize sizeHint() const override
+  {
+    if (mElided)
+      return QSize(mWidth, QLabel::sizeHint().height());
+
+    return QLabel::sizeHint();
+  }
+
+  QSize minimumSizeHint() const override
+  {
+    if (mElided && !mShortText.isEmpty())
+      return QLabel::minimumSizeHint();
+
+    QFontMetrics fm = getFontMetric();
+
+    return QSize(fm.boundingRect("...").width() + fm.averageCharWidth(), QLabel::minimumSizeHint().height());
+  }
+
+protected:
+  void paintEvent(QPaintEvent *event) override
+  {
+    QFontMetrics fm = getFontMetric();
+    QString plain = QTextDocumentFragment::fromHtml(mText).toPlainText();
+    QString elide = fm.elidedText(plain, mElideMode, width());
+    if (plain.length() > elide.length()) {
+      // Use short text or elide text.
+      if (!mShortText.isEmpty())
+        QLabel::setText(mShortText);
+      else {
+        QString text = mText;
+        QLabel::setText(text.replace(plain, elide));
+      }
+      mElided = true;
+    } else {
+      // Use text.
+      QLabel::setText(mText);
+      mElided = false;
+      mWidth = QLabel::width();
+    }
+
+    QLabel::paintEvent(event);
+  }
+
+private:
+  QFontMetrics getFontMetric(void) const
+  {
+    QFont font = QLabel::font();
+
+    // Detect common HTML tags.
+    font.setBold(mText.contains("<b>"));
+
+    QFontMetrics fm(font);
+
+    return fm;
+  }
+
+  QString mText;
+  QString mShortText;
+
+  Qt::TextElideMode mElideMode = Qt::ElideMiddle;
+
+  bool mElided = false;
+  int mWidth = 10000;
+};
+
 class CommitEditor : public QFrame
 {
   Q_OBJECT
 
 public:
   CommitEditor(const git::Repository &repo, QWidget *parent = nullptr)
-    : QFrame(parent)
+    : QFrame(parent), mRepo(repo)
   {
     QLabel *label = new QLabel(tr("<b>Commit Message:</b>"), this);
+
+    // Read configuration.
+    git::Config appconfig = repo.appConfig();
+    mSubjectLimit = appconfig.value<int>(kSubjectLimitKey, 50);
+    mBodyLimit = appconfig.value<int>(kBodyLimitKey, 72);
+
+    mLengthLabel = new ElidedLabel(QString(), QString(), Qt::ElideLeft, this);
+    mLengthLabel->setAlignment(Qt::AlignRight);
+
+    mLengthSpin = new QSpinBox(this);
+    mLengthSpin->setRange(0, 999);
+    mLengthSpin->setValue(mSubjectLimit);
+
+    // Spinbox size adaption
+    QFont font = mLengthSpin->font();
+    font.setPointSize(font.pointSize() - 2);
+    mLengthLabel->setFont(font);
+    mLengthSpin->setFont(font);
+    mLengthSpin->setStyleSheet(kSpin);
+
+    connect(mLengthSpin, QOverload<int>::of(&QSpinBox::valueChanged), [this](int value) {
+      QTextCursor cursor = mMessage->textCursor();
+      int row = cursor.blockNumber();
+
+      // Ignore value for blank line.
+      if ((row == 1) && (mBlank->isChecked()))
+        return;
+
+      // Save settings.
+      git::Config appconfig = mRepo.appConfig();
+      if (row == 0) {
+        mSubjectLimit = value;
+        appconfig.setValue(kSubjectLimitKey, value);
+      } else {
+        mBodyLimit = value;
+        appconfig.setValue(kBodyLimitKey, value);
+      }
+
+      checkWarning();
+    });
+
     mStatus = new QLabel(QString(), this);
+
+    // Context button.
+    ContextMenuButton *button = new ContextMenuButton(this);
+    QMenu *menu = new QMenu(this);
+    button->setMenu(menu);
+
+    mSubjectWarn = menu->addAction(tr("Subject Line Length Warning"), [this] {
+      // Save settings.
+      git::Config appconfig = mRepo.appConfig();
+      appconfig.setValue(kSubjectWarnKey, mSubjectWarn->isChecked());
+
+      checkWarning();
+    });
+    mSubjectWarn->setCheckable(true);
+    mSubjectWarn->setChecked(appconfig.value<bool>(kSubjectWarnKey, false));
+    mSubjectProtect = menu->addAction(tr("Avoid Subject Line Length Violation"), [this] {
+      bool protect = mSubjectProtect->isChecked();
+      if (protect)
+        mSubjectWarn->setChecked(true);
+      mSubjectWarn->setEnabled(!protect);
+
+      // Save settings.
+      git::Config appconfig = mRepo.appConfig();
+      appconfig.setValue(kSubjectProtectKey, mSubjectProtect->isChecked());
+
+      checkWarning();
+    });
+    mSubjectProtect->setCheckable(true);
+    mSubjectProtect->setChecked(appconfig.value<bool>(kSubjectProtectKey, false));
+    mSubjectWarn->setEnabled(!mSubjectProtect->isChecked());
+
+    mBlank = menu->addAction(tr("Insert Blank Line between Subject and Body"), [this] {
+      // Save settings.
+      git::Config appconfig = mRepo.appConfig();
+      appconfig.setValue(kBlankKey, mBlank->isChecked());
+
+      checkWarning();
+    });
+    mBlank->setCheckable(true);
+    mBlank->setChecked(appconfig.value<bool>(kBlankKey, false));
+
+    mBodyWarn = menu->addAction(tr("Body Text Length Warning"), [this] {
+      // Save settings.
+      git::Config appconfig = mRepo.appConfig();
+      appconfig.setValue(kBodyWarnKey, mBodyWarn->isChecked());
+
+      checkWarning();
+    });
+    mBodyWarn->setCheckable(true);
+    mBodyWarn->setChecked(appconfig.value<bool>(kBodyWarnKey, false));
+    mBodyWrap = menu->addAction(tr("Body Text Wordwrap"), [this] {
+      bool wrap = mBodyWrap->isChecked();
+      if (wrap)
+        mBodyWarn->setChecked(true);
+      mBodyWarn->setEnabled(!wrap);
+
+      // Save settings.
+      git::Config appconfig = mRepo.appConfig();
+      appconfig.setValue(kBodyWrapKey, mBodyWrap->isChecked());
+
+      checkWarning();
+    });
+    mBodyWrap->setCheckable(true);
+    mBodyWrap->setChecked(appconfig.value<bool>(kBodyWrapKey, false));
+    mBodyWarn->setEnabled(!mBodyWrap->isChecked());
 
     QHBoxLayout *labelLayout = new QHBoxLayout;
     labelLayout->addWidget(label);
     labelLayout->addStretch();
+    labelLayout->addWidget(mLengthLabel);
+    labelLayout->addWidget(mLengthSpin);
+    labelLayout->addStretch();
     labelLayout->addWidget(mStatus);
+    labelLayout->addWidget(button);
 
     mMessage = new QTextEdit(this);
     mMessage->setAcceptRichText(false);
@@ -484,7 +739,15 @@ public:
       mEditorEmpty = empty;
 
       mPopulate = mMessage->toPlainText().isEmpty();
+
+      checkWarning();
     });
+    connect(mMessage, &QTextEdit::cursorPositionChanged, [this] {
+      checkWarning();
+    });
+
+    // Check initial limits.
+    checkWarning();
 
     // Update menu items.
     MenuBar *menuBar = MenuBar::instance(this);
@@ -696,9 +959,209 @@ private:
     MenuBar::instance(this)->updateRepository();
   }
 
+  void checkWarning(void)
+  {
+    QTextCursor cursor = mMessage->textCursor();
+    int row = cursor.blockNumber();
+    int pos = cursor.position();
+    bool enable = true;
+    int limit = -1;
+
+    // Setup text prefix and limit according to actual row.
+    QString text;
+    QString shorttext;
+    switch (row) {
+      case 0:
+        text = tr("Subject:");
+        limit = mSubjectLimit;
+        break;
+      case 1:
+        if (mBlank->isChecked()) {
+          text = tr("Blank:");
+          limit = 0;
+          enable = false;
+        }
+        else {
+          text = tr("Body:");
+          limit = mBodyLimit;
+        }
+        break;
+      default:
+        text = tr("Body:");
+        limit = mBodyLimit;
+        break;
+    }
+
+    // Evaluate actual line length.
+    QStringList str = mMessage->toPlainText().split('\n');
+    int len = str[row].length();
+
+    text.append(" ");
+    text.append(QString::number(len));
+    shorttext = QString::number(len);
+    text.append(" /");
+    shorttext.append(" /");
+    mLengthLabel->setText(brightText(text), brightText(shorttext));
+
+    mLengthSpin->setValue(limit);
+    mLengthSpin->setEnabled(enable);
+
+    // Subject line length limit.
+    if (mSubjectProtect->isChecked()) {
+      if ((str.count() > 0) && (str[0].length() > mSubjectLimit)) {
+        // Warning indication (300 ms).
+        mMessage->setStyleSheet(warningStyle(kMessageFmt, true));
+        mSubjectFlash = true;
+        QTimer *timer = new QTimer(this);
+        connect(timer, &QTimer::timeout, [this, timer] {
+          mSubjectFlash = false;
+          if (!mSubjectViolation && !mBodyViolation)
+            mMessage->setStyleSheet(warningStyle(kMessageFmt, false));
+          timer->stop();
+        });
+        timer->start(300);
+
+        // Protect subject line length limit.
+        if (pos == (limit + 1))
+          pos -= 1;
+        str[0] = str[0].left(limit);
+        mMessage->setPlainText(str.join('\n'));
+
+        cursor.setPosition(pos);
+        mMessage->setTextCursor(cursor);
+
+        // setPlainText() will emit textchanged().
+        return;
+      }
+    }
+    if ((row == 0) && !mSubjectWarn->isChecked())
+      limit = -1;
+
+    // Blank line (inserted).
+    if (mBlank->isChecked()) {
+      if ((str.count() > 1) && (str[1].length() > 0)) {
+        // Prevent content in blank line.
+        if (row >= 1)
+          pos += 1;
+        str[1].insert(0, '\n');
+        mMessage->setPlainText(str.join('\n'));
+
+        cursor.setPosition(pos);
+        mMessage->setTextCursor(cursor);
+
+        // setPlainText() will emit textchanged().
+        return;
+      }
+      if (row == 1)
+        limit = 0;
+    }
+
+    // Body line length limit.
+    if (((row == 1) && !mBodyWarn->isChecked() && !mBlank->isChecked()) ||
+        ((row >= 2) && !mBodyWarn->isChecked()))
+      limit = -1;
+
+    // Display warning: actual line has a warning.
+    if ((limit >= 0) && (len > limit))
+      mLengthLabel->setStyleSheet(warningStyle(kLimitFmt, true));
+    else
+      mLengthLabel->setStyleSheet(warningStyle(kLimitFmt, false));
+
+    // Set limit label and spinbox visibility.
+    mLengthLabel->setVisible(limit >= 0);
+    mLengthSpin->setVisible(limit >= 0);
+
+    // Subject line length violation detection.
+    if (str.count()) {
+      if (mSubjectWarn->isChecked() && (str[0].length() > mSubjectLimit))
+        mSubjectViolation = true;
+      else
+        mSubjectViolation = false;
+    }
+
+    // Body line length violation detection.
+    mBodyViolation = false;
+    for (int i = 1; i < str.count(); i++) {
+      if (mBodyWarn->isChecked() && (str[i].length() > mBodyLimit)) {
+        mBodyViolation = true;
+        break;
+      }
+    }
+
+    // Display warning: subject or body has a warning
+    if (mSubjectViolation || mSubjectFlash || mBodyViolation)
+      mMessage->setStyleSheet(warningStyle(kMessageFmt, true));
+    else
+      mMessage->setStyleSheet(warningStyle(kMessageFmt, false));
+
+    // Wordwrap for body.
+    if (mBodyViolation && mBodyWrap->isChecked())
+      wordWrap(cursor, str);
+  }
+
+  void wordWrap(QTextCursor &cursor, QStringList &str)
+  {
+    bool changed = false;
+
+    // Scan the body, skip subject.
+    for (int i = 1; i < str.count(); i++) {
+      int len = str[i].length();
+
+      if (len > mBodyLimit) {
+        // Limit exceeded. find whitespace for wordwrap.
+        int ws = str[i].lastIndexOf(' ');
+        if (ws > mBodyLimit) {
+          // The whitespace is beyond the limit, search backward.
+          QString line = str[i].left(ws);
+          while (ws > mBodyLimit) {
+            ws = line.lastIndexOf(' ');
+            if (ws > 0)
+              line = line.left(ws);
+          }
+          if (ws < 0) {
+            // No whitespace within the limit, search forward.
+            ws = str[i].indexOf(' ', mBodyLimit);
+          }
+        }
+
+        // Wordwrap at whitespace position.
+        if (ws > 0) {
+          changed = true;
+          QString tail = str[i].right(len - ws - 1);
+          str[i] = str[i].left(ws);
+          if ((i + 1) >= str.count())
+            str.append(tail);
+          else
+            str[i + 1].insert(0, tail.append(' '));
+        }
+      }
+    }
+
+    // Apply changes.
+    if (changed) {
+      int pos = cursor.position();
+      mMessage->setPlainText(str.join('\n'));
+
+      cursor.setPosition(pos);
+      mMessage->setTextCursor(cursor);
+
+      // setPlainText() will emit textchanged().
+    }
+  }
+
+  git::Repository mRepo;
   git::Diff mDiff;
 
+  ElidedLabel *mLengthLabel;
+  QSpinBox *mLengthSpin;
   QLabel *mStatus;
+
+  QAction *mSubjectWarn;
+  QAction *mSubjectProtect;
+  QAction *mBlank;
+  QAction *mBodyWarn;
+  QAction *mBodyWrap;
+
   QTextEdit *mMessage;
   QPushButton *mStage;
   QPushButton *mUnstage;
@@ -706,6 +1169,11 @@ private:
 
   bool mEditorEmpty = true;
   bool mPopulate = true;
+  int mSubjectLimit = 50;
+  int mBodyLimit = 72;
+  bool mSubjectViolation = false;
+  bool mSubjectFlash = false;
+  bool mBodyViolation = false;
 };
 
 } // anon. namespace

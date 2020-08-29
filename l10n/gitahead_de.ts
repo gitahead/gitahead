@@ -494,22 +494,22 @@
 <context>
     <name>CommitDetail</name>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="214"/>
+        <location filename="../src/ui/DetailView.cpp" line="253"/>
         <source>Copy</source>
         <translation>Kopieren</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="356"/>
+        <location filename="../src/ui/DetailView.cpp" line="395"/>
         <source>Range:</source>
         <translation>Bereich:</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="373"/>
+        <location filename="../src/ui/DetailView.cpp" line="412"/>
         <source>Id:</source>
         <translation>ID:</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="385"/>
+        <location filename="../src/ui/DetailView.cpp" line="424"/>
         <source>initial commit</source>
         <translation>Initialer Commit</translation>
     </message>
@@ -567,90 +567,131 @@
 <context>
     <name>CommitEditor</name>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="466"/>
+        <location filename="../src/ui/DetailView.cpp" line="611"/>
         <source>&lt;b&gt;Commit Message:&lt;/b&gt;</source>
         <translation>&lt;b&gt;Commit-Nachricht:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="503"/>
+        <location filename="../src/ui/DetailView.cpp" line="660"/>
+        <source>Subject Line Length Warning</source>
+        <translation type="unfinished">Warnung wenn die Betreffzeile zu lange ist</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/DetailView.cpp" line="669"/>
+        <source>Avoid Subject Line Length Violation</source>
+        <translation type="unfinished">Zu lange Betreffzeile verhindern</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/DetailView.cpp" line="685"/>
+        <source>Insert Blank Line between Subject and Body</source>
+        <translation type="unfinished">Leerzeile zwischen Betreff und Nachricht einfügen</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/DetailView.cpp" line="695"/>
+        <source>Body Text Length Warning</source>
+        <translation type="unfinished">Warnung wenn eine Nachrichtenzeile zu lange ist</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/DetailView.cpp" line="704"/>
+        <source>Body Text Wordwrap</source>
+        <translation type="unfinished">Automatischer Zeilenumbruch für die Nachricht</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/DetailView.cpp" line="766"/>
         <source>Stage All</source>
         <translation>Alles stagen</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="507"/>
+        <location filename="../src/ui/DetailView.cpp" line="770"/>
         <source>Unstage All</source>
         <translation>Alles unstagen</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="510"/>
-        <location filename="../src/ui/DetailView.cpp" line="693"/>
+        <location filename="../src/ui/DetailView.cpp" line="773"/>
+        <location filename="../src/ui/DetailView.cpp" line="956"/>
         <source>Commit</source>
         <translation>Committen</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="636"/>
+        <location filename="../src/ui/DetailView.cpp" line="899"/>
         <source>Update %1</source>
         <translation>%1 aktualisiert</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="640"/>
+        <location filename="../src/ui/DetailView.cpp" line="903"/>
         <source>Update %1 and %2</source>
         <translation>%1 und %2 aktualisiert</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="644"/>
+        <location filename="../src/ui/DetailView.cpp" line="907"/>
         <source>Update %1, %2, and %3</source>
         <translation>%1, %2 und %3 aktualisiert</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="649"/>
+        <location filename="../src/ui/DetailView.cpp" line="912"/>
         <source>Update %1, %2, and %3 more files...</source>
         <translation>%1, %2 und %3 weitere dateien aktualisiert...</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="665"/>
+        <location filename="../src/ui/DetailView.cpp" line="928"/>
         <source>Nothing staged</source>
         <translation>Nichts gestaged</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="668"/>
+        <location filename="../src/ui/DetailView.cpp" line="931"/>
         <source>%1 of %2 file staged</source>
         <translation>%1 von %2 Datei gestaged</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="668"/>
+        <location filename="../src/ui/DetailView.cpp" line="931"/>
         <source>%1 of %2 files staged</source>
         <translation>%1 von %2 Dateien gestaged</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="673"/>
+        <location filename="../src/ui/DetailView.cpp" line="936"/>
         <source>%1 file partially staged</source>
         <translation>%1 Datei teilweise gestaged</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="673"/>
+        <location filename="../src/ui/DetailView.cpp" line="936"/>
         <source>%1 files partially staged</source>
         <translation>%1 Dateien teilweise gestaged</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="679"/>
+        <location filename="../src/ui/DetailView.cpp" line="942"/>
         <source>%1 unresolved conflict</source>
         <translation>%1 ungelöster Konflikt</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="679"/>
+        <location filename="../src/ui/DetailView.cpp" line="942"/>
         <source>%1 unresolved conflicts</source>
         <translation>%1 ungelöste Konflikte</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="682"/>
+        <location filename="../src/ui/DetailView.cpp" line="945"/>
         <source>all conflicts resolved</source>
         <translation>Alle Konflikte gelöst</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="693"/>
+        <location filename="../src/ui/DetailView.cpp" line="956"/>
         <source>Commit Merge</source>
         <translation>Merge committen</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/DetailView.cpp" line="975"/>
+        <source>Subject:</source>
+        <translation type="unfinished">Betreff:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/DetailView.cpp" line="980"/>
+        <source>Blank:</source>
+        <translation type="unfinished">Leerzeile:</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/DetailView.cpp" line="985"/>
+        <location filename="../src/ui/DetailView.cpp" line="990"/>
+        <source>Body:</source>
+        <translation type="unfinished">Nachricht:</translation>
     </message>
 </context>
 <context>
@@ -1659,32 +1700,32 @@
 <context>
     <name>GeneralPanel</name>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="104"/>
         <location filename="../src/dialogs/ConfigDialog.cpp" line="85"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="104"/>
         <source>Fetch every</source>
         <translation>Fetchen alle</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="112"/>
         <location filename="../src/dialogs/ConfigDialog.cpp" line="93"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="112"/>
         <source>minutes</source>
         <translation>Minuten</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="115"/>
         <location filename="../src/dialogs/ConfigDialog.cpp" line="96"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="115"/>
         <source>Push after each commit</source>
         <translation>Nach jedem Commit pushen</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="116"/>
         <location filename="../src/dialogs/ConfigDialog.cpp" line="97"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="116"/>
         <source>Update submodules after pull</source>
         <translation>Submodule nach pull aktualisieren</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="117"/>
         <location filename="../src/dialogs/ConfigDialog.cpp" line="98"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="117"/>
         <source>Prune when fetching</source>
         <translation>Beim Fetchen aufräumen</translation>
     </message>
@@ -1694,20 +1735,20 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="131"/>
         <location filename="../src/dialogs/ConfigDialog.cpp" line="101"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="131"/>
         <source>User name:</source>
         <translation>Benutzername:</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="132"/>
         <location filename="../src/dialogs/ConfigDialog.cpp" line="102"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="132"/>
         <source>User email:</source>
         <translation>E-Mail-Adresse:</translation>
     </message>
     <message>
-        <location filename="../src/dialogs/SettingsDialog.cpp" line="133"/>
         <location filename="../src/dialogs/ConfigDialog.cpp" line="103"/>
+        <location filename="../src/dialogs/SettingsDialog.cpp" line="133"/>
         <source>Automatic actions:</source>
         <translation>Automatische Aktionen:</translation>
     </message>
@@ -5047,7 +5088,6 @@ Dies reverted den Commit %2.</translation>
         <translation>Installer-Skript schlug fehl: %1</translation>
     </message>
     <message>
-        <location filename="../src/update/Updater_mac.mm" line="117"/>
         <location filename="../src/update/Updater.cpp" line="274"/>
         <source>Helper application failed to start</source>
         <translation>Helfer-Programm konnte nicht gestartet werden</translation>
@@ -5058,19 +5098,16 @@ Dies reverted den Commit %2.</translation>
         <translation>Installer konnte nicht gestartet werden</translation>
     </message>
     <message>
-        <location filename="../src/update/Updater_mac.mm" line="77"/>
         <source>The disk image failed to mount successfully</source>
-        <translation>Das Volumen-Abbild konnte nicht eingehangen werden</translation>
+        <translation type="vanished">Das Volumen-Abbild konnte nicht eingehangen werden</translation>
     </message>
     <message>
-        <location filename="../src/update/Updater_mac.mm" line="96"/>
         <source>The existing bundle could not be moved to the trash</source>
-        <translation>Das bereits vorhandene Paket konnte nicht in den Papierkorb verschoben werden</translation>
+        <translation type="vanished">Das bereits vorhandene Paket konnte nicht in den Papierkorb verschoben werden</translation>
     </message>
     <message>
-        <location filename="../src/update/Updater_mac.mm" line="108"/>
         <source>The new bundle could not be copied into place</source>
-        <translation>Das neue Paket konnte nicht an den Zielort verschoben werden</translation>
+        <translation type="vanished">Das neue Paket konnte nicht an den Zielort verschoben werden</translation>
     </message>
 </context>
 <context>
