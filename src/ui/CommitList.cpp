@@ -1436,6 +1436,11 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
       }
     }
 
+    menu.addAction(tr("New Branch..."), [view] {
+      view->promptToCreateBranch(view->repo().head().target());
+    });
+    menu.addSeparator();
+
     QAction *clean = menu.addAction(tr("Remove Untracked Files"),
     [view, untracked] {
       view->clean(untracked);
@@ -1583,23 +1588,43 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
             view->checkout(ref);
           });
 
-          checkout->setEnabled(
-            head.isValid() &&
-            head.qualifiedName() != ref.qualifiedName() &&
-            !view->repo().isBare());
+          if (!head.isValid()) { // I'm not sure when this can happen
+            checkout->setEnabled(false);
+            checkout->setToolTip(tr("HEAD is invalid"));
+          } else if (head.qualifiedName() == ref.qualifiedName()) {
+            checkout->setEnabled(false);
+            checkout->setToolTip(tr("Local branch is already checked out"));
+          } else if (view->repo().isBare()) {
+            checkout->setEnabled(false);
+            checkout->setToolTip(tr("This is a bare repository"));
+          }
         } else if (ref.isRemoteBranch()) {
           QAction *checkout = menu.addAction(tr("Checkout %1").arg(ref.name()),
-          [view, ref] {
-            view->checkout(ref);
+          [view, head, commit, ref] {
+            QString local = ref.name().section('/', 1);
+
+            if (head.name() == local) {
+              view->checkout(commit, ref);
+
+              // Checkout done, reset local branch.
+              QString id = view->repo().head().target().id().toString();
+              if (id.contains(commit.detachedHeadName()))
+                view->createBranch(local, ref.target(), ref, true, true);
+            } else {
+              view->checkout(ref);
+            }
           });
 
           // Calculate local branch name in the same way as checkout() does
           QString local = ref.name().section('/', 1);
           if (!head.isValid()) { // I'm not sure when this can happen
             checkout->setEnabled(false);
-          } else if (head.name() == local) {
+            checkout->setToolTip(tr("HEAD is invalid"));
+          } else if (head.target() == commit) {
             checkout->setEnabled(false);
             checkout->setToolTip(tr("Local branch is already checked out"));
+          } else if (head.name() == local) {
+            checkout->setToolTip(tr("Checkout %1 and Reset local branch %2").arg(ref.name()).arg(local));
           } else if (view->repo().isBare()) {
             checkout->setEnabled(false);
             checkout->setToolTip(tr("This is a bare repository"));
@@ -1613,9 +1638,16 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
         view->checkout(commit);
       });
 
-      checkout->setEnabled(head.isValid() &&
-                           head.target() != commit &&
-                           !view->repo().isBare());
+      if (!head.isValid()) { // I'm not sure when this can happen
+        checkout->setEnabled(false);
+        checkout->setToolTip(tr("HEAD is invalid"));
+      } else if (head.target() == commit) {
+        checkout->setEnabled(false);
+        checkout->setToolTip(tr("Local branch is already checked out"));
+      } else if (view->repo().isBare()) {
+        checkout->setEnabled(false);
+        checkout->setToolTip(tr("This is a bare repository"));
+      }
 
       menu.addSeparator();
 
