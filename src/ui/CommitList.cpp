@@ -665,7 +665,8 @@ public:
     initStyleOption(&opt, index);
 
     bool compact = Settings::instance()->value("commit/compact").toBool();
-    LayoutConstants constants = layoutConstants(compact);
+    bool reduced = Settings::instance()->value("commit/reduced").toBool();
+    LayoutConstants constants = layoutConstants(compact, reduced);
 
     // Draw background.
     QStyledItemDelegate::paint(painter, opt, index);
@@ -818,6 +819,8 @@ public:
       const QFontMetrics &fm = opt.fontMetrics;
       QRect star = rect;
 
+      QString msg = commit.summary(git::Commit::SubstituteEmoji);
+      QString name = commit.author().name();
       QDateTime date = commit.committer().date().toLocalTime();
       QString timestamp = (date.date() == QDate::currentDate()) ?
         date.time().toString(Qt::DefaultLocaleShortDate) :
@@ -841,9 +844,7 @@ public:
 
         QRect commitRect = rect;
         commitRect.setX(commitRect.x() + commitRect.width() - idWidth);
-        painter->save();
         painter->drawText(commitRect, Qt::AlignLeft, id);
-        painter->restore();
         rect.setWidth(rect.width() - idWidth - constants.hMargin);
 
         // Draw date. Only if it is not the same as previous?
@@ -874,14 +875,75 @@ public:
         // Draw message.
         painter->save();
         painter->setPen(bright);
-        QString msg = commit.summary(git::Commit::SubstituteEmoji);
         QString elidedText = fm.elidedText(msg, Qt::ElideRight, rect.width());
         painter->drawText(rect, Qt::ElideRight, elidedText);
         painter->restore();
 
+      } else if (reduced) {
+        // Star always takes up its width on the right side.
+        star.setX(star.x() + star.width() - star.height() / 2);
+        star.setY(star.y() + star.width() / 4 + constants.starPadding);
+        star.setHeight(star.width());
+        rect.setWidth(rect.width() - star.width());
+
+        QRect topRect = rect;
+        topRect.setY(rect.y() + constants.vMargin / 2);
+        QRect bottomRect = rect;
+        bottomRect.setY(rect.y() + constants.lineSpacing + constants.vMargin);
+
+        // Draw short commit id.
+        QString id = commit.id().toString().left(kShortIdSize);
+        int idWidth = maxShortIdWidth(fm);
+
+        if (topRect.width() > (idWidth + 2 * constants.hMargin)) {
+          QRect commitRect = topRect;
+          commitRect.setX(commitRect.x() + commitRect.width() - idWidth);
+          painter->drawText(commitRect, Qt::AlignLeft, id);
+          topRect.setWidth(topRect.width() - idWidth - constants.hMargin);
+        }
+
+        // Draw date.
+        if (topRect.width() > (timestampWidth + 2 * constants.hMargin)) {
+          painter->save();
+          painter->setPen(bright);
+          painter->drawText(topRect, Qt::AlignRight, timestamp);
+          painter->restore();
+          topRect.setWidth(topRect.width() - timestampWidth - constants.hMargin);
+        }
+
+        // Draw references.
+        QList<Badge::Label> refs = mRefs.value(commit.id());
+        if (!refs.isEmpty())
+          Badge::paint(painter, refs, topRect, &opt, Qt::AlignLeft);
+
+        // Draw Name.
+        QFont bold = opt.font;
+        bold.setBold(true);
+        QFontMetrics fmBold(bold);
+        int nameWidth = fmBold.horizontalAdvance(name);
+
+        if (bottomRect.width() > (nameWidth + 2 * constants.hMargin)) {
+          painter->save();
+          painter->setFont(bold);
+          painter->drawText(bottomRect, Qt::AlignRight, name);
+          painter->restore();
+          bottomRect.setWidth(bottomRect.width() - nameWidth - constants.hMargin);
+        }
+
+        // Draw message.
+        if (refs.isEmpty()) {
+          bottomRect.setY(rect.y() + rect.height() / 4);
+          if (topRect.width() < bottomRect.width())
+            bottomRect.setWidth(topRect.width());
+        }
+        painter->save();
+        painter->setPen(bright);
+        QString elidedText = fm.elidedText(msg, Qt::ElideRight, bottomRect.width());
+        painter->drawText(bottomRect, Qt::ElideRight, elidedText);
+        painter->restore();
+
       } else {
         // Draw Name.
-        QString name = commit.author().name();
         painter->save();
         QFont bold = opt.font;
         bold.setBold(true);
@@ -924,7 +986,6 @@ public:
         // Draw message.
         painter->save();
         painter->setPen(bright);
-        QString msg = commit.summary(git::Commit::SubstituteEmoji);
         QTextLayout layout(msg, painter->font());
         layout.beginLayout();
 
@@ -1023,10 +1084,11 @@ public:
     const QModelIndex &index) const override
   {
     bool compact = Settings::instance()->value("commit/compact").toBool();
-    LayoutConstants constants = layoutConstants(compact);
+    bool reduced = Settings::instance()->value("commit/reduced").toBool();
+    LayoutConstants constants = layoutConstants(compact, reduced);
 
     int lineHeight = constants.lineSpacing + constants.vMargin;
-    return QSize(0, lineHeight * (compact ? 1 : 4));
+    return QSize(0, lineHeight * (compact ? 1 : (reduced ? 2 : 4)));
   }
 
   QRect decorationRect(
@@ -1046,7 +1108,8 @@ public:
     const QModelIndex &index) const
   {
     bool compact = Settings::instance()->value("commit/compact").toBool();
-    LayoutConstants constants = layoutConstants(compact);
+    bool reduced = Settings::instance()->value("commit/reduced").toBool();
+    LayoutConstants constants = layoutConstants(compact, reduced);
 
     QRect rect = option.rect;
     int length = constants.lineSpacing * 2;
@@ -1076,9 +1139,14 @@ private:
     const int hMargin;
   };
 
-  LayoutConstants layoutConstants(bool compact) const
+  LayoutConstants layoutConstants(bool compact, bool reduced) const
   {
-    return { compact ? 7 : 8, compact ? 23 : 16, compact ? 5 : 2, 4 };
+    if (compact)
+      return { 7, 23, 5, 4 };
+    if (reduced)
+      return { 3, 20, 2, 4 };
+
+    return { 8, 16, 2, 4 };
   }
 
   void updateRefs()
