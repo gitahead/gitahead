@@ -27,7 +27,6 @@
 #include <QNetworkReply>
 #include <QOperatingSystemVersion>
 #include <QSettings>
-#include <QSysInfo>
 #include <QTimer>
 #include <QTranslator>
 #include <QUrlQuery>

@@ -12,9 +12,7 @@
 
 #include "ScintillaQt.h"
 
-#ifdef SCI_NAMESPACE
 namespace Scintilla {
-#endif
 
 class ScintillaIFace : public ScintillaQt
 {
@@ -2827,8 +2825,6 @@ public:
   //--
 };
 
-#ifdef SCI_NAMESPACE
-}
-#endif
+} // namespace Scintilla
 
 #endif

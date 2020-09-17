@@ -12,9 +12,7 @@
 #include "Scintilla.h"
 #include <QVarLengthArray>
 
-#ifdef SCI_NAMESPACE
 namespace Scintilla {
-#endif
 
 namespace {
 
@@ -45,6 +43,4 @@ ScintillaIFace::ScintillaIFace(QWidget *parent)
 //++FuncImp
 //--
 
-#ifdef SCI_NAMESPACE
-}
-#endif
+} // namespace Scintilla

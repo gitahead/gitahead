@@ -28,9 +28,7 @@
 #define SC_INDICATOR_CONVERTED INDIC_IME+2
 #define SC_INDICATOR_UNKNOWN INDIC_IME_MAX
 
-#ifdef SCI_NAMESPACE
-using namespace Scintilla;
-#endif
+namespace Scintilla {
 
 namespace {
 
@@ -158,8 +156,6 @@ bool ScintillaQt::event(QEvent *event)
     // Circumvent the tab focus convention.
     keyPressEvent(static_cast<QKeyEvent *>(event));
     return event->isAccepted();
-  } else if (event->type() == QEvent::Hide) {
-    setMouseTracking(false);
   }
 
   return QAbstractScrollArea::event(event);
@@ -351,15 +347,15 @@ void ScintillaQt::mousePressEvent(QMouseEvent *event)
   }
 
   if (event->button() == Qt::LeftButton) {
-    bool shift = QApplication::keyboardModifiers() & Qt::ShiftModifier;
-    bool ctrl  = QApplication::keyboardModifiers() & Qt::ControlModifier;
+    Qt::KeyboardModifiers modifiers = event->modifiers();
+    bool shift = modifiers & Qt::ShiftModifier;
+    bool ctrl  = modifiers & Qt::ControlModifier;
 #ifdef Q_WS_X11
     // On X allow choice of rectangular modifier since most window
     // managers grab alt + click for moving windows.
-    bool alt = QApplication::keyboardModifiers() &
-               modifierTranslated(rectangularSelectionModifier);
+    bool alt = modifiers & modifierTranslated(rectangularSelectionModifier);
 #else
-    bool alt = QApplication::keyboardModifiers() & Qt::AltModifier;
+    bool alt = modifiers & Qt::AltModifier;
 #endif
 
     ButtonDownWithModifiers(
@@ -1160,3 +1156,5 @@ sptr_t ScintillaQt::DirectFunction(
 {
   return reinterpret_cast<ScintillaQt *>(ptr)->WndProc(iMessage, wParam, lParam);
 }
+
+} // namespace Scintilla

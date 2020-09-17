@@ -26,9 +26,7 @@
 #include <QLibrary>
 #include <cstdio>
 
-#ifdef SCI_NAMESPACE
 namespace Scintilla {
-#endif
 
 Font::Font() noexcept : fid(nullptr) {}
 
@@ -159,11 +157,11 @@ void SurfaceImpl::Polygon(
   ColourDesired fore,
   ColourDesired back)
 {
+  PenColour(fore);
+
   QVarLengthArray<QPoint,8> qpts(npts);
   for (int i = 0; i < npts; i++)
     qpts[i] = QPoint(pts[i].x, pts[i].y);
-
-  PenColour(fore);
 
   QPainter *painter = GetPainter();
   painter->setBrush(QColorFromCA(back));
@@ -214,8 +212,8 @@ void SurfaceImpl::RoundedRectangle(
   PenColour(fore);
 
   QPainter *painter = GetPainter();
-  painter->drawRoundedRect(QRectFFromPRect(rc), 25, 25, Qt::RelativeSize);
   painter->setBrush(QColorFromCA(back));
+  painter->drawRoundedRect(QRectFFromPRect(rc), 25, 25, Qt::RelativeSize);
 }
 
 void SurfaceImpl::AlphaRectangle(
@@ -237,8 +235,10 @@ void SurfaceImpl::AlphaRectangle(
   qFill.setAlpha(alphaFill);
   painter->setBrush(qFill);
 
-  QRectF rect(rc.left, rc.top, rc.Width() - 1, rc.Height() - 1);
-  painter->drawRoundedRect(rect, cornerSize, cornerSize);
+  painter->save();
+  painter->setRenderHint(QPainter::Antialiasing);
+  painter->drawRoundedRect(QRectFFromPRect(rc), cornerSize, cornerSize);
+  painter->restore();
 }
 
 void SurfaceImpl::GradientRectangle(
@@ -745,6 +745,4 @@ void Platform::Assert(const char *c, const char *file, int line)
   Platform::DebugDisplay(buffer);
 }
 
-#ifdef SCI_NAMESPACE
-}
-#endif
+} // namespace Scintilla

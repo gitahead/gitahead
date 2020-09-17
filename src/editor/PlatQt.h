@@ -19,9 +19,7 @@
 class QPaintDevice;
 class QPainter;
 
-#ifdef SCI_NAMESPACE
 namespace Scintilla {
-#endif
 
 inline QColor QColorFromCA(ColourDesired ca)
 {
@@ -118,8 +116,6 @@ public:
   QPainter *GetPainter();
 };
 
-#ifdef SCI_NAMESPACE
-}
-#endif
+} // namespace Scintilla
 
 #endif

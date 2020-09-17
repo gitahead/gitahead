@@ -12,9 +12,7 @@
 #include "Scintilla.h"
 #include <QVarLengthArray>
 
-#ifdef SCI_NAMESPACE
 namespace Scintilla {
-#endif
 
 namespace {
 
@@ -3445,6 +3443,4 @@ int ScintillaIFace::subStyleBases(char * styles) const
 
 //--
 
-#ifdef SCI_NAMESPACE
-}
-#endif
+} // namespace Scintilla

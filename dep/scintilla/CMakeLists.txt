@@ -45,7 +45,6 @@ target_compile_definitions(scintilla
   PUBLIC
     SCINTILLA_QT
     SCI_LEXER
-    SCI_NAMESPACE
   PRIVATE
     SCI_EMPTYCATALOGUE
 )

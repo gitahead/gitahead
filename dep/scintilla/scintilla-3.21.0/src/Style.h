@@ -35,9 +35,9 @@ public:
 	FontAlias() noexcept;
 	// FontAlias objects can not be assigned except for initialization
 	FontAlias(const FontAlias &) noexcept;
-	FontAlias(FontAlias &&)  = delete;
+	FontAlias(FontAlias &&) noexcept;
 	FontAlias &operator=(const FontAlias &) = delete;
-	FontAlias &operator=(FontAlias &&) = delete;
+	FontAlias &operator=(FontAlias &&) noexcept;
 	~FontAlias() override;
 	void MakeAlias(const Font &fontOrigin) noexcept;
 	void ClearFont() noexcept;
@@ -73,10 +73,10 @@ public:
 	Style();
 	Style(const Style &source) noexcept;
 	// Style objects should not be moved but MSVC 2015 requires this.
-	Style(Style &&) = delete;
+	Style(Style &&) noexcept = default;
 	~Style();
 	Style &operator=(const Style &source) noexcept;
-	Style &operator=(Style &&) = delete;
+	Style &operator=(Style &&) noexcept = default;
 	void Clear(ColourDesired fore_, ColourDesired back_,
 	           int size_,
 	           const char *fontName_, int characterSet_,

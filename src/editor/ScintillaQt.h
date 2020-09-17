@@ -68,9 +68,7 @@
 #include <QElapsedTimer>
 #include <QPaintEvent>
 
-#ifdef SCI_NAMESPACE
 namespace Scintilla {
-#endif
 
 class ScintillaQt : public QAbstractScrollArea, public ScintillaBase
 {
@@ -191,12 +189,8 @@ private:
   int vPage = 0, hPage = 0; // Scroll bar page sizes.
 
   bool haveMouseCapture = false;
-
-  friend class ScintillaEditBase;
 };
 
-#ifdef SCI_NAMESPACE
-}
-#endif
+} // namespace Scintilla
 
-#endif // SCINTILLAQT_H
+#endif
