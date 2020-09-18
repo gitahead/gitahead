@@ -8,7 +8,6 @@
 //
 
 #include "Badge.h"
-#include "app/Application.h"
 #include <QPainter>
 #include <QPainterPath>
 #include <QStyleOption>
@@ -72,10 +71,10 @@ QSize Badge::size(const QFont &font, const QList<Label> &labels)
 QSize Badge::size(const QFont &font, const Label &label)
 {
   QFont copy = font;
-  copy.setBold(label.bold);
+  copy.setBold(label.state == Theme::BadgeState::Head);
 
   QFontMetrics fm(copy);
-  int icon = label.tag ? kIconWidth : 0;
+  int icon = label.state == Theme::BadgeState::Tag ? kIconWidth : 0;
   int width = (label.text.length() > 1) ?
     fm.horizontalAdvance(label.text) : fm.averageCharWidth();
   return QSize(icon + width + kPadding, fm.lineSpacing() + 2);
@@ -156,14 +155,22 @@ void Badge::paint(
   bool active)
 {
   Theme *theme = Application::theme();
-  Theme::BadgeState state = Theme::BadgeState::Normal;
-  if (selected && active) {
+  Theme::BadgeState state = label.state;
+
+  if (selected && active)
     state = Theme::BadgeState::Selected;
-  } else if (label.text == "!") {
+  else if (label.text == "!")
     state = Theme::BadgeState::Conflicted;
-  } else if (label.bold) {
-    state = Theme::BadgeState::Head;
-  }
+  else if (label.text == "?")
+    state = Theme::BadgeState::Untracked;
+  else if (label.text == "A")
+    state = Theme::BadgeState::Added;
+  else if (label.text == "M")
+    state = Theme::BadgeState::Modified;
+  else if (label.text == "R")
+    state = Theme::BadgeState::Renamed;
+  else if (label.text == "D")
+    state = Theme::BadgeState::Deleted;
 
   QColor fore = theme->badge(Theme::BadgeRole::Foreground, state);
   QColor back = theme->badge(Theme::BadgeRole::Background, state);
@@ -173,11 +180,11 @@ void Badge::paint(
   painter->drawRoundedRect(rect, 4, 4);
 
   QFont font = painter->font();
-  font.setBold(label.bold);
+  font.setBold(state == Theme::BadgeState::Head);
   painter->setFont(font);
 
   QRect adjusted = rect;
-  if (label.tag) {
+  if (state == Theme::BadgeState::Tag) {
     qreal x = rect.x() + (kPadding / 2) + 5;
     qreal y = rect.y() + (rect.height() / 2) + 1;
     QPainterPath path;

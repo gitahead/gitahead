@@ -74,7 +74,7 @@ theme['files']     = {
 }
 
 -- status badge colors
--- { normal, selected, conflicted, head, notification }
+-- { normal, selected, conflicted, untracked, added, modified, renamed, deleted, head, localbranch, remotebranch, tag, notification }
 theme['badge']     = {
   foreground       = {
     normal         = '#E1E5F2',
@@ -83,9 +83,17 @@ theme['badge']     = {
   background       = {
     normal         = '#2A82DA', -- the default color
     selected       = '#E1E5F2', -- the color when a list item is selected
-    conflicted     = '#DA2ADA', -- the color of conflicted items
-    head           = '#52A500', -- a bolder color to indicate the HEAD
-    notification   = '#8C2026'  -- the color of toolbar notifications badges
+    conflicted     = '#DA2ADA', -- the color of conflicted items '!'
+    -- untracked      = '#2A82DA', -- the color of untracked items '?'
+    -- added          = '#296812', -- the color of added items 'A'
+    -- modified       = '#DA822A', -- the color of modified items 'M'
+    -- renamed        = '#822ADA', -- the color of renamed items 'R'
+    -- deleted        = '#781B20', -- the color of deleted items 'D'
+    head           = '#52A500', -- the color to indicate the HEAD
+    -- localbranch    = '#2A82DA', -- the color of local branch badges
+    -- remotebranch   = '#555B65', -- the color of remote branch badges 
+    -- tag            = '#DA822A', -- the color of tag badges
+    notification   = '#8C2026', -- the color of toolbar notifications badges
   }
 }
 

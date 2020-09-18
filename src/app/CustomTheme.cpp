@@ -347,8 +347,40 @@ QColor CustomTheme::badge(BadgeRole role, BadgeState state)
       stateKey = "conflicted";
       break;
 
+    case BadgeState::Untracked:
+      stateKey = "untracked";
+      break;
+
+    case BadgeState::Added:
+      stateKey = "added";
+      break;
+
+    case BadgeState::Modified:
+      stateKey = "modified";
+      break;
+
+    case BadgeState::Renamed:
+      stateKey = "renamed";
+      break;
+
+    case BadgeState::Deleted:
+      stateKey = "deleted";
+      break;
+
     case BadgeState::Head:
       stateKey = "head";
+      break;
+
+    case BadgeState::Local:
+      stateKey = "localbranch";
+      break;
+
+    case BadgeState::Remote:
+      stateKey = "remotebranch";
+      break;
+
+    case BadgeState::Tag:
+      stateKey = "tag";
       break;
 
     case BadgeState::Notification:

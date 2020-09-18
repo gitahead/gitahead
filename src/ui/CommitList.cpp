@@ -1087,12 +1087,22 @@ private:
 
     if (mRepo.isHeadDetached()) {
       git::Reference head = mRepo.head();
-      mRefs[head.target().id()].append({head.name(), true});
+      mRefs[head.target().id()].append({head.name(), Theme::BadgeState::Head});
     }
 
     foreach (const git::Reference &ref, mRepo.refs()) {
-      if (git::Commit target = ref.target())
-        mRefs[target.id()].append({ref.name(), ref.isHead(), ref.isTag()});
+      if (git::Commit target = ref.target()) {
+        if (ref.isHead())
+          mRefs[target.id()].append({ref.name(), Theme::BadgeState::Head});
+        else if (ref.isTag())
+          mRefs[target.id()].append({ref.name(), Theme::BadgeState::Tag});
+        else if (ref.isLocalBranch())
+          mRefs[target.id()].append({ref.name(), Theme::BadgeState::Local});
+        else if (ref.isRemoteBranch())
+          mRefs[target.id()].append({ref.name(), Theme::BadgeState::Remote});
+        else
+          mRefs[target.id()].append({ref.name(), Theme::BadgeState::Normal});
+      }
     }
   }
 

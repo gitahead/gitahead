@@ -10,6 +10,7 @@
 #ifndef BADGE_H
 #define BADGE_H
 
+#include <app/Application.h>
 #include <QWidget>
 
 class QStyleOption;
@@ -19,13 +20,12 @@ class Badge : public QWidget
 public:
   struct Label
   {
-    Label(const QString &text = QString(), bool bold = false, bool tag = false)
-      : text(text), bold(bold), tag(tag)
+    Label(const QString &text = QString(), Theme::BadgeState state = Theme::BadgeState::Normal)
+      : text(text), state(state)
     {}
 
     QString text;
-    bool bold;
-    bool tag;
+    Theme::BadgeState state;
   };
 
   Badge(const QList<Label> &labels, QWidget *parent = nullptr);

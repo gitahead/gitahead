@@ -31,7 +31,15 @@ public:
     Normal,
     Selected,
     Conflicted,
+    Untracked,
+    Added,
+    Modified,
+    Renamed,
+    Deleted,
     Head,
+    Local,
+    Remote,
+    Tag,
     Notification
   };
 
