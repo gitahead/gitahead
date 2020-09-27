@@ -944,10 +944,8 @@ void RepoView::startFetchTimer()
 
   // Read defaults from global settings.
   Settings *settings = Settings::instance();
-  settings->beginGroup("global/autofetch");
-  bool enable = settings->value("enable").toBool();
-  int minutes = settings->value("minutes").toInt();
-  settings->endGroup();
+  bool enable = settings->value("global/autofetch/enable").toBool();
+  int minutes = settings->value("global/autofetch/minutes").toInt();
 
   git::Config config = mRepo.appConfig();
   if (!config.value<bool>("autofetch.enable", enable))

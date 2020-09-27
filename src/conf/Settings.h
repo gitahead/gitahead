@@ -29,10 +29,6 @@ public:
     PromptLargeFiles
   };
 
-  QString group() const;
-  void beginGroup(const QString &prefix);
-  void endGroup();
-
   QVariant value(const QString &key) const;
   QVariant defaultValue(const QString &key) const;
   void setValue(const QString &key, const QVariant &value, bool refresh = false);
@@ -75,7 +71,6 @@ signals:
 private:
   Settings(QObject *parent = nullptr);
 
-  QStringList mGroup;
   QVariantMap mDefaults;
   QVariantMap mCurrentMap;
 };

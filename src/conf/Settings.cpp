@@ -101,29 +101,10 @@ Settings::Settings(QObject *parent)
   mCurrentMap = mDefaults;
 }
 
-QString Settings::group() const
-{
-  return mGroup.join("/");
-}
-
-void Settings::beginGroup(const QString &prefix)
-{
-  mGroup.append(prefix);
-  mCurrentMap = lookup(mDefaults, group()).toMap();
-}
-
-void Settings::endGroup()
-{
-  mGroup.removeLast();
-  mCurrentMap = lookup(mDefaults, group()).toMap();
-}
-
 QVariant Settings::value(const QString &key) const
 {
   QSettings settings;
-  settings.beginGroup(group());
   QVariant result = settings.value(key, defaultValue(key));
-  settings.endGroup();
   return result;
 }
 
@@ -135,7 +116,6 @@ QVariant Settings::defaultValue(const QString &key) const
 void Settings::setValue(const QString &key, const QVariant &value, bool refresh)
 {
   QSettings settings;
-  settings.beginGroup(group());
   if (value == defaultValue(key)) {
     if (settings.contains(key)) {
       settings.remove(key);
@@ -147,7 +127,6 @@ void Settings::setValue(const QString &key, const QVariant &value, bool refresh)
       emit settingsChanged(refresh);
     }
   }
-  settings.endGroup();
 }
 
 QString Settings::lexer(const QString &filename)

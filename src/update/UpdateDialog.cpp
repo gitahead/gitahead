@@ -79,11 +79,10 @@ UpdateDialog::UpdateDialog(
   connect(buttons, &QDialogButtonBox::rejected, this, &UpdateDialog::reject);
   connect(skip, &QPushButton::clicked, [this, version] {
     Settings *settings = Settings::instance();
-    settings->beginGroup("update");
-    QStringList skipped = settings->value("skip").toStringList();
+    QStringList skipped = settings->value("update/skip").toStringList();
     if (!skipped.contains(version))
-      settings->setValue("skip", skipped << version);
-    settings->endGroup();
+      settings->setValue("update/skip", skipped << version);
+
     reject();
   });
 
