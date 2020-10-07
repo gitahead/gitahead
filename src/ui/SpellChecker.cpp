@@ -76,7 +76,7 @@ QStringList SpellChecker::suggest(const QString &word)
   std::vector<std::string> suggestion = mHunspell->suggest(mCodec->fromUnicode(word).toStdString());
 
   // Decode from the encoding used by current dictionary to Unicode.
-  foreach (std::string str, suggestion)
+  foreach (const std::string &str, suggestion)
     suggestions.append(mCodec->toUnicode(str.data()));
 
   return suggestions;

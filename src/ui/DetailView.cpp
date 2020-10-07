@@ -672,7 +672,7 @@ private:
 
       // Selected word under cursor.
       if (!word.isEmpty()) {
-        foreach (QTextEdit::ExtraSelection es, mSpellList) {
+        foreach (const QTextEdit::ExtraSelection &es, mSpellList) {
           if ((es.cursor == cursor) &&
               (es.format == mSpellFormat)) {
 
@@ -684,7 +684,7 @@ private:
             if (!suggestions.isEmpty()) {
               QMenu *spellReplace = menu->addMenu(tr("Replace..."));
               QMenu *spellReplaceAll = menu->addMenu(tr("Replace All..."));
-              foreach (QString str, suggestions) {
+              foreach (const QString &str, suggestions) {
                 QAction *replace = spellReplace->addAction(str);
                 connect(replace, &QAction::triggered, [this, event, str] {
                   QTextCursor cursor = cursorForPosition(event->pos());
@@ -777,7 +777,7 @@ private:
     if (mLineLengthCheckValid) {
       QTextCursor cursor = cursorForPosition(event->pos());
       int row = cursor.blockNumber();
-      foreach (QTextEdit::ExtraSelection es, mLineList) {
+      foreach (const QTextEdit::ExtraSelection &es, mLineList) {
         if ((es.cursor.position() <= cursor.position()) &&
             (es.cursor.anchor() >= cursor.position())) {
 
@@ -865,7 +865,7 @@ private:
 
   bool ignoredword(const QTextCursor &cursor)
   {
-    foreach (QTextEdit::ExtraSelection es, extraSelections()) {
+    foreach (const QTextEdit::ExtraSelection &es, extraSelections()) {
       if ((es.cursor == cursor) &&
           (es.format == mIgnoredFormat))
         return true;
