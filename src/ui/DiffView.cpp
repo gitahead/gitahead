@@ -1670,48 +1670,13 @@ public:
         buttons->addWidget(discard);
 
         connect(discard, &QToolButton::clicked, [this] {
+          RepoView *view = RepoView::parentView(this);
           QString name = mPatch.name();
-          bool untracked = mPatch.isUntracked();
-          QString path = mPatch.repo().workdir().filePath(name);
-          QString arg = QFileInfo(path).isDir() ? FileWidget::tr("Directory") : FileWidget::tr("File");
-          QString title =
-            untracked ? FileWidget::tr("Remove %1?").arg(arg) : FileWidget::tr("Discard Changes?");
-          QString text = untracked ?
-            FileWidget::tr("Are you sure you want to remove '%1'?") :
-            FileWidget::tr("Are you sure you want to discard all changes in '%1'?");
-          QMessageBox *dialog = new QMessageBox(
-            QMessageBox::Warning, title, text.arg(name),
-            QMessageBox::Cancel, this);
-          dialog->setAttribute(Qt::WA_DeleteOnClose);
-          dialog->setInformativeText(FileWidget::tr("This action cannot be undone."));
 
-          QString button =
-            untracked ? FileWidget::tr("Remove %1").arg(arg) : FileWidget::tr("Discard Changes");
-          QPushButton *discard =
-            dialog->addButton(button, QMessageBox::AcceptRole);
-          connect(discard, &QPushButton::clicked, [this, untracked] {
-            RepoView *view = RepoView::parentView(this);
-            git::Repository repo = mPatch.repo();
-            QString name = mPatch.name();
-            int strategy = GIT_CHECKOUT_FORCE;
-            if (untracked) {
-              QDir dir = repo.workdir();
-              if (QFileInfo(dir.filePath(name)).isDir()) {
-                if (dir.cd(name))
-                  dir.removeRecursively();
-              } else {
-                dir.remove(name);
-              }
-            } else if (!repo.checkout(git::Commit(), nullptr, {name}, strategy)) {
-              LogEntry *parent = view->addLogEntry(mPatch.name(), FileWidget::tr("Discard"));
-              view->error(parent, FileWidget::tr("discard"), mPatch.name());
-            }
-
-            // FIXME: Work dir changed?
-            view->refresh();
-          });
-
-          dialog->open();
+          if (mPatch.isUntracked())
+            view->promptToRemove({name});
+          else
+            view->promptToDiscard(view->repo().head().target(), {name});
         });
       }
 

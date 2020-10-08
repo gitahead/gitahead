@@ -72,8 +72,8 @@ public:
   RepoView(const git::Repository &repo, MainWindow *parent);
   virtual ~RepoView();
 
-  //clean
-  void clean(const QStringList &untracked);
+  // remove
+  void promptToRemove(const QStringList &untracked);
 
   // Select head reference in ref list.
   void selectHead();
@@ -234,6 +234,12 @@ public:
     LogEntry *parent = nullptr,
     bool force = false);
   void amendCommit();
+
+  // discard
+  void promptToDiscard(
+    const git::Commit &commit,
+    const QStringList &paths,
+    bool all = false);
 
   // checkout
   void promptToCheckout();

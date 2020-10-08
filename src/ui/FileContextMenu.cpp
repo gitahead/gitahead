@@ -146,7 +146,7 @@ FileContextMenu::FileContextMenu(
       addSeparator();
     }
 
-    // Discard
+    // Remove and discard
     QStringList modified;
     QStringList untracked;
     if (diff.isValid()) {
@@ -155,55 +155,22 @@ FileContextMenu::FileContextMenu(
         if (index < 0)
           continue;
 
-        switch (diff.status(index)) {
-          case GIT_DELTA_DELETED:
-          case GIT_DELTA_MODIFIED:
-            modified.append(file);
-            break;
-
-          case GIT_DELTA_UNTRACKED:
-            untracked.append(file);
-            break;
-
-          default:
-            break;
-        }
+        if (diff.status(index) == GIT_DELTA_UNTRACKED)
+          untracked.append(file);
+        else if (diff.status(index) != GIT_DELTA_UNMODIFIED)
+          modified.append(file);
       }
     }
 
-    QAction *discard = addAction(tr("Discard Changes"), [view, modified] {
-      QMessageBox *dialog = new QMessageBox(
-        QMessageBox::Warning, tr("Discard Changes?"),
-        tr("Are you sure you want to discard changes in the selected files?"),
-        QMessageBox::Cancel, view);
-      dialog->setAttribute(Qt::WA_DeleteOnClose);
-      dialog->setInformativeText(tr("This action cannot be undone."));
-      dialog->setDetailedText(modified.join('\n'));
-
-      QString text = tr("Discard Changes");
-      QPushButton *discard = dialog->addButton(text, QMessageBox::AcceptRole);
-      connect(discard, &QPushButton::clicked, [view, modified] {
-        git::Repository repo = view->repo();
-        int strategy = GIT_CHECKOUT_FORCE;
-        if (!repo.checkout(git::Commit(), nullptr, modified, strategy)) {
-          QString text = tr("%1 files").arg(modified.size());
-          LogEntry *parent = view->addLogEntry(text, tr("Discard"));
-          view->error(parent, tr("discard"), text);
-        }
-
-        // FIXME: Work dir changed?
-        view->refresh();
-      });
-
-      dialog->open();
-    });
-
     QAction *remove = addAction(tr("Remove Untracked Files"), [view, untracked] {
-      view->clean(untracked);
+      view->promptToRemove(untracked);
     });
-
-    discard->setEnabled(!modified.isEmpty());
     remove->setEnabled(!untracked.isEmpty());
+
+    QAction *discard = addAction(tr("Discard Changes"), [view, modified] {
+      view->promptToDiscard(view->repo().head().target(), modified);
+    });
+    discard->setEnabled(!modified.isEmpty());
 
     // Ignore
     QAction *ignore = addAction(tr("Ignore"), [view, files] {
