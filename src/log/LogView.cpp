@@ -282,6 +282,7 @@ void LogView::load()
       int childindent = json["indent"].toInt(kDefaultIndent);
       LogEntry::Kind kind = static_cast<LogEntry::Kind>(json["kind"].toInt(kDefaultKind));
       char status = json["status"].toInt(kDefaultStatus);
+      QString title = json["title"].toString();
       QString text = json["text"].toString();
 
       while ((indent > childindent) && (entry->parentEntry() != mRoot)) {
@@ -289,7 +290,7 @@ void LogView::load()
         indent--;
       }
 
-      entry = entry->addEntry(kind, text);
+      entry = entry->addEntry(kind, text, title);
       entry->setStatus(status);
       indent += 1;
     }
@@ -342,7 +343,6 @@ void LogView::save(bool as)
 
     if (!currentParent.isValid()) {
       json.insert("timestamp", entry->timestamp().toString(Qt::ISODate));
-      json.insert("title", entry->title());
     } else {
       int indent = 0;
       while (currentParent.isValid()) {
@@ -356,7 +356,11 @@ void LogView::save(bool as)
       if (entry->status() != kDefaultStatus)
         json.insert("status", entry->status());
     }
-    json.insert("text", entry->text());
+    if (!entry->title().isEmpty())
+      json.insert("title", entry->title());
+    if (!entry->text().isEmpty())
+      json.insert("text", entry->text());
+
     jsonarr.append(json);
   }
 

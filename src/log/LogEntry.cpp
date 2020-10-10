@@ -52,12 +52,16 @@ void LogEntry::addEntries(const QList<LogEntry *> &entries)
   insertEntries(mEntries.size(), entries);
 }
 
-LogEntry *LogEntry::addEntry(Kind kind, const QString &text)
+LogEntry *LogEntry::addEntry(Kind kind,
+                             const QString &text,
+                             const QString &title)
 {
-  return insertEntry(mEntries.size(), kind, text);
+  return insertEntry(mEntries.size(), kind, text, title);
 }
 
-LogEntry *LogEntry::addEntry(const QString &text, const QString &title, const QDateTime &timestamp)
+LogEntry *LogEntry::addEntry(const QString &text,
+                             const QString &title,
+                             const QDateTime &timestamp)
 {
   return insertEntry(mEntries.size(), Entry, text, title, timestamp);
 }
