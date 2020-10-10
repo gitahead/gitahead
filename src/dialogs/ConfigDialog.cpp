@@ -97,6 +97,15 @@ public:
     mPullUpdate = new QCheckBox(tr("Update submodules after pull"), this);
     mAutoPrune = new QCheckBox(tr("Prune when fetching"), this);
 
+    mMaxLogEntrys = new QSpinBox(this);
+    mMaxLogEntrys->setRange(3, 300);
+
+    QHBoxLayout *logLayout = new QHBoxLayout;
+    logLayout->addWidget(new QLabel(tr("Retain")));
+    logLayout->addWidget(mMaxLogEntrys);
+    logLayout->addWidget(new QLabel(tr("entrys")));
+    logLayout->addStretch();
+
     QFormLayout *form = new QFormLayout(this);
     form->addRow(tr("User name:"), mName);
     form->addRow(tr("User email:"), mEmail);
@@ -104,6 +113,7 @@ public:
     form->addRow(QString(), mPushCommit);
     form->addRow(QString(), mPullUpdate);
     form->addRow(QString(), mAutoPrune);
+    form->addRow(tr("Logging:"), logLayout);
 
     init();
 
@@ -138,6 +148,10 @@ public:
     connect(mAutoPrune, &QCheckBox::toggled, [this](bool checked) {
       mRepo.appConfig().setValue("autoprune.enable", checked);
     });
+
+    connect(mMaxLogEntrys, signal, [this](int value) {
+      mRepo.appConfig().setValue("log.maxentrys", value);
+    });
   }
 
   void init()
@@ -165,6 +179,7 @@ public:
     mPushCommit->setChecked(app.value<bool>("autopush.enable", push));
     mPullUpdate->setChecked(app.value<bool>("autoupdate.enable", update));
     mAutoPrune->setChecked(app.value<bool>("autoprune.enable", prune));
+    mMaxLogEntrys->setValue(app.value<int>("log.maxentrys", 300));
   }
 
 private:
@@ -177,6 +192,7 @@ private:
   QCheckBox *mPushCommit;
   QCheckBox *mPullUpdate;
   QCheckBox *mAutoPrune;
+  QSpinBox *mMaxLogEntrys;
 };
 
 class RemotesPanel : public QWidget

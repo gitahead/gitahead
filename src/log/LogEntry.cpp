@@ -17,11 +17,10 @@ LogEntry::LogEntry(
   Kind kind,
   const QString &text,
   const QString &title,
+  const QDateTime &timestamp,
   LogEntry *parent)
-  : QObject(parent), mKind(kind), mText(text), mTitle(title)
+  : QObject(parent), mKind(kind), mText(text), mTitle(title), mTimestamp(timestamp)
 {
-  mTimestamp = QDateTime::currentDateTime();
-
   // Connect progress timer.
   connect(&mTimer, &QTimer::timeout, [this] {
     ++mProgress;
@@ -58,9 +57,9 @@ LogEntry *LogEntry::addEntry(Kind kind, const QString &text)
   return insertEntry(mEntries.size(), kind, text);
 }
 
-LogEntry *LogEntry::addEntry(const QString &text, const QString &title)
+LogEntry *LogEntry::addEntry(const QString &text, const QString &title, const QDateTime &timestamp)
 {
-  return insertEntry(mEntries.size(), Entry, text, title);
+  return insertEntry(mEntries.size(), Entry, text, title, timestamp);
 }
 
 void LogEntry::insertEntries(int row, const QList<LogEntry *> &entries)
@@ -81,11 +80,30 @@ LogEntry *LogEntry::insertEntry(
   int row,
   Kind kind,
   const QString &text,
-  const QString &title)
+  const QString &title,
+  const QDateTime &timestamp)
 {
-  LogEntry *entry = new LogEntry(kind, text, title, this);
+  LogEntry *entry = new LogEntry(kind, text, title, timestamp, this);
   insertEntries(row, {entry});
   return entry;
+}
+
+void LogEntry::delEntry(const LogEntry *entry)
+{
+  for (int i = 0; i < mEntries.size(); ++i) {
+    if (entry == mEntries.at(i)) {
+      removeEntry(i);
+      break;
+    }
+  }
+}
+
+void LogEntry::removeEntry(int row)
+{
+  LogEntry *root = rootEntry();
+  emit root->entriesAboutToBeRemoved(this, row, mEntries.size());
+  mEntries.removeAt(row);
+  emit root->entriesRemoved();
 }
 
 void LogEntry::setBusy(bool busy)

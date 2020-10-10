@@ -36,6 +36,13 @@ LogModel::LogModel(LogEntry *root, QStyle *style, QObject *parent)
     QModelIndex index = this->index(entry);
     emit dataChanged(index, index, {Qt::DisplayRole});
   });
+
+  connect(root, &LogEntry::entriesAboutToBeRemoved,
+  [this](LogEntry *entry, int row, int count) {
+    beginRemoveRows(index(entry), row, row + count - 1);
+  });
+
+  connect(root, &LogEntry::entriesRemoved, this, &LogModel::endRemoveRows);
 }
 
 QModelIndex LogModel::index(

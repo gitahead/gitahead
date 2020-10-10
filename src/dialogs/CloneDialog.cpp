@@ -258,7 +258,7 @@ public:
     setSubTitle(tr("The new repository will open after the clone finishes."));
 
     mLogRoot = new LogEntry(this);
-    mLogView = new LogView(mLogRoot, this);
+    mLogView = new LogView(mLogRoot, nullptr, this);
     connect(mLogView, &LogView::operationCanceled, this, &ClonePage::cancel);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
