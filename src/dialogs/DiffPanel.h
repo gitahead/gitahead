@@ -11,6 +11,9 @@
 #define DIFFPANEL_H
 
 #include "git/Config.h"
+#include <QCheckBox>
+#include <QComboBox>
+#include <QSpinBox>
 #include <QWidget>
 
 class QHBoxLayout;
@@ -22,8 +25,19 @@ class DiffPanel : public QWidget
 public:
   DiffPanel(const git::Repository &repo, QWidget *parent = nullptr);
 
+  void refresh(void);
+
 private:
   git::Config mConfig;
+  git::Config mAppConfig;
+
+  QSpinBox *mContext;
+  QComboBox *mEncoding;
+
+  QCheckBox *mIgnoreWs = nullptr;
+
+  QCheckBox *mCollapseAdded;
+  QCheckBox *mCollapseDeleted;
 };
 
 #endif
