@@ -1746,6 +1746,11 @@ public:
       updateCheckState();
     }
 
+    /*!
+     * \brief Filewidget::Header: updatePatch
+     * when the patch is changed, update the edit button and update the status labels (mStats and mStatusBadge)
+     * \param patch
+     */
     void updatePatch(const git::Patch &patch) {
         char status = git::Diff::statusChar(patch.status());
         mStatusBadge->setLabels({Badge::Label(QChar(status))});
@@ -1942,6 +1947,12 @@ public:
     return (mHunks.isEmpty() && mImages.isEmpty());
   }
 
+  /*!
+   * \brief updatePatch
+   * update patch without recreating the FileWidget object.
+   * \param patch
+   * \param staged
+   */
   void updatePatch(const git::Patch &patch, const git::Patch &staged) {
     mHeader->updatePatch(patch);
 
