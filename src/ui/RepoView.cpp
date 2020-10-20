@@ -1165,9 +1165,7 @@ void RepoView::merge(
   LogEntry *parent,
   const std::function<void()> &callback)
 {
-  // Shouldn't be called with an unborn HEAD.
   git::Reference head = mRepo.head();
-  Q_ASSERT(head.isValid());
 
   git::AnnotatedCommit upstream;
   QString upstreamName = tr("<i>no upstream</i>");
@@ -1177,7 +1175,7 @@ void RepoView::merge(
   } else if (ref.isValid()) {
     upstream = ref.annotatedCommit();
     upstreamName = ref.name();
-  } else if (head.isBranch()) {
+  } else if (head.isValid() && head.isBranch()) {
     git::Branch headBranch = head;
     upstream = headBranch.annotatedCommitFromFetchHead();
     git::Branch up = headBranch.upstream();
@@ -1203,9 +1201,16 @@ void RepoView::merge(
     textFmt = tr("%2 on %1");
   }
 
-  QString headName = head.name();
+  QString headName = head.isValid() ? head.name() : tr("<i>no branch</i>");
   QString text = textFmt.arg(upstreamName, headName);
   LogEntry *entry = addLogEntry(text, title, parent);
+
+  // Empty repository.
+  if (!head.isValid()) {
+    entry->addEntry(LogEntry::Error,
+      tr("The repository is empty."));
+    return;
+  }
 
   // Validate inputs.
   if (!upstream.isValid()) {
