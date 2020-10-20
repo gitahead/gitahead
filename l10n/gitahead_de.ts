@@ -698,12 +698,12 @@
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1503"/>
         <source>Delete Tag %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Tag %1 löschen</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1513"/>
         <source>Delete Branch %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Branch %1 löschen</translation>
     </message>
     <message>
         <location filename="../src/ui/CommitList.cpp" line="1521"/>
@@ -1038,7 +1038,7 @@
     <message>
         <location filename="../src/dialogs/DiffPanel.cpp" line="31"/>
         <source>lines</source>
-        <translation>zeilen</translation>
+        <translation>Zeilen</translation>
     </message>
     <message>
         <location filename="../src/dialogs/DiffPanel.cpp" line="49"/>
@@ -1086,7 +1086,7 @@
     <message>
         <location filename="../src/dialogs/DiffPanel.cpp" line="104"/>
         <source>Auto Collapse:</source>
-        <translation>Automatisch zusammenklappen:</translation>
+        <translation>Automatisch zuklappen:</translation>
     </message>
 </context>
 <context>
@@ -1609,13 +1609,13 @@
         <location filename="../src/ui/DiffView.cpp" line="1720"/>
         <location filename="../src/ui/DiffView.cpp" line="1723"/>
         <source>Collapse File</source>
-        <translation>Datei zusammenklappen</translation>
+        <translation>Datei zuklappen</translation>
     </message>
     <message>
         <location filename="../src/ui/DiffView.cpp" line="1720"/>
         <location filename="../src/ui/DiffView.cpp" line="1723"/>
         <source>Expand File</source>
-        <translation>Datei ausklappen</translation>
+        <translation>Datei aufklappen</translation>
     </message>
     <message>
         <location filename="../src/ui/DiffView.cpp" line="1907"/>
@@ -1691,7 +1691,7 @@
     <message>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="118"/>
         <source>No translation</source>
-        <translation type="unfinished"></translation>
+        <translation>Keine Übersetzung</translation>
     </message>
     <message>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="131"/>
@@ -1714,7 +1714,7 @@
     <message>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="137"/>
         <source>Language:</source>
-        <translation type="unfinished"></translation>
+        <translation>Sprache:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/SettingsDialog.cpp" line="121"/>
@@ -1873,13 +1873,13 @@
         <location filename="../src/ui/DiffView.cpp" line="721"/>
         <location filename="../src/ui/DiffView.cpp" line="724"/>
         <source>Collapse Hunk</source>
-        <translation>Hunk zusammenklappen</translation>
+        <translation>Hunk zuklappen</translation>
     </message>
     <message>
         <location filename="../src/ui/DiffView.cpp" line="721"/>
         <location filename="../src/ui/DiffView.cpp" line="724"/>
         <source>Expand Hunk</source>
-        <translation>Hunk ausklappen</translation>
+        <translation>Hunk aufklappen</translation>
     </message>
     <message>
         <location filename="../src/ui/DiffView.cpp" line="947"/>
@@ -3314,17 +3314,17 @@ Konflikt zu beheben</translation>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="46"/>
         <source>Enter the URL of the remote repository or browse for a local directory</source>
-        <translation type="unfinished"></translation>
+        <translation>Gib die URL des entfernten Repositories ein oder suche nach einem lokalen Ordner</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="74"/>
         <source>...</source>
-        <translation type="unfinished">...</translation>
+        <translation>...</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="76"/>
         <source>Choose Directory</source>
-        <translation type="unfinished">Ordner wählen</translation>
+        <translation>Ordner wählen</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="98"/>
@@ -4376,12 +4376,12 @@ Dies reverted den Commit %2.</translation>
     <message>
         <location filename="../src/conf/Settings.cpp" line="222"/>
         <source>Prompt to stage directories</source>
-        <translation type="unfinished"></translation>
+        <translation>Auffordern, Ordner zu stagen</translation>
     </message>
     <message>
         <location filename="../src/conf/Settings.cpp" line="225"/>
         <source>Prompt to stage large files</source>
-        <translation type="unfinished"></translation>
+        <translation>Auffordern, große Dateien zu stagen</translation>
     </message>
 </context>
 <context>
