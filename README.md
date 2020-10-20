@@ -5,8 +5,8 @@ GitAhead - Understand Your History
 ==================================
 
 GitAhead is a graphical Git client designed to help you understand
-and manage your source code history. It's available as a pre-built
-binary for Windows, Linux, and macOS, or can be built from source by
+and manage your source code history. It's available as a [pre-built
+binary for Windows, Linux, and macOS](https://gitahead.github.io/gitahead.com/), or can be built from source by
 following the directions below.
 
 How to Get Help
