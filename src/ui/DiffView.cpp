@@ -1428,12 +1428,19 @@ public:
   LineStats(const git::Patch::LineStats &stats, QWidget *parent = nullptr)
     : QWidget(parent)
   {
-    Q_ASSERT(stats.additions > 0 || stats.deletions > 0);
+    setStats(stats);
+  }
 
-    qreal x = static_cast<qreal>(stats.additions + stats.deletions) / 5;
-    bool scaled = (stats.additions + stats.deletions > 5);
-    mPluses = scaled ? stats.additions / x : stats.additions;
-    mMinuses = scaled ? stats.deletions / x : stats.deletions;
+  void setStats(const git::Patch::LineStats &stats) {
+      qreal x = static_cast<qreal>(stats.additions + stats.deletions) / 5;
+      if (x > 0) {
+          bool scaled = (stats.additions + stats.deletions > 5);
+          mPluses = scaled ? stats.additions / x : stats.additions;
+          mMinuses = scaled ? stats.deletions / x : stats.deletions;
+      } else {
+          mPluses = 0;
+          mMinuses = 0;
+      }
   }
 
   QSize minimumSizeHint() const override
