@@ -222,7 +222,7 @@ FileWidget::FileWidget(
   const git::Patch &patch,
   const git::Patch &staged,
   QWidget *parent)
-  : QFrame(parent), mView(view), mDiff(diff), mPatch(patch)
+  : QWidget(parent), mView(view), mDiff(diff), mPatch(patch)
 {
   setObjectName("FileWidget");
   QVBoxLayout *layout = new QVBoxLayout(this);
