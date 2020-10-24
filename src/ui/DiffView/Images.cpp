@@ -3,6 +3,7 @@
 #include "app/Application.h"
 
 #include <QPainter>
+#include <QPainterPath>
 #include <QHBoxLayout>
 #include <QFileIconProvider>
 #include <QLabel>

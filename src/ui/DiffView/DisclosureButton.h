@@ -2,6 +2,7 @@
 #define BUTTON_H
 
 #include "Button.h"
+#include <QPainterPath>
 
 class DisclosureButton : public Button
 {

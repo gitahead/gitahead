@@ -3,6 +3,7 @@
 #include "../RepoView.h"
 
 #include <QPainter>
+#include <QPainterPath>
 
 FileLabel::FileLabel(const QString &name, bool submodule, QWidget *parent)
   : QWidget(parent), mName(name)

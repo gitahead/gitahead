@@ -3,6 +3,7 @@
 #include "Badge.h"
 
 #include <QPainter>
+#include <QPainterPath>
 
 void ViewDelegate::paint(
   QPainter *painter,

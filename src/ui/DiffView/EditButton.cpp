@@ -1,5 +1,7 @@
 #include "EditButton.h"
 
+#include <QPainterPath>
+
 EditButton::EditButton(
   const git::Patch &patch,
   int index,
