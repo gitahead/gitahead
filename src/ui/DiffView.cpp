@@ -1630,7 +1630,7 @@ public:
 
       // Add LFS buttons.
       if (lfs) {
-        Badge *lfsBadge = new Badge({Badge::Label(FileWidget::tr("LFS"), true)}, this);
+        Badge *lfsBadge = new Badge({Badge::Label(FileWidget::tr("LFS"), Theme::BadgeState::Head)}, this);
         buttons->addWidget(lfsBadge);
 
         QToolButton *lfsLockButton = new QToolButton(this);

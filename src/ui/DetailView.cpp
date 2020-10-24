@@ -12,6 +12,7 @@
 #include "DiffWidget.h"
 #include "MenuBar.h"
 #include "TreeWidget.h"
+#include "app/Application.h"
 #include "git/Branch.h"
 #include "git/Commit.h"
 #include "git/Diff.h"
@@ -267,7 +268,7 @@ public:
     connect(&mWatcher, &QFutureWatcher<QString>::finished, this, [this] {
       QString result = mWatcher.result();
       if (result.contains('+'))
-        mRefs->appendLabel({result, false, true});
+        mRefs->appendLabel({result, Theme::BadgeState::Tag});
     });
 
     // Respond to reference changes.
@@ -286,8 +287,18 @@ public:
   {
     QList<Badge::Label> refs;
     foreach (const git::Commit &commit, commits) {
-      foreach (const git::Reference &ref, commit.refs())
-        refs.append({ref.name(), ref.isHead(), ref.isTag()});
+      foreach (const git::Reference &ref, commit.refs()) {
+        if (ref.isHead())
+          refs.append({ref.name(), Theme::BadgeState::Head});
+        else if (ref.isTag())
+          refs.append({ref.name(), Theme::BadgeState::Tag});
+        else if (ref.isLocalBranch())
+          refs.append({ref.name(), Theme::BadgeState::Local});
+        else if (ref.isRemoteBranch())
+          refs.append({ref.name(), Theme::BadgeState::Remote});
+        else
+          refs.append({ref.name(), Theme::BadgeState::Normal});
+      }
     }
 
     mRefs->setLabels(refs);
