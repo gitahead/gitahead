@@ -1781,8 +1781,8 @@ void CommitList::notifySelectionChanged()
   // Redraw all selected indexes. Separators may have changed.
   foreach (const QModelIndex &index, indexes)
     update(index);
-
-  emit diffSelected(selectedDiff(), mFile, mSpontaneous);
+  git::Diff diff = selectedDiff();
+  emit diffSelected(diff, mFile, mSpontaneous);
 }
 
 bool CommitList::isDecoration(const QModelIndex &index, const QPoint &pos)
