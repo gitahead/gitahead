@@ -315,8 +315,6 @@ public:
   void selectCommit(const git::Commit &commit, const QString &file);
 
   static RepoView *parentView(const QWidget *widget);
-public slots:
-  void diffSelected(const git::Diff diff, const QString &file, bool spontaneous);
 
   enum class DetailSplitterWidgets {
      NotDefined,
@@ -344,6 +342,9 @@ public slots:
    * \param maximized
    */
   DetailSplitterWidgets detailSplitterMaximize(bool maximized, DetailSplitterWidgets maximizeWidget = DetailSplitterWidgets::NotDefined);
+
+public slots:
+  void diffSelected(const git::Diff diff, const QString &file, bool spontaneous);
 
 signals:
   void statusChanged(bool dirty);
