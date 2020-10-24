@@ -276,6 +276,9 @@ public:
     const git::Commit &commitToAmend = git::Commit());
 
   // submodule
+  void resetSubmodules(const QList<git::Submodule> &submodules,
+          bool recursive, git_reset_t type,
+          LogEntry *parent);
   void updateSubmodules(
     const QList<git::Submodule> &submodules = QList<git::Submodule>(),
     bool recursive = true,
@@ -336,7 +339,7 @@ private:
   bool suspendLogTimer();
   void resumeLogTimer(bool suspended = true);
 
-  QList<SubmoduleInfo> submoduleInfoList(
+  QList<SubmoduleInfo> submoduleUpdateInfoList(
     const git::Repository &repo,
     const QList<git::Submodule> &submodules,
     bool init,
@@ -345,6 +348,13 @@ private:
     const QList<SubmoduleInfo> &submodules,
     bool recursive = true,
     bool init = false);
+
+  QList<SubmoduleInfo> submoduleResetInfoList(const git::Repository &repo,
+    const QList<git::Submodule> &submodules,
+    LogEntry *parent);
+  void resetSubmodulesAsync(const QList<SubmoduleInfo> &submodules,
+    bool recursive,
+    git_reset_t type);
 
   bool checkForConflicts(LogEntry *parent, const QString &action);
 
