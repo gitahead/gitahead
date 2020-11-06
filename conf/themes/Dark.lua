@@ -122,6 +122,13 @@ theme['checkbox']  = {
   outline          = '#3C3C42'
 }
 
+-- commit editor colors
+theme['commiteditor'] = {
+  spellerror       = '#BC0009', -- spell check error
+  spellignore      = '#E1E5F2', -- spell check ignored word(s)
+  lengthwarning    = '#464614'  -- line length limit warning (background)
+}
+
 -- diff view colors
 theme['diff']      = {
   addition         = '#394734', -- added lines

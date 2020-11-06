@@ -411,6 +411,17 @@ QPalette CustomTheme::commitList()
   return palette;
 }
 
+QColor CustomTheme::commitEditor(CommitEditor color)
+{
+  QVariantMap commitEditor = mMap.value("commiteditor").toMap();
+
+  switch (color) {
+    case CommitEditor::SpellError:    return commitEditor.value("spellerror").value<QColor>();
+    case CommitEditor::SpellIgnore:   return commitEditor.value("spellignore").value<QColor>();
+    case CommitEditor::LengthWarning: return commitEditor.value("lengthwarning").value<QColor>();
+  }
+}
+
 QColor CustomTheme::diff(Diff color)
 {
   QVariantMap diff = mMap.value("diff").toMap();
