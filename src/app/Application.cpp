@@ -199,7 +199,7 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   if (!dir.exists())
     dir.setPath("/Applications");
   dir.cd("Utilities/Terminal.app/Contents/Resources/Fonts");
-  foreach (const QString &name, dir.entryList({"SFMono-*.otf"}, QDir::Files))
+  foreach (const QString &name, dir.entryList({"SF*Mono-*.otf"}, QDir::Files))
     QFontDatabase::addApplicationFont(dir.filePath(name));
 
   // Create shared menu bar on Mac.
