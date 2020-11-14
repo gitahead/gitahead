@@ -80,6 +80,9 @@ Account *Accounts::createAccount(
     case Account::GitLab:    account = new GitLab(username);    break;
   }
 
+  if (!account)
+      return nullptr;
+
   account->setUrl(url);
 
   AccountProgress *progress = account->progress();
@@ -148,6 +151,9 @@ void Accounts::load()
     QString username = settings.value("username").toString();
     QString url = settings.value("url").toString();
     Account *account = createAccount(kind, username, url);
+
+    if (!account)
+        continue;
 
     int repoCount = settings.beginReadArray("repos");
     for (int j = 0; j < repoCount; ++j) {
