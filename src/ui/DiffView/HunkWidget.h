@@ -131,7 +131,8 @@ public:
    * \brief determineLineOffset
    * \param lines Lines of the diff patch (staged and unstaged)
    * \param stagedLines Lines of the staged patch
-   * \return
+   * \return Offset between the lines in the patch and in the staged Lines. If no staged Lines
+   * are available, -1 is returned
    */
   static int determineLineOffset(QList<Line> &lines, QList<Line> &stagedLines);
 

@@ -1013,6 +1013,7 @@ int HunkWidget::determineLineOffset(QList<Line>& lines, QList<Line>& stagedLines
     assert(-1); // should not occur. Just for checkig if the logic is correct
     return -1;
     }
+    return -1;
 }
 
 void HunkWidget::createMarkersAndLineNumbers(const Line& line, int lidx, Account::FileComments& comments, int width) const
