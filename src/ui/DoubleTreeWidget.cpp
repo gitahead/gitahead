@@ -91,8 +91,10 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
     mFileView = new QStackedWidget(this);
     mEditor = new BlameEditor(repo, this);
     mDiffView = new DiffView(repo, this);
-    assert(mFileView->addWidget(mEditor) == DoubleTreeWidget::Blame);
-    assert(mFileView->addWidget(mDiffView) == DoubleTreeWidget::Diff);
+    int index = mFileView->addWidget(mEditor);
+    assert(index == DoubleTreeWidget::Blame);
+    index = mFileView->addWidget(mDiffView);
+    assert(index == DoubleTreeWidget::Diff);
 
     const QButtonGroup* viewGroup = segmentedButton->buttonGroup();
     QHBoxLayout* buttonLayout = new QHBoxLayout();
