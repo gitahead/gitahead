@@ -28,8 +28,8 @@ endif()
 # Explicitly disable shared libraries.
 set(BUILD_SHARED_LIBS OFF)
 
-# Require C++11.
-set(CMAKE_CXX_STANDARD 11)
+# Require C++17.
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 # Disable exceptions and RTTI.
@@ -37,7 +37,7 @@ if(WIN32)
   string(REPLACE "/EHsc" "/EHs-c-" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
   string(REPLACE "/GR" "/GR-" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 endif()
 
 if(UNIX AND NOT APPLE)

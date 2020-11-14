@@ -1,4 +1,4 @@
-set(SCINTILLA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/scintilla-3.21.0)
+set(SCINTILLA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/scintilla445/scintilla)
 
 add_library(scintilla
   ${SCINTILLA_DIR}/src/AutoComplete.cxx
