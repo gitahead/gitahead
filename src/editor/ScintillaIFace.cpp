@@ -1644,12 +1644,16 @@ void ScintillaIFace::appendText(const QString & text)
 
 bool ScintillaIFace::twoPhaseDraw() const
 {
-  return send(SCI_GETTWOPHASEDRAW, 0, 0) != 0;
+  return send(SCI_GETPHASESDRAW, 0, 0) != 0;
 }
 
 void ScintillaIFace::setTwoPhaseDraw(bool twoPhase)
 {
-  send(SCI_SETTWOPHASEDRAW, (uptr_t)twoPhase, 0);
+  int phases = 1;
+  if (twoPhase)
+      phases = 2;
+
+  send(SCI_SETPHASESDRAW, phases, 0);
 }
 
 int ScintillaIFace::phasesDraw() const
