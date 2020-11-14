@@ -299,12 +299,13 @@ void SurfaceImpl::DrawTextNoClip(
   PRectangle rc,
   Font &font,
   XYPOSITION ybase,
-  const char *s,
-  int len,
+  std::string_view s,
   ColourDesired fore,
   ColourDesired back)
 {
   PenColour(fore);
+
+  QString(s.data());
 
   QPainter *painter = GetPainter();
   if (FontID id = font.GetID())
@@ -312,29 +313,26 @@ void SurfaceImpl::DrawTextNoClip(
 
   painter->setBackground(QColorFromCA(back));
   painter->setBackgroundMode(Qt::OpaqueMode);
-  painter->drawText(QPointF(rc.left, ybase), QString::fromUtf8(s, len));
+  painter->drawText(QPointF(rc.left, ybase), QString::fromUtf8(s.data(), s.length()));
 }
 
 void SurfaceImpl::DrawTextClipped(
   PRectangle rc,
   Font &font,
   XYPOSITION ybase,
-  const char *s,
-  int len,
+  std::string_view s,
   ColourDesired fore,
   ColourDesired back)
 {
   SetClip(rc);
-  DrawTextNoClip(rc, font, ybase, s, len, fore, back);
+  DrawTextNoClip(rc, font, ybase, s, fore, back);
   GetPainter()->setClipping(false);
 }
 
-void SurfaceImpl::DrawTextTransparent(
-  PRectangle rc,
+void SurfaceImpl::DrawTextTransparent(PRectangle rc,
   Font &font,
   XYPOSITION ybase,
-  const char *s,
-  int len,
+  std::string_view s,
   ColourDesired fore)
 {
   PenColour(fore);
@@ -344,7 +342,7 @@ void SurfaceImpl::DrawTextTransparent(
     painter->setFont(*static_cast<QFont *>(id));
 
   painter->setBackgroundMode(Qt::TransparentMode);
-  painter->drawText(QPointF(rc.left, ybase), QString::fromUtf8(s, len));
+  painter->drawText(QPointF(rc.left, ybase), QString::fromUtf8(s.data(), s.length()));
 }
 
 void SurfaceImpl::SetClip(PRectangle rc)
@@ -367,13 +365,12 @@ static size_t utf8LengthFromLead(unsigned char uch)
 
 void SurfaceImpl::MeasureWidths(
   Font &font,
-  const char *s,
-  int len,
+  std::string_view s,
   XYPOSITION *positions)
 {
   if (!font.GetID())
     return;
-  QString su = QString::fromUtf8(s, len);
+  QString su = QString::fromUtf8(s.data(), s.length());
   QTextLayout tlay(su, *static_cast<QFont *>(font.GetID()), device);
   tlay.beginLayout();
   QTextLine tl = tlay.createLine();
@@ -382,12 +379,12 @@ void SurfaceImpl::MeasureWidths(
   int i = 0;
   int ui = 0;
   int fit = su.size();
-  const unsigned char *us = reinterpret_cast<const unsigned char *>(s);
+  const unsigned char *us = reinterpret_cast<const unsigned char *>(s.data());
   while (ui < fit) {
     size_t lenChar = utf8LengthFromLead(us[i]);
     int codeUnits = (lenChar < 4) ? 1 : 2;
     qreal xPosition = tl.cursorToX(ui + codeUnits);
-    for (unsigned int bytePos = 0; (bytePos < lenChar) && (i < len); ++bytePos)
+    for (unsigned int bytePos = 0; (bytePos < lenChar) && (i < s.length()); ++bytePos)
       positions[i++] = xPosition;
     ui += codeUnits;
   }
@@ -395,14 +392,14 @@ void SurfaceImpl::MeasureWidths(
   XYPOSITION lastPos = 0;
   if (i > 0)
     lastPos = positions[i - 1];
-  while (i < len)
+  while (i < s.length())
     positions[i++] = lastPos;
 }
 
-XYPOSITION SurfaceImpl::WidthText(Font &font, const char *s, int len)
+XYPOSITION SurfaceImpl::WidthText(Font &font, std::string_view s)
 {
   QFontMetricsF metrics(*static_cast<QFont *>(font.GetID()), device);
-  return metrics.width(QString::fromUtf8(s, len));
+  return metrics.width(QString::fromUtf8(s.data(), s.length()));
 }
 
 XYPOSITION SurfaceImpl::Ascent(Font &font)

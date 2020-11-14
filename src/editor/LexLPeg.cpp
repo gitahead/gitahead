@@ -70,7 +70,7 @@ LUALIB_API int luaopen_lpeg(lua_State *L);
 
 using namespace Scintilla;
 
-class LexerLPeg : public ILexer {
+class LexerLPeg : public ILexer5 {
   // Shared lua state.
   static lua_State *L;
 
@@ -589,8 +589,54 @@ public:
   const char * SCI_METHOD DescribeWordListSets() { return ""; }
   Sci_Position SCI_METHOD WordListSet(int, const char *) { return -1; }
 
+  int SCI_METHOD LineEndTypesSupported() noexcept override {return SC_LINE_END_TYPE_UNICODE;}
+
+  int SCI_METHOD AllocateSubStyles(int styleBase, int numberStyles) override {
+      return 0;
+  }
+  int SCI_METHOD SubStylesStart(int styleBase) override {
+      return 0;
+  }
+  int SCI_METHOD SubStylesLength(int styleBase) override {
+      return 0;
+  }
+  int SCI_METHOD StyleFromSubStyle(int subStyle) override {
+      return 0;
+  }
+  int SCI_METHOD PrimaryStyleFromStyle(int style) noexcept override {
+      return 0;
+  }
+  void SCI_METHOD FreeSubStyles() override {
+  }
+  void SCI_METHOD SetIdentifiers(int style, const char *identifiers) override {
+  }
+  int SCI_METHOD DistanceToSecondaryStyles() noexcept override {
+      return 0;
+  }
+  const char * SCI_METHOD GetSubStyleBases() noexcept override {
+      return "";
+  }
+  int SCI_METHOD NamedStyles() override {
+      return 0;
+  }
+  const char * SCI_METHOD NameOfStyle(int style) override {
+      return "";
+  }
+  const char * SCI_METHOD TagsOfStyle(int style) override {
+      return "";
+  }
+  const char * SCI_METHOD DescriptionOfStyle(int style) override {
+      return "";
+  }
+
+  const char * SCI_METHOD GetName() override {return "";}
+
+  int SCI_METHOD  GetIdentifier() override { return 0; }
+
+  const char * SCI_METHOD PropertyGet(const char *key) {return "";}
+
   /** Constructs a new instance of the lexer. */
-  static ILexer *LexerFactoryLPeg() { return new LexerLPeg(); }
+  static ILexer5 *LexerFactoryLPeg() { return new LexerLPeg(); }
 };
 
 lua_State *LexerLPeg::L = NULL;
