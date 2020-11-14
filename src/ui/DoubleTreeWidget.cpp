@@ -195,6 +195,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 
 QString DoubleTreeWidget::selectedFile() const {
 
+    return "";
 }
 
 /*!
