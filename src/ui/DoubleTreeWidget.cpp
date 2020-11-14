@@ -194,7 +194,15 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 }
 
 QString DoubleTreeWidget::selectedFile() const {
+    QModelIndexList indexes = stagedFiles->selectionModel()->selectedIndexes();
+    if (!indexes.isEmpty()) {
+      return indexes.first().data(Qt::DisplayRole).toString();
+    }
 
+    indexes = unstagedFiles->selectionModel()->selectedIndexes();
+    if (!indexes.isEmpty()) {
+      return indexes.first().data(Qt::DisplayRole).toString();
+    }
     return "";
 }
 
