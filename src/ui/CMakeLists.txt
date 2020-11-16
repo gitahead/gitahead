@@ -34,6 +34,7 @@ add_library(ui
   RemoteCallbacks.cpp
   SearchField.cpp
   SideBar.cpp
+  SpellChecker.cpp
   TabBar.cpp
   TabWidget.cpp
   ToolBar.cpp
@@ -53,6 +54,7 @@ target_link_libraries(ui
   editor
   git
   host
+  hunspell
   index
   loglib
   plugins

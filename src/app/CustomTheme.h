@@ -30,6 +30,7 @@ public:
   QList<QColor> branchTopologyEdges() override;
   QColor buttonChecked() override;
   QPalette commitList() override;
+  QColor commitEditor(CommitEditor color) override;
   QColor diff(Diff color) override;
   QPalette fileList() override;
   QColor heatMap(HeatMap color) override;

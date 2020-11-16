@@ -10,3 +10,5 @@ add_subdirectory(lpeg)
 add_subdirectory(scintilla)
 
 add_subdirectory(git)
+
+add_subdirectory(hunspell)

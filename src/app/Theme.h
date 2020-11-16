@@ -35,6 +35,13 @@ public:
     Notification
   };
 
+  enum class CommitEditor
+  {
+    SpellError,
+    SpellIgnore,
+    LengthWarning
+  };
+
   enum class Diff
   {
     Ours,
@@ -79,6 +86,7 @@ public:
   virtual QList<QColor> branchTopologyEdges();
   virtual QColor buttonChecked();
   virtual QPalette commitList();
+  virtual QColor commitEditor(CommitEditor color);
   virtual QColor diff(Diff color);
   virtual QPalette fileList();
   virtual QColor heatMap(HeatMap color);
