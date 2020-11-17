@@ -176,7 +176,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 
 	setLayout(layout);
 
-    connect(viewGroup, QOverload<int>::of(&QButtonGroup::buttonClicked), [this] (int idx) {
+    connect(viewGroup, QOverload<int>::of(&QButtonGroup::idClicked), [this] (int idx) {
         mFileView->setCurrentIndex(idx);
     });
 
@@ -217,6 +217,7 @@ QString DoubleTreeWidget::selectedFile() const {
 void DoubleTreeWidget::setDiff(const git::Diff &diff,
 									const QString &file,
 									const QString &pathspec) {
+    Q_UNUSED(pathspec);
 	// Remember selection.
 	QString name = file;
 	if (name.isEmpty()) {
@@ -269,8 +270,9 @@ void DoubleTreeWidget::updateTreeModel(git::Index::StagedState state)
 }
 
 void DoubleTreeWidget::treeModelStateChanged(const QModelIndex& index, int checkState) {
+    Q_UNUSED(index);
+    Q_UNUSED(checkState);
     // clear editor and disable diffView when no item is selected
-    Qt::CheckState cs = static_cast<Qt::CheckState>(checkState);
     QModelIndexList stagedSelections = stagedFiles->selectionModel()->selectedIndexes();
     if (stagedSelections.count())
         return;
@@ -287,6 +289,7 @@ void DoubleTreeWidget::treeModelStateChanged(const QModelIndex& index, int check
 
 void DoubleTreeWidget::selectFile(const QString &file)
 {
+    Q_UNUSED(file);
 //  if (file.isEmpty())
 //	return;
 
