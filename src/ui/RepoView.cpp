@@ -2368,7 +2368,7 @@ QList<RepoView::SubmoduleInfo> RepoView::submoduleResetInfoList(
   foreach (const git::Submodule &submodule, submodules) {
     int status = submodule.status();
 
-    if (status & (GIT_SUBMODULE_STATUS_WD_WD_MODIFIED | GIT_SUBMODULE_STATUS_WD_INDEX_MODIFIED))
+    if (status & (GIT_SUBMODULE_STATUS_WD_MODIFIED | GIT_SUBMODULE_STATUS_WD_WD_MODIFIED | GIT_SUBMODULE_STATUS_WD_INDEX_MODIFIED))
         modules.append(submodule);
   }
 
