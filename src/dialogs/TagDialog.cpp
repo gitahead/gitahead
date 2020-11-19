@@ -10,6 +10,7 @@
 #include "TagDialog.h"
 #include "git/Repository.h"
 #include "git/TagRef.h"
+#include "git2/tag.h"
 #include "ui/ExpandButton.h"
 #include <QApplication>
 #include <QCheckBox>
@@ -20,6 +21,8 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QTextEdit>
+#include <QListWidget>
+#include <QStringList>
 
 TagDialog::TagDialog(
   const git::Repository &repo,
@@ -27,7 +30,8 @@ TagDialog::TagDialog(
   const git::Remote &remote,
   QWidget *parent)
   : QDialog(parent),
-    mRemote(remote)
+    mRemote(remote),
+    mExistingTags(repo.existingTags())
 {
   setAttribute(Qt::WA_DeleteOnClose);
 
@@ -71,18 +75,31 @@ TagDialog::TagDialog(
     buttons->addButton(tr("Create Tag"), QDialogButtonBox::AcceptRole);
   create->setEnabled(false);
 
+  mListWidget = new QListWidget(this);
+  mListWidget->addItems(mExistingTags);
+
   auto updateButton = [this, repo, create, annotated] {
     QString name = mNameField->text();
     bool force = mForce->isChecked();
     create->setEnabled(
       !name.isEmpty() && (force || !repo.lookupTag(name).isValid()) &&
       (!annotated->isChecked() || !mMessage->toPlainText().isEmpty()));
+
+    // TODO: might be inefficient
+    // if character was added, only the filtered must be filtered again
+    QStringList filtered = mExistingTags.filter(name, Qt::CaseSensitivity::CaseSensitive);
+    filtered.sort(Qt::CaseSensitivity::CaseSensitive);
+
+    mListWidget->clear();
+    mListWidget->addItems(filtered);
   };
 
   connect(mNameField, &QLineEdit::textChanged, updateButton);
   connect(mForce, &QCheckBox::toggled, updateButton);
   connect(annotated, &QCheckBox::toggled, updateButton);
   connect(mMessage, &QTextEdit::textChanged, updateButton);
+
+
 
   QFormLayout *layout = new QFormLayout(this);
   layout->addRow(label);
@@ -92,7 +109,14 @@ TagDialog::TagDialog(
     layout->addRow(mPush);
   layout->addRow(annotatedLayout);
   layout->addRow(mMessage);
-  layout->addRow(buttons);
+
+  QHBoxLayout* hLayout = new QHBoxLayout();
+  hLayout->addLayout(layout);
+  hLayout->addWidget(mListWidget);
+
+  QVBoxLayout* vLayout = new QVBoxLayout();
+  vLayout->addLayout(hLayout);
+  vLayout->addWidget(buttons);
 }
 
 bool TagDialog::force() const

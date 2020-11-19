@@ -482,6 +482,21 @@ TagRef Repository::lookupTag(const QString &name) const
   return lookupRef(QString("refs/tags/%1").arg(name));
 }
 
+QStringList Repository::existingTags() const {
+
+    git_strarray* array = nullptr;
+    git_tag_list(array, operator git_repository *());
+
+    QStringList list;
+
+    for (int i=0; i < array->count; i++) {
+        list.append(array->strings[i]);
+    }
+
+    git_strarray_dispose(array);
+    return list;
+}
+
 TagRef Repository::createTag(
   const Commit &target,
   const QString &name,

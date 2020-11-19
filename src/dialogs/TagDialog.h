@@ -16,6 +16,7 @@
 class QCheckBox;
 class QLineEdit;
 class QTextEdit;
+class QListWidget;
 
 namespace git {
 class Repository;
@@ -43,6 +44,8 @@ private:
   QCheckBox *mForce;
   QCheckBox *mPush;
   QTextEdit *mMessage;
+  QListWidget* mListWidget{nullptr};
+  QStringList mExistingTags;
 };
 
 #endif

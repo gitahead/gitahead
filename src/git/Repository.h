@@ -138,6 +138,7 @@ public:
     const QString &name,
     const QString &message = QString(),
     bool force = false);
+  QStringList existingTags() const;
 
   // blob
   Blob lookupBlob(const Id &id) const;
