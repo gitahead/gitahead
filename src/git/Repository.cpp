@@ -484,16 +484,16 @@ TagRef Repository::lookupTag(const QString &name) const
 
 QStringList Repository::existingTags() const {
 
-    git_strarray* array = nullptr;
-    git_tag_list(array, operator git_repository *());
+    git_strarray array;
+    git_tag_list(&array, operator git_repository *());
 
     QStringList list;
 
-    for (int i=0; i < array->count; i++) {
-        list.append(array->strings[i]);
+    for (int i=0; i < array.count; i++) {
+        list.append(array.strings[i]);
     }
 
-    git_strarray_dispose(array);
+    git_strarray_dispose(&array);
     return list;
 }
 

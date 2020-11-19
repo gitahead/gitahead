@@ -46,6 +46,8 @@ private:
   QTextEdit *mMessage;
   QListWidget* mListWidget{nullptr};
   QStringList mExistingTags;
+  QStringList mFilteredTags;
+  QString mOldTagname;
 };
 
 #endif

@@ -31,7 +31,8 @@ TagDialog::TagDialog(
   QWidget *parent)
   : QDialog(parent),
     mRemote(remote),
-    mExistingTags(repo.existingTags())
+    mExistingTags(repo.existingTags()),
+    mFilteredTags(mExistingTags)
 {
   setAttribute(Qt::WA_DeleteOnClose);
 
@@ -78,20 +79,30 @@ TagDialog::TagDialog(
   mListWidget = new QListWidget(this);
   mListWidget->addItems(mExistingTags);
 
+  connect(mListWidget, &QListWidget::itemDoubleClicked, [this] (QListWidgetItem* item) {
+      mNameField->setText(item->text());
+  });
+
   auto updateButton = [this, repo, create, annotated] {
     QString name = mNameField->text();
+    int value = QString::compare(name, mOldTagname);
+    mOldTagname = name;
     bool force = mForce->isChecked();
     create->setEnabled(
       !name.isEmpty() && (force || !repo.lookupTag(name).isValid()) &&
       (!annotated->isChecked() || !mMessage->toPlainText().isEmpty()));
 
-    // TODO: might be inefficient
-    // if character was added, only the filtered must be filtered again
-    QStringList filtered = mExistingTags.filter(name, Qt::CaseSensitivity::CaseSensitive);
-    filtered.sort(Qt::CaseSensitivity::CaseSensitive);
+    if (value >= 0) {
+        // a new character was added, so the filtered data can be filtered again
+        mFilteredTags = mFilteredTags.filter(name, Qt::CaseSensitivity::CaseSensitive);
+    } else {
+        mFilteredTags = mExistingTags.filter(name, Qt::CaseSensitivity::CaseSensitive);
+    }
+    mFilteredTags.sort(Qt::CaseSensitivity::CaseSensitive);
+    // TODO: sort descending, because V1.2 shoud be shown above V1.1
 
     mListWidget->clear();
-    mListWidget->addItems(filtered);
+    mListWidget->addItems(mFilteredTags);
   };
 
   connect(mNameField, &QLineEdit::textChanged, updateButton);
@@ -99,9 +110,7 @@ TagDialog::TagDialog(
   connect(annotated, &QCheckBox::toggled, updateButton);
   connect(mMessage, &QTextEdit::textChanged, updateButton);
 
-
-
-  QFormLayout *layout = new QFormLayout(this);
+  QFormLayout *layout = new QFormLayout();
   layout->addRow(label);
   layout->addRow(tr("Name"), mNameField);
   layout->addRow(mForce);
@@ -112,11 +121,17 @@ TagDialog::TagDialog(
 
   QHBoxLayout* hLayout = new QHBoxLayout();
   hLayout->addLayout(layout);
-  hLayout->addWidget(mListWidget);
 
   QVBoxLayout* vLayout = new QVBoxLayout();
+  vLayout->addWidget(new QLabel("Existing Tags:", this));
+  vLayout->addWidget(mListWidget);
+  hLayout->addLayout(vLayout);
+
+  vLayout = new QVBoxLayout();
   vLayout->addLayout(hLayout);
   vLayout->addWidget(buttons);
+
+  setLayout(vLayout);
 }
 
 bool TagDialog::force() const
