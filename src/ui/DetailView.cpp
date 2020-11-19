@@ -62,6 +62,11 @@ const QString kAltFmt = "<span style='color: %1'>%2</span>";
 const QString kUrl = "http://www.gravatar.com/avatar/%1?s=%2&d=mm";
 
 const QString kDictKey = "commit.spellcheck.dict";
+const QString kSubjectCheckKey = "commit.subject.lengthcheck";
+const QString kSubjectLimitKey = "commit.subject.limit";
+const QString kBlankKey = "commit.blank.insert";
+const QString kBodyCheckKey = "commit.body.lengthcheck";
+const QString kBodyLimitKey = "commit.body.limit";
 
 const Qt::TextInteractionFlags kTextFlags =
   Qt::TextSelectableByMouse | Qt::LinksAccessibleByMouse;
@@ -478,9 +483,11 @@ public:
         checkSpelling();
     });
 
-    // Spell check on textchange.
+    // Spell and linelength check on textchange.
     connect(this, &QTextEdit::textChanged, [this] {
       mTimer.start(500);
+      if (mLineLengthCheckValid)
+        checkLength();
     });
   }
 
@@ -507,6 +514,30 @@ public:
   {
     if (mSpellCheckValid)
       checkSpelling();
+  }
+
+  void LengthSetup(const QList<int> &lineLength,
+                   const QList<int> &blankLines,
+                   const QTextCharFormat &lineFormat)
+  {
+    // Length set or blank line enabled.
+    if (!lineLength.isEmpty() && !blankLines.isEmpty()) {
+      mLineLength = lineLength;
+      mBlankLines = blankLines;
+      mLineFormat = lineFormat;
+      checkLength();
+      mLineLengthCheckValid = true;
+    } else {
+      mLineList.clear();
+      setSelections();
+      mLineLengthCheckValid = false;
+    }
+  }
+
+  void LineLengthCheck(void)
+  {
+    if (mLineLengthCheckValid)
+      checkLength();
   }
 
 private:
@@ -626,6 +657,48 @@ private:
         }
       }
     }
+
+    // Line length checking enabled.
+    if (mLineLengthCheckValid) {
+      QTextCursor cursor = cursorForPosition(event->pos());
+      int row = cursor.blockNumber();
+      foreach (const QTextEdit::ExtraSelection &es, mLineList) {
+        if ((es.cursor.position() <= cursor.position()) &&
+            (es.cursor.anchor() >= cursor.position())) {
+
+          // Replace standard context menu.
+          if (replaced)
+            menu->addSeparator();
+          else {
+            menu->clear();
+            replaced = true;
+          }
+
+          QAction *lineWrap;
+          if (mBlankLines.contains(row + 1))
+            lineWrap = menu->addAction(tr("Truncate Line"));
+          else
+            lineWrap = menu->addAction(tr("Insert Wordwrap"));
+
+          cursor = es.cursor;
+          connect(lineWrap, &QAction::triggered, [this, cursor, row] {
+            wordWrap(cursor, row, true);
+            checkLength();
+            checkSpelling();
+          });
+
+          if (!mBlankLines.contains(row + 1)) {
+            QAction *lineAll = menu->addAction(tr("Insert All Wordwraps"));
+            connect(lineAll, &QAction::triggered, [this] {
+              wordWraps();
+              checkLength();
+              checkSpelling();
+            });
+          }
+          break;
+        }
+      }
+    }
     menu->exec(event->globalPos());
     delete menu;
   }
@@ -701,9 +774,102 @@ private:
     return word;
   }
 
+  void checkLength(void)
+  {
+    QTextCursor cursor(document());
+    QStringList strlist = toPlainText().split('\n');
+    mLineList.clear();
+
+    for (int row = 0; row < strlist.count(); row++) {
+      int len = strlist[row].length();
+
+      // Forced blank lines.
+      if (mBlankLines.contains(row) && (len > 0)) {
+          cursor.insertText("\n");
+        break;
+      }
+
+      int limit;
+      if (row >= mLineLength.count())
+        limit = mLineLength.last();
+      else
+        limit = mLineLength.at(row);
+
+      cursor.movePosition(QTextCursor::EndOfBlock,
+                          QTextCursor::MoveAnchor, 1);
+      if ((limit > 0) && (len > limit)) {
+        cursor.movePosition(QTextCursor::Left,
+                            QTextCursor::KeepAnchor, len - limit);
+
+        // Highlight length violation.
+        QTextEdit::ExtraSelection es;
+        es.cursor = cursor;
+        es.format = mLineFormat;
+        mLineList << es;
+
+        cursor.movePosition(QTextCursor::EndOfBlock,
+                            QTextCursor::MoveAnchor, 1);
+      }
+      cursor.movePosition(QTextCursor::NextCharacter,
+                          QTextCursor::MoveAnchor, 1);
+    }
+    setSelections();
+  }
+
+  bool wordWrap(QTextCursor cursor, int row, bool truncate)
+  {
+    QStringList strlist = toPlainText().split('\n');
+    if (row <= strlist.count()) {
+      int limit;
+      if (row >= mLineLength.count())
+        limit = mLineLength.last();
+      else
+        limit = mLineLength.at(row);
+
+      if (mBlankLines.contains(row + 1)) {
+
+        // Truncate selection.
+        if (truncate)
+          cursor.deleteChar();
+        else
+          return false;
+      } else {
+
+        // Insert Wordwrap.
+        cursor.movePosition(QTextCursor::PreviousWord,
+                            QTextCursor::MoveAnchor, 1);
+        if (cursor.positionInBlock() > 0) {
+          cursor.movePosition(QTextCursor::Left,
+                              QTextCursor::KeepAnchor, 1);
+          cursor.insertText("\n");
+        } else {
+          cursor.movePosition(QTextCursor::Right,
+                              QTextCursor::MoveAnchor, limit);
+          cursor.insertText("\n");
+        }
+      }
+      return true;
+    }
+    return false;
+  }
+
+  void wordWraps(void)
+  {
+    int index = 0;
+    while (index < mLineList.count()) {
+      QTextEdit::ExtraSelection es = mLineList.at(index);
+      int row = es.cursor.blockNumber();
+      if (!wordWrap(es.cursor, row, false))
+        index += 1;
+      else
+        checkLength();
+    }
+  }
+
   void setSelections(void)
   {
     QList<QTextEdit::ExtraSelection> esList;
+    esList.append(mLineList);
     esList.append(mSpellList);
     setExtraSelections(esList);
   }
@@ -715,6 +881,76 @@ private:
   QTextCharFormat mIgnoredFormat;
   QList<QTextEdit::ExtraSelection> mSpellList;
   bool mSpellCheckValid = false;
+
+  QList<int> mLineLength;
+  QList<int> mBlankLines;
+  QTextCharFormat mLineFormat;
+  QList<QTextEdit::ExtraSelection> mLineList;
+  bool mLineLengthCheckValid = false;
+};
+
+class Menu : public QMenu
+{
+  Q_OBJECT
+
+public:
+  Menu(QMenu *parent = nullptr)
+    : QMenu(parent)
+  {}
+
+signals:
+  void keyPressed(QAction *action, int key, ulong msDiff);
+  void mouseWheel(QAction *action, int wheelX, int wheelY);
+
+private:
+  void actionEvent(QActionEvent *e) override
+  {
+    QMenu::actionEvent(e);
+
+    if (e->type() == QEvent::ActionAdded) {
+      QAction *action = e->action();
+      connect(action, &QAction::hovered, [this, action] {
+        mAction = action;
+      });
+    }
+  }
+
+  void keyPressEvent(QKeyEvent *e) override
+  {
+    if (mAction != nullptr) {
+      ulong timestamp = e->timestamp();
+      emit keyPressed(mAction, e->key(), timestamp - mTimeStamp);
+      mTimeStamp = timestamp;
+    }
+    QMenu::keyPressEvent(e);
+  }
+
+  void mouseMoveEvent(QMouseEvent *e) override
+  {
+    mAction = actionAt(e->pos());
+    QMenu::mouseMoveEvent(e);
+  }
+
+  void wheelEvent(QWheelEvent *e) override
+  {
+    QPoint degrees = e->angleDelta();
+    if (!degrees.isNull()) {
+
+      // Degrees in 1/8 of a degree
+      degrees /= 8;
+
+      // Default wheel step = 15 degrees
+      QPoint numSteps = degrees / 15;
+      if ((numSteps.x() != 0) || (numSteps.y() != 0)) {
+        if (mAction != nullptr)
+          emit mouseWheel(mAction, numSteps.x(), numSteps.y());
+      }
+    }
+    QMenu::wheelEvent(e);
+  }
+
+  QAction *mAction = nullptr;
+  ulong mTimeStamp;
 };
 
 class CommitEditor : public QFrame
@@ -734,6 +970,8 @@ public:
     mSpellIgnore.setUnderlineColor(Application::theme()->commitEditor(
                                      Theme::CommitEditor::SpellIgnore));
     mSpellIgnore.setUnderlineStyle(QTextCharFormat::WaveUnderline);
+    mLineLengthWarn.setBackground(Application::theme()->commitEditor(
+                                    Theme::CommitEditor::LengthWarning));
 
     // Spell check configuration
     git::Config appconfig = repo.appConfig();
@@ -858,6 +1096,120 @@ public:
       appconfig.setValue(kDictKey, mDictName);
     });
 
+    // Line length limit configuration.
+    mSubjectLimit = appconfig.value<int>(kSubjectLimitKey, 50);
+    mBodyLimit = appconfig.value<int>(kBodyLimitKey, 72);
+
+    Menu *lineLengthChecks = new Menu();
+    lineLengthChecks->setTitle(tr("Line Length Checks"));
+
+    mSubjectCheck = lineLengthChecks->addAction(
+    tr("Subject Line Length Check: %1").arg(mSubjectLimit), [this] {
+      // Save settings.
+      git::Config appconfig = mRepo.appConfig();
+      appconfig.setValue(kSubjectCheckKey, mSubjectCheck->isChecked());
+
+      // Apply changes.
+      mMessage->LengthSetup({mSubjectCheck->isChecked() ? mSubjectLimit : 0,
+                             mBodyCheck->isChecked() ? mBodyLimit : 0},
+                            {mInsertBlank->isChecked() ? 1 : -1},
+                            mLineLengthWarn);
+    });
+    mSubjectCheck->setData(1);
+    mSubjectCheck->setCheckable(true);
+    mSubjectCheck->setToolTip(tr("Use mouse wheel, numeric keys and space key"));
+    mSubjectCheck->setChecked(appconfig.value<bool>(kSubjectCheckKey, false));
+
+    mInsertBlank = lineLengthChecks->addAction(
+    tr("Insert Blank Line between Subject and Body"), [this] {
+      // Save settings.
+      git::Config appconfig = mRepo.appConfig();
+      appconfig.setValue(kBlankKey, mInsertBlank->isChecked());
+
+      // Apply changes.
+      mMessage->LengthSetup({mSubjectCheck->isChecked() ? mSubjectLimit : 0,
+                             mBodyCheck->isChecked() ? mBodyLimit : 0},
+                            {mInsertBlank->isChecked() ? 1 : -1},
+                            mLineLengthWarn);
+    });
+    mInsertBlank->setData(2);
+    mInsertBlank->setCheckable(true);
+    mInsertBlank->setChecked(appconfig.value<bool>(kBlankKey, false));
+
+    mBodyCheck = lineLengthChecks->addAction(
+    tr("Body Text Length Check: %1").arg(mBodyLimit), [this] {
+      // Save settings.
+      git::Config appconfig = mRepo.appConfig();
+      appconfig.setValue(kBodyCheckKey, mBodyCheck->isChecked());
+
+      // Apply changes.
+      mMessage->LengthSetup({mSubjectCheck->isChecked() ? mSubjectLimit : 0,
+                             mBodyCheck->isChecked() ? mBodyLimit : 0},
+                            {mInsertBlank->isChecked() ? 1 : -1},
+                            mLineLengthWarn);
+    });
+    mBodyCheck->setData(3);
+    mBodyCheck->setCheckable(true);
+    mBodyCheck->setToolTip(mSubjectCheck->toolTip());
+    mBodyCheck->setChecked(appconfig.value<bool>(kBodyCheckKey, false));
+
+    connect(lineLengthChecks, &Menu::mouseWheel,
+    [this](QAction *action, int wheelX, int wheelY) {
+      QWidget *widget = action->parentWidget();
+      if (widget) {
+        Menu *menu = static_cast<Menu*>(widget);
+        menu->setToolTipsVisible(false);
+      }
+
+      updateLineSettings(action, wheelY);
+    });
+
+    connect(lineLengthChecks, &Menu::keyPressed,
+    [this](QAction *action, int key, ulong msDiff) {
+      QWidget *widget = action->parentWidget();
+      if (widget) {
+        Menu *menu = static_cast<Menu*>(widget);
+        menu->setToolTipsVisible(false);
+      }
+
+      // 0..9 keys for value input
+      if ((key >= Qt::Key_0) && (key <= Qt::Key_9)) {
+        int diff = 0;
+        int value;
+        switch (action->data().toInt()) {
+          case 1:
+            value = mSubjectLimit;
+            break;
+          case 2:
+            return;
+          case 3:
+            value = mBodyLimit;
+        }
+
+        if (msDiff > 500) {
+          diff = key - Qt::Key_0;
+          diff -= value;
+        } else {
+          diff = value * 10;
+          diff += key - Qt::Key_0;
+          diff -= value;
+        }
+
+        if (diff != 0)
+          updateLineSettings(action, diff);
+      }
+
+      // Space key: toggle checkbox
+      if (key == Qt::Key_Space) {
+        action->setChecked(!action->isChecked());
+        updateLineSettings(action, 0);
+      }
+    });
+
+    connect(lineLengthChecks, &QMenu::aboutToShow, [lineLengthChecks] {
+      lineLengthChecks->setToolTipsVisible(true);
+    });
+
     mStatus = new QLabel(QString(), this);
 
     // Context button.
@@ -876,6 +1228,9 @@ public:
       RepoView *view = RepoView::parentView(this);
       view->openEditor(mUserDict);
     });
+
+    // Line length check menu.
+    menu->addMenu(lineLengthChecks);
 
     QHBoxLayout *labelLayout = new QHBoxLayout;
     labelLayout->addWidget(label);
@@ -915,6 +1270,12 @@ public:
         mDictName = "none";
       }
     }
+
+    // Setup line length check.
+    mMessage->LengthSetup({mSubjectCheck->isChecked() ? mSubjectLimit : 0,
+                           mBodyCheck->isChecked() ? mBodyLimit : 0},
+                          {mInsertBlank->isChecked() ? 1 : -1},
+                          mLineLengthWarn);
 
     // Update menu items.
     MenuBar *menuBar = MenuBar::instance(this);
@@ -1126,10 +1487,72 @@ private:
     MenuBar::instance(this)->updateRepository();
   }
 
+  void updateLineSettings(QAction *action, int value)
+  {
+    git::Config appconfig = mRepo.appConfig();
+    int nr = action->data().toInt();
+    bool saved = false;
+
+    // Mouse wheel / keyboard value change action.
+    switch (nr) {
+      case 1: // Subject text
+        mSubjectLimit += value;
+        if (mSubjectLimit > 200)
+          mSubjectLimit = 200;
+        if (mSubjectLimit < 1) {
+          mSubjectLimit = 0;
+          action->setChecked(false);
+        }
+        action->setText(tr("Subject Line Length Check: %1")
+                          .arg(mSubjectLimit));
+
+        // Save settings.
+        appconfig.setValue(kSubjectCheckKey, action->isChecked());
+        appconfig.setValue(kSubjectLimitKey, mSubjectLimit);
+        saved = true;
+        break;
+      case 2: // Blank line insertion
+        // Save settings.
+        appconfig.setValue(kBlankKey, action->isChecked());
+        saved = true;
+        break;
+      case 3: // Body text
+        mBodyLimit += value;
+        if (mBodyLimit > 200)
+          mBodyLimit = 200;
+        if (mBodyLimit < 1) {
+          mBodyLimit = 0;
+          action->setChecked(false);
+        }
+        action->setText(tr("Body Text Length Check: %1").arg(mBodyLimit));
+
+        // Save settings.
+        appconfig.setValue(kBodyCheckKey, action->isChecked());
+        appconfig.setValue(kBodyLimitKey, mBodyLimit);
+        saved = true;
+        break;
+      default:
+        break;
+    }
+
+    // Apply changes.
+    if (saved) {
+      mMessage->LengthSetup({mSubjectCheck->isChecked() ? mSubjectLimit : 0,
+                             mBodyCheck->isChecked() ? mBodyLimit : 0},
+                            {mInsertBlank->isChecked() ? 1 : -1},
+                            mLineLengthWarn);
+    }
+  }
+
   git::Repository mRepo;
   git::Diff mDiff;
 
   QLabel *mStatus;
+
+  QAction *mSubjectCheck;
+  QAction *mInsertBlank;
+  QAction *mBodyCheck;
+
   TextEdit *mMessage;
   QPushButton *mStage;
   QPushButton *mUnstage;
@@ -1142,8 +1565,12 @@ private:
   QString mDictPath;
   QString mUserDict;
 
+  int mSubjectLimit;
+  int mBodyLimit;
+
   QTextCharFormat mSpellError;
   QTextCharFormat mSpellIgnore;
+  QTextCharFormat mLineLengthWarn;
 };
 
 } // anon. namespace

@@ -30,10 +30,10 @@ else()
 endif()
 
 foreach(QT_PLUGIN ${QT_PLUGINS})
-  get_target_property(PLUGIN Qt5::${QT_PLUGIN} LOCATION_${CMAKE_BUILD_TYPE})
-  get_filename_component(FILE_NAME ${PLUGIN} NAME)
-  get_filename_component(DIR ${PLUGIN} DIRECTORY)
-  get_filename_component(DIR_NAME ${DIR} NAME)
+  #get_target_property(PLUGIN Qt5::${QT_PLUGIN} LOCATION_${CMAKE_BUILD_TYPE})
+  #get_filename_component(FILE_NAME ${PLUGIN} NAME)
+  #get_filename_component(DIR ${PLUGIN} DIRECTORY)
+  #get_filename_component(DIR_NAME ${DIR} NAME)
   set(PLUGIN_PATH Plugins/${DIR_NAME}/${FILE_NAME})
 
   install(FILES ${PLUGIN}

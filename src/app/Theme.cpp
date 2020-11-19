@@ -531,13 +531,13 @@ QColor Theme::commitEditor(CommitEditor color)
     switch (color) {
       case CommitEditor::SpellError:    return "#BC0009";
       case CommitEditor::SpellIgnore:   return "#E1E5F2";
-      case CommitEditor::LengthWarning: return "#464614";
+      case CommitEditor::LengthWarning: return "#565614";
     }
   }
   switch (color) {
     case CommitEditor::SpellError:    return Qt::red;
     case CommitEditor::SpellIgnore:   return Qt::gray;
-    case CommitEditor::LengthWarning: return "#EFF0F1";
+    case CommitEditor::LengthWarning: return "#ECECBC";
   }
 }
 
