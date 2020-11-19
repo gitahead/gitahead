@@ -7,6 +7,8 @@
 // Author: Jason Haslam
 //
 
+#include <algorithm>
+
 #include "TagDialog.h"
 #include "git/Repository.h"
 #include "git/TagRef.h"
@@ -30,9 +32,7 @@ TagDialog::TagDialog(
   const git::Remote &remote,
   QWidget *parent)
   : QDialog(parent),
-    mRemote(remote),
-    mExistingTags(repo.existingTags()),
-    mFilteredTags(mExistingTags)
+    mRemote(remote)
 {
   setAttribute(Qt::WA_DeleteOnClose);
 
@@ -76,6 +76,14 @@ TagDialog::TagDialog(
     buttons->addButton(tr("Create Tag"), QDialogButtonBox::AcceptRole);
   create->setEnabled(false);
 
+  // filtering must be done only once, because mExistingTags does not change during
+  // the use of this dialog
+  mExistingTags = repo.existingTags(),
+  // filter descending. V1.1 before V1.0 makes more sense, because normaly the
+  // next greater number will be choosen and so it can be seen faster
+  std::sort(mExistingTags.begin(), mExistingTags.end(), std::greater <>());
+  mFilteredTags = mExistingTags;
+
   mListWidget = new QListWidget(this);
   mListWidget->addItems(mExistingTags);
 
@@ -98,8 +106,6 @@ TagDialog::TagDialog(
     } else {
         mFilteredTags = mExistingTags.filter(name, Qt::CaseSensitivity::CaseSensitive);
     }
-    mFilteredTags.sort(Qt::CaseSensitivity::CaseSensitive);
-    // TODO: sort descending, because V1.2 shoud be shown above V1.1
 
     mListWidget->clear();
     mListWidget->addItems(mFilteredTags);
