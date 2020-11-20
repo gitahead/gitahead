@@ -69,6 +69,8 @@ LPegLexer::LPegLexer(
 bool LPegLexer::lex(const QByteArray &buffer)
 {
   lua_State *L = mL.data();
+  if (!lua_checkstack(L, 4))
+    return false;
 
   // Initialize lex data.
   mIndex = 1;
