@@ -32,7 +32,10 @@ public:
   enum SortRole
   {
     NameRole,
-    StatusRole
+    StatusRole,
+    BinaryRole,
+    PathRole,
+    ExtensionRole,
   };
 
   class Callbacks {
@@ -76,6 +79,7 @@ public:
   void findSimilar(bool untracked = false);
 
   void sort(SortRole role, Qt::SortOrder order = Qt::AscendingOrder);
+  void sort(QList<SortRole> roleList, QList<Qt::SortOrder> orderList);
 
   void setAllStaged(bool staged, bool yieldFocus = true);
 
