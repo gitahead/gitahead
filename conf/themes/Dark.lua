@@ -126,7 +126,7 @@ theme['checkbox']  = {
 theme['commiteditor'] = {
   spellerror       = '#BC0009', -- spell check error
   spellignore      = '#E1E5F2', -- spell check ignored word(s)
-  lengthwarning    = '#464614'  -- line length limit warning (background)
+  lengthwarning    = '#565614'  -- line length limit warning (background)
 }
 
 -- diff view colors
