@@ -266,6 +266,8 @@ protected:
 
 class EditButton : public Button
 {
+  Q_OBJECT
+
 public:
   EditButton(
     const git::Patch &patch,
@@ -292,7 +294,7 @@ public:
     }
 
     if (view->repo().workdir().exists(name)) {
-      QAction *action = menu->addAction("Edit Working Copy");
+      QAction *action = menu->addAction(tr("Edit Working Copy"));
       connect(action, &QAction::triggered, [this, view, name, newLine] {
         view->edit(name, newLine);
       });
@@ -303,7 +305,7 @@ public:
     git::Commit commit = !commits.isEmpty() ? commits.first() : git::Commit();
     git::Blob newBlob = patch.blob(git::Diff::NewFile);
     if (newBlob.isValid()) {
-      QAction *action = menu->addAction("Edit New Revision");
+      QAction *action = menu->addAction(tr("Edit New Revision"));
       connect(action, &QAction::triggered,
       [this, view, name, newLine, newBlob, commit] {
         view->openEditor(name, newLine, newBlob, commit);
@@ -318,18 +320,15 @@ public:
           commit = parents.first();
       }
 
-      QAction *action = menu->addAction("Edit Old Revision");
+      QAction *action = menu->addAction(tr("Edit Old Revision"));
       connect(action, &QAction::triggered,
       [this, view, name, oldLine, oldBlob, commit] {
         view->openEditor(name, oldLine, oldBlob, commit);
       });
     }
 
-    // Connect button click to the first menu action.
     setEnabled(!menu->isEmpty() && !binary && !lfs);
-    connect(this, &EditButton::clicked, [menu] {
-      menu->actions().first()->trigger();
-    });
+    setPopupMode(ToolButtonPopupMode::InstantPopup);
 
     setMenu(menu);
   }
@@ -356,6 +355,17 @@ protected:
     painter.setPen(QPen(painter.pen().color(), 1, Qt::SolidLine, Qt::FlatCap));
     painter.drawLine(x - r + 1, y + r - 5, x - r + 5, y + r - 1);
     painter.drawLine(x + r - 6, y - r + 2, x + r - 2, y - r + 6);
+
+    // Menu indicator.
+    QColor indicator = painter.pen().color();
+    painter.setPen(QPen(indicator.darker(150), 1,
+                        Qt::SolidLine, Qt::FlatCap));
+    painter.drawLine(x + 3, y + 5, x + 8, y + 5);
+
+    painter.setPen(QPen(indicator, 1,
+                        Qt::SolidLine, Qt::FlatCap));
+    painter.drawLine(x + 4, y + 6, x + 7, y + 6);
+    painter.drawLine(x + 5, y + 7, x + 6, y + 7);
   }
 };
 
