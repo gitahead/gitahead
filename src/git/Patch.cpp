@@ -112,12 +112,18 @@ Repository Patch::repo() const
 
 QString Patch::name(Diff::File file) const
 {
+  if (!isValid()) // Patch data is invalid
+    return QString();
+
   const git_diff_delta *delta = git_patch_get_delta(d.data());
   return (file == Diff::NewFile) ? delta->new_file.path : delta->old_file.path;
 }
 
 git_delta_t Patch::status() const
 {
+  if (!isValid()) // Patch data is invalid
+    return GIT_DELTA_UNMODIFIED;
+
   return git_patch_get_delta(d.data())->status;
 }
 
@@ -133,6 +139,9 @@ bool Patch::isConflicted() const
 
 bool Patch::isBinary() const
 {
+  if (!isValid()) // Patch data is invalid
+    return false;
+
   return git_patch_get_delta(d.data())->flags & GIT_DIFF_FLAG_BINARY;
 }
 
@@ -149,6 +158,9 @@ bool Patch::isLfsPointer() const
 
 Blob Patch::blob(Diff::File file) const
 {
+  if (!isValid()) // Patch data is invalid
+    return Blob();
+
   git_repository *repo = git_patch_owner(d.data());
   if (!repo)
     return Blob();
@@ -164,9 +176,11 @@ Blob Patch::blob(Diff::File file) const
 Patch::LineStats Patch::lineStats() const
 {
   size_t context;
-  size_t additions;
-  size_t deletions;
-  git_patch_line_stats(&context, &additions, &deletions, d.data());
+  size_t additions = 0;
+  size_t deletions = 0;
+
+  if (isValid())
+    git_patch_line_stats(&context, &additions, &deletions, d.data());
 
   LineStats stats;
   stats.additions = additions;
@@ -176,6 +190,9 @@ Patch::LineStats Patch::lineStats() const
 
 int Patch::count() const
 {
+  if (!isValid()) // Patch data is invalid
+    return 0;
+
   if (isConflicted())
     return mConflicts.size();
 
@@ -194,6 +211,9 @@ QByteArray Patch::header(int index) const
 
 int Patch::lineCount(int index) const
 {
+  if (!isValid()) // Patch data is invalid
+    return 0;
+
   if (isConflicted())
     return mConflicts.at(index).lines.size();
 
