@@ -140,13 +140,13 @@ _HunkWidget::Header::Header(
   connect(mCheck, &QCheckBox::clicked, [this](bool staged) {
     mButton->setChecked(!staged);
     if (staged)
-        emit stageStageChanged(Qt::Checked);
+        emit stageStateChanged(Qt::Checked);
     else
-        emit stageStageChanged(Qt::Unchecked);
+        emit stageStateChanged(Qt::Unchecked);
   });
 }
 
-void _HunkWidget::Header::stageStateChanged(int stageState) {
+void _HunkWidget::Header::hunkStageStateChanged(int stageState) { // on the checkstate signal will not be reacted
     mCheck->setCheckState(static_cast<Qt::CheckState>(stageState));
 }
 
@@ -208,7 +208,7 @@ HunkWidget::HunkWidget(
 
   mHeader = new _HunkWidget::Header(diff, patch, index, lfs, submodule, this);
   layout->addWidget(mHeader);
-  connect(this, &HunkWidget::stageStageChanged, mHeader, &_HunkWidget::Header::stageStateChanged);
+  connect(this, &HunkWidget::stageStateChanged, mHeader, &_HunkWidget::Header::hunkStageStateChanged);
   connect(mHeader, &_HunkWidget::Header::discard, this, &HunkWidget::discard);
 
   mEditor = new Editor(this);
@@ -242,7 +242,7 @@ HunkWidget::HunkWidget(
   layout->addWidget(mEditor);
   connect(mHeader->button(), &DisclosureButton::toggled,
           mEditor, &TextEditor::setVisible);
-  connect(mHeader, &_HunkWidget::Header::stageStageChanged, this , &HunkWidget::headerCheckStateChanged);
+  connect(mHeader, &_HunkWidget::Header::stageStateChanged, this , &HunkWidget::headerCheckStateChanged);
 
   // Handle conflict resolution.
   if (QToolButton *save = mHeader->saveButton()) {
@@ -475,7 +475,7 @@ void HunkWidget::paintEvent(QPaintEvent *event)
   QFrame::paintEvent(event);
 }
 
-void HunkWidget::stageSelected(int startLine, int end) {
+void HunkWidget::stageSelected(int startLine, int end, bool emitSignal) {
      for (int i=startLine; i < end; i++) {
          int mask = mEditor->markers(i);
          if (mask & (1 << TextEditor::Marker::Addition | 1 << TextEditor::Marker::Deletion)) {
@@ -486,10 +486,10 @@ void HunkWidget::stageSelected(int startLine, int end) {
      }
 
      mStagedStateLoaded = false;
-     if (!mLoading)
-        emit stageStageChanged(stageState());
+     if (!mLoading && emitSignal)
+        emit stageStateChanged(stageState());
  }
- void HunkWidget::unstageSelected(int startLine, int end) {
+ void HunkWidget::unstageSelected(int startLine, int end, bool emitSignal) {
     for (int i=startLine; i < end; i++) {
         int mask = mEditor->markers(i);
         if (mask & (1 << TextEditor::Marker::Addition | 1 << TextEditor::Marker::Deletion))
@@ -497,8 +497,8 @@ void HunkWidget::stageSelected(int startLine, int end) {
     }
 
     mStagedStateLoaded = false;
-    if (!mLoading)
-        emit stageStageChanged(stageState());
+    if (!mLoading && emitSignal)
+        emit stageStateChanged(stageState());
  }
 
  void HunkWidget::discardDialog(int startLine, int end) {
@@ -537,34 +537,33 @@ void HunkWidget::stageSelected(int startLine, int end) {
 
      assert(state != Qt::PartiallyChecked); // makes no sense, that the user can select partially selected
 
-     mStagedStateLoaded = false;
-     bool staged = state == Qt::Checked ? true : false;
+     bool staged = state == Qt::Checked ? true : false; // header cannot set to partially staged. Makes no sense there
      setStaged(staged);
  }
 
  void HunkWidget::setStaged(bool staged)
  {
+     mStagedStateLoaded = false;
      int lineCount = mEditor->lineCount();
      int count = 0;
      for (int i = 0; i < lineCount; i++) {
        int mask = mEditor->markers(i);
        if (mask & (1 << TextEditor::Marker::Addition | 1 << TextEditor::Marker::Deletion)) {
-         setStaged(i, staged);
+         setStaged(i, staged, false);
          count++;
        }
      }
-     if (count == 0) {
-         // it must be a new file!
-         // TODO: how to check it
-         git::Index::StagedState state;
-         if (!staged)
-             state = git::Index::Unstaged;
-         else
-             state = git::Index::Staged;
-         mStagedStage = state;
-         mStagedStateLoaded = true;
-         emit stageStageChanged(state);
-     }
+     // if count = 0. it must be a new file!
+     // TODO: how to check it
+     git::Index::StagedState state;
+     if (!staged)
+         state = git::Index::Unstaged;
+     else
+         state = git::Index::Staged;
+     mStagedStage = state;
+     if (count == 0)
+        mStagedStateLoaded = true;
+     emit stageStateChanged(state);
  }
 
  void HunkWidget::discard()
@@ -573,7 +572,7 @@ void HunkWidget::stageSelected(int startLine, int end) {
      discardDialog(0, count);
  }
 
- void HunkWidget::setStaged(int lidx, bool staged) {
+ void HunkWidget::setStaged(int lidx, bool staged, bool emitSignal) {
      int markers = mEditor->markers(lidx);
      if (!(markers & (1 << TextEditor::Marker::Addition | 1 << TextEditor::Marker::Deletion)))
          return;
@@ -582,11 +581,11 @@ void HunkWidget::stageSelected(int startLine, int end) {
          return;
 
      if (staged) {
-         stageSelected(lidx, lidx + 1);
+         stageSelected(lidx, lidx + 1, emitSignal);
          return;
      }
 
-     unstageSelected(lidx, lidx + 1);
+     unstageSelected(lidx, lidx + 1, emitSignal);
  }
 
  void HunkWidget::marginClicked(int pos, int modifier, int margin) {
@@ -897,7 +896,7 @@ void HunkWidget::load(git::Patch &staged, bool force)
 
   mLoading = false;
   // update stageState after everythin is loaded
-  stageStageChanged(stageState());
+  stageStateChanged(stageState());
 
 }
 

@@ -40,13 +40,13 @@ namespace _HunkWidget {
       QToolButton *theirsButton() const;
 
     public slots:
-      void stageStateChanged(int stageState);
+      void hunkStageStateChanged(int stageState);
 
     protected:
       void mouseDoubleClickEvent(QMouseEvent *event) override;
 
     signals:
-      void stageStageChanged(int stageState);
+      void stageStateChanged(int stageState);
       void discard();
 
     private:
@@ -141,18 +141,18 @@ signals:
    * It is not possible to stage single hunks.
    * So the complete file must be staged. Inform the FileWidget
    * about changes and it will perform a stage
-   * \brief stageStageChanged
+   * \brief stageStateChanged
    * \param stageState
    */
-  void stageStageChanged(int stageState);
+  void stageStateChanged(int stageState);
   void discardSignal();
 
 protected:
   void paintEvent(QPaintEvent *event);
 
 private slots:
-  void stageSelected(int startLine, int end);
-  void unstageSelected(int startLine, int end);
+  void stageSelected(int startLine, int end, bool emitSignal=true);
+  void unstageSelected(int startLine, int end, bool emitSignal=true);
   void discardSelected(int startLine, int end);
   /*!
    * Shows dialog if the changes should be discarded
@@ -168,7 +168,7 @@ private slots:
    * \param lidx Line index
    * \param staged Staged if true, else unstaged
    */
-  void setStaged(int lidx, bool staged);
+  void setStaged(int lidx, bool staged, bool emitSignal=true);
   void marginClicked(int pos, int modifier, int margin);
 
 private:

@@ -138,14 +138,14 @@ signals:
    * \param startPos Start line of selection
    * \param end End line of selection + 1
    */
-  void stageSelectedSignal(int startPos, int end);
+  void stageSelectedSignal(int startPos, int end, bool emitSignal=true);
   /*!
    * Emitted when in the context menu "unstage selected" is triggered
    * \brief unstageSelectedSignal
    * \param startPos Start line of selection
    * \param end End line of selection + 1
    */
-  void unstageSelectedSignal(int startPos, int end);
+  void unstageSelectedSignal(int startPos, int end, bool emitSignal=true);
   /*!
    * Emitted when in the context menu "revert selected" is triggered
    * \brief discardSelectedSignal

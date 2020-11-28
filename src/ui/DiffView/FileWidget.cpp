@@ -36,6 +36,7 @@ _FileWidget::Header::Header(
   QString name = patch.name();
   mCheck = new QCheckBox(this);
   mCheck->setVisible(diff.isStatusDiff());
+  mCheck->setTristate(true);
 
   mStatusBadge = new Badge({}, this);
 
@@ -120,9 +121,9 @@ _FileWidget::Header::Header(
   // Respond to check changes.
   connect(mCheck, &QCheckBox::clicked, [this](bool staged) {
       if (staged)
-          emit stageStageChanged(Qt::Checked);
+          emit stageStateChanged(Qt::Checked);
       else
-          emit stageStageChanged(Qt::Unchecked);
+          emit stageStateChanged(Qt::Unchecked);
   });
 
   // Set initial check state.
@@ -248,7 +249,7 @@ FileWidget::FileWidget(
   bool lfs = patch.isLfsPointer();
   mHeader = new _FileWidget::Header(diff, patch, binary, lfs, submodule, parent);
   connect(this, &FileWidget::stageStateChanged, mHeader, &_FileWidget::Header::setStageState);
-  connect(mHeader, &_FileWidget::Header::stageStageChanged, this, &FileWidget::headerCheckStateChanged);
+  connect(mHeader, &_FileWidget::Header::stageStateChanged, this, &FileWidget::headerCheckStateChanged);
   connect(mHeader, &_FileWidget::Header::discard, this, &FileWidget::discard);
   layout->addWidget(mHeader);
 
@@ -442,7 +443,7 @@ HunkWidget *FileWidget::addHunk(
   HunkWidget *hunk =
     new HunkWidget(mView, diff, patch, staged, index, lfs, submodule, this);
 
-  connect(hunk, &HunkWidget::stageStageChanged, this, &FileWidget::stageHunks);
+  connect(hunk, &HunkWidget::stageStateChanged, [this]() {this->stageHunks(false);});
   connect(hunk, &HunkWidget::discardSignal, this, &FileWidget::discardHunk);
   TextEditor* editor = hunk->editor(false);
 
@@ -458,7 +459,7 @@ HunkWidget *FileWidget::addHunk(
   return hunk;
 }
 
-void FileWidget::stageHunks()
+void FileWidget::stageHunks(bool completeFile, bool completeFileStaged)
 {
   if (mSupressStaging)
       return;
@@ -479,11 +480,17 @@ void FileWidget::stageHunks()
 
   mSuppressUpdate = true;
 
-  if (staged == mHunks.size()) {
+  if ((staged == mHunks.size() && mHunks.size() > 0) || (completeFile && completeFileStaged)) {
+    // if the file does not contain hunks, it should be always staged!
     index.setStaged({mPatch.name()}, true);
     emit stageStateChanged(git::Index::Staged);
     mSuppressUpdate = false;
     return;
+  } else if (completeFile && !completeFileStaged) {
+      index.setStaged({mPatch.name()}, false);
+      emit stageStateChanged(git::Index::Unstaged);
+      mSuppressUpdate = false;
+      return;
   }
 
   if (unstaged == mHunks.size()) {
@@ -619,5 +626,6 @@ void FileWidget::headerCheckStateChanged(int state)
         mHunks[i]->setStaged(staged);
     mSupressStaging = false;
 
-    stageHunks();
+    // complete file must be staged
+    stageHunks(true, staged);
 }

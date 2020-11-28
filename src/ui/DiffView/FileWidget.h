@@ -44,7 +44,7 @@ public:
   void setStageState(git::Index::StagedState state);
 
 signals:
-  void stageStageChanged(int stageState);
+  void stageStateChanged(int stageState);
   void discard();
 protected:
   void mouseDoubleClickEvent(QMouseEvent *event) override;
@@ -116,7 +116,7 @@ public slots:
    * current state of the hunk as parameter
    * \brief stageHunks
    */
-  void stageHunks();
+  void stageHunks(bool completeFile=false, bool completeFileStaged=false);
   /*!
    * Discard specific hunk
    * Emitted by the hunk it self
