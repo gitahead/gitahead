@@ -50,6 +50,8 @@ private:
   QSplitter *mSplitter;
 
   git::Diff mDiff;
+
+  QList<QMetaObject::Connection> mConnections;
 };
 
 #endif
