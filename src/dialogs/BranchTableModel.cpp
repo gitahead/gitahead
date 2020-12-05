@@ -91,8 +91,26 @@ QVariant BranchTableModel::headerData(
 
 Qt::ItemFlags BranchTableModel::flags(const QModelIndex &index) const
 {
-  return QAbstractTableModel::flags(index) |
-    ((index.column() == Rebase) ?  Qt::ItemIsUserCheckable : Qt::ItemIsEditable);
+  Qt::ItemFlags flags = QAbstractTableModel::flags(index);
+
+  switch (index.column()) {
+    case Name: {
+      git::Branch branch = branches().at(index.row());
+      if (!branch.isHead())
+        flags |= Qt::ItemIsEditable;
+      break;
+    }
+
+    case Upstream:
+      flags |= Qt::ItemIsEditable;
+      break;
+
+    case Rebase:
+      flags |= Qt::ItemIsUserCheckable;
+      break;
+  }
+
+  return flags;
 }
 
 bool BranchTableModel::setData(
