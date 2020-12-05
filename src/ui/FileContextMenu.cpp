@@ -272,7 +272,7 @@ FileContextMenu::FileContextMenu(
     QString abs = QDir::toNativeSeparators(dir.filePath(file));
     QString name = QFileInfo(file).fileName();
     QMenu *copy = addMenu(tr("Copy File Name"));
-    if (name != file) {
+    if (!name.isEmpty() && name != file) {
       copy->addAction(name, [name] {
         QApplication::clipboard()->setText(name);
       });
