@@ -505,7 +505,7 @@ void HunkWidget::stageSelected(int startLine, int end, bool emitSignal) {
      QString name = mPatch.name();
      int line = mPatch.lineNumber(mIndex, 0, git::Diff::NewFile);
 
-     QString title = HunkWidget::tr("Discard Hunk?");
+     QString title = HunkWidget::tr("Discard selected lines?");
      QString text = mPatch.isUntracked() ?
        HunkWidget::tr("Are you sure you want to remove '%1'?").arg(name) :
        HunkWidget::tr("Are you sure you want to discard the "
@@ -515,7 +515,7 @@ void HunkWidget::stageSelected(int startLine, int end, bool emitSignal) {
        QMessageBox::Warning, title, text, QMessageBox::Cancel, this);     dialog->setAttribute(Qt::WA_DeleteOnClose);
      dialog->setInformativeText(HunkWidget::tr("This action cannot be undone."));
 
-     QPushButton *discard =       dialog->addButton(HunkWidget::tr("Discard Hunk"), QMessageBox::AcceptRole);
+     QPushButton *discard =       dialog->addButton(HunkWidget::tr("Discard selected lines"), QMessageBox::AcceptRole);
      connect(discard, &QPushButton::clicked, [this, startLine, end] {
          discardSelected(startLine, end);
      });
