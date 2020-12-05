@@ -41,7 +41,7 @@ DeleteTagDialog::DeleteTagDialog(
     RepoView *view = RepoView::parentView(this);
     QString name = tag.name();
 
-    if (checkBox()->isChecked()) {
+    if (remote.isValid() && checkBox()->isChecked()) {
       git::Repository repo = view->repo();
 
       QString remoteName = remote.name();

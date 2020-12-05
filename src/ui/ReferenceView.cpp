@@ -525,10 +525,12 @@ void ReferenceView::contextMenuEvent(QContextMenuEvent *event)
 
   if (ref.isTag()) {
     git::Remote remote = ref.repo().defaultRemote();
-    menu.addAction(tr("Push Tag to %1").arg(remote.name()),
-      [this, ref, view, remote] {
-        view->push(remote, ref);
-      });
+    if (remote.isValid()) {
+      menu.addAction(tr("Push Tag to %1").arg(remote.name()),
+        [this, ref, view, remote] {
+          view->push(remote, ref);
+        });
+    }
   }
 
   if (ref.isRemoteBranch()) {
