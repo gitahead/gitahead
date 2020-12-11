@@ -1,3 +1,14 @@
+if(USE_SYSTEM_LIBGIT2)
+  pkg_check_modules(libgit2 libgit2>1.1.0) # Not now, currently it depends on not upstreamed features + some changes that cannot be upstreamed at all.
+endif()
+
+if(libgit2_FOUND)
+  add_library(git2 INTERFACE)
+  target_include_directories(git2 INTERFACE ${libgit2_INCLUDE_DIR})
+  target_link_libraries(git2 INTERFACE ${libgit2_LIBRARIES})
+else()
+#left unindented to avoid rebase conflicts
+
 # Set some defaults.
 set(BUILD_SHARED_LIBS
     OFF
@@ -32,8 +43,8 @@ if(WIN32)
       CACHE BOOL "" FORCE)
 endif()
 
-if(NOT USE_SYSTEM_LIBGIT2)
   add_subdirectory(libgit2)
   target_include_directories(
     git2 INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/libgit2/include)
-endif()
+
+endif(libgit2_FOUND)
