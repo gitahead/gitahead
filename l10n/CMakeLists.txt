@@ -4,6 +4,7 @@ option(UPDATE_TRANSLATIONS
 
 set(LANGUAGES
   de
+  ru
   en
   es
   pt_BR
