@@ -856,7 +856,7 @@ void MenuBar::updateRepository()
 
   bool lfs = view && view->repo().lfsIsInitialized();
   mLfsUnlock->setEnabled(lfs);
-  mLfsInitialize->setEnabled(!lfs);
+  mLfsInitialize->setEnabled(view && !lfs);
 }
 
 void MenuBar::updateRemote()
