@@ -1501,32 +1501,35 @@ void RepoView::squash(
   const git::AnnotatedCommit &upstream,
   LogEntry *parent)
 {
-    git::Branch head = mRepo.head();
-    Q_ASSERT(head.isValid());
+  git::Branch head = mRepo.head();
+  Q_ASSERT(head.isValid());
 
-    // Try to merge.
-    if (!mRepo.merge(upstream)) {
-      LogEntry *err = error(parent, tr("squash"), head.name());
+  // Try to merge.
+  if (!mRepo.merge(upstream)) {
+    LogEntry *err = error(parent, tr("squash"), head.name());
 
-      // Add stash hint if the failure was because of uncommitted changes.
-      QString msg = git::Repository::lastError();
-      int kind = git::Repository::lastErrorKind();
-      if (kind == GIT_ERROR_MERGE && msg.contains("overwritten by merge")) {
-        QString text =
-          tr("You may be able to rebase by <a href='action:stash'>stashing</a> "
-             "before trying to <a href='action:merge'>merge</a>. Then "
-             "<a href='action:unstash'>unstash</a> to restore your changes.");
-        err->addEntry(LogEntry::Hint, text);
-      }
-
-      return;
+    // Add stash hint if the failure was because of uncommitted changes.
+    QString msg = git::Repository::lastError();
+    int kind = git::Repository::lastErrorKind();
+    if (kind == GIT_ERROR_MERGE && msg.contains("overwritten by merge")) {
+      QString text =
+        tr("You may be able to rebase by <a href='action:stash'>stashing</a> "
+           "before trying to <a href='action:merge'>merge</a>. Then "
+           "<a href='action:unstash'>unstash</a> to restore your changes.");
+      err->addEntry(LogEntry::Hint, text);
     }
 
-    // Make squash effect.
-    mRepo.cleanupState();
+    return;
+  }
 
-    // Check for conflicts.
-    checkForConflicts(parent, tr("squash"));
+  // Make squash effect.
+  mRepo.cleanupState();
+
+  // Check for conflicts.
+  checkForConflicts(parent, tr("squash"));
+
+  refresh();
+  selectHead();
 }
 
 void RepoView::revert(const git::Commit &commit)
