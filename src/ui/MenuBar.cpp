@@ -68,6 +68,8 @@ bool MenuBar::sDebugMenuVisible = false;
 MenuBar::MenuBar(QWidget *parent)
   : QMenuBar(parent)
 {
+  setContextMenuPolicy(Qt::PreventContextMenu);
+
   // File
   QMenu *file = addMenu(tr("File"));
 
