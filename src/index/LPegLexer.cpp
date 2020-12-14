@@ -27,35 +27,28 @@ LPegLexer::LPegLexer(
 {
   Q_ASSERT(!home.isEmpty() && !lexer.isEmpty());
 
+  // Load lexer from absolute path.
+  QFileInfo info(lexer);
+  if (info.isAbsolute())
+    mName = info.baseName().toUtf8();
+
   lua_State *L = mL.data();
 
   luaL_openlibs(L);
   luaL_requiref(L, "lpeg", luaopen_lpeg, 1), lua_pop(L, 1);
 
-  // Modify `package.path` to find lexers.
-  lua_getglobal(L, "package"), lua_getfield(L, -1, "path");
-  int orig_path = luaL_ref(L, LUA_REGISTRYINDEX); // restore later
-  lua_pushstring(L, home), lua_pushstring(L, "/?.lua"), lua_concat(L, 2);
-  lua_setfield(L, -2, "path"), lua_pop(L, 1); // package
+  // Set `package.path` to find lexers.
+  lua_getglobal(L, "package");
+  lua_pushstring(L, home);
+  lua_pushstring(L, "/?.lua");
+  lua_concat(L, 2);
+  lua_setfield(L, -2, "path");
+  lua_pop(L, 1); // package
 
   // Load the lexer module.
   lua_getglobal(L, "require");
   lua_pushstring(L, "lexer");
   lua_pcall(L, 1, 1, 0);
-
-  // Restore `package.path`.
-  lua_getglobal(L, "package");
-  lua_getfield(L, -1, "path"), lua_setfield(L, -3, "LEXERPATH");
-  lua_rawgeti(L, LUA_REGISTRYINDEX, orig_path), lua_setfield(L, -2, "path");
-  luaL_unref(L, LUA_REGISTRYINDEX, orig_path), lua_pop(L, 1); // package
-
-  // Load lexer from absolute path.
-  QFileInfo info(lexer);
-  if (info.isAbsolute()) {
-    lua_pushstring(L, info.absoluteFilePath().toUtf8());
-    lua_setfield(L, -2, "LEXERPATH");
-    mName = info.baseName().toUtf8();
-  }
 
   // Load the language lexer.
   lua_getfield(L, -1, "load");
@@ -68,21 +61,19 @@ LPegLexer::LPegLexer(
 
 bool LPegLexer::lex(const QByteArray &buffer)
 {
-  lua_State *L = mL.data();
-  if (!lua_checkstack(L, 4))
-    return false;
-
   // Initialize lex data.
   mIndex = 1;
   mLength = 0;
   mStartPos = 0;
   mBuffer = buffer;
 
+  lua_State *L = mL.data();
+
   // Lex the buffer.
   lua_getfield(L, -1, "lex");
   lua_pushvalue(L, -2); // lexer object
   lua_pushlstring(L, buffer, buffer.length());
-  lua_pushinteger(L, Nothing); // initial state
+  lua_pushinteger(L, Nothing + 1); // initial state
   lua_pcall(L, 3, 1, 0);
 
   // Bail out if lex didn't return a table.
@@ -104,7 +95,7 @@ Lexer::Lexeme LPegLexer::next()
   lua_State *L = mL.data();
 
   lua_rawgeti(L, -2, mIndex), lua_rawget(L, -2); // _TOKENSTYLES[token]
-  int token = !lua_isnil(L, -1) ? lua_tointeger(L, -1) : Nothing;
+  int token = !lua_isnil(L, -1) ? lua_tointeger(L, -1) - 1 : Nothing;
   lua_pop(L, 1); // _TOKENSTYLES[token]
 
   lua_rawgeti(L, -2, mIndex + 1); // endPos
