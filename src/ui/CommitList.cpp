@@ -200,6 +200,8 @@ public:
     // Reset state.
     mParents.clear();
     mRows.clear();
+    mOursId = 0;
+    mTheirsId = 0;
 
     // Update status row.
     bool head = (!mRef.isValid() || mRef.isHead());
@@ -234,8 +236,11 @@ public:
 
       if (mRef.isHead()) {
         // Add merge head.
-        if (git::Reference mergeHead = mRepo.lookupRef("MERGE_HEAD"))
+        if (git::Reference mergeHead = mRepo.lookupRef("MERGE_HEAD")) {
           mWalker.push(mergeHead);
+          mOursId = mRepo.head().target().id();
+          mTheirsId = mergeHead.annotatedCommit().commit().id();
+        }
       }
 
       if (mRefsAll) {
@@ -366,6 +371,15 @@ public:
           return QVariant();
 
         return QVariant(Qt::AlignHCenter | Qt::AlignVCenter);
+
+      case Qt::BackgroundColorRole:
+        if (!status) {
+          if (row.commit.id() == mOursId)
+            return QColor(Application::theme()->diff(Theme::Diff::Ours));
+          if (row.commit.id() == mTheirsId)
+          return QColor(Application::theme()->diff(Theme::Diff::Theirs));
+        }
+        return QVariant();
 
       case Qt::DecorationRole:
         if (!status)
@@ -596,6 +610,9 @@ private:
   bool mSortDate = true;
   bool mCleanStatus = true;
   bool mGraphVisible = true;
+
+  git::Id mOursId;
+  git::Id mTheirsId;
 };
 
 class ListModel : public QAbstractListModel

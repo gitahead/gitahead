@@ -25,6 +25,7 @@
 #include "git/Index.h"
 #include "git/Patch.h"
 #include "git/Repository.h"
+#include "git/RevWalk.h"
 #include "git/Signature.h"
 #include "git/Submodule.h"
 #include "git/Tree.h"
@@ -599,6 +600,73 @@ private:
   git::Patch mPatch;
 };
 
+void lookupCommitInfos(
+  const git::Repository &repo,
+  bool ours,
+  QToolButton *button)
+{
+  // Find id.
+  QString id;
+  if (ours) {
+    id = repo.head().target().id().toString();
+  } else {
+    git::Reference mergeHead = repo.lookupRef("MERGE_HEAD");
+    if (mergeHead.isValid())
+      id = mergeHead.annotatedCommit().commit().id().toString();
+  }
+
+  if (id.isEmpty())
+    return;
+
+  QString branch;
+  QString tooltip;
+
+  // Commit detail lookup.
+  git::RevWalk walker = repo.walker();
+  while (git::Commit commit = walker.next()) {
+    QList<git::Reference> refs = commit.refs();
+    foreach (const git::Reference &ref, refs) {
+      if (id == ref.name()) {
+        id = commit.id().toString();
+        break;
+      }
+    }
+
+    if (id == commit.id().toString()) {
+      // Set branch name.
+      foreach (const git::Reference &ref, refs) {
+        if (ref.isLocalBranch()) {
+          branch = ref.name();
+          break;
+        }
+      }
+
+      // Set tooltip.
+      tooltip.append(commit.id().toString().left(7));
+      tooltip.append("\n");
+      tooltip.append(commit.author().name());
+      tooltip.append("\n");
+      tooltip.append(commit.author().date()
+                     .toString(Qt::DefaultLocaleShortDate));
+      break;
+    }
+  }
+
+  // Branch: elide, set id if empty
+  if (branch.length() > 20) {
+    branch.chop(17);
+    branch.append("...");
+  }
+  if (branch.isEmpty())
+    branch = id.left(7);
+
+  // Set button text and tooltip.
+  if (!branch.isEmpty())
+    button->setText(button->text() + "( " + branch + ")");
+  if (!tooltip.isEmpty())
+    button->setToolTip(tooltip);
+}
+
 class HunkWidget : public QFrame
 {
   Q_OBJECT
@@ -642,6 +710,7 @@ public:
         mOurs->setObjectName("ConflictOurs");
         mOurs->setStyleSheet(buttonStyle(Theme::Diff::Ours));
         mOurs->setText(HunkWidget::tr("Use Ours"));
+        lookupCommitInfos(patch.repo(), true, mOurs);
         connect(mOurs, &QToolButton::clicked, [this] {
           mSave->setVisible(true);
           mUndo->setVisible(true);
@@ -653,6 +722,7 @@ public:
         mTheirs->setObjectName("ConflictTheirs");
         mTheirs->setStyleSheet(buttonStyle(Theme::Diff::Theirs));
         mTheirs->setText(HunkWidget::tr("Use Theirs"));
+        lookupCommitInfos(patch.repo(), false, mTheirs);
         connect(mTheirs, &QToolButton::clicked, [this] {
           mSave->setVisible(true);
           mUndo->setVisible(true);
