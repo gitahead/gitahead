@@ -639,6 +639,8 @@ void lookupCommitInfos(
           branch = ref.name();
           break;
         }
+        else if (ref.isTag())
+          branch = ref.name();
       }
 
       // Set tooltip.
@@ -662,7 +664,7 @@ void lookupCommitInfos(
 
   // Set button text and tooltip.
   if (!branch.isEmpty())
-    button->setText(button->text() + "( " + branch + ")");
+    button->setText(button->text() + " (" + branch + ")");
   if (!tooltip.isEmpty())
     button->setToolTip(tooltip);
 }
