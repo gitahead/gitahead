@@ -266,6 +266,8 @@ protected:
 
 class EditButton : public Button
 {
+  Q_OBJECT
+
 public:
   EditButton(
     const git::Patch &patch,
@@ -292,7 +294,7 @@ public:
     }
 
     if (view->repo().workdir().exists(name)) {
-      QAction *action = menu->addAction("Edit Working Copy");
+      QAction *action = menu->addAction(tr("Edit Working Copy"));
       connect(action, &QAction::triggered, [this, view, name, newLine] {
         view->edit(name, newLine);
       });
@@ -303,7 +305,7 @@ public:
     git::Commit commit = !commits.isEmpty() ? commits.first() : git::Commit();
     git::Blob newBlob = patch.blob(git::Diff::NewFile);
     if (newBlob.isValid()) {
-      QAction *action = menu->addAction("Edit New Revision");
+      QAction *action = menu->addAction(tr("Edit New Revision"));
       connect(action, &QAction::triggered,
       [this, view, name, newLine, newBlob, commit] {
         view->openEditor(name, newLine, newBlob, commit);
@@ -318,7 +320,7 @@ public:
           commit = parents.first();
       }
 
-      QAction *action = menu->addAction("Edit Old Revision");
+      QAction *action = menu->addAction(tr("Edit Old Revision"));
       connect(action, &QAction::triggered,
       [this, view, name, oldLine, oldBlob, commit] {
         view->openEditor(name, oldLine, oldBlob, commit);
