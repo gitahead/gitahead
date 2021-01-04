@@ -356,16 +356,12 @@ protected:
     painter.drawLine(x - r + 1, y + r - 5, x - r + 5, y + r - 1);
     painter.drawLine(x + r - 6, y - r + 2, x + r - 2, y - r + 6);
 
-    // Menu indicator.
-    QColor indicator = painter.pen().color();
-    painter.setPen(QPen(indicator.darker(150), 1,
-                        Qt::SolidLine, Qt::FlatCap));
-    painter.drawLine(x + 3, y + 5, x + 8, y + 5);
-
-    painter.setPen(QPen(indicator, 1,
-                        Qt::SolidLine, Qt::FlatCap));
-    painter.drawLine(x + 4, y + 6, x + 7, y + 6);
-    painter.drawLine(x + 5, y + 7, x + 6, y + 7);
+    // Draw menu indicator.
+    QPainterPath indicator;
+    indicator.moveTo(x + 3, y + 4.5);
+    indicator.lineTo(x + 5.5, y + 7);
+    indicator.lineTo(x + 8, y + 4.5);
+    painter.drawPath(indicator);
   }
 };
 
