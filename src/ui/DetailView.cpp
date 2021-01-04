@@ -474,7 +474,7 @@ public:
     // Spell check with delay timeout.
     connect(&mTimer, &QTimer::timeout, [this] {
       mTimer.stop();
-      if (mSpellCheckValid)
+      if (mSpellChecker)
         checkSpelling();
     });
 
@@ -484,148 +484,138 @@ public:
     });
   }
 
-  bool SpellCheckSetup(const QString &dictPath,
-                       const QString &userDict,
-                       const QTextCharFormat &spellFormat,
-                       const QTextCharFormat &ignoredFormat)
+  bool setupSpellCheck(
+    const QString &dictPath,
+    const QString &userDict,
+    const QTextCharFormat &spellFormat,
+    const QTextCharFormat &ignoredFormat)
   {
     mSpellChecker = new SpellChecker(dictPath, userDict);
-    if (mSpellChecker->isValid()) {
-      mSpellFormat = spellFormat;
-      mIgnoredFormat = ignoredFormat;
-      checkSpelling();
-      mSpellCheckValid = true;
-    } else {
+    if (!mSpellChecker->isValid()) {
+      delete mSpellChecker;
+      mSpellChecker = nullptr;
       mSpellList.clear();
       setSelections();
-      mSpellCheckValid = false;
+      return false;
     }
-    return mSpellCheckValid;
-  }
 
-  void SpellCheck(void)
-  {
-    if (mSpellCheckValid)
-      checkSpelling();
+    mSpellFormat = spellFormat;
+    mIgnoredFormat = ignoredFormat;
+    checkSpelling();
+    return true;
   }
 
 private:
   void contextMenuEvent(QContextMenuEvent *event) override
   {
+    // Check for spell checking enabled and a word under the cursor.
+    QTextCursor cursor = cursorForPosition(event->pos());
+    cursor.select(QTextCursor::WordUnderCursor);
+    QString word = cursor.selectedText();
+    if (!mSpellChecker || word.isEmpty()) {
+      contextMenuEvent(event);
+      return;
+    }
+
     QMenu *menu = createStandardContextMenu();
-    bool replaced = false;
+    foreach (const QTextEdit::ExtraSelection &es, mSpellList) {
+      if (es.cursor == cursor && es.format == mSpellFormat) {
 
-    // Spell checking enabled.
-    if (mSpellCheckValid) {
-      QTextCursor cursor = cursorForPosition(event->pos());
-      cursor.select(QTextCursor::WordUnderCursor);
-      QString word = cursor.selectedText();
+        // Replace standard context menu.
+        menu->clear();
 
-      // Selected word under cursor.
-      if (!word.isEmpty()) {
-        foreach (const QTextEdit::ExtraSelection &es, mSpellList) {
-          if ((es.cursor == cursor) &&
-              (es.format == mSpellFormat)) {
+        QStringList suggestions = mSpellChecker->suggest(word);
+        if (!suggestions.isEmpty()) {
+          QMenu *spellReplace = menu->addMenu(tr("Replace..."));
+          QMenu *spellReplaceAll = menu->addMenu(tr("Replace All..."));
+          foreach (const QString &str, suggestions) {
+            QAction *replace = spellReplace->addAction(str);
+            connect(replace, &QAction::triggered, [this, event, str] {
+              QTextCursor cursor = cursorForPosition(event->pos());
+              cursor.select(QTextCursor::WordUnderCursor);
+              cursor.insertText(str);
+              checkSpelling();
+            });
 
-            // Replace standard context menu.
-            menu->clear();
-            replaced = true;
-
-            QStringList suggestions = mSpellChecker->suggest(word);
-            if (!suggestions.isEmpty()) {
-              QMenu *spellReplace = menu->addMenu(tr("Replace..."));
-              QMenu *spellReplaceAll = menu->addMenu(tr("Replace All..."));
-              foreach (const QString &str, suggestions) {
-                QAction *replace = spellReplace->addAction(str);
-                connect(replace, &QAction::triggered, [this, event, str] {
-                  QTextCursor cursor = cursorForPosition(event->pos());
-                  cursor.select(QTextCursor::WordUnderCursor);
+            QAction *replaceAll = spellReplaceAll->addAction(str);
+              connect(replaceAll, &QAction::triggered, [this, word, str] {
+              QTextCursor cursor(document());
+              while (!cursor.atEnd()) {
+                cursor.movePosition(QTextCursor::EndOfWord,
+                                    QTextCursor::KeepAnchor, 1);
+                QString search = wordAt(cursor);
+                if (!search.isEmpty() && (search == word) &&
+                    !ignoredAt(cursor))
                   cursor.insertText(str);
-                  checkSpelling();
-                });
 
-                QAction *replaceAll = spellReplaceAll->addAction(str);
-                  connect(replaceAll, &QAction::triggered, [this, word, str] {
-                  QTextCursor cursor(document());
-                  while (!cursor.atEnd()) {
-                    cursor.movePosition(QTextCursor::EndOfWord,
-                                        QTextCursor::KeepAnchor, 1);
-                    QString search = wordAt(cursor);
-                    if (!search.isEmpty() && (search == word) &&
-                        !ignoredAt(cursor))
-                      cursor.insertText(str);
-
-                    cursor.movePosition(QTextCursor::NextWord,
-                                        QTextCursor::MoveAnchor, 1);
-                  }
-                  checkSpelling();
-                });
-              }
-              menu->addSeparator();
-            }
-
-            QAction *spellIgnore = menu->addAction(tr("Ignore"));
-            connect(spellIgnore, &QAction::triggered, [this, event] {
-              QTextCursor cursor = cursorForPosition(event->pos());
-              cursor.select(QTextCursor::WordUnderCursor);
-
-              for (int i = 0; i < mSpellList.count(); i++) {
-                QTextEdit::ExtraSelection es = mSpellList.at(i);
-                if (es.cursor == cursor) {
-                  mSpellList.removeAt(i);
-                  es.format = mIgnoredFormat;
-                  mSpellList << es;
-
-                  setSelections();
-                  break;
-                }
+                cursor.movePosition(QTextCursor::NextWord,
+                                    QTextCursor::MoveAnchor, 1);
               }
               checkSpelling();
             });
-
-            QAction *spellIgnoreAll = menu->addAction(tr("Ignore All"));
-            connect(spellIgnoreAll, &QAction::triggered, [this, word] {
-              mSpellChecker->ignoreWord(word);
-              checkSpelling();
-            });
-
-            QAction *spellAdd = menu->addAction(tr("Add to User Dictionary"));
-            connect(spellAdd, &QAction::triggered, [this, word] {
-              mSpellChecker->addToUserDict(word);
-              checkSpelling();
-            });
-            break;
           }
-
-          // Ignored words.
-          if ((es.cursor == cursor) &&
-              (es.format == mIgnoredFormat)) {
-
-            // Replace standard context menu.
-            menu->clear();
-            replaced = true;
-
-            QAction *spellIgnore = menu->addAction(tr("Do not Ignore"));
-            connect(spellIgnore, &QAction::triggered, [this, event] {
-              QTextCursor cursor = cursorForPosition(event->pos());
-              cursor.select(QTextCursor::WordUnderCursor);
-
-              for (int i = 0; i < mSpellList.count(); i++) {
-                QTextEdit::ExtraSelection es = mSpellList.at(i);
-                if (es.cursor == cursor) {
-                  mSpellList.removeAt(i);
-
-                  setSelections();
-                  break;
-                }
-              }
-              checkSpelling();
-            });
-            break;
-          }
+          menu->addSeparator();
         }
+
+        QAction *spellIgnore = menu->addAction(tr("Ignore"));
+        connect(spellIgnore, &QAction::triggered, [this, event] {
+          QTextCursor cursor = cursorForPosition(event->pos());
+          cursor.select(QTextCursor::WordUnderCursor);
+
+          for (int i = 0; i < mSpellList.count(); i++) {
+            QTextEdit::ExtraSelection es = mSpellList.at(i);
+            if (es.cursor == cursor) {
+              mSpellList.removeAt(i);
+              es.format = mIgnoredFormat;
+              mSpellList << es;
+
+              setSelections();
+              break;
+            }
+          }
+          checkSpelling();
+        });
+
+        QAction *spellIgnoreAll = menu->addAction(tr("Ignore All"));
+        connect(spellIgnoreAll, &QAction::triggered, [this, word] {
+          mSpellChecker->ignoreWord(word);
+          checkSpelling();
+        });
+
+        QAction *spellAdd = menu->addAction(tr("Add to User Dictionary"));
+        connect(spellAdd, &QAction::triggered, [this, word] {
+          mSpellChecker->addToUserDict(word);
+          checkSpelling();
+        });
+        break;
+      }
+
+      // Ignored words.
+      if (es.cursor == cursor && es.format == mIgnoredFormat) {
+
+        // Replace standard context menu.
+        menu->clear();
+
+        QAction *spellIgnore = menu->addAction(tr("Do not Ignore"));
+        connect(spellIgnore, &QAction::triggered, [this, event] {
+          QTextCursor cursor = cursorForPosition(event->pos());
+          cursor.select(QTextCursor::WordUnderCursor);
+
+          for (int i = 0; i < mSpellList.count(); i++) {
+            QTextEdit::ExtraSelection es = mSpellList.at(i);
+            if (es.cursor == cursor) {
+              mSpellList.removeAt(i);
+
+              setSelections();
+              break;
+            }
+          }
+          checkSpelling();
+        });
+        break;
       }
     }
+
     menu->exec(event->globalPos());
     delete menu;
   }
@@ -635,20 +625,21 @@ private:
     QTextEdit::keyPressEvent(event);
 
     QString text = event->text();
-    if (text.length()) {
+    if (!text.isEmpty()) {
       QChar chr = text.at(0);
 
       // Spell check:
       //   delayed check while writing
       //   immediate check if space, comma, ... is pressed
-      if (chr.isLetter() || chr.isNumber())
+      if (chr.isLetter() || chr.isNumber()) {
         mTimer.start(500);
-      else if (mSpellCheckValid && !event->isAutoRepeat())
+      } else if (mSpellChecker && !event->isAutoRepeat()) {
         checkSpelling();
+      }
     }
   }
 
-  void checkSpelling(void)
+  void checkSpelling()
   {
     QTextCursor cursor(document());
     mSpellList.clear();
@@ -658,14 +649,10 @@ private:
                           QTextCursor::KeepAnchor, 1);
       QString word = wordAt(cursor);
       if (!word.isEmpty() && !mSpellChecker->spell(word)) {
-
         // Highlight the unknown or ignored word.
         QTextEdit::ExtraSelection es;
         es.cursor = cursor;
-        if (ignoredAt(cursor))
-          es.format = mIgnoredFormat;
-        else
-          es.format = mSpellFormat;
+        es.format = ignoredAt(cursor) ? mIgnoredFormat : mSpellFormat;
 
         mSpellList << es;
       }
@@ -678,10 +665,10 @@ private:
   bool ignoredAt(const QTextCursor &cursor)
   {
     foreach (const QTextEdit::ExtraSelection &es, extraSelections()) {
-      if ((es.cursor == cursor) &&
-          (es.format == mIgnoredFormat))
+      if (es.cursor == cursor && es.format == mIgnoredFormat)
         return true;
     }
+
     return false;
   }
 
@@ -714,7 +701,6 @@ private:
   QTextCharFormat mSpellFormat;
   QTextCharFormat mIgnoredFormat;
   QList<QTextEdit::ExtraSelection> mSpellList;
-  bool mSpellCheckValid = false;
 };
 
 class CommitEditor : public QFrame
@@ -736,8 +722,7 @@ public:
     mSpellIgnore.setUnderlineStyle(QTextCharFormat::WaveUnderline);
 
     // Spell check configuration
-    git::Config appconfig = repo.appConfig();
-    mDictName = appconfig.value<QString>(kDictKey, "system");
+    mDictName = repo.appConfig().value<QString>(kDictKey, "system");
     mDictPath = Settings::dictionariesDir().path();
     mUserDict = Settings::userDir().path() + "/user.dic";
     QFile userDict(mUserDict);
@@ -835,10 +820,10 @@ public:
       }
 
       // Apply changes, disable invalid dictionary.
-      bool valid = mMessage->SpellCheckSetup(mDictPath + "/" + mDictName,
-                                             mUserDict,
-                                             mSpellError, mSpellIgnore);
-      if ((!valid) && (mDictName != "none")) {
+      QString path = mDictPath + "/" + mDictName;
+      if (!mMessage->setupSpellCheck(
+            path, mUserDict, mSpellError, mSpellIgnore) &&
+          mDictName != "none") {
         QMessageBox mb(QMessageBox::Critical,
                        tr("Spell Check Language"),
                        tr("The dictionary '%1' is invalid").arg(action->text()));
@@ -854,8 +839,7 @@ public:
       }
 
       // Save settings.
-      git::Config appconfig = mRepo.appConfig();
-      appconfig.setValue(kDictKey, mDictName);
+      mRepo.appConfig().setValue(kDictKey, mDictName);
     });
 
     mStatus = new QLabel(QString(), this);
@@ -900,10 +884,9 @@ public:
 
     // Setup spell check.
     if (mDictName != "none") {
-      bool valid = mMessage->SpellCheckSetup(mDictPath + "/" + mDictName,
-                                             mUserDict,
-                                             mSpellError, mSpellIgnore);
-      if (!valid) {
+      QString path = mDictPath + "/" + mDictName;
+      if (!mMessage->setupSpellCheck(
+            path, mUserDict, mSpellError, mSpellIgnore)) {
         foreach (QAction *action, dictActionGroup->actions()) {
           action->setChecked(false);
           if (mDictName == action->data().toString()) {
