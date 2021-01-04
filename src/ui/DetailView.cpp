@@ -513,7 +513,7 @@ private:
     cursor.select(QTextCursor::WordUnderCursor);
     QString word = cursor.selectedText();
     if (!mSpellChecker || word.isEmpty()) {
-      contextMenuEvent(event);
+      QTextEdit::contextMenuEvent(event);
       return;
     }
 

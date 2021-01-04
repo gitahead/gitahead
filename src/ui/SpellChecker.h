@@ -23,7 +23,7 @@ public:
   bool isValid(void) const { return mValid; }
 
 private:
-  Hunspell *mHunspell;
+  Hunspell *mHunspell = nullptr;
 
   QTextCodec *mCodec;
   QString mUserDictionary;
