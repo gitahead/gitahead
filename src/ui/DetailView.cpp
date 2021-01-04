@@ -392,7 +392,7 @@ public:
 
     QString initial = kItalicFmt.arg(tr("initial commit"));
     QString text = parents.isEmpty() ? initial : parents.join(", ");
-    mParents->setText(brightText("Parents:") + " " + text);
+    mParents->setText(brightText(tr("Parents:")) + " " + text);
 
     QString msg = commit.message(git::Commit::SubstituteEmoji).trimmed();
     mMessage->setPlainText(msg);

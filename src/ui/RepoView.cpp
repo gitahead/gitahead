@@ -405,7 +405,7 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   });
 
   connect(notifier, &git::RepositoryNotifier::indexStageError, this, [this] {
-    error(mLogRoot, "stage");
+    error(mLogRoot, tr("stage"));
   });
 
   QObject *context = new QObject(this);
@@ -761,7 +761,7 @@ void RepoView::lfsInitialize()
 {
   LogEntry *entry = addLogEntry(tr("Git LFS"), tr("Initialize"));
   if (!mRepo.lfsInitialize()) {
-    error(entry, "initialize");
+    error(entry, tr("initialize"));
     return;
   }
 
@@ -772,7 +772,7 @@ void RepoView::lfsDeinitialize()
 {
   LogEntry *entry = addLogEntry(tr("Git LFS"), tr("Deinitialize"));
   if (!mRepo.lfsDeinitialize()) {
-    error(entry, "deinitialize");
+    error(entry, tr("deinitialize"));
     return;
   }
 
