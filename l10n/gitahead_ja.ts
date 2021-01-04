@@ -513,6 +513,11 @@
         <source>initial commit</source>
         <translation>初回コミット</translation>
     </message>
+    <message>
+        <location filename="../src/ui/DetailView.cpp" line="395"/>
+        <source>Parents:</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>CommitDialog</name>
@@ -567,120 +572,120 @@
 <context>
     <name>CommitEditor</name>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="728"/>
+        <location filename="../src/ui/DetailView.cpp" line="714"/>
         <source>&lt;b&gt;Commit Message:&lt;/b&gt;</source>
         <translation>&lt;b&gt;コミットの説明:&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="843"/>
-        <location filename="../src/ui/DetailView.cpp" line="869"/>
+        <location filename="../src/ui/DetailView.cpp" line="828"/>
+        <location filename="../src/ui/DetailView.cpp" line="853"/>
         <source>Spell Check Language</source>
         <translation>スペルチェックの言語</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="844"/>
+        <location filename="../src/ui/DetailView.cpp" line="829"/>
         <source>The dictionary &apos;%1&apos; is invalid</source>
         <translation>辞書 &apos;%1&apos; が無効です</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="845"/>
+        <location filename="../src/ui/DetailView.cpp" line="830"/>
         <source>Spell checking is disabled.</source>
         <translation>スペルチェックは無効化されました。</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="846"/>
+        <location filename="../src/ui/DetailView.cpp" line="831"/>
         <source>The choosen dictionary &apos;%1.dic&apos; is not a valid hunspell dictionary.</source>
         <translation>指定された辞書 &apos;%1.dic&apos; は有効な hunspell 辞書ではありません。</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="852"/>
-        <location filename="../src/ui/DetailView.cpp" line="911"/>
+        <location filename="../src/ui/DetailView.cpp" line="837"/>
+        <location filename="../src/ui/DetailView.cpp" line="894"/>
         <source>Invalid dictionary &apos;%1.dic&apos;</source>
         <translation>無効な辞書 &apos;%1.dic&apos;</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="875"/>
+        <location filename="../src/ui/DetailView.cpp" line="859"/>
         <source>Edit User Dictionary</source>
         <translation>ユーザー辞書を編集</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="933"/>
+        <location filename="../src/ui/DetailView.cpp" line="916"/>
         <source>Stage All</source>
         <translation>全てステージに上げる</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="937"/>
+        <location filename="../src/ui/DetailView.cpp" line="920"/>
         <source>Unstage All</source>
         <translation>全てステージから降ろす</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="940"/>
-        <location filename="../src/ui/DetailView.cpp" line="1123"/>
+        <location filename="../src/ui/DetailView.cpp" line="923"/>
+        <location filename="../src/ui/DetailView.cpp" line="1106"/>
         <source>Commit</source>
         <translation>コミット</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="1066"/>
+        <location filename="../src/ui/DetailView.cpp" line="1049"/>
         <source>Update %1</source>
         <translation>%1 の更新</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="1070"/>
+        <location filename="../src/ui/DetailView.cpp" line="1053"/>
         <source>Update %1 and %2</source>
         <translation>%1 と %2 の更新</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="1074"/>
+        <location filename="../src/ui/DetailView.cpp" line="1057"/>
         <source>Update %1, %2, and %3</source>
         <translation>%1, %2, %3 の更新</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="1079"/>
+        <location filename="../src/ui/DetailView.cpp" line="1062"/>
         <source>Update %1, %2, and %3 more files...</source>
         <translation>%1, %2, 他 %3 個のファイルの更新...</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="1095"/>
+        <location filename="../src/ui/DetailView.cpp" line="1078"/>
         <source>Nothing staged</source>
         <translation>ステージ上に項目なし</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="1098"/>
+        <location filename="../src/ui/DetailView.cpp" line="1081"/>
         <source>%1 of %2 file staged</source>
         <translation>%1 / %2 個のファイルをステージに上げました</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="1098"/>
+        <location filename="../src/ui/DetailView.cpp" line="1081"/>
         <source>%1 of %2 files staged</source>
         <translation>%1 / %2 個のファイルをステージに上げました</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="1103"/>
+        <location filename="../src/ui/DetailView.cpp" line="1086"/>
         <source>%1 file partially staged</source>
         <translation>%1 個のファイル一部分をステージに上げました</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="1103"/>
+        <location filename="../src/ui/DetailView.cpp" line="1086"/>
         <source>%1 files partially staged</source>
         <translation>%1 個のファイル一部分をステージに上げました</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="1109"/>
+        <location filename="../src/ui/DetailView.cpp" line="1092"/>
         <source>%1 unresolved conflict</source>
         <translation>%1 件の衝突が未解決です</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="1109"/>
+        <location filename="../src/ui/DetailView.cpp" line="1092"/>
         <source>%1 unresolved conflicts</source>
         <translation>%1 件の衝突が未解決です</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="1112"/>
+        <location filename="../src/ui/DetailView.cpp" line="1095"/>
         <source>all conflicts resolved</source>
         <translation>全ての衝突を解決しました</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="1123"/>
+        <location filename="../src/ui/DetailView.cpp" line="1106"/>
         <source>Commit Merge</source>
         <translation>マージをコミット</translation>
     </message>
@@ -1102,12 +1107,12 @@
 <context>
     <name>DiffView</name>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="2114"/>
+        <location filename="../src/ui/DiffView.cpp" line="2124"/>
         <source>Add new file</source>
         <translation>新しいファイルを追加</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="2128"/>
+        <location filename="../src/ui/DiffView.cpp" line="2138"/>
         <source>Or drag files here to copy into the repository</source>
         <translation>または、ここにファイルをドラッグして、リポジトリへコピーします</translation>
     </message>
@@ -1133,6 +1138,24 @@
         <location filename="../src/update/DownloadDialog.cpp" line="66"/>
         <source>Install and Restart</source>
         <translation>インストールと再起動を行う</translation>
+    </message>
+</context>
+<context>
+    <name>EditButton</name>
+    <message>
+        <location filename="../src/ui/DiffView.cpp" line="297"/>
+        <source>Edit Working Copy</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/DiffView.cpp" line="308"/>
+        <source>Edit New Revision</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/ui/DiffView.cpp" line="323"/>
+        <source>Edit Old Revision</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1500,107 +1523,107 @@
 <context>
     <name>FileWidget</name>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1633"/>
+        <location filename="../src/ui/DiffView.cpp" line="1643"/>
         <source>LFS</source>
         <translation>LFS</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1638"/>
-        <location filename="../src/ui/DiffView.cpp" line="1650"/>
+        <location filename="../src/ui/DiffView.cpp" line="1648"/>
+        <location filename="../src/ui/DiffView.cpp" line="1660"/>
         <source>Unlock</source>
         <translation>ロック解除</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1638"/>
-        <location filename="../src/ui/DiffView.cpp" line="1650"/>
+        <location filename="../src/ui/DiffView.cpp" line="1648"/>
+        <location filename="../src/ui/DiffView.cpp" line="1660"/>
         <source>Lock</source>
         <translation>ロック</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1654"/>
-        <location filename="../src/ui/DiffView.cpp" line="1907"/>
+        <location filename="../src/ui/DiffView.cpp" line="1664"/>
+        <location filename="../src/ui/DiffView.cpp" line="1917"/>
         <source>Show Object</source>
         <translation>オブジェクトを表示</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1663"/>
+        <location filename="../src/ui/DiffView.cpp" line="1673"/>
         <source>Edit File</source>
         <translation>ファイルを編集</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1669"/>
+        <location filename="../src/ui/DiffView.cpp" line="1679"/>
         <source>Discard File</source>
         <translation>ファイルを破棄</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1676"/>
+        <location filename="../src/ui/DiffView.cpp" line="1686"/>
         <source>Directory</source>
         <translation>ディレクトリ</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1676"/>
+        <location filename="../src/ui/DiffView.cpp" line="1686"/>
         <source>File</source>
         <translation>ファイル</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1678"/>
+        <location filename="../src/ui/DiffView.cpp" line="1688"/>
         <source>Remove %1?</source>
         <translation>%1を削除しますか？</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1678"/>
+        <location filename="../src/ui/DiffView.cpp" line="1688"/>
         <source>Discard Changes?</source>
         <translation>変更を破棄しますか？</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1680"/>
+        <location filename="../src/ui/DiffView.cpp" line="1690"/>
         <source>Are you sure you want to remove &apos;%1&apos;?</source>
         <translation>&apos;%1&apos; を削除しますか？</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1681"/>
+        <location filename="../src/ui/DiffView.cpp" line="1691"/>
         <source>Are you sure you want to discard all changes in &apos;%1&apos;?</source>
         <translation>&apos;%1&apos; への全ての変更を破棄しますか？</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1686"/>
+        <location filename="../src/ui/DiffView.cpp" line="1696"/>
         <source>This action cannot be undone.</source>
         <translation>この操作は元に戻せません。</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1689"/>
+        <location filename="../src/ui/DiffView.cpp" line="1699"/>
         <source>Remove %1</source>
         <translation>%1を削除</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1689"/>
+        <location filename="../src/ui/DiffView.cpp" line="1699"/>
         <source>Discard Changes</source>
         <translation>変更を破棄</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1706"/>
+        <location filename="../src/ui/DiffView.cpp" line="1716"/>
         <source>Discard</source>
         <translation>破棄</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1707"/>
+        <location filename="../src/ui/DiffView.cpp" line="1717"/>
         <source>discard</source>
         <translation>破棄</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1720"/>
-        <location filename="../src/ui/DiffView.cpp" line="1723"/>
+        <location filename="../src/ui/DiffView.cpp" line="1730"/>
+        <location filename="../src/ui/DiffView.cpp" line="1733"/>
         <source>Collapse File</source>
         <translation>ファイルを折り畳む</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1720"/>
-        <location filename="../src/ui/DiffView.cpp" line="1723"/>
+        <location filename="../src/ui/DiffView.cpp" line="1730"/>
+        <location filename="../src/ui/DiffView.cpp" line="1733"/>
         <source>Expand File</source>
         <translation>ファイルを広げる</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1907"/>
+        <location filename="../src/ui/DiffView.cpp" line="1917"/>
         <source>Show Pointer</source>
         <translation>ポインターを表示</translation>
     </message>
@@ -1774,85 +1797,85 @@
 <context>
     <name>HunkWidget</name>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="629"/>
+        <location filename="../src/ui/DiffView.cpp" line="639"/>
         <source>Save</source>
         <translation>保存</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="633"/>
+        <location filename="../src/ui/DiffView.cpp" line="643"/>
         <source>Undo</source>
         <translation>元に戻す</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="644"/>
+        <location filename="../src/ui/DiffView.cpp" line="654"/>
         <source>Use Ours</source>
         <translation>手元のものを使う</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="655"/>
+        <location filename="../src/ui/DiffView.cpp" line="665"/>
         <source>Use Theirs</source>
         <translation>向こうのものを使う</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="665"/>
+        <location filename="../src/ui/DiffView.cpp" line="675"/>
         <source>Edit Hunk</source>
         <translation>差分を編集</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="671"/>
-        <location filename="../src/ui/DiffView.cpp" line="688"/>
+        <location filename="../src/ui/DiffView.cpp" line="681"/>
+        <location filename="../src/ui/DiffView.cpp" line="698"/>
         <source>Discard Hunk</source>
         <translation>差分を破棄</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="676"/>
+        <location filename="../src/ui/DiffView.cpp" line="686"/>
         <source>Discard Hunk?</source>
         <translation>差分を破棄しますか？</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="678"/>
+        <location filename="../src/ui/DiffView.cpp" line="688"/>
         <source>Are you sure you want to remove &apos;%1&apos;?</source>
         <translation>&apos;%1&apos; を削除しますか？</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="679"/>
+        <location filename="../src/ui/DiffView.cpp" line="689"/>
         <source>Are you sure you want to discard the hunk starting at line %1 in &apos;%2&apos;?</source>
         <translation>&apos;%2&apos; の差分内容 (開始行 %1) を破棄しますか？</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="685"/>
+        <location filename="../src/ui/DiffView.cpp" line="695"/>
         <source>This action cannot be undone.</source>
         <translation>この操作は元に戻せません。</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="721"/>
-        <location filename="../src/ui/DiffView.cpp" line="724"/>
+        <location filename="../src/ui/DiffView.cpp" line="731"/>
+        <location filename="../src/ui/DiffView.cpp" line="734"/>
         <source>Collapse Hunk</source>
         <translation>差分内容を折り畳む</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="721"/>
-        <location filename="../src/ui/DiffView.cpp" line="724"/>
+        <location filename="../src/ui/DiffView.cpp" line="731"/>
+        <location filename="../src/ui/DiffView.cpp" line="734"/>
         <source>Expand Hunk</source>
         <translation>差分内容を広げる</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="920"/>
+        <location filename="../src/ui/DiffView.cpp" line="930"/>
         <source>Esc</source>
         <translation>Esc</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="947"/>
+        <location filename="../src/ui/DiffView.cpp" line="957"/>
         <source>Fix</source>
         <translation>修正</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="998"/>
+        <location filename="../src/ui/DiffView.cpp" line="1008"/>
         <source>Edit</source>
         <translation>編集</translation>
     </message>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="1197"/>
+        <location filename="../src/ui/DiffView.cpp" line="1207"/>
         <source>No newline at end of file</source>
         <translation>ファイル終端に改行なし</translation>
     </message>
@@ -1860,7 +1883,7 @@
 <context>
     <name>Images</name>
     <message>
-        <location filename="../src/ui/DiffView.cpp" line="587"/>
+        <location filename="../src/ui/DiffView.cpp" line="597"/>
         <source>&lt;b&gt;Size:&lt;/b&gt; %1</source>
         <translation>&lt;b&gt;容量:&lt;/b&gt; %1</translation>
     </message>
@@ -3403,6 +3426,11 @@ Examples
         <translation>Esc</translation>
     </message>
     <message>
+        <location filename="../src/ui/RepoView.cpp" line="408"/>
+        <source>stage</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/ui/RepoView.cpp" line="415"/>
         <source>Git LFS was not found on the PATH. &lt;a href=&apos;https://git-lfs.github.com&apos;&gt;Install Git LFS&lt;/a&gt; to use LFS integration.</source>
         <translation>Git LFS がどの PATH にも見つかりませんでした。LFS 統合機能を使うには、&lt;a href=&apos;https://git-lfs.github.com&apos;&gt;Git LFS をインストール&lt;/a&gt;してください。</translation>
@@ -3465,6 +3493,11 @@ Examples
         <translation>初期化</translation>
     </message>
     <message>
+        <location filename="../src/ui/RepoView.cpp" line="764"/>
+        <source>initialize</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/ui/RepoView.cpp" line="768"/>
         <source>Git LFS initialized.</source>
         <translation>Git LFS を初期化しました。</translation>
@@ -3473,6 +3506,11 @@ Examples
         <location filename="../src/ui/RepoView.cpp" line="773"/>
         <source>Deinitialize</source>
         <translation>解除</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/RepoView.cpp" line="775"/>
+        <source>deinitialize</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/ui/RepoView.cpp" line="779"/>
@@ -4350,6 +4388,21 @@ This reverts commit %2.</source>
 <context>
     <name>ShowTool</name>
     <message>
+        <location filename="../src/tools/ShowTool.cpp" line="19"/>
+        <source>Finder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/tools/ShowTool.cpp" line="21"/>
+        <source>Explorer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/tools/ShowTool.cpp" line="23"/>
+        <source>Default File Browser</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/tools/ShowTool.cpp" line="37"/>
         <source>Show in %1</source>
         <translation>%1 に表示</translation>
@@ -4658,32 +4711,32 @@ This reverts commit %2.</source>
 <context>
     <name>TextEdit</name>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="536"/>
+        <location filename="../src/ui/DetailView.cpp" line="529"/>
         <source>Replace...</source>
         <translation>置換...</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="537"/>
+        <location filename="../src/ui/DetailView.cpp" line="530"/>
         <source>Replace All...</source>
         <translation>全て置換...</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="567"/>
+        <location filename="../src/ui/DetailView.cpp" line="560"/>
         <source>Ignore</source>
         <translation>無視</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="586"/>
+        <location filename="../src/ui/DetailView.cpp" line="579"/>
         <source>Ignore All</source>
         <translation>全て無視</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="592"/>
+        <location filename="../src/ui/DetailView.cpp" line="585"/>
         <source>Add to User Dictionary</source>
         <translation>ユーザー辞書に追加</translation>
     </message>
     <message>
-        <location filename="../src/ui/DetailView.cpp" line="608"/>
+        <location filename="../src/ui/DetailView.cpp" line="599"/>
         <source>Do not Ignore</source>
         <translation>無視しない</translation>
     </message>
@@ -4737,6 +4790,16 @@ This reverts commit %2.</source>
         <location filename="../src/ui/ToolBar.cpp" line="800"/>
         <source>Pull</source>
         <translation>プル</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/ToolBar.cpp" line="806"/>
+        <source>Merge</source>
+        <translation type="unfinished">マージ</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/ToolBar.cpp" line="811"/>
+        <source>Rebase</source>
+        <translation type="unfinished">リベース</translation>
     </message>
     <message>
         <location filename="../src/ui/ToolBar.cpp" line="821"/>

@@ -8,8 +8,9 @@ set(LANGUAGES
   en
   es
   ja
+  pt
   pt_BR
-  zh-CN
+  zh_CN
 )
 
 set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)
