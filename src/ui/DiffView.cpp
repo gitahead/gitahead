@@ -429,6 +429,7 @@ protected:
 
 class Editor : public TextEditor
 {
+    Q_OBJECT
 public:
   Editor(QWidget *parent = nullptr)
     : TextEditor(parent)
@@ -442,6 +443,16 @@ protected:
 
     TextEditor::focusOutEvent(event);
   }
+
+  void paintEvent(QPaintEvent *event) override
+  {
+      emit aboutToPaint();
+      TextEditor::paintEvent(event);
+  }
+
+signals:
+    void aboutToPaint();
+
 };
 
 class Images : public QWidget
@@ -804,7 +815,9 @@ public:
     mHeader = new Header(diff, patch, index, lfs, submodule, this);
     layout->addWidget(mHeader);
 
-    mEditor = new Editor(this);
+    auto edt = new Editor(this);
+    mEditor = edt;
+    connect(edt, &Editor::aboutToPaint, this, &HunkWidget::load);
     mEditor->setLexer(patch.name());
     mEditor->setCaretStyle(CARETSTYLE_INVISIBLE);
     mEditor->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
