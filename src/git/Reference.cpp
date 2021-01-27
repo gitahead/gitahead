@@ -145,7 +145,9 @@ AnnotatedCommit Reference::annotatedCommit() const
 
 bool Reference::isNameValid(const QString &name)
 {
-  return git_reference_is_valid_name(name.toUtf8());
+  int valid;
+  git_reference_name_is_valid(&valid, name.toUtf8());
+  return valid;
 }
 
 } // namespace git
