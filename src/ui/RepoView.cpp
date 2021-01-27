@@ -1379,13 +1379,17 @@ void RepoView::mergeAbort(LogEntry *parent)
   if (!commit.isValid())
     return;
 
+  bool ignoreWhitespace = Settings::instance()->isWhitespaceIgnored();
+
   QSet<QString> paths;
-  git::Diff index = mRepo.diffTreeToIndex(commit.tree());
+  git::Diff index =
+    mRepo.diffTreeToIndex(commit.tree(), git::Index(), ignoreWhitespace);
   for (int i = 0; i < index.count(); ++i)
     paths.insert(index.name(i));
 
   QStringList conflicts;
-  git::Diff workdir = mRepo.diffIndexToWorkdir();
+  git::Diff workdir =
+    mRepo.diffIndexToWorkdir(git::Index(), nullptr, ignoreWhitespace);
   for (int i = 0; i < workdir.count(); ++i) {
     QString name = workdir.name(i);
     if (workdir.status(i) != GIT_DELTA_CONFLICTED && paths.contains(name))

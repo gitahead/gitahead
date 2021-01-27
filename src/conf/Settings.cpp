@@ -22,10 +22,6 @@
 
 namespace {
 
-const QString kTempDir = "GitAhead";
-const QStandardPaths::StandardLocation kUserLocation =
-  QStandardPaths::AppLocalDataLocation;
-
 const QString kIgnoreWsKey = "diff/whitespace/ignore";
 const QString kLastPathKey = "lastpath";
 
@@ -314,14 +310,16 @@ QDir Settings::pluginsDir()
 
 QDir Settings::userDir()
 {
-  return QStandardPaths::writableLocation(kUserLocation);
+  return QStandardPaths::writableLocation(
+           QStandardPaths::AppLocalDataLocation);
 }
 
 QDir Settings::tempDir()
 {
+  QString name = QCoreApplication::applicationName();
   QDir dir = QDir::temp();
-  dir.mkpath(kTempDir);
-  dir.cd(kTempDir);
+  dir.mkpath(name);
+  dir.cd(name);
   return dir;
 }
 

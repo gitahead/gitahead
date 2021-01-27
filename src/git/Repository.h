@@ -101,13 +101,16 @@ public:
   // status/diff
   Diff status(
     const Index &index,
-    Diff::Callbacks *callbacks) const;
+    Diff::Callbacks *callbacks,
+    bool ignoreWhitespace = false) const;
   Diff diffTreeToIndex(
     const Tree &tree,
-    const Index &index = Index()) const;
+    const Index &index = Index(),
+    bool ignoreWhitespace = false) const;
   Diff diffIndexToWorkdir(
     const Index &index = Index(),
-    Diff::Callbacks *callbacks = nullptr) const;
+    Diff::Callbacks *callbacks = nullptr,
+    bool ignoreWhitespace = false) const;
 
   // refs
   QList<Reference> refs() const;

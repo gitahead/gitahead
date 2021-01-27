@@ -59,6 +59,10 @@ public:
   // pre-push hook
   bool negotiation(const QList<git::Remote::PushUpdate> &updates) override;
 
+  // user setting hooks
+  QString keyFilePath() const override;
+  QString configFilePath() const override;
+
 signals:
   void referenceUpdated(const QString &name);
 

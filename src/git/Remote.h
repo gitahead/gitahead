@@ -126,6 +126,10 @@ public:
       return true;
     }
 
+    // user setting hooks
+    virtual QString keyFilePath() const { return QString(); }
+    virtual QString configFilePath() const { return QString(); }
+
     // static callback wrappers
     static int connect(
       git_remote *remote,

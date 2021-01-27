@@ -149,7 +149,8 @@ public:
     mTimer.start(50);
     mStatus.setFuture(QtConcurrent::run([this] {
       // Pass the repo's index to suppress reload.
-      return mRepo.status(mRepo.index(), &mStatusCallbacks);
+      bool ignoreWhitespace = Settings::instance()->isWhitespaceIgnored();
+      return mRepo.status(mRepo.index(), &mStatusCallbacks, ignoreWhitespace);
     }));
   }
 
@@ -377,7 +378,8 @@ public:
         if (status)
           return QVariant::fromValue(this->status());
 
-        git::Diff diff = row.commit.diff();
+        bool ignoreWhitespace = Settings::instance()->isWhitespaceIgnored();
+        git::Diff diff = row.commit.diff(git::Commit(), -1, ignoreWhitespace);
         diff.findSimilar();
         return QVariant::fromValue(diff);
       }
@@ -623,7 +625,9 @@ public:
   {
     switch (role) {
       case DiffRole: {
-        git::Diff diff = mCommits.at(index.row()).diff();
+        git::Commit commit = mCommits.at(index.row());
+        bool ignoreWhitespace = Settings::instance()->isWhitespaceIgnored();
+        git::Diff diff = commit.diff(git::Commit(), -1, ignoreWhitespace);
         diff.findSimilar();
         return QVariant::fromValue(diff);
       }
@@ -1247,7 +1251,8 @@ git::Diff CommitList::selectedDiff() const
     return git::Diff();
 
   git::Commit last = indexes.last().data(CommitRole).value<git::Commit>();
-  git::Diff diff = first.diff(last);
+  bool ignoreWhitespace = Settings::instance()->isWhitespaceIgnored();
+  git::Diff diff = first.diff(last, -1, ignoreWhitespace);
   diff.findSimilar();
   return diff;
 }

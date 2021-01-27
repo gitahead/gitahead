@@ -267,7 +267,7 @@ public:
 
     // Index diff.
     quint32 diffPos = 0;
-    git::Diff diff = commit.diff(git::Commit(), mContextLines);
+    git::Diff diff = commit.diff(git::Commit(), mContextLines, true);
     int patches = diff.count();
     for (int pidx = 0; pidx < patches; ++pidx) {
       // Truncate commits after term limit.

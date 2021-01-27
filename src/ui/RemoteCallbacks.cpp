@@ -8,6 +8,7 @@
 //
 
 #include "RemoteCallbacks.h"
+#include "conf/Settings.h"
 #include "cred/CredentialHelper.h"
 #include "git/Command.h"
 #include "git/Id.h"
@@ -260,6 +261,16 @@ bool RemoteCallbacks::negotiation(
   }
 
   return true;
+}
+
+QString RemoteCallbacks::keyFilePath() const
+{
+  return Settings::instance()->value("ssh/keyFilePath").toString();
+}
+
+QString RemoteCallbacks::configFilePath() const
+{
+  return Settings::instance()->value("ssh/configFilePath").toString();
 }
 
 void RemoteCallbacks::credentialsImpl(

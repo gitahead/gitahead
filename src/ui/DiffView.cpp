@@ -2152,7 +2152,9 @@ void DiffView::setDiff(const git::Diff &diff)
   if (diff.isStatusDiff()) {
     if (git::Reference head = repo.head()) {
       if (git::Commit commit = head.target()) {
-        git::Diff stagedDiff = repo.diffTreeToIndex(commit.tree());
+        bool ignoreWhitespace = Settings::instance()->isWhitespaceIgnored();
+        git::Diff stagedDiff =
+          repo.diffTreeToIndex(commit.tree(), git::Index(), ignoreWhitespace);
         for (int i = 0; i < stagedDiff.count(); ++i)
           mStagedPatches[stagedDiff.name(i)] = stagedDiff.patch(i);
       }

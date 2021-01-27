@@ -218,6 +218,9 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   setWindowIcon(icon);
 #endif
 
+  // Set path to emoji description file.
+  git::Commit::setEmojiFile(Settings::confDir().filePath("emoji.json"));
+
   // Initialize git library.
   git::Repository::init();
 
