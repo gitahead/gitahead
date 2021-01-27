@@ -63,6 +63,9 @@ public:
   QString keyFilePath() const override;
   QString configFilePath() const override;
 
+  // agent availability hook
+  bool connectToAgent() const override;
+
 signals:
   void referenceUpdated(const QString &name);
 

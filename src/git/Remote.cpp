@@ -16,7 +16,6 @@
 #include "git2/clone.h"
 #include "git2/remote.h"
 #include "git2/signature.h"
-#include <libssh2.h>
 #include <QCoreApplication>
 #include <QDir>
 #include <QFile>
@@ -257,19 +256,7 @@ int Remote::Callbacks::credentials(
     if (!cbs->mAgentNames.contains(name)) {
       log(QString("agent: %1").arg(name));
       cbs->mAgentNames.insert(name);
-      LIBSSH2_SESSION *session = libssh2_session_init();
-      LIBSSH2_AGENT *agent = libssh2_agent_init(session);
-      int error = libssh2_agent_connect(agent);
-      if (error != LIBSSH2_ERROR_NONE) {
-        char *msg;
-        libssh2_session_last_error(session, &msg, nullptr, 0);
-        log(QString("agent: %1 (%2)").arg(msg).arg(error));
-      }
-
-      libssh2_agent_disconnect(agent);
-      libssh2_agent_free(agent);
-      libssh2_session_free(session);
-      if (error == LIBSSH2_ERROR_NONE)
+      if (cbs->connectToAgent())
         return git_credential_ssh_key_from_agent(out, name);
 
     } else if (error) {
