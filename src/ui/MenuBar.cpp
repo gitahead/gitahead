@@ -810,7 +810,7 @@ void MenuBar::updateCutCopyPaste()
     mCopy->setEnabled(editor->hasSelectedText());
     mPaste->setEnabled(canPaste);
     mFindSelection->setEnabled(editor->hasSelectedText());
-  } else if (LogView *logView = qobject_cast<LogView *>(widget)){
+  } else if (LogView *logView = qobject_cast<LogView *>(widget)) {
     mCopy->setEnabled(true);
   }
 }

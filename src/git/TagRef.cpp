@@ -50,8 +50,8 @@ bool TagRef::remove()
   // We have to notify even if removal failed and the tag is still valid.
   // Clients can check this tag to see if the tag was really removed.
   emit repo.notifier()->referenceRemoved(name);
-  
+
   return !error;
-} 
+}
 
 } // namespace git

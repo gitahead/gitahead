@@ -23,7 +23,7 @@ class Repository;
 class TreeWidget : public ContentWidget
 {
   Q_OBJECT
-  
+
 public:
   TreeWidget(const git::Repository &repo, QWidget *parent = nullptr);
 

@@ -9,7 +9,7 @@
 
 #ifndef FILELIST_H
 #define FILELIST_H
- 
+
 #include "git/Diff.h"
 #include <QListView>
 

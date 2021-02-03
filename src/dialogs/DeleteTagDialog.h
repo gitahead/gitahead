@@ -24,4 +24,4 @@ public:
   DeleteTagDialog(const git::TagRef &tag, QWidget *parent = nullptr);
 };
 
-#endif 
+#endif

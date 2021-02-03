@@ -41,18 +41,18 @@ public:
       "  border: 1px solid #D3D3D3;"
       "  border-radius: 4px"
       "}"
-      
+
       "ThemeButton:default {"
       "  background: #DCEBFB;"
       "  border: 2px solid #AFD1F5"
       "}"
-      
+
       "ThemeButton:pressed {"
       "  background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, "
       "    stop: 0 #D8D8D8, stop: 1 #E2E2E2);"
       "  border: 1px solid #D3D3D3"
       "}"
-      
+
       "ThemeButton #description {"
       "  color: #9A9A9A;"
       "  font-size: 12px;"
@@ -67,23 +67,23 @@ public:
       "  margin: 13px 0px 20px 8px"
       "}"
     );
-    
+
     QSize iconSize = QSize(350, 280);
     setFixedHeight(iconSize.height() + 80);
     setFixedWidth(iconSize.width() + 35);
     setFocusPolicy(Qt::StrongFocus);
-    
+
     mTitle = new QLabel(title, this);
     mTitle->setObjectName("title");
-    
+
     setIcon(icon);
     setIconSize(iconSize);
-    
+
     mDescription = new QLabel(description, this);
     mDescription->setAlignment(Qt::AlignHCenter);
     mDescription->setMinimumWidth(rect().width());
     mDescription->setObjectName("description");
-    
+
     connect(this, &QPushButton::clicked, [this] {
       if (mTitle->text().startsWith("dark", Qt::CaseInsensitive)) {
         Settings::instance()->setValue("window/theme", "Dark");
@@ -113,23 +113,23 @@ ThemeDialog::ThemeDialog(QWidget *parent)
   : QDialog(parent)
 {
   setWindowTitle("Pick a theme for GitAhead");
-  
+
   ThemeButton *native = new ThemeButton(
     tr("Native Theme"),
     QIcon(":/native.png"),
     tr("A flexible look matching system colors")
   );
-  
+
   ThemeButton *dark = new ThemeButton(
-    tr("Dark Theme"), 
+    tr("Dark Theme"),
     QIcon(":/dark.png"),
     tr("A consistent look optimal for reducing eye strain")
   );
-  
+
   QHBoxLayout *themeButtons = new QHBoxLayout;
   themeButtons->addWidget(native);
   themeButtons->addWidget(dark);
-  
+
   QVBoxLayout *layout = new QVBoxLayout(this);
   layout->addLayout(themeButtons);
 }

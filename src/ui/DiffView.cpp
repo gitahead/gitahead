@@ -1108,7 +1108,8 @@ public:
 
   Header *header() const { return mHeader; }
 
-  TextEditor *editor(bool ensureLoaded = true) {
+  TextEditor *editor(bool ensureLoaded = true)
+  {
     if (ensureLoaded)
       load();
     return mEditor;

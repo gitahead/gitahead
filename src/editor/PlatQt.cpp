@@ -665,22 +665,26 @@ class DynamicLibraryImpl : public DynamicLibrary {
 protected:
   QLibrary *lib;
 public:
-  explicit DynamicLibraryImpl(const char *modulePath) {
+  explicit DynamicLibraryImpl(const char *modulePath)
+  {
     QString path = QString::fromUtf8(modulePath);
     lib = new QLibrary(path);
   }
 
-  virtual ~DynamicLibraryImpl() {
+  virtual ~DynamicLibraryImpl()
+  {
     if (lib)
       lib->unload();
     lib = 0;
   }
 
-  Function FindFunction(const char *name) override {
+  Function FindFunction(const char *name) override
+  {
     return lib ? reinterpret_cast<Function>(lib->resolve(name)) : NULL;
   }
 
-  bool IsValid() override {
+  bool IsValid() override
+  {
     return lib != NULL;
   }
 };

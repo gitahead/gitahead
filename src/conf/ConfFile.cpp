@@ -71,7 +71,8 @@ ConfFile::ConfFile(const QString &filename)
 
 ConfFile::~ConfFile() {}
 
-QVariantMap ConfFile::parse(const QString &name) {
+QVariantMap ConfFile::parse(const QString &name)
+{
   // Verify the existence of the file.
   QFileInfo info(mFilename);
   QString canPath = info.canonicalPath();

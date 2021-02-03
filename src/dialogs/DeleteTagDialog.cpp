@@ -58,7 +58,7 @@ DeleteTagDialog::DeleteTagDialog(
       watcher->setFuture(
         QtConcurrent::run(remote, &git::Remote::push, callbacks, refspecs));
 
-      connect(watcher, &QFutureWatcher<git::Result>::finished, watcher, 
+      connect(watcher, &QFutureWatcher<git::Result>::finished, watcher,
       [entry, watcher, callbacks, remoteName] {
         entry->setBusy(false);
         git::Result result = watcher->result();

@@ -97,7 +97,7 @@ bool IsHangul(const QChar qchar)
   const bool HangulJamoExtendedB = (0xD7B0 <= unicode && unicode <= 0xD7FF);
   const bool HangulSyllable = (0xAC00 <= unicode && unicode <= 0xD7A3);
   return HangulJamo || HangulCompatibleJamo  || HangulSyllable ||
-         HangulJamoExtendedA || HangulJamoExtendedB; 
+         HangulJamoExtendedA || HangulJamoExtendedB;
 }
 
 } // anon. namespace
@@ -459,7 +459,7 @@ void ScintillaQt::dropEvent(QDropEvent *event)
   }
 }
 
-void ScintillaQt::MoveImeCarets(int offset) 
+void ScintillaQt::MoveImeCarets(int offset)
 {
   // Move carets relatively by bytes
   for (size_t r=0; r < sel.Count(); r++) {
@@ -469,7 +469,7 @@ void ScintillaQt::MoveImeCarets(int offset)
   }
 }
 
-void ScintillaQt::DrawImeIndicator(int indicator, int len) 
+void ScintillaQt::DrawImeIndicator(int indicator, int len)
 {
   // Emulate the visual style of IME characters with indicators.
   // Draw an indicator on the character before caret by the character bytes of len
@@ -556,7 +556,7 @@ void ScintillaQt::inputMethodEvent(QInputMethodEvent *event)
           case QTextCharFormat::SpellCheckUnderline:
             indicator = SC_INDICATOR_CONVERTED;
             break;
-          
+
           default:
             indicator = SC_INDICATOR_UNKNOWN;
         }
@@ -606,7 +606,7 @@ void ScintillaQt::inputMethodEvent(QInputMethodEvent *event)
       DrawImeIndicator(imeIndicator[i], oneCharLen);
 #endif
       i += ucWidth;
-    } 
+    }
     recordingMacro = recording;
 
     // Move IME carets.
@@ -631,8 +631,7 @@ QVariant ScintillaQt::inputMethodQuery(Qt::InputMethodQuery query) const
   int line = send(SCI_LINEFROMPOSITION, pos);
 
   switch (query) {
-    case Qt::ImMicroFocus:
-    {
+    case Qt::ImMicroFocus: {
       int startPos = (preeditPos >= 0) ? preeditPos : pos;
       Point pt = const_cast<ScintillaQt *>(this)->LocationFromPosition(startPos);
       int width = send(SCI_GETCARETWIDTH);
@@ -640,8 +639,7 @@ QVariant ScintillaQt::inputMethodQuery(Qt::InputMethodQuery query) const
       return QRect(pt.x, pt.y, width, height);
     }
 
-    case Qt::ImFont:
-    {
+    case Qt::ImFont: {
       char fontName[64];
       int style = send(SCI_GETSTYLEAT, pos);
       int len = send(SCI_STYLEGETFONT, style, (sptr_t)fontName);
@@ -651,14 +649,12 @@ QVariant ScintillaQt::inputMethodQuery(Qt::InputMethodQuery query) const
       return QFont(QString::fromUtf8(fontName, len), size, weight, italic);
     }
 
-    case Qt::ImCursorPosition:
-    {
+    case Qt::ImCursorPosition: {
       int paraStart = pdoc->ParaUp(pos);
       return pos - paraStart;
     }
 
-    case Qt::ImSurroundingText:
-    {
+    case Qt::ImSurroundingText: {
       int paraStart = pdoc->ParaUp(pos);
       int paraEnd = pdoc->ParaDown(pos);
       QVarLengthArray<char,1024> buffer(paraEnd - paraStart + 1);
@@ -676,8 +672,7 @@ QVariant ScintillaQt::inputMethodQuery(Qt::InputMethodQuery query) const
       return buffer.constData();
     }
 
-    case Qt::ImCurrentSelection:
-    {
+    case Qt::ImCurrentSelection: {
       QVarLengthArray<char,1024> buffer(send(SCI_GETSELTEXT));
       send(SCI_GETSELTEXT, 0, (sptr_t)buffer.data());
 
@@ -907,8 +902,7 @@ void ScintillaQt::NotifyParent(SCNotification scn)
       emit updateUi();
       break;
 
-    case SCN_MODIFIED:
-    {
+    case SCN_MODIFIED: {
       bool added = scn.modificationType & SC_MOD_INSERTTEXT;
       bool deleted = scn.modificationType & SC_MOD_DELETETEXT;
 

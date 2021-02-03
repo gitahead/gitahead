@@ -367,7 +367,7 @@ public:
     // Edit enabled for user themes
     QStandardItemModel *model =
       static_cast<QStandardItemModel *>(comboBox->model());
-    if(!comboBox->itemData(comboBox->currentIndex()).isValid())
+    if (!comboBox->itemData(comboBox->currentIndex()).isValid())
       model->item(comboBox->count() - 1)->setEnabled(false);
 
     auto signal = QOverload<int>::of(&QComboBox::currentIndexChanged);

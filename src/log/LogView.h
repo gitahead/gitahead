@@ -24,7 +24,7 @@ public:
   QSize minimumSizeHint() const override;
 
   void copy();
-  void setCollapseEnabled(bool collapse); 
+  void setCollapseEnabled(bool collapse);
 
   void setEntryExpanded(LogEntry *entry, bool expanded);
 

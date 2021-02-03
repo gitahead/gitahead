@@ -241,7 +241,7 @@ void AdvancedSearchWidget::addField(
 
   QLabel *label = new QLabel(text, this);
   label->setToolTip(tooltip);
-  label->setCursor(Qt::WhatsThisCursor);  
+  label->setCursor(Qt::WhatsThisCursor);
 
   static_cast<QFormLayout *>(layout())->addRow(label, widget);
 }

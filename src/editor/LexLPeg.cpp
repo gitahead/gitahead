@@ -98,13 +98,15 @@ class LexerLPeg : public ILexer {
    * @param str The error message to print. If `NULL`, prints the Lua error
    *   message at the top of the stack.
    */
-  static void l_error(lua_State *L, const char *str=NULL) {
+  static void l_error(lua_State *L, const char *str=NULL)
+  {
     fprintf(stderr, "Lua Error: %s.\n", str ? str : lua_tostring(L, -1));
     lua_settop(L, 0);
   }
 
   /** The lexer's `__index` Lua metatable. */
-  static int llexer_property(lua_State *L) {
+  static int llexer_property(lua_State *L)
+  {
     int newindex = (lua_gettop(L) == 3);
     luaL_getmetatable(L, "sci_lexer");
     lua_getmetatable(L, 1); // metatable can be either sci_lexer or sci_lexerp
@@ -177,7 +179,8 @@ class LexerLPeg : public ILexer {
    * @param L The Lua State.
    * @param index The index the string property key.
    */
-  void lL_getexpanded(lua_State *L, int index) {
+  void lL_getexpanded(lua_State *L, int index)
+  {
     lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED"), lua_getfield(L, -1, "lexer");
     lua_getfield(L, -1, "property_expanded");
     lua_pushvalue(L, (index > 0) ? index : index - 3), lua_gettable(L, -2);
@@ -190,7 +193,8 @@ class LexerLPeg : public ILexer {
    * @param num The style number to set properties for.
    * @param style The style string containing properties to set.
    */
-  void SetStyle(int num, const char *style) {
+  void SetStyle(int num, const char *style)
+  {
     char *style_copy = static_cast<char *>(malloc(strlen(style) + 1));
     char *option = strcpy(style_copy, style), *next = NULL, *p = NULL;
     while (option) {
@@ -240,7 +244,8 @@ class LexerLPeg : public ILexer {
    * for all defined styles, or for SciTE, generates the set of style properties
    * instead of directly setting style properties.
    */
-  bool SetStyles() {
+  bool SetStyles()
+  {
     // If the lexer defines additional styles, set their properties first (if
     // the user has not already defined them).
     l_getlexerfield(L, "_EXTRASTYLES");
@@ -290,7 +295,8 @@ class LexerLPeg : public ILexer {
    * Initializes the lexer once the `lexer.lpeg.home` and `lexer.name`
    * properties are set.
    */
-  bool init(const char *lexer) {
+  bool init(const char *lexer)
+  {
     char home[FILENAME_MAX], themes[FILENAME_MAX], theme[FILENAME_MAX];
     props.GetExpanded("lexer.lpeg.home", home);
     props.GetExpanded("lexer.lpeg.themes", themes);
@@ -372,7 +378,8 @@ class LexerLPeg : public ILexer {
   }
 
 public:
-  LexerLPeg() : fn(nullptr), sci(0), multilang(false) {
+  LexerLPeg() : fn(nullptr), sci(0), multilang(false)
+  {
     // Lua state is shared.
     if (L)
       return;
@@ -397,7 +404,8 @@ public:
   virtual ~LexerLPeg() {}
 
   /** Destroys the lexer object. */
-  void SCI_METHOD Release() {
+  void SCI_METHOD Release()
+  {
     lua_getfield(L, LUA_REGISTRYINDEX, "sci_lexers");
     lua_pushlightuserdata(L, reinterpret_cast<void *>(this));
     lua_pushnil(L), lua_settable(L, -3), lua_pop(L, 1); // sci_lexers
@@ -412,8 +420,12 @@ public:
    * @param initStyle The initial style at position *startPos* in the document.
    * @param buffer The document interface.
    */
-  void SCI_METHOD Lex(Sci_PositionU startPos, Sci_Position lengthDoc,
-                      int initStyle, IDocument *buffer) {
+  void SCI_METHOD Lex(
+    Sci_PositionU startPos,
+    Sci_Position lengthDoc,
+    int initStyle,
+    IDocument *buffer)
+  {
     lua_pushlightuserdata(L, reinterpret_cast<void *>(&props));
     lua_setfield(L, LUA_REGISTRYINDEX, "sci_props");
     lua_pushlightuserdata(L, reinterpret_cast<void *>(buffer));
@@ -492,8 +504,12 @@ public:
    * @param initStyle The initial style at position *startPos* in the document.
    * @param buffer The document interface.
    */
-  void SCI_METHOD Fold(Sci_PositionU startPos, Sci_Position lengthDoc,
-                       int initStyle, IDocument *buffer) {
+  void SCI_METHOD Fold(
+    Sci_PositionU startPos,
+    Sci_Position lengthDoc,
+    int initStyle,
+    IDocument *buffer)
+  {
     lua_pushlightuserdata(L, reinterpret_cast<void *>(&props));
     lua_setfield(L, LUA_REGISTRYINDEX, "sci_props");
     lua_pushlightuserdata(L, reinterpret_cast<void *>(buffer));
@@ -527,7 +543,8 @@ public:
    * @param key The string keyword.
    * @param val The string value.
    */
-  Sci_Position SCI_METHOD PropertySet(const char *key, const char *value) {
+  Sci_Position SCI_METHOD PropertySet(const char *key, const char *value)
+  {
     const char *val = *value ? value : " ";
     props.Set(key, val, strlen(key), strlen(val)); // ensure property is cleared
     return -1; // no need to re-lex
@@ -541,8 +558,9 @@ public:
    * @param arg The argument.
    * @return void *data
    */
-  void * SCI_METHOD PrivateCall(int code, void *arg) {
-    switch(code) {
+  void * SCI_METHOD PrivateCall(int code, void *arg)
+  {
+    switch (code) {
       case SCI_GETDIRECTFUNCTION:
         fn = reinterpret_cast<SciFnDirect>(arg);
         return nullptr;

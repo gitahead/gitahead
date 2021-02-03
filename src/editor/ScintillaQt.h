@@ -142,7 +142,7 @@ private:
   void PasteFromMode(QClipboard::Mode);
   void CopyToModeClipboard(const SelectionText &, QClipboard::Mode);
 
-  void MoveImeCarets(int offset); 
+  void MoveImeCarets(int offset);
   void DrawImeIndicator(int indicator, int len);
 
   void Initialise() override;

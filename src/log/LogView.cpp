@@ -68,11 +68,11 @@ LogView::LogView(LogEntry *root, QWidget *parent)
   [this](const QModelIndex &parent, int first, int last) {
     if (!parent.isValid() && mCollapse)
       collapse(this->model()->index(last - 1, 0, parent));
-    scrollTo(this->model()->index(last, 0, parent)); 
+    scrollTo(this->model()->index(last, 0, parent));
   });
 }
 
-void LogView::setCollapseEnabled(bool collapse) 
+void LogView::setCollapseEnabled(bool collapse)
 {
   mCollapse = collapse;
 }
@@ -82,7 +82,7 @@ void LogView::setEntryExpanded(LogEntry *entry, bool expanded)
   setExpanded(static_cast<LogModel *>(model())->index(entry), expanded);
 }
 
-void LogView::copy() 
+void LogView::copy()
 {
   QString plainText;
   QString richText;
@@ -92,7 +92,7 @@ void LogView::copy()
 
     //Indent child indices
     QModelIndex currentParent = index.parent();
-    while (currentParent.isValid()){
+    while (currentParent.isValid()) {
       prefix += QString(4, ' ');
       currentParent = currentParent.parent();
     }

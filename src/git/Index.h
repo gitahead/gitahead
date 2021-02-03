@@ -38,7 +38,8 @@ public:
     Id ours;
     Id theirs;
 
-    bool isValid() const {
+    bool isValid() const
+    {
       return !ancestor.isNull() && !ours.isNull() && !theirs.isNull();
     }
   };

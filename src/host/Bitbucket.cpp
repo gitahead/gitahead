@@ -48,7 +48,7 @@ Bitbucket::Bitbucket(const QString &username)
     for (int i = 0; i < array.size(); ++i) {
       QJsonObject obj = array.at(i).toObject();
       QJsonObject repository = obj.value("repository").toObject();
-      
+
       QString name = repository.value("name").toString();
       QString fullName = repository.value("full_name").toString();
 

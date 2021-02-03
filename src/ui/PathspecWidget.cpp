@@ -160,7 +160,7 @@ PathspecWidget::PathspecWidget(const git::Repository &repo, QWidget *parent)
 
   using Signal = void(QCompleter::*)(const QModelIndex &);
   auto signal = static_cast<Signal>(&QCompleter::highlighted);
-  connect(mField->completer(), signal, [this](const QModelIndex &index) { 
+  connect(mField->completer(), signal, [this](const QModelIndex &index) {
     QAbstractItemModel *model = mField->completer()->completionModel();
     QAbstractProxyModel *proxy = qobject_cast<QAbstractProxyModel *>(model);
     Q_ASSERT(proxy);

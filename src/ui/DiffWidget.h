@@ -39,7 +39,7 @@ public:
   void find() override;
   void findNext() override;
   void findPrevious() override;
-  
+
 private:
   void selectFile(const QString &name);
   void setCurrentFile(int value);
