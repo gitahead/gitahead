@@ -7,9 +7,6 @@ set(STATIC_CRT OFF CACHE BOOL "" FORCE)
 set(USE_SSH OFF CACHE BOOL "" FORCE)
 
 if(WIN32)
-  # Disable search for OpenSSL.
-  set(USE_OPENSSL OFF CACHE BOOL "" FORCE)
-
   # Set variables manually.
   set(OPENSSL_FOUND TRUE)
   set(OPENSSL_INCLUDE_DIR ${OPENSSL_DIR}/inc32)
