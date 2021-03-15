@@ -27,6 +27,7 @@
 #include "dialogs/CommitDialog.h"
 #include "dialogs/DeleteBranchDialog.h"
 #include "dialogs/DeleteTagDialog.h"
+#include "dialogs/DiffFileDialog.h"
 #include "dialogs/NewBranchDialog.h"
 #include "dialogs/RemoteDialog.h"
 #include "dialogs/SettingsDialog.h"
@@ -47,6 +48,8 @@
 #include <QCheckBox>
 #include <QCloseEvent>
 #include <QDesktopServices>
+#include <QFile>
+#include <QFileInfo>
 #include <QMessageBox>
 #include <QtNetwork>
 #include <QPushButton>
@@ -1618,6 +1621,13 @@ void RepoView::cherryPick(const git::Commit &commit)
   this->commit(msg, git::AnnotatedCommit(), parent);
 }
 
+void RepoView::promptToApplyDiff()
+{
+  QString path = DiffFileDialog::getApplyFileName(this);
+  if (!path.isEmpty())
+    applyDiff(path);
+}
+
 void RepoView::promptToForcePush(
   const git::Remote &remote,
   const git::Reference &src)
@@ -2636,6 +2646,32 @@ bool RepoView::checkForConflicts(LogEntry *parent, const QString &action)
 
   refresh();
   return true;
+}
+
+void RepoView::applyDiff(const QString &path)
+{
+  LogEntry *entry = addLogEntry(path, tr("Apply Diff"));
+  auto error = [this, entry, &path](const QString &message) {
+    this->error(entry, tr("apply diff"), QFileInfo(path).fileName(), message);
+  };
+
+  QFile file(path);
+  if (!file.open(QFile::ReadOnly)) {
+    error(file.errorString());
+    return;
+  }
+
+  QByteArray buffer = file.readAll();
+  git::Diff diff = git::Diff::fromBuffer(buffer);
+  if (!diff.isValid()) {
+    error(tr("The diff file is invalid"));
+    return;
+  }
+
+  if (!mRepo.applyDiff(diff)) {
+    error(git::Repository::lastError());
+    return;
+  }
 }
 
 #include "RepoView.moc"

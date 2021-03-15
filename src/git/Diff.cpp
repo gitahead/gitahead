@@ -169,12 +169,30 @@ void Diff::setAllStaged(bool staged, bool yieldFocus)
   index().setStaged(paths, staged);
 }
 
+QByteArray Diff::toBuffer(git_diff_format_t format) const
+{
+  git_buf buf = GIT_BUF_INIT_CONST(nullptr, 0);
+  if (git_diff_to_buf(&buf, d->diff, format))
+    return QByteArray();
+
+  QByteArray text(buf.ptr, buf.size);
+  git_buf_dispose(&buf);
+  return text;
+}
+
 char Diff::statusChar(git_delta_t status)
 {
   if (status == GIT_DELTA_CONFLICTED)
     return '!';
 
   return git_diff_status_char(status);
+}
+
+Diff Diff::fromBuffer(const QByteArray &text)
+{
+  git_diff *diff = nullptr;
+  git_diff_from_buffer(&diff, text.constData(), text.size());
+  return Diff(diff);
 }
 
 } // namespace git

@@ -365,6 +365,13 @@ MenuBar::MenuBar(QWidget *parent)
 
   repository->addSeparator();
 
+  mApplyDiff = repository->addAction(tr("Apply Diff..."));
+  connect(mApplyDiff, &QAction::triggered, [this] {
+    view()->promptToApplyDiff();
+  });
+
+  repository->addSeparator();
+
   QMenu *lfs = repository->addMenu(tr("Git LFS"));
   mLfsUnlock = lfs->addAction(tr("Remove all locks"));
   connect(mLfsUnlock, &QAction::triggered, [this] {
@@ -853,6 +860,7 @@ void MenuBar::updateRepository()
   mStageAll->setEnabled(view && view->isStageEnabled());
   mUnstageAll->setEnabled(view && view->isUnstageEnabled());
   mAmendCommit->setEnabled(view);
+  mApplyDiff->setEnabled(view);
 
   bool lfs = view && view->repo().lfsIsInitialized();
   mLfsUnlock->setEnabled(lfs);
