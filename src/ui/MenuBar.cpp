@@ -338,8 +338,8 @@ MenuBar::MenuBar(QWidget *parent)
   mToggleView = viewMenu->addAction(tr("Show Tree View"));
   connect(mToggleView, &QAction::triggered, [this] {
     RepoView *view = this->view();
-    bool diff = (view->viewMode() == RepoView::Diff);
-    view->setViewMode(diff ? RepoView::Tree : RepoView::Diff);
+    bool diff = (view->viewMode() == RepoView::DoubleTree);
+    view->setViewMode(diff ? RepoView::Tree : RepoView::DoubleTree);
   });
 
   // Repository
@@ -856,9 +856,9 @@ void MenuBar::updateView()
   if (!view)
     return;
 
-  bool diff = (view->viewMode() == RepoView::Diff);
+  bool diff = (view->viewMode() == RepoView::DoubleTree);
   mToggleLog->setText(view->isLogVisible() ? tr("Hide Log") : tr("Show Log"));
-  mToggleView->setText(diff ? tr("Show Tree View") : tr("Show Diff View"));
+  mToggleView->setText(diff ? tr("Show Tree View") : tr("Show Double Tree View"));
 }
 
 void MenuBar::updateRepository()

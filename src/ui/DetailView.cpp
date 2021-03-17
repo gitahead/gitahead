@@ -749,9 +749,9 @@ DetailView::DetailView(const git::Repository &repo, QWidget *parent)
   mContent = new QStackedWidget(this);
   layout->addWidget(mContent, 1);
 
-  mContent->addWidget(new DiffWidget(repo, this));
-  mContent->addWidget(new TreeWidget(repo, this));
+  //mContent->addWidget(new DiffWidget(repo, this));
   mContent->addWidget(new DoubleTreeWidget(repo, this));
+  mContent->addWidget(new TreeWidget(repo, this));
 }
 
 DetailView::~DetailView() {}

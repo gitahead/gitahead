@@ -52,9 +52,9 @@ class RepoView : public QSplitter
 public:
   enum ViewMode
   {
-    Diff,
+    DoubleTree,
+    //Diff,
 	Tree,
-	DoubleTree
   };
 
   enum MergeFlag

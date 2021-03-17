@@ -541,39 +541,39 @@ public:
     qreal x = width() / 2.0;
     qreal y = height() / 2.0;
 
-    if (mMode == RepoView::Diff) {
-      // Subtract a diagonal rectangle from the clip area.
-      QPainterPath clip;
-      clip.addRect(rect());
+//    if (mMode == RepoView::Diff) {
+//      // Subtract a diagonal rectangle from the clip area.
+//      QPainterPath clip;
+//      clip.addRect(rect());
 
-      QPainterPath path;
-      path.moveTo(x - 3, y - 4);
-      path.lineTo(x + 5, y + 2);
-      path.lineTo(x + 3, y + 4);
-      path.lineTo(x - 5, y - 2);
-      path.closeSubpath();
+//      QPainterPath path;
+//      path.moveTo(x - 3, y - 4);
+//      path.lineTo(x + 5, y + 2);
+//      path.lineTo(x + 3, y + 4);
+//      path.lineTo(x - 5, y - 2);
+//      path.closeSubpath();
 
-      painter.setClipPath(clip.subtracted(path));
+//      painter.setClipPath(clip.subtracted(path));
 
-      QPainterPath path1;
-      path1.addEllipse(x + 4, y - 7, 4, 4);
-      path1.addEllipse(x - 8, y + 3, 4, 4);
+//      QPainterPath path1;
+//      path1.addEllipse(x + 4, y - 7, 4, 4);
+//      path1.addEllipse(x - 8, y + 3, 4, 4);
 
-      path1.moveTo(x - 4, y + 3);
-      path1.lineTo(x + 4, y - 3);
-      painter.drawPath(path1);
+//      path1.moveTo(x - 4, y + 3);
+//      path1.lineTo(x + 4, y - 3);
+//      painter.drawPath(path1);
 
-      painter.setClipping(false);
+//      painter.setClipping(false);
 
-      QPainterPath path2;
-      path2.addEllipse(x - 8, y - 7, 4, 4);
-      path2.addEllipse(x + 4, y + 3, 4, 4);
+//      QPainterPath path2;
+//      path2.addEllipse(x - 8, y - 7, 4, 4);
+//      path2.addEllipse(x + 4, y + 3, 4, 4);
 
-      path2.moveTo(x - 4, y - 3);
-      path2.lineTo(x + 4, y + 3);
-      painter.drawPath(path2);
+//      path2.moveTo(x - 4, y - 3);
+//      path2.lineTo(x + 4, y + 3);
+//      painter.drawPath(path2);
 
-    } else {
+//    } else {
       QPainterPath path;
       path.addEllipse(x - 8, y - 7, 4, 4);
       path.addEllipse(x, y - 7, 4, 4);
@@ -589,7 +589,7 @@ public:
       path.moveTo(x + 5, y + 5);
       path.lineTo(x + 8, y + 5);
       painter.drawPath(path);
-    }
+//    }
   }
 
 private:
@@ -893,15 +893,20 @@ ToolBar::ToolBar(MainWindow *parent)
   SegmentedButton *mode = new SegmentedButton(this);
   mModeGroup = mode->buttonGroup();
 
-  ModeButton *diff = new ModeButton(RepoView::Diff, mode);
-  mode->addButton(diff, tr("Diff View"), true);
-  diff->setChecked(true);
+//  ModeButton *diff = new ModeButton(RepoView::Diff, mode);
+//  mode->addButton(diff, tr("Diff View"), true);
+//  diff->setEnabled(false);
+//  diff->setToolTip("Forever Disabled View");
 
+  // The order must match with the Index in RepoView::ViewMode!
+  // Index 0
+  ModeButton *alternativeTree = new ModeButton(RepoView::DoubleTree, mode);
+  mode->addButton(alternativeTree, tr("Double Tree View"), true);
+  alternativeTree->setChecked(true);
+
+  // Index 1
   ModeButton *tree = new ModeButton(RepoView::Tree, mode);
   mode->addButton(tree, tr("Tree View"), true);
-
-  ModeButton *alternativeTree = new ModeButton(RepoView::Tree, mode);
-  mode->addButton(alternativeTree, tr("Double Tree View"), true);
 
   addWidget(mode);
 
@@ -1004,7 +1009,7 @@ void ToolBar::updateView()
   RepoView *view = currentView();
   mConfigButton->setEnabled(view);
   mLogButton->setEnabled(view);
-  mModeGroup->button(RepoView::Diff)->setEnabled(view);
+  //mModeGroup->button(RepoView::Diff)->setEnabled(view);
   mModeGroup->button(RepoView::Tree)->setEnabled(view);
   mModeGroup->button(RepoView::DoubleTree)->setEnabled(view);
 

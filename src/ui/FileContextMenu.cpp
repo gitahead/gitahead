@@ -231,7 +231,7 @@ FileContextMenu::FileContextMenu(
     // Checkout
     QAction *checkout = addAction(tr("Checkout"), [this, view, files] {
       view->checkout(view->commits().first(), files);
-      view->setViewMode(RepoView::Diff);
+      view->setViewMode(RepoView::DoubleTree);
     });
 
     checkout->setEnabled(!view->repo().isBare());
