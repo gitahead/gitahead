@@ -967,7 +967,7 @@ void RepoView::fetchAll()
     return;
 
   if (remotes.size() == 1) {
-    fetch();
+    fetch(remotes.at(0));
     return;
   }
 
