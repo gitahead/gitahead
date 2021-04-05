@@ -140,7 +140,7 @@ void TreeView::collapseAll()
     mSupressItemExpandStateChanged = true;
     QTreeView::collapseAll();
     mSupressItemExpandStateChanged = false;
-    setCollapseCount(countCollapsed());
+    setCollapseCount(model()->rowCount());
 }
 
 void TreeView::itemExpanded(const QModelIndex& index)
