@@ -113,6 +113,12 @@ void TreeView::updateCollapseCount(const QModelIndex &parent, int first, int las
     setCollapseCount(countCollapsed());
 }
 
+/*!
+ * \brief TreeView::countCollapsed
+ * Takes long for many items
+ * \param parent
+ * \return
+ */
 int TreeView::countCollapsed(QModelIndex parent)
 {
     QAbstractItemModel* model = this->model();
