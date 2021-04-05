@@ -221,24 +221,44 @@ bool DiffView::scrollToFile(int index)
 void DiffView::enable(bool enable)
 {
     mEnabled = enable;
-    setFilter(QStringList());
 }
 
 void DiffView::setFilter(const QStringList &paths)
 {
-  fetchAll();
-  foreach (QWidget *widget, mFiles) {
-    FileWidget *file = static_cast<FileWidget *>(widget);
-    QString name = file->name();
-    bool contains = false;
-    for (auto path : paths) {
-        if (containsPath(name, path)) {
-            contains = true;
-            break;
+    mFilteredPaths = paths;
+    QVBoxLayout *layout = static_cast<QVBoxLayout *>(widget()->layout());
+    while (mFiles.count()) {
+        auto file = mFiles.takeFirst();
+        layout->removeWidget(file);
+        delete file;
+    }
+    mFiles.clear();
+    mFilteredPatchesCount = 0;
+    mFilteredPatchesLargestIndex = 0;
+
+    for (int i = 0; i < mDiff.count(); i++) {
+        for (int j = 0; j < mFilteredPaths.count(); j++)
+        {
+            auto name = mDiff.name(i);
+            if (name.contains(mFilteredPaths[j])) {
+                mFilteredPatchesCount++;
+                break;
+            }
         }
     }
-    file->setVisible(mEnabled && (paths.isEmpty() || contains));
-  }
+    fetchAll();
+//  foreach (QWidget *widget, mFiles) {
+//    FileWidget *file = static_cast<FileWidget *>(widget);
+//    QString name = file->name();
+//    bool contains = false;
+//    for (auto path : paths) {
+//        if (containsPath(name, path)) {
+//            contains = true;
+//            break;
+//        }
+//    }
+//    file->setVisible(mEnabled && (paths.isEmpty() || contains));
+//  }
 }
 
 QList<TextEditor *> DiffView::editors()
@@ -301,7 +321,7 @@ void DiffView::dragEnterEvent(QDragEnterEvent *event)
 
 bool DiffView::canFetchMore()
 {
-  return (mDiff.isValid() && mFiles.size() < mDiff.count());
+  return (mDiff.isValid() && mFiles.size() < mFilteredPatchesCount);
 }
 
 void DiffView::fetchMore()
@@ -310,9 +330,23 @@ void DiffView::fetchMore()
 
   // Add widgets.
   int init = mFiles.size();
-  int patchCount = mDiff.count();
   RepoView *view = RepoView::parentView(this);
-  for (int pidx = init; pidx < patchCount && pidx - init < 8; ++pidx) {
+  auto count = mDiff.count();
+  // Do it maximum 8 times. So other things can be done?
+  for (int pidx = mFilteredPatchesLargestIndex; pidx < mDiff.count() /*&& pidx - init < 8*/; ++pidx) {
+    auto name = mDiff.name(pidx);
+    bool filtered = false;
+    for (int i = 0; i < mFilteredPaths.count(); i++)
+    {
+        if (name.contains(mFilteredPaths[i])) {
+            filtered = true;
+            break;
+        }
+    }
+    if (mFilteredPaths.length() && !filtered)
+        continue;
+
+    mFilteredPatchesLargestIndex = pidx;
     git::Patch patch = mDiff.patch(pidx);
     if (!patch.isValid()) {
       // This diff is stale. Refresh the view.

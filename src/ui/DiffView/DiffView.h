@@ -92,7 +92,7 @@ public:
    * \brief setFilter
    * \param paths List of paths to be filtered
    */
-  void setFilter(const QStringList &paths);
+  void setFilter(const QStringList &paths = QStringList());
 
   const QList<PluginRef> &plugins() const { return mPlugins; }
   const Account::CommitComments &comments() const { return mComments; }
@@ -135,6 +135,9 @@ private:
   Account::CommitComments mComments;
 
   bool mEnabled{true};
+  QStringList mFilteredPaths;
+  int mFilteredPatchesCount{0};
+  int mFilteredPatchesLargestIndex{0};
 };
 
 #endif
