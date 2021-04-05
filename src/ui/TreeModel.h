@@ -97,7 +97,7 @@ private:
     QString mName;
     git::Object mObject;
 
-    Node *mParent;
+    Node *mParent{nullptr};
     QList<Node *> mChildren;
   };
 
