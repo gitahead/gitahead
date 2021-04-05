@@ -13,7 +13,7 @@
 #include "DetailView.h" // ContentWidget
 
 class QTreeView;
-class TreeModel;
+class DiffTreeModel;
 class TreeView;
 class BlameEditor;
 class StatePushButton;
@@ -58,7 +58,7 @@ private:
   void toggleCollapseStagedFiles();
   void toggleCollapseUnstagedFiles();
 
-  TreeModel* mTreeModel{nullptr};
+  DiffTreeModel* mTreeModel{nullptr};
   TreeView* stagedFiles{nullptr};
   TreeView* unstagedFiles{nullptr};
   StatePushButton* collapseButtonStagedFiles{nullptr};

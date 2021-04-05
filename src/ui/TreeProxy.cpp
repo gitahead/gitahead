@@ -8,7 +8,7 @@
 //
 
 #include "TreeProxy.h"
-#include "TreeModel.h"
+#include "DiffTreeModel.h"
 #include "conf/Settings.h"
 #include "git/Blob.h"
 #include "git/Diff.h"
@@ -39,7 +39,7 @@ bool TreeProxy::setData(const QModelIndex &index, const QVariant &value, int rol
     if (index.isValid() && !sourceIndex.isValid())
         return false;
 
-    return static_cast<TreeModel*>(sourceModel())->setData(sourceIndex, value, role, ignoreIndexChanges);
+    return static_cast<DiffTreeModel*>(sourceModel())->setData(sourceIndex, value, role, ignoreIndexChanges);
 }
 
 bool TreeProxy::filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
@@ -48,7 +48,7 @@ bool TreeProxy::filterAcceptsRow(int source_row, const QModelIndex &source_paren
 	if (!index.isValid())
 		return false;
 
-	QString status = sourceModel()->data(index, TreeModel::StatusRole).toString();
+    QString status = sourceModel()->data(index, DiffTreeModel::StatusRole).toString();
 	QRegExp regexp(".*[AM?].*");
 	if (!status.contains(regexp))
 		return false; // if the file/folder was not modified/added ... don't show it in the tree view

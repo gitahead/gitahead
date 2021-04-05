@@ -9,7 +9,7 @@
 
 #include "DoubleTreeWidget.h"
 #include "BlameEditor.h"
-#include "TreeModel.h"
+#include "DiffTreeModel.h"
 #include "TreeProxy.h"
 #include "TreeView.h"
 #include "ViewDelegate.h"
@@ -114,7 +114,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 	QVBoxLayout* vBoxLayout = new QVBoxLayout();
 	QLabel* label = new QLabel(tr("Staged Files"));
 	stagedFiles = new TreeView(this);
-    mTreeModel = new TreeModel(repo, this);
+    mTreeModel = new DiffTreeModel(repo, this);
 	TreeProxy* treewrapperStaged = new TreeProxy(true, this);
     treewrapperStaged->setSourceModel(mTreeModel);
 	stagedFiles->setModel(treewrapperStaged);
@@ -180,7 +180,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
         mFileView->setCurrentIndex(idx);
     });
 
-    connect(mTreeModel, &TreeModel::checkStateChanged, this, &DoubleTreeWidget::treeModelStateChanged);
+    connect(mTreeModel, &DiffTreeModel::checkStateChanged, this, &DoubleTreeWidget::treeModelStateChanged);
 
     connect(mDiffView, &DiffView::fileStageStateChanged, this, &DoubleTreeWidget::updateTreeModel);
 
@@ -230,8 +230,8 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff,
     git::Tree tree = RepoView::parentView(this)->tree();
     // because of this, the content in the view is shown.
     TreeProxy* proxy = static_cast<TreeProxy *>(unstagedFiles->model());
-    TreeModel* model = static_cast<TreeModel*>(proxy->sourceModel());
-    model->setTree(tree, diff);
+    DiffTreeModel* model = static_cast<DiffTreeModel*>(proxy->sourceModel());
+    model->setDiff(diff);
     unstagedFiles->expandAll();
 
     if (!diff.isValid() || diff.isStatusDiff()) {
@@ -349,7 +349,7 @@ void DoubleTreeWidget::fileSelected(const QModelIndex &index) {
 void DoubleTreeWidget::loadEditorContent(const QModelIndex &index)
 {
   QString name = index.data(Qt::EditRole).toString();
-  git::Blob blob = index.data(TreeModel::BlobRole).value<git::Blob>();
+  git::Blob blob = index.data(DiffTreeModel::BlobRole).value<git::Blob>();
 
   QList<git::Commit> commits = RepoView::parentView(this)->commits();
   git::Commit commit = !commits.isEmpty() ? commits.first() : git::Commit();
