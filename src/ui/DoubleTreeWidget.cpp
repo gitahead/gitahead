@@ -232,11 +232,17 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff,
     TreeProxy* proxy = static_cast<TreeProxy *>(unstagedFiles->model());
     DiffTreeModel* model = static_cast<DiffTreeModel*>(proxy->sourceModel());
     model->setDiff(diff);
-    unstagedFiles->expandAll();
+    if (diff.isValid() && diff.count() < 100)
+        unstagedFiles->expandAll();
+    else
+        unstagedFiles->collapseAll();
 
     if (!diff.isValid() || diff.isStatusDiff()) {
         mUnstagedCommitedFiles->setText(kUnstagedFiles);
-        stagedFiles->expandAll();
+        if (diff.isValid() && diff.count() < 100)
+            stagedFiles->expandAll();
+        else
+            stagedFiles->collapseAll();
         mStagedWidget->setVisible(true);
 
     } else {
