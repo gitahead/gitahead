@@ -317,5 +317,9 @@ void DiffTreeModel::Node::addChild(const QStringList& pathPart, int indexFirstDi
         }
     }
 
-    mChildren.append(new Node(pathPart[indexFirstDifferent], this));
+    auto n = new Node(pathPart[indexFirstDifferent], this);
+    if (indexFirstDifferent + 1 < pathPart.length()) {
+        n->addChild(pathPart, indexFirstDifferent + 1);
+    }
+    mChildren.append(n);
 }
