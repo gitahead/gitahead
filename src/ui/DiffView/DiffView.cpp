@@ -246,7 +246,8 @@ void DiffView::setFilter(const QStringList &paths)
             }
         }
     }
-    fetchAll();
+    if (canFetchMore())
+      fetchMore();
 //  foreach (QWidget *widget, mFiles) {
 //    FileWidget *file = static_cast<FileWidget *>(widget);
 //    QString name = file->name();
@@ -324,16 +325,20 @@ bool DiffView::canFetchMore()
   return (mDiff.isValid() && mFiles.size() < mFilteredPatchesCount);
 }
 
+/*!
+ * \brief DiffView::fetchMore
+ * Fetch maxNewFiles more patches
+ * use a while loop with canFetchMore() to get all
+ */
 void DiffView::fetchMore()
 {
+  const int maxNewFiles = 8;
   QVBoxLayout *layout = static_cast<QVBoxLayout *>(widget()->layout());
 
   // Add widgets.
-  int init = mFiles.size();
   RepoView *view = RepoView::parentView(this);
-  auto count = mDiff.count();
-  // Do it maximum 8 times. So other things can be done?
-  for (int pidx = mFilteredPatchesLargestIndex; pidx < mDiff.count() /*&& pidx - init < 8*/; ++pidx) {
+  int addedFiles = 0;
+  for (int pidx = mFilteredPatchesLargestIndex; pidx < mDiff.count() && addedFiles < maxNewFiles; ++pidx) {
     auto name = mDiff.name(pidx);
     bool filtered = false;
     for (int i = 0; i < mFilteredPaths.count(); i++)
@@ -346,6 +351,7 @@ void DiffView::fetchMore()
     if (mFilteredPaths.length() && !filtered)
         continue;
 
+    addedFiles ++;
     mFilteredPatchesLargestIndex = pidx;
     git::Patch patch = mDiff.patch(pidx);
     if (!patch.isValid()) {
