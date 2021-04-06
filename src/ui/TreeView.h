@@ -22,6 +22,7 @@ public:
   TreeView(QWidget *parent = nullptr);
 
   void setModel(QAbstractItemModel *model) override;
+  void onCustomContextMenu(const QPointF& point);
   bool eventFilter(QObject *obj, QEvent *event) override;
   void deselectAll();
   /*!

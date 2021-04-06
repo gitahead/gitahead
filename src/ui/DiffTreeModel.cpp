@@ -120,6 +120,8 @@ QVariant DiffTreeModel::data(const QModelIndex &index, int role) const
 
       QStringList paths;
       QString prefix = node->path(true);
+      // #################TODO: can be simplified, by searching through the node tree!!!!!
+      // check all childs of the node for staging!
 	  // from these files the checkstate for the folders is created,
 	  // because the folder it self cannot be staged
       for (int i = 0; i < mDiff.count(); ++i) {
@@ -136,20 +138,28 @@ QVariant DiffTreeModel::data(const QModelIndex &index, int role) const
       foreach (const QString &path, paths) {
 		// isStaged on folders does not work, because folder cannot be staged
         switch (index.isStaged(path)) {
+          case git::Index::Unstaged: {
+            if (count > 0)
+                return Qt::PartiallyChecked;
+            count = -1;
+            break;
+          }
           case git::Index::Disabled:
-          case git::Index::Unstaged:
           case git::Index::Conflicted:
             break;
 
           case git::Index::PartiallyStaged:
             return Qt::PartiallyChecked;
-          case git::Index::Staged:
+          case git::Index::Staged: {
+            if (count < 0)
+                return Qt::PartiallyChecked;
             ++count;
             break;
         }
+        }
       }
 
-      if (count == 0) {
+      if (count <= 0) {
         return Qt::Unchecked;
       } else if (count == paths.size()) {
         return Qt::Checked;
