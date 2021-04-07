@@ -16,6 +16,7 @@
 #include "git/Repository.h"
 #include <QAbstractItemModel>
 #include <QFileIconProvider>
+#include "git/Index.h"
 
 /*!
  * \brief The DiffTreeModel class
@@ -91,6 +92,12 @@ private:
 	  Node(const QString &name, Node *parent = nullptr);
     ~Node();
 
+    enum class ParentStageState{
+        Any,
+        Staged,
+        Unstaged
+    };
+
     QString name() const;
     QString path(bool relative = false) const;
 
@@ -98,6 +105,8 @@ private:
     bool hasChildren() const;
 	QList<Node *> children();
 	void addChild(const QStringList& pathPart, int indexFirstDifferent);
+    git::Index::StagedState stageState(const git::Index& idx, ParentStageState searchingState);
+    void childFiles(QStringList &files);
 
   private:
     QString mName;

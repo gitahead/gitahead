@@ -118,54 +118,8 @@ QVariant DiffTreeModel::data(const QModelIndex &index, int role) const
       if (!mDiff.isValid() || !mDiff.isStatusDiff())
         return QVariant();
 
-      QStringList paths;
-      QString prefix = node->path(true);
-      // #################TODO: can be simplified, by searching through the node tree!!!!!
-      // check all childs of the node for staging!
-	  // from these files the checkstate for the folders is created,
-	  // because the folder it self cannot be staged
-      for (int i = 0; i < mDiff.count(); ++i) {
-        QString path = mDiff.name(i);
-        if (path.startsWith(prefix))
-          paths.append(path);
-      }
-
-      if (paths.isEmpty())
-        return QVariant();
-
-      int count = 0;
       git::Index index = mDiff.index();
-      foreach (const QString &path, paths) {
-		// isStaged on folders does not work, because folder cannot be staged
-        switch (index.isStaged(path)) {
-          case git::Index::Unstaged: {
-            if (count > 0)
-                return Qt::PartiallyChecked;
-            count = -1;
-            break;
-          }
-          case git::Index::Disabled:
-          case git::Index::Conflicted:
-            break;
-
-          case git::Index::PartiallyStaged:
-            return Qt::PartiallyChecked;
-          case git::Index::Staged: {
-            if (count < 0)
-                return Qt::PartiallyChecked;
-            ++count;
-            break;
-        }
-        }
-      }
-
-      if (count <= 0) {
-        return Qt::Unchecked;
-      } else if (count == paths.size()) {
-        return Qt::Checked;
-      } else {
-        return Qt::PartiallyChecked;
-      }
+      return node->stageState(index, Node::ParentStageState::Any);
     }
 
     case KindRole: {
@@ -229,14 +183,12 @@ bool DiffTreeModel::setData(const QModelIndex &index,
       QStringList files;
       Node *node = this->node(index);
       QString prefix = node->path(true);
-      for (int i = 0; i < mDiff.count(); ++i) {
-        QString file = mDiff.name(i);
-        if (file.startsWith(prefix))
-          files.append(file);
-      }
 
-      if (!ignoreIndexChanges)
-        mDiff.index().setStaged(files, value.toBool());
+      if (!ignoreIndexChanges) {
+          QStringList files;
+          node->childFiles(files);
+          mDiff.index().setStaged(files, value.toBool());
+      }
 
 	  // childs
 	  if (hasChildren(index)) {
@@ -332,4 +284,40 @@ void DiffTreeModel::Node::addChild(const QStringList& pathPart, int indexFirstDi
         n->addChild(pathPart, indexFirstDifferent + 1);
     }
     mChildren.append(n);
+}
+
+git::Index::StagedState DiffTreeModel::Node::stageState(const git::Index& idx, ParentStageState searchingState)
+{
+    if (!hasChildren())
+        return idx.isStaged(path(true));
+
+    git::Index::StagedState childState;
+    for (auto child: mChildren) {
+
+        childState = child->stageState(idx, searchingState);
+        if ((childState == git::Index::StagedState::Staged && searchingState == ParentStageState::Unstaged) ||
+            (childState == git::Index::StagedState::Unstaged && searchingState == ParentStageState::Staged) ||
+            childState == git::Index::PartiallyStaged)
+            return git::Index::PartiallyStaged;
+
+        if (searchingState == ParentStageState::Any) {
+            if (childState == git::Index::Unstaged)
+                searchingState = ParentStageState::Unstaged;
+            else if (childState == git::Index::Staged)
+                searchingState = ParentStageState::Staged;
+        }
+    }
+
+    return childState;
+}
+
+void DiffTreeModel::Node::childFiles(QStringList& files)
+{
+    if (!hasChildren()) {
+        files.append(path(true));
+        return;
+    }
+
+    for (auto child: mChildren)
+        child->childFiles(files);
 }

@@ -32,7 +32,7 @@ public:
    * \param parent Parent item to be able to use this method recursive
    * \return
    */
-  int countCollapsed(QModelIndex parent = QModelIndex());
+  int countCollapsed(QModelIndex parent = QModelIndex(), bool recursive = true);
 public slots:
   /*!
    * \brief expandAll

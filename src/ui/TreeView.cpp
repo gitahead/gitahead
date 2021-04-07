@@ -142,7 +142,7 @@ void TreeView::updateCollapseCount(const QModelIndex &parent, int first, int las
  * \param parent
  * \return
  */
-int TreeView::countCollapsed(QModelIndex parent)
+int TreeView::countCollapsed(QModelIndex parent, bool recursive)
 {
     QAbstractItemModel* model = this->model();
 
@@ -151,7 +151,8 @@ int TreeView::countCollapsed(QModelIndex parent)
         QModelIndex idx = model->index(i, 0, parent);
         if (model->rowCount(idx) && !this->isExpanded(idx))
             count++;
-        count += countCollapsed(idx);
+        if (recursive)
+            count += countCollapsed(idx);
     }
     return count;
 }
@@ -177,7 +178,7 @@ void TreeView::itemExpanded(const QModelIndex& index)
     if (mSupressItemExpandStateChanged)
         return;
 
-    setCollapseCount(mCollapseCount - 1);
+    setCollapseCount(mCollapseCount - 1 + countCollapsed(index, false));
 }
 
 void TreeView::itemCollapsed(const QModelIndex& index)
@@ -185,7 +186,7 @@ void TreeView::itemCollapsed(const QModelIndex& index)
     if (mSupressItemExpandStateChanged)
         return;
 
-    setCollapseCount(mCollapseCount + 1);
+    setCollapseCount(mCollapseCount + 1 - countCollapsed(index, false));
 }
 
 
