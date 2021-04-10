@@ -291,6 +291,7 @@ FileWidget::FileWidget(
 
   mHunkLayout = new QVBoxLayout();
   layout->addLayout(mHunkLayout);
+  layout->addSpacerItem(new QSpacerItem(0,0, QSizePolicy::Expanding));
 
   updatePatch(patch, staged);
 
@@ -482,20 +483,26 @@ void FileWidget::stageHunks(bool completeFile, bool completeFileStaged)
 
   if ((staged == mHunks.size() && mHunks.size() > 0) || (completeFile && completeFileStaged)) {
     // if the file does not contain hunks, it should be always staged!
-    index.setStaged({mPatch.name()}, true);
-    emit stageStateChanged(git::Index::Staged);
+    if (!index.isStaged(mPatch.name())) {
+        index.setStaged({mPatch.name()}, true);
+        emit stageStateChanged(git::Index::Staged);
+    }
     mSuppressUpdate = false;
     return;
   } else if (completeFile && !completeFileStaged) {
-      index.setStaged({mPatch.name()}, false);
-      emit stageStateChanged(git::Index::Unstaged);
+      if (index.isStaged(mPatch.name())) {
+          index.setStaged({mPatch.name()}, false);
+          emit stageStateChanged(git::Index::Unstaged);
+      }
       mSuppressUpdate = false;
       return;
   }
 
   if (unstaged == mHunks.size()) {
-    index.setStaged({mPatch.name()}, false);
-    emit stageStateChanged(git::Index::Unstaged);
+    if (index.isStaged(mPatch.name())) {
+        index.setStaged({mPatch.name()}, false);
+        emit stageStateChanged(git::Index::Unstaged);
+    }
     mSuppressUpdate = false;
     return;
   }

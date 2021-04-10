@@ -895,7 +895,7 @@ void HunkWidget::load(git::Patch &staged, bool force)
   mEditor->updateGeometry();
 
   mLoading = false;
-  // update stageState after everythin is loaded
+  // update stageState after everything is loaded
   stageStateChanged(stageState());
 
 }
