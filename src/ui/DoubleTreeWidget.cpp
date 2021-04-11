@@ -377,7 +377,7 @@ void DoubleTreeWidget::loadEditorContent(const QModelIndex &index)
   git::Commit commit = !commits.isEmpty() ? commits.first() : git::Commit();
   mEditor->load(name, blob, commit);
   mDiffView->enable(true);
-  mDiffView->setFilter(QStringList(name));
+  mDiffView->updateFiles();
 }
 
 void DoubleTreeWidget::toggleCollapseStagedFiles() {

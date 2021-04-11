@@ -237,46 +237,17 @@ void DiffView::setModel(DiffTreeModel* model)
     mDiffTreeModel = model;
 }
 
-// TODO: should be called when selection in TreeView was changed
-void DiffView::setFilter(const QStringList &paths)
+void DiffView::updateFiles()
 {
-    mFilteredPaths = paths;
-    QVBoxLayout *layout = static_cast<QVBoxLayout *>(widget()->layout());
     while (mFiles.count()) {
         auto file = mFiles.takeFirst();
-        layout->removeWidget(file);
+        mFileWidgetLayout->removeWidget(file);
         delete file;
     }
     mFiles.clear();
-    mFilteredPatchesCount = 0;
-    mFilteredPatchesLargestIndex = 0;
 
-//    mDiffTreeModel->data()
-
-//    for (int i = 0; i < mDiff.count(); i++) {
-//        for (int j = 0; j < mFilteredPaths.count(); j++)
-//        {
-//            auto name = mDiff.name(i);
-//            if (name.contains(mFilteredPaths[j])) {
-//                mFilteredPatchesCount++;
-//                break;
-//            }
-//        }
-//    }
     if (canFetchMore())
       fetchMore();
-//  foreach (QWidget *widget, mFiles) {
-//    FileWidget *file = static_cast<FileWidget *>(widget);
-//    QString name = file->name();
-//    bool contains = false;
-//    for (auto path : paths) {
-//        if (containsPath(name, path)) {
-//            contains = true;
-//            break;
-//        }
-//    }
-//    file->setVisible(mEnabled && (paths.isEmpty() || contains));
-//  }
 }
 
 QList<TextEditor *> DiffView::editors()

@@ -88,12 +88,13 @@ public:
   void setDiff(const git::Diff &diff);
 
   bool scrollToFile(int index);
+
   /*!
-   * Filters for specific paths and shows only them
-   * \brief setFilter
-   * \param paths List of paths to be filtered
+   * \brief updateFiles
+   * Call this function to update the visible diff files.
+   * It fetches the files then from the diffTreeModel and the selection model
    */
-  void setFilter(const QStringList &paths = QStringList());
+  void updateFiles();
 
   const QList<PluginRef> &plugins() const { return mPlugins; }
   const Account::CommitComments &comments() const { return mComments; }
@@ -137,9 +138,6 @@ private:
   Account::CommitComments mComments;
 
   bool mEnabled{true};
-  QStringList mFilteredPaths;
-  int mFilteredPatchesCount{0};
-  int mFilteredPatchesLargestIndex{0};
   DiffTreeModel* mDiffTreeModel{nullptr};
   QWidget* mParent{nullptr};
   QVBoxLayout* mFileWidgetLayout{nullptr};
