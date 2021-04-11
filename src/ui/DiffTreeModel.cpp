@@ -168,14 +168,12 @@ QVariant DiffTreeModel::data(const QModelIndex &index, int role) const
         return QString();
 
       QString status;
-      QString prefix = node->path(true);
-      for (int i = 0; i < mDiff.count(); ++i) {
-        QString name = mDiff.name(i);
-        if (containsPath(name, prefix)) {
-          QChar ch = git::Diff::statusChar(mDiff.status(i));
+      QList<int> patchIndices;
+      node->patchIndices(patchIndices);
+      for (auto patchIndex: patchIndices) {
+          QChar ch = git::Diff::statusChar(mDiff.status(patchIndex));
           if (!status.contains(ch))
             status.append(ch);
-        }
       }
 
       return status;
