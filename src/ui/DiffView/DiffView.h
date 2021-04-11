@@ -142,6 +142,7 @@ private:
   int mFilteredPatchesLargestIndex{0};
   DiffTreeModel* mDiffTreeModel{nullptr};
   QWidget* mParent{nullptr};
+  QVBoxLayout* mFileWidgetLayout{nullptr};
 };
 
 #endif

@@ -127,6 +127,8 @@ void DiffView::setDiff(const git::Diff &diff)
   layout->setSpacing(4);
   layout->setSizeConstraint(QLayout::SetMinAndMaxSize);
 
+  mFileWidgetLayout = new QVBoxLayout();
+
   if (!diff.isValid()) {
     if (repo.isHeadUnborn()) {
       QPushButton *button =
@@ -158,8 +160,13 @@ void DiffView::setDiff(const git::Diff &diff)
       layout->addStretch();
     }
 
+    layout->addLayout(mFileWidgetLayout);
+    layout->addSpacerItem(new QSpacerItem(0,0, QSizePolicy::Expanding, QSizePolicy::Expanding)); // so the file is always starting from top and is not distributed over the hole diff view
     return;
   }
+
+  layout->addLayout(mFileWidgetLayout);
+  layout->addSpacerItem(new QSpacerItem(0,0, QSizePolicy::Expanding, QSizePolicy::Expanding)); // so the file is always starting from top and is not distributed over the hole diff view
 
   // Generate a diff between the head tree and index.
   if (diff.isStatusDiff()) {
@@ -368,7 +375,7 @@ void DiffView::fetchMore()
 
     git::Patch staged = mStagedPatches.value(patch.name());
     FileWidget *file = new FileWidget(this, mDiff, patch, staged, widget());
-    layout->addWidget(file);
+    mFileWidgetLayout->addWidget(file);
 
     mFiles.append(file);
 
