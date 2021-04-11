@@ -47,6 +47,8 @@ public:
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
+  int fileCount(const QModelIndex& parent = QModelIndex()) const;
+  QList<int> patchIndices(const QModelIndex& parent) const;
 
   QModelIndex parent(const QModelIndex &index) const override;
   QModelIndex index(
@@ -85,11 +87,11 @@ public:
 signals:
   void checkStateChanged(const QModelIndex& index, int state);
 
-private:
+public:
   class Node // item of the model
   {
   public:
-	  Node(const QString &name, Node *parent = nullptr);
+      Node(const QString &name, int patchIndex, Node *parent = nullptr);
     ~Node();
 
     enum class ParentStageState{
@@ -104,17 +106,21 @@ private:
     Node *parent() const;
     bool hasChildren() const;
 	QList<Node *> children();
-	void addChild(const QStringList& pathPart, int indexFirstDifferent);
+    void addChild(const QStringList& pathPart, int patchIndex, int indexFirstDifferent);
     git::Index::StagedState stageState(const git::Index& idx, ParentStageState searchingState);
     void childFiles(QStringList &files);
+    int fileCount() const;
+    int patchIndex() const;
+    void patchIndices(QList<int>& list);
 
   private:
     QString mName;
-
+    // Index of the patch in the diff
+    int mPatchIndex{-1};
     Node *mParent;
     QList<Node *> mChildren;
   };
-
+private:
   Node *node(const QModelIndex &index) const;
 
   QFileIconProvider mIconProvider;

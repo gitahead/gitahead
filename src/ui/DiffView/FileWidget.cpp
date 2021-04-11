@@ -291,7 +291,7 @@ FileWidget::FileWidget(
 
   mHunkLayout = new QVBoxLayout();
   layout->addLayout(mHunkLayout);
-  layout->addSpacerItem(new QSpacerItem(0,0, QSizePolicy::Expanding));
+  layout->addSpacerItem(new QSpacerItem(0,0, QSizePolicy::Expanding, QSizePolicy::Expanding)); // so the hunkwidget is always starting from top and is not distributed over the hole filewidget
 
   updatePatch(patch, staged);
 

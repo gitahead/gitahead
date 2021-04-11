@@ -25,6 +25,7 @@
 class QCheckBox;
 class QVBoxLayout;
 class FileWidget;
+class DiffTreeModel;
 
 namespace DiffViewStyle {
     const int kIndent = 2;
@@ -105,6 +106,7 @@ public:
    * \param enable
    */
   void enable(bool enable);
+  void setModel(DiffTreeModel *model);
 
 signals:
   void diagnosticAdded(TextEditor::DiagnosticKind kind);
@@ -138,6 +140,8 @@ private:
   QStringList mFilteredPaths;
   int mFilteredPatchesCount{0};
   int mFilteredPatchesLargestIndex{0};
+  DiffTreeModel* mDiffTreeModel{nullptr};
+  QWidget* mParent{nullptr};
 };
 
 #endif

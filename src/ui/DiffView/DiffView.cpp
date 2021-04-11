@@ -13,6 +13,8 @@
 #include "ui/RepoView.h"
 #include "DisclosureButton.h"
 #include "CommentWidget.h"
+#include "ui/DiffTreeModel.h"
+#include "ui/DoubleTreeWidget.h"
 #include "git/Tree.h"
 #include <QScrollBar>
 #include <QPushButton>
@@ -46,7 +48,7 @@ bool copy(const QString &source, const QDir &targetDir)
 } // anon. namespace
 
 DiffView::DiffView(const git::Repository &repo, QWidget *parent)
-  : QScrollArea(parent)
+  : QScrollArea(parent), mParent(parent)
 {
   setStyleSheet(DiffViewStyle::kStyleSheet);
   setAcceptDrops(true);
@@ -223,6 +225,12 @@ void DiffView::enable(bool enable)
     mEnabled = enable;
 }
 
+void DiffView::setModel(DiffTreeModel* model)
+{
+    mDiffTreeModel = model;
+}
+
+// TODO: should be called when selection in TreeView was changed
 void DiffView::setFilter(const QStringList &paths)
 {
     mFilteredPaths = paths;
@@ -236,16 +244,18 @@ void DiffView::setFilter(const QStringList &paths)
     mFilteredPatchesCount = 0;
     mFilteredPatchesLargestIndex = 0;
 
-    for (int i = 0; i < mDiff.count(); i++) {
-        for (int j = 0; j < mFilteredPaths.count(); j++)
-        {
-            auto name = mDiff.name(i);
-            if (name.contains(mFilteredPaths[j])) {
-                mFilteredPatchesCount++;
-                break;
-            }
-        }
-    }
+//    mDiffTreeModel->data()
+
+//    for (int i = 0; i < mDiff.count(); i++) {
+//        for (int j = 0; j < mFilteredPaths.count(); j++)
+//        {
+//            auto name = mDiff.name(i);
+//            if (name.contains(mFilteredPaths[j])) {
+//                mFilteredPatchesCount++;
+//                break;
+//            }
+//        }
+//    }
     if (canFetchMore())
       fetchMore();
 //  foreach (QWidget *widget, mFiles) {
@@ -322,7 +332,9 @@ void DiffView::dragEnterEvent(QDragEnterEvent *event)
 
 bool DiffView::canFetchMore()
 {
-  return (mDiff.isValid() && mFiles.size() < mFilteredPatchesCount);
+  auto dtw = dynamic_cast<DoubleTreeWidget*>(mParent); // for an unknown reason parent() and p are not the same
+  assert(dtw);
+  return  mFiles.size() < mDiffTreeModel->fileCount(dtw->selectedIndex());
 }
 
 /*!
@@ -338,21 +350,15 @@ void DiffView::fetchMore()
   // Add widgets.
   RepoView *view = RepoView::parentView(this);
   int addedFiles = 0;
-  for (int pidx = mFilteredPatchesLargestIndex; pidx < mDiff.count() && addedFiles < maxNewFiles; ++pidx) {
-    auto name = mDiff.name(pidx);
-    bool filtered = false;
-    for (int i = 0; i < mFilteredPaths.count(); i++)
-    {
-        if (name.contains(mFilteredPaths[i])) {
-            filtered = true;
-            break;
-        }
-    }
-    if (mFilteredPaths.length() && !filtered)
-        continue;
 
+  auto dtw = dynamic_cast<DoubleTreeWidget*>(mParent);
+  QList<int> patchIndices = mDiffTreeModel->patchIndices(dtw->selectedIndex());
+  int count = patchIndices.count();
+
+  for (int i = mFiles.count(); i < count && addedFiles < maxNewFiles; ++i) {
+
+    int pidx = patchIndices[i];
     addedFiles ++;
-    mFilteredPatchesLargestIndex = pidx;
     git::Patch patch = mDiff.patch(pidx);
     if (!patch.isValid()) {
       // This diff is stale. Refresh the view.
@@ -403,21 +409,21 @@ void DiffView::indexChanged(const QStringList &paths) {
 
     mStagedPatches.clear();
     // Generate a diff between the head tree and index.
-    if (mDiff.isStatusDiff()) {
-      if (git::Reference head = repo.head()) {
-        if (git::Commit commit = head.target()) {
-          git::Diff stagedDiff = repo.diffTreeToIndex(commit.tree());
-          for (int i = 0; i < stagedDiff.count(); ++i)
-            mStagedPatches[stagedDiff.name(i)] = stagedDiff.patch(i);
-        }
-      }
-    }
+//    if (mDiff.isStatusDiff()) {
+//      if (git::Reference head = repo.head()) {
+//        if (git::Commit commit = head.target()) {
+//          git::Diff stagedDiff = repo.diffTreeToIndex(commit.tree());
+//          for (int i = 0; i < stagedDiff.count(); ++i)
+//            mStagedPatches[stagedDiff.name(i)] = stagedDiff.patch(i);
+//        }
+//      }
+//    }
 
-    for (auto* file : mFiles) {
-        for (auto path : paths) {
-            git::Patch stagedPatch = mStagedPatches[path];
-            if (file->name() == path)
-                file->updateHunks(stagedPatch);
-        }
-    }
+//    for (auto* file : mFiles) {
+//        for (auto path : paths) {
+//            git::Patch stagedPatch = mStagedPatches[path];
+//            if (file->name() == path)
+//                file->updateHunks(stagedPatch);
+//        }
+//    }
 }

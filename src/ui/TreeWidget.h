@@ -28,6 +28,7 @@ public:
   TreeWidget(const git::Repository &repo, QWidget *parent = nullptr);
 
   QString selectedFile() const override;
+  virtual QModelIndex selectedIndex() const override;
 
   void setDiff(
     const git::Diff &diff,
