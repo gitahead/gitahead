@@ -140,7 +140,7 @@ Result Submodule::reset(Remote::Callbacks *callbacks,
     git_object* commit = nullptr;
     int error;
     // reset submodule to head
-    error = git_object_lookup(&commit, repo, git_submodule_head_id(d.data()), GIT_OBJECT_COMMIT);
+    error = git_object_lookup(&commit, repo, git_submodule_index_id(d.data()), GIT_OBJECT_COMMIT);
     if (error < 0) {
         // if an error occurs commit must not be freed
         // TODO: how to show message?
@@ -148,7 +148,7 @@ Result Submodule::reset(Remote::Callbacks *callbacks,
     }
 
     // checkout a new detached head. So no other branch will be reset to the desired commit
-    error = git_repository_set_head_detached(repo, git_submodule_head_id(d.data()));
+    error = git_repository_set_head_detached(repo, git_submodule_index_id(d.data()));
     if (error < 0) {
         // if an error occurs commit must not be freed
         // TODO: how to show message?
