@@ -525,6 +525,22 @@ QPalette Theme::commitList()
   return palette;
 }
 
+QColor Theme::commitEditor(CommitEditor color)
+{
+  if (mDark) {
+    switch (color) {
+      case CommitEditor::SpellError:    return "#BC0009";
+      case CommitEditor::SpellIgnore:   return "#E1E5F2";
+      case CommitEditor::LengthWarning: return "#464614";
+    }
+  }
+  switch (color) {
+    case CommitEditor::SpellError:    return Qt::red;
+    case CommitEditor::SpellIgnore:   return Qt::gray;
+    case CommitEditor::LengthWarning: return "#EFF0F1";
+  }
+}
+
 QColor Theme::diff(Diff color)
 {
   if (mDark) {

@@ -153,6 +153,15 @@ void TestInitRepo::editFile()
   QToolButton *edit = view->findChild<QToolButton *>("EditButton");
   QVERIFY(edit);
 
+  // Set up timer to dismiss the popup.
+  QTimer::singleShot(500, [] {
+    QMenu *menu = qobject_cast<QMenu *>(QApplication::activePopupWidget());
+    QVERIFY(menu);
+
+    keyClick(menu, Qt::Key_Down);
+    keyClick(menu, Qt::Key_Return);
+  });
+
   mouseClick(edit, Qt::LeftButton);
 }
 

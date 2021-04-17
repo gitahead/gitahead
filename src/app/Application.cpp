@@ -199,7 +199,7 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   if (!dir.exists())
     dir.setPath("/Applications");
   dir.cd("Utilities/Terminal.app/Contents/Resources/Fonts");
-  foreach (const QString &name, dir.entryList({"SFMono-*.otf"}, QDir::Files))
+  foreach (const QString &name, dir.entryList({"SF*Mono-*.otf"}, QDir::Files))
     QFontDatabase::addApplicationFont(dir.filePath(name));
 
   // Create shared menu bar on Mac.
@@ -217,6 +217,9 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   icon.addPixmap(QPixmap(":/GitAhead.iconset/icon_128x128.png"));
   setWindowIcon(icon);
 #endif
+
+  // Set path to emoji description file.
+  git::Commit::setEmojiFile(Settings::confDir().filePath("emoji.json"));
 
   // Initialize git library.
   git::Repository::init();

@@ -59,6 +59,7 @@ public:
   static QDir docDir();
   static QDir confDir();
   static QDir l10nDir();
+  static QDir dictionariesDir();
   static QDir lexerDir();
   static QDir themesDir();
   static QDir pluginsDir();

@@ -12,12 +12,11 @@
 #include "Config.h"
 #include "Id.h"
 #include "TagRef.h"
-#include "conf/Settings.h"
 #include "git2/buffer.h"
 #include "git2/clone.h"
 #include "git2/remote.h"
 #include "git2/signature.h"
-#include <libssh2.h>
+#include <QCoreApplication>
 #include <QDir>
 #include <QFile>
 #include <QNetworkProxyFactory>
@@ -35,23 +34,18 @@ namespace {
 const QString kLogKey = "remote/log";
 const QStringList kKeyKinds = {"ed25519", "rsa", "dsa"};
 
-bool keyFile(QString &key)
+bool keyFile(QString &key, const QString &path = QString())
 {
   QDir dir = QDir::home();
-
-  QString filePath = Settings::instance()->value("ssh/keyFilePath").toString();
-  if (!filePath.isEmpty()) {
-    QFileInfo file(filePath);
+  if (!path.isEmpty()) {
+    QFileInfo file(path);
 
     if (!file.isAbsolute())
       file.setFile(dir.absolutePath() + '/' + file.filePath());
-    
-    if (file.exists()) {
+
+    if (file.exists())
       key = file.absoluteFilePath();
-      return true;
-    } else {
-      return false;
-    }
+    return file.exists();
   }
 
   if (!dir.cd(".ssh"))
@@ -150,19 +144,16 @@ public:
     QStringList patterns;
   };
 
-  ConfigFile()
+  ConfigFile(const QString &path)
   {
-    QString filePath = Settings::instance()->value("ssh/configFilePath").toString();
+    QFileInfo file(path);
     QDir dir = QDir::home();
-
-    if (filePath.isEmpty()) {
+    if (path.isEmpty()) {
       if (!dir.cd(".ssh"))
         return;
 
-      filePath = dir.absoluteFilePath("config");
+      file.setFile(dir.absoluteFilePath("config"));
     }
-
-    QFileInfo file(filePath);
 
     if (!file.isAbsolute())
       file.setFile(dir.absolutePath() + '/' + file.filePath());
@@ -265,19 +256,7 @@ int Remote::Callbacks::credentials(
     if (!cbs->mAgentNames.contains(name)) {
       log(QString("agent: %1").arg(name));
       cbs->mAgentNames.insert(name);
-      LIBSSH2_SESSION *session = libssh2_session_init();
-      LIBSSH2_AGENT *agent = libssh2_agent_init(session);
-      int error = libssh2_agent_connect(agent);
-      if (error != LIBSSH2_ERROR_NONE) {
-        char *msg;
-        libssh2_session_last_error(session, &msg, nullptr, 0);
-        log(QString("agent: %1 (%2)").arg(msg).arg(error));
-      }
-
-      libssh2_agent_disconnect(agent);
-      libssh2_agent_free(agent);
-      libssh2_session_free(session);
-      if (error == LIBSSH2_ERROR_NONE)
+      if (cbs->connectToAgent())
         return git_credential_ssh_key_from_agent(out, name);
 
     } else if (error) {
@@ -286,7 +265,7 @@ int Remote::Callbacks::credentials(
 
     // Read SSH config file.
     QString key;
-    ConfigFile configFile;
+    ConfigFile configFile(cbs->configFilePath());
     if (configFile.isValid()) {
       // Extract hostname from the unresolved URL.
       QString name = hostName(cbs->url());
@@ -315,7 +294,7 @@ int Remote::Callbacks::credentials(
         git_error_set_str(GIT_ERROR_NET, err.toUtf8());
         return -1;
       }
-    } else if (!keyFile(key)) {
+    } else if (!keyFile(key, cbs->keyFilePath())) {
       git_error_set_str(GIT_ERROR_NET, "failed to find SSH identity file");
       return -1;
     }
@@ -442,7 +421,7 @@ int Remote::Callbacks::url(
 
   // Find matching config entry.
   if (!hostName.isEmpty()) {
-    ConfigFile configFile;
+    ConfigFile configFile(cbs->configFilePath());
     if (configFile.isValid()) {
       foreach (const ConfigFile::Host &host, configFile.parse()) {
         // Skip about entries that don't have a host name.
@@ -672,7 +651,12 @@ void Remote::log(const QString &text)
   if (!isLoggingEnabled())
     return;
 
-  QFile file(Settings::tempDir().filePath("remote.log"));
+  QString name = QCoreApplication::applicationName();
+  QDir tempDir = QDir::temp();
+  tempDir.mkpath(name);
+  tempDir.cd(name);
+
+  QFile file(tempDir.filePath("remote.log"));
   if (!file.open(QFile::WriteOnly | QIODevice::Append))
     return;
 

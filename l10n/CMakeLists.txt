@@ -4,10 +4,13 @@ option(UPDATE_TRANSLATIONS
 
 set(LANGUAGES
   de
+  ru
   en
   es
+  ja
+  pt
   pt_BR
-  zh-CN
+  zh_CN
 )
 
 set(SRC_DIR ${CMAKE_SOURCE_DIR}/src)

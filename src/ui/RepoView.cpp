@@ -401,7 +401,7 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   });
 
   connect(notifier, &git::RepositoryNotifier::indexStageError, this, [this] {
-    error(mLogRoot, "stage");
+    error(mLogRoot, tr("stage"));
   });
 
   QObject *context = new QObject(this);
@@ -764,7 +764,7 @@ void RepoView::lfsInitialize()
 {
   LogEntry *entry = addLogEntry(tr("Git LFS"), tr("Initialize"));
   if (!mRepo.lfsInitialize()) {
-    error(entry, "initialize");
+    error(entry, tr("initialize"));
     return;
   }
 
@@ -775,7 +775,7 @@ void RepoView::lfsDeinitialize()
 {
   LogEntry *entry = addLogEntry(tr("Git LFS"), tr("Deinitialize"));
   if (!mRepo.lfsDeinitialize()) {
-    error(entry, "deinitialize");
+    error(entry, tr("deinitialize"));
     return;
   }
 
@@ -1382,13 +1382,17 @@ void RepoView::mergeAbort(LogEntry *parent)
   if (!commit.isValid())
     return;
 
+  bool ignoreWhitespace = Settings::instance()->isWhitespaceIgnored();
+
   QSet<QString> paths;
-  git::Diff index = mRepo.diffTreeToIndex(commit.tree());
+  git::Diff index =
+    mRepo.diffTreeToIndex(commit.tree(), git::Index(), ignoreWhitespace);
   for (int i = 0; i < index.count(); ++i)
     paths.insert(index.name(i));
 
   QStringList conflicts;
-  git::Diff workdir = mRepo.diffIndexToWorkdir();
+  git::Diff workdir =
+    mRepo.diffIndexToWorkdir(git::Index(), nullptr, ignoreWhitespace);
   for (int i = 0; i < workdir.count(); ++i) {
     QString name = workdir.name(i);
     if (workdir.status(i) != GIT_DELTA_CONFLICTED && paths.contains(name))

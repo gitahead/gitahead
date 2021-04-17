@@ -28,7 +28,6 @@ add_library(git
 )
 
 target_link_libraries(git
-  conf
   git2
   Qt5::Core
   Qt5::Network

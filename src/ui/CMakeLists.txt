@@ -44,6 +44,7 @@ add_library(ui
   SideBar.cpp
   StateAction.cpp
   StatePushButton.cpp
+  SpellChecker.cpp
   TabBar.cpp
   TabWidget.cpp
   TemplateButton.cpp
@@ -68,6 +69,7 @@ target_link_libraries(ui
   editor
   git
   host
+  hunspell
   index
   loglib
   plugins

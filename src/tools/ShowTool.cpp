@@ -16,11 +16,11 @@
 #include <QUrl>
 
 #if defined(Q_OS_MAC)
-#define NAME "Finder"
+#define NAME QT_TRANSLATE_NOOP("ShowTool", "Finder")
 #elif defined(Q_OS_WIN)
-#define NAME "Explorer"
+#define NAME QT_TRANSLATE_NOOP("ShowTool", "Explorer")
 #else
-#define NAME "Default File Browser"
+#define NAME QT_TRANSLATE_NOOP("ShowTool", "Default File Browser")
 #endif
 
 ShowTool::ShowTool(const QString &file, QObject *parent)
@@ -34,7 +34,7 @@ ExternalTool::Kind ShowTool::kind() const
 
 QString ShowTool::name() const
 {
-  return tr("Show in %1").arg(NAME);
+  return tr("Show in %1").arg(tr(NAME));
 }
 
 bool ShowTool::start()

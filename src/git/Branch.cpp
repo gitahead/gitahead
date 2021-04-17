@@ -118,7 +118,10 @@ Branch Branch::rename(const QString &name)
 
   // Invalidate this branch.
   d.clear();
-  return Branch(ref);
+
+  Branch branch(ref);
+  emit branch.repo().notifier()->referenceUpdated(branch);
+  return branch;
 }
 
 void Branch::remove(bool force)

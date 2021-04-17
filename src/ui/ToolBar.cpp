@@ -803,12 +803,12 @@ ToolBar::ToolBar(MainWindow *parent)
   QMenu *pullMenu = new QMenu(mPullButton);
   mPullButton->setMenu(pullMenu);
 
-  QAction *mergeAction = pullMenu->addAction("Merge");
+  QAction *mergeAction = pullMenu->addAction(tr("Merge"));
   connect(mergeAction, &QAction::triggered, [this] {
     currentView()->pull(RepoView::Merge);
   });
 
-  QAction *rebaseAction = pullMenu->addAction("Rebase");
+  QAction *rebaseAction = pullMenu->addAction(tr("Rebase"));
   connect(rebaseAction, &QAction::triggered, [this] {
     currentView()->pull(RepoView::Rebase);
   });

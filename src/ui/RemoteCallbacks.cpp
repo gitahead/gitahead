@@ -8,11 +8,13 @@
 //
 
 #include "RemoteCallbacks.h"
+#include "conf/Settings.h"
 #include "cred/CredentialHelper.h"
 #include "git/Command.h"
 #include "git/Id.h"
 #include "git/RevWalk.h"
 #include "log/LogEntry.h"
+#include <libssh2.h>
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QEventLoop>
@@ -260,6 +262,33 @@ bool RemoteCallbacks::negotiation(
   }
 
   return true;
+}
+
+QString RemoteCallbacks::keyFilePath() const
+{
+  return Settings::instance()->value("ssh/keyFilePath").toString();
+}
+
+QString RemoteCallbacks::configFilePath() const
+{
+  return Settings::instance()->value("ssh/configFilePath").toString();
+}
+
+bool RemoteCallbacks::connectToAgent() const
+{
+  LIBSSH2_SESSION *session = libssh2_session_init();
+  LIBSSH2_AGENT *agent = libssh2_agent_init(session);
+  int error = libssh2_agent_connect(agent);
+  if (error != LIBSSH2_ERROR_NONE) {
+    char *msg;
+    libssh2_session_last_error(session, &msg, nullptr, 0);
+    git::Remote::log(QString("agent: %1 (%2)").arg(msg).arg(error));
+  }
+
+  libssh2_agent_disconnect(agent);
+  libssh2_agent_free(agent);
+  libssh2_session_free(session);
+  return (error == LIBSSH2_ERROR_NONE);
 }
 
 void RemoteCallbacks::credentialsImpl(

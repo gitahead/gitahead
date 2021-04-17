@@ -121,10 +121,18 @@ public:
       return true;
     }
 
+    // url resolution hook
     virtual bool url(QString &url)
     {
       return true;
     }
+
+    // user setting hooks
+    virtual QString keyFilePath() const { return QString(); }
+    virtual QString configFilePath() const { return QString(); }
+
+    // agent availability hook
+    virtual bool connectToAgent() const { return false; }
 
     // static callback wrappers
     static int connect(

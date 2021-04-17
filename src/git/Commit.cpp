@@ -16,7 +16,6 @@
 #include "Signature.h"
 #include "TagRef.h"
 #include "Tree.h"
-#include "conf/Settings.h"
 #include "git2/annotated_commit.h"
 #include "git2/diff.h"
 #include "git2/refs.h"
@@ -31,7 +30,12 @@
 
 namespace git {
 
-QMap<QString,QString> Commit::sEmojiCache;
+namespace {
+
+QString sEmojiFile;
+QMap<QString,QString> sEmojiCache;
+
+} // anon. namespace
 
 Commit::Commit()
   : Object()
@@ -133,7 +137,10 @@ Signature Commit::committer() const
   return const_cast<git_signature *>(git_commit_committer(*this));
 }
 
-Diff Commit::diff(const git::Commit &commit, int contextLines) const
+Diff Commit::diff(
+  const git::Commit &commit,
+  int contextLines,
+  bool ignoreWhitespace) const
 {
   Tree old;
   if (commit.isValid()) {
@@ -146,7 +153,7 @@ Diff Commit::diff(const git::Commit &commit, int contextLines) const
 
   git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
   opts.context_lines = contextLines;
-  if (Settings::instance()->isWhitespaceIgnored())
+  if (ignoreWhitespace)
     opts.flags |= GIT_DIFF_IGNORE_WHITESPACE;
 
   git_diff *diff = nullptr;
@@ -308,9 +315,12 @@ QString Commit::decodeMessage(const char *msg) const
 
 QString Commit::substituteEmoji(const QString &text) const
 {
+  if (sEmojiFile.isEmpty())
+    return text;
+
   // Populate cache.
   if (sEmojiCache.isEmpty()) {
-    QFile file(Settings::confDir().filePath("emoji.json"));
+    QFile file(sEmojiFile);
     if (file.open(QFile::ReadOnly)) {
       QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
       for (const QJsonValue &val : doc.array()) {
@@ -340,6 +350,11 @@ QString Commit::substituteEmoji(const QString &text) const
   }
 
   return result;
+}
+
+void Commit::setEmojiFile(const QString &file)
+{
+  sEmojiFile = file;
 }
 
 } // namespace git
