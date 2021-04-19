@@ -6,6 +6,7 @@ add_library(loglib
 )
 
 target_link_libraries(loglib
+  git
   Qt5::Widgets
 )
 
