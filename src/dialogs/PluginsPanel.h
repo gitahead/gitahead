@@ -24,10 +24,10 @@ public:
 
   PluginsPanel(const git::Repository &repo, QWidget *parent = nullptr);
 
+  void refresh();
+
   QSize sizeHint() const override;
 
 private:
-  void refresh();
-
   git::Repository mRepo;
 };
