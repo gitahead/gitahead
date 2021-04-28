@@ -23,6 +23,10 @@
 #include <QPushButton>
 #include <QSaveFile>
 
+namespace  {
+    bool disclosure = false;
+}
+
 _FileWidget::Header::Header(
   const git::Diff &diff,
   const git::Patch &patch,
@@ -112,6 +116,7 @@ _FileWidget::Header::Header(
     mDisclosureButton->setToolTip(
       mDisclosureButton->isChecked() ? FileWidget::tr("Collapse File") : FileWidget::tr("Expand File"));
   });
+  mDisclosureButton->setVisible(disclosure);
   buttons->addWidget(mDisclosureButton);
 
   updatePatch(patch);
@@ -255,31 +260,33 @@ FileWidget::FileWidget(DiffView *view,
   layout->addWidget(mHeader);
 
   DisclosureButton *disclosureButton = mHeader->disclosureButton();
-  connect(disclosureButton, &DisclosureButton::toggled, [this](bool visible) {
+  if (disclosure)
+      connect(disclosureButton, &DisclosureButton::toggled, [this](bool visible) {
 
-    if (mHeader->lfsButton() && !visible) {
-      mHunks.first()->setVisible(false);
-      if (!mImages.isEmpty())
-        mImages.first()->setVisible(false);
-      return;
-    }
+        if (mHeader->lfsButton() && !visible) {
+          mHunks.first()->setVisible(false);
+          if (!mImages.isEmpty())
+            mImages.first()->setVisible(false);
+          return;
+        }
 
-    if (mHeader->lfsButton() && visible) {
-      bool checked = mHeader->lfsButton()->isChecked();
-      mHunks.first()->setVisible(!checked);
-      if (!mImages.isEmpty())
-        mImages.first()->setVisible(checked);
-      return;
-    }
+        if (mHeader->lfsButton() && visible) {
+          bool checked = mHeader->lfsButton()->isChecked();
+          mHunks.first()->setVisible(!checked);
+          if (!mImages.isEmpty())
+            mImages.first()->setVisible(checked);
+          return;
+        }
 
-    foreach (HunkWidget *hunk, mHunks)
-      hunk->setVisible(visible);
-  });
+        foreach (HunkWidget *hunk, mHunks)
+          hunk->setVisible(visible);
+      });
 
   if (diff.isStatusDiff()) {
     // Collapse on check.
-    connect(mHeader->check(), &QCheckBox::stateChanged, [this](int state) {
-      mHeader->disclosureButton()->setChecked(state != Qt::Checked);
+    if (disclosure)
+        connect(mHeader->check(), &QCheckBox::stateChanged, [this](int state) {
+                mHeader->disclosureButton()->setChecked(state != Qt::Checked);
     });
   }
 
@@ -408,7 +415,7 @@ QWidget *FileWidget::addImage(
   Images *images = new Images(patch, lfs, this);
 
   // Hide on file collapse.
-  if (!lfs)
+  if (!lfs && disclosure)
     connect(button, &DisclosureButton::toggled, images, &QLabel::setVisible);
 
   // Remember image.

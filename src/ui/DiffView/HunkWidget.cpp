@@ -33,6 +33,8 @@ namespace {
       QString pressed = color.darker(115).name();
       return DiffViewStyle::kButtonStyleFmt.arg(color.name(), pressed);
     }
+
+    bool disclosure = false;
 }
 
 _HunkWidget::Header::Header(
@@ -110,6 +112,7 @@ _HunkWidget::Header::Header(
     mButton->setToolTip(
       mButton->isChecked() ? HunkWidget::tr("Collapse Hunk") : HunkWidget::tr("Expand Hunk"));
   });
+  mButton->setVisible(disclosure);
 
   QHBoxLayout *buttons = new QHBoxLayout;
   buttons->setContentsMargins(0,0,0,0);
@@ -245,8 +248,8 @@ HunkWidget::HunkWidget(
   mEditor->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
   layout->addWidget(mEditor);
-  connect(mHeader->button(), &DisclosureButton::toggled,
-          mEditor, &TextEditor::setVisible);
+  if (disclosure)
+    connect(mHeader->button(), &DisclosureButton::toggled, mEditor, &TextEditor::setVisible);
   connect(mHeader, &_HunkWidget::Header::stageStateChanged, this , &HunkWidget::headerCheckStateChanged);
 
   // Handle conflict resolution.
