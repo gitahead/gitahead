@@ -50,6 +50,7 @@ int TreeModel::rowCount(const QModelIndex &parent) const
 
 int TreeModel::columnCount(const QModelIndex &parent) const
 {
+  Q_UNUSED(parent);
   return 1;
 }
 
@@ -197,7 +198,7 @@ bool TreeModel::setData(const QModelIndex &index,
                         const QVariant &value,
                         int role)
 {
-    setData(index, value, role, false);
+    return setData(index, value, role, false);
 }
 
 bool TreeModel::setData(const QModelIndex &index,

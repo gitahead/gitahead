@@ -9,7 +9,7 @@
 
 #include "DoubleTreeWidget.h"
 #include "BlameEditor.h"
-#include "TreeModel.h"
+#include "DiffTreeModel.h"
 #include "TreeProxy.h"
 #include "TreeView.h"
 #include "ViewDelegate.h"
@@ -114,9 +114,10 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 	QVBoxLayout* vBoxLayout = new QVBoxLayout();
 	QLabel* label = new QLabel(tr("Staged Files"));
 	stagedFiles = new TreeView(this);
-    mTreeModel = new TreeModel(repo, this);
+    mDiffTreeModel = new DiffTreeModel(repo, this);
+    mDiffView->setModel(mDiffTreeModel);
 	TreeProxy* treewrapperStaged = new TreeProxy(true, this);
-    treewrapperStaged->setSourceModel(mTreeModel);
+    treewrapperStaged->setSourceModel(mDiffTreeModel);
 	stagedFiles->setModel(treewrapperStaged);
 	stagedFiles->setHeaderHidden(true);
 	stagedFiles->setItemDelegateForColumn(0, new ViewDelegate());
@@ -138,7 +139,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
     mUnstagedCommitedFiles = new QLabel(kUnstagedFiles);
 	unstagedFiles = new TreeView(this);
 	TreeProxy* treewrapperUnstaged = new TreeProxy(false, this);
-    treewrapperUnstaged->setSourceModel(mTreeModel);
+    treewrapperUnstaged->setSourceModel(mDiffTreeModel);
 	unstagedFiles->setModel(treewrapperUnstaged);
 	unstagedFiles->setHeaderHidden(true);
 	unstagedFiles->setItemDelegateForColumn(0, new ViewDelegate());
@@ -180,7 +181,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
         mFileView->setCurrentIndex(idx);
     });
 
-    connect(mTreeModel, &TreeModel::checkStateChanged, this, &DoubleTreeWidget::treeModelStateChanged);
+    connect(mDiffTreeModel, &DiffTreeModel::checkStateChanged, this, &DoubleTreeWidget::treeModelStateChanged);
 
     connect(mDiffView, &DiffView::fileStageStateChanged, this, &DoubleTreeWidget::updateTreeModel);
 
@@ -193,6 +194,21 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 
 	connect(collapseButtonStagedFiles, &StatePushButton::clicked, this, &DoubleTreeWidget::toggleCollapseStagedFiles);
 	connect(collapseButtonUnstagedFiles, &StatePushButton::clicked, this, &DoubleTreeWidget::toggleCollapseUnstagedFiles);
+}
+
+QModelIndex DoubleTreeWidget::selectedIndex() const {
+    TreeProxy* proxy = static_cast<TreeProxy *>(stagedFiles->model());
+    QModelIndexList indexes = stagedFiles->selectionModel()->selectedIndexes();
+    if (!indexes.isEmpty()) {
+      return proxy->mapToSource(indexes.first());
+    }
+
+    indexes = unstagedFiles->selectionModel()->selectedIndexes();
+    proxy = static_cast<TreeProxy *>(unstagedFiles->model());
+    if (!indexes.isEmpty()) {
+      return  proxy->mapToSource(indexes.first());
+    }
+    return QModelIndex();
 }
 
 QString DoubleTreeWidget::selectedFile() const {
@@ -230,13 +246,19 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff,
     git::Tree tree = RepoView::parentView(this)->tree();
     // because of this, the content in the view is shown.
     TreeProxy* proxy = static_cast<TreeProxy *>(unstagedFiles->model());
-    TreeModel* model = static_cast<TreeModel*>(proxy->sourceModel());
-    model->setTree(tree, diff);
-    unstagedFiles->expandAll();
+    DiffTreeModel* model = static_cast<DiffTreeModel*>(proxy->sourceModel());
+    model->setDiff(diff);
+    if (diff.isValid() && diff.count() < 100)
+        unstagedFiles->expandAll();
+    else
+        unstagedFiles->collapseAll();
 
     if (!diff.isValid() || diff.isStatusDiff()) {
         mUnstagedCommitedFiles->setText(kUnstagedFiles);
-        stagedFiles->expandAll();
+        if (diff.isValid() && diff.count() < 100)
+            stagedFiles->expandAll();
+        else
+            stagedFiles->collapseAll();
         mStagedWidget->setVisible(true);
 
     } else {
@@ -255,18 +277,18 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff,
 
 void DoubleTreeWidget::updateTreeModel(git::Index::StagedState state)
 {
-    // the selected index must be the file which is visible in the diffView!
-    QModelIndexList indexes = stagedFiles->selectionModel()->selectedIndexes();
-    if (!indexes.isEmpty()) {
-        static_cast<TreeProxy*>(stagedFiles->model())->setData(indexes.first(), state, Qt::CheckStateRole, true);
-      return;
-    }
+//    // the selected index must be the file which is visible in the diffView!
+//    QModelIndexList indexes = stagedFiles->selectionModel()->selectedIndexes();
+//    if (!indexes.isEmpty()) {
+//        static_cast<TreeProxy*>(stagedFiles->model())->setData(indexes.first(), state, Qt::CheckStateRole, true);
+//      return;
+//    }
 
-    indexes = unstagedFiles->selectionModel()->selectedIndexes();
-    if (!indexes.isEmpty()) {
-      static_cast<TreeProxy*>(unstagedFiles->model())->setData(indexes.first(), state, Qt::CheckStateRole, true);
-      return;
-    }
+//    indexes = unstagedFiles->selectionModel()->selectedIndexes();
+//    if (!indexes.isEmpty()) {
+//      static_cast<TreeProxy*>(unstagedFiles->model())->setData(indexes.first(), state, Qt::CheckStateRole, true);
+//      return;
+//    }
 }
 
 void DoubleTreeWidget::treeModelStateChanged(const QModelIndex& index, int checkState) {
@@ -349,13 +371,13 @@ void DoubleTreeWidget::fileSelected(const QModelIndex &index) {
 void DoubleTreeWidget::loadEditorContent(const QModelIndex &index)
 {
   QString name = index.data(Qt::EditRole).toString();
-  git::Blob blob = index.data(TreeModel::BlobRole).value<git::Blob>();
+  git::Blob blob = index.data(DiffTreeModel::BlobRole).value<git::Blob>();
 
   QList<git::Commit> commits = RepoView::parentView(this)->commits();
   git::Commit commit = !commits.isEmpty() ? commits.first() : git::Commit();
   mEditor->load(name, blob, commit);
   mDiffView->enable(true);
-  mDiffView->setFilter(QStringList(name));
+  mDiffView->updateFiles();
 }
 
 void DoubleTreeWidget::toggleCollapseStagedFiles() {

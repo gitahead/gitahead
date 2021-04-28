@@ -707,6 +707,12 @@ private:
   QList<QTextEdit::ExtraSelection> mSpellList;
 };
 
+
+/*!
+ * \brief The CommitEditor class
+ * This widget contains the textedit element for entering the commit message, the buttons
+ * for commiting, staging all and unstage all
+ */
 class CommitEditor : public QFrame
 {
   Q_OBJECT

@@ -1,3 +1,4 @@
+
 #include "FileWidget.h"
 #include "DisclosureButton.h"
 #include "EditButton.h"
@@ -21,6 +22,10 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSaveFile>
+
+namespace  {
+    bool disclosure = false;
+}
 
 _FileWidget::Header::Header(
   const git::Diff &diff,
@@ -111,6 +116,7 @@ _FileWidget::Header::Header(
     mDisclosureButton->setToolTip(
       mDisclosureButton->isChecked() ? FileWidget::tr("Collapse File") : FileWidget::tr("Expand File"));
   });
+  mDisclosureButton->setVisible(disclosure);
   buttons->addWidget(mDisclosureButton);
 
   updatePatch(patch);
@@ -217,14 +223,14 @@ void _FileWidget::Header::updateCheckState()
 //###############      FileWidget     ###########################################
 //###############################################################################
 
-FileWidget::FileWidget(
-  DiffView *view,
+FileWidget::FileWidget(DiffView *view,
   const git::Diff &diff,
   const git::Patch &patch,
-  const git::Patch &staged,
+  const git::Patch &staged, const QModelIndex modelIndex,
   QWidget *parent)
-  : QWidget(parent), mView(view), mDiff(diff), mPatch(patch)
+  : QWidget(parent), mView(view), mDiff(diff), mPatch(patch), mModelIndex(modelIndex)
 {
+  auto stageState = static_cast<git::Index::StagedState>(mModelIndex.data(Qt::CheckStateRole).toInt());
   setObjectName("FileWidget");
   QVBoxLayout *layout = new QVBoxLayout(this);
   layout->setContentsMargins(0,0,0,0);
@@ -248,37 +254,39 @@ FileWidget::FileWidget(
 
   bool lfs = patch.isLfsPointer();
   mHeader = new _FileWidget::Header(diff, patch, binary, lfs, submodule, parent);
-  connect(this, &FileWidget::stageStateChanged, mHeader, &_FileWidget::Header::setStageState);
+  mHeader->setStageState(stageState);
   connect(mHeader, &_FileWidget::Header::stageStateChanged, this, &FileWidget::headerCheckStateChanged);
   connect(mHeader, &_FileWidget::Header::discard, this, &FileWidget::discard);
   layout->addWidget(mHeader);
 
   DisclosureButton *disclosureButton = mHeader->disclosureButton();
-  connect(disclosureButton, &DisclosureButton::toggled, [this](bool visible) {
+  if (disclosure)
+      connect(disclosureButton, &DisclosureButton::toggled, [this](bool visible) {
 
-    if (mHeader->lfsButton() && !visible) {
-      mHunks.first()->setVisible(false);
-      if (!mImages.isEmpty())
-        mImages.first()->setVisible(false);
-      return;
-    }
+        if (mHeader->lfsButton() && !visible) {
+          mHunks.first()->setVisible(false);
+          if (!mImages.isEmpty())
+            mImages.first()->setVisible(false);
+          return;
+        }
 
-    if (mHeader->lfsButton() && visible) {
-      bool checked = mHeader->lfsButton()->isChecked();
-      mHunks.first()->setVisible(!checked);
-      if (!mImages.isEmpty())
-        mImages.first()->setVisible(checked);
-      return;
-    }
+        if (mHeader->lfsButton() && visible) {
+          bool checked = mHeader->lfsButton()->isChecked();
+          mHunks.first()->setVisible(!checked);
+          if (!mImages.isEmpty())
+            mImages.first()->setVisible(checked);
+          return;
+        }
 
-    foreach (HunkWidget *hunk, mHunks)
-      hunk->setVisible(visible);
-  });
+        foreach (HunkWidget *hunk, mHunks)
+          hunk->setVisible(visible);
+      });
 
   if (diff.isStatusDiff()) {
     // Collapse on check.
-    connect(mHeader->check(), &QCheckBox::stateChanged, [this](int state) {
-      mHeader->disclosureButton()->setChecked(state != Qt::Checked);
+    if (disclosure)
+        connect(mHeader->check(), &QCheckBox::stateChanged, [this](int state) {
+                mHeader->disclosureButton()->setChecked(state != Qt::Checked);
     });
   }
 
@@ -291,6 +299,7 @@ FileWidget::FileWidget(
 
   mHunkLayout = new QVBoxLayout();
   layout->addLayout(mHunkLayout);
+  layout->addSpacerItem(new QSpacerItem(0,0, QSizePolicy::Expanding, QSizePolicy::Expanding)); // so the hunkwidget is always starting from top and is not distributed over the hole filewidget
 
   updatePatch(patch, staged);
 
@@ -328,43 +337,26 @@ FileWidget::FileWidget(
 
 void FileWidget::updateHunks(git::Patch stagedPatch)
 {
-    if (mSuppressUpdate)
-        return;
-
-    mSuppressUpdate = true;
-    mSupressStaging = true;
     for (auto hunk: mHunks)
-     hunk->load(stagedPatch, true);
-    mSupressStaging = false;
-
-    int staged = 0;
-    int unstaged = 0;
-    for (int i = 0; i < mHunks.size(); ++i) {
-      git::Index::StagedState state = mHunks[i]->stageState();
-      if (state == git::Index::Staged)
-          staged++;
-      else if (state == git::Index::Unstaged)
-          unstaged ++;
-    }
-
-    mSuppressUpdate = false;
-
-    if (staged == mHunks.size()) {
-      emit stageStateChanged(git::Index::Staged);
-      return;
-    }
-
-    if (unstaged == mHunks.size()) {
-      emit stageStateChanged(git::Index::Unstaged);
-      return;
-    }
-
-    emit stageStateChanged(git::Index::PartiallyStaged);
+        hunk->load(stagedPatch, true);
 }
 
 bool FileWidget::isEmpty()
 {
   return (mHunks.isEmpty() && mImages.isEmpty());
+}
+
+void FileWidget::setStageState(git::Index::StagedState state)
+{
+    mHeader->setStageState(state);
+
+    for (auto hunk: mHunks)
+        hunk->setStageState(state);
+}
+
+QModelIndex FileWidget::modelIndex()
+{
+    return mModelIndex;
 }
 
 void FileWidget::updatePatch(const git::Patch &patch, const git::Patch &staged) {
@@ -401,7 +393,7 @@ void FileWidget::updatePatch(const git::Patch &patch, const git::Patch &staged) 
   for (int hidx = 0; hidx < hunkCount; ++hidx) {
     HunkWidget *hunk = addHunk(mDiff, patch, staged, hidx, lfs, submodule);
     int startLine = patch.lineNumber(hidx, 0, git::Diff::OldFile);
-    hunk->header()->check()->setChecked(stagedHunks.contains(startLine)); // not correct, because it could also only a part of the hunk staged (single lines)
+    //hunk->header()->check()->setChecked(stagedHunks.contains(startLine)); // not correct, because it could also only a part of the hunk staged (single lines)
     mHunkLayout->addWidget(hunk);
   }
 }
@@ -423,7 +415,7 @@ QWidget *FileWidget::addImage(
   Images *images = new Images(patch, lfs, this);
 
   // Hide on file collapse.
-  if (!lfs)
+  if (!lfs && disclosure)
     connect(button, &DisclosureButton::toggled, images, &QLabel::setVisible);
 
   // Remember image.
@@ -443,7 +435,7 @@ HunkWidget *FileWidget::addHunk(
   HunkWidget *hunk =
     new HunkWidget(mView, diff, patch, staged, index, lfs, submodule, this);
 
-  connect(hunk, &HunkWidget::stageStateChanged, [this]() {this->stageHunks(false);});
+  connect(hunk, &HunkWidget::stageStateChanged, [this, hunk](git::Index::StagedState state) {this->stageHunks(hunk, state, false);});
   connect(hunk, &HunkWidget::discardSignal, this, &FileWidget::discardHunk);
   TextEditor* editor = hunk->editor(false);
 
@@ -459,7 +451,7 @@ HunkWidget *FileWidget::addHunk(
   return hunk;
 }
 
-void FileWidget::stageHunks(bool completeFile, bool completeFileStaged)
+void FileWidget::stageHunks(const HunkWidget* hunk, git::Index::StagedState stageState, bool completeFile, bool completeFileStaged)
 {
   if (mSupressStaging)
       return;
@@ -471,7 +463,11 @@ void FileWidget::stageHunks(bool completeFile, bool completeFileStaged)
   int staged = 0;
   int unstaged = 0;
   for (int i = 0; i < mHunks.size(); ++i) {
-    git::Index::StagedState state = mHunks[i]->stageState();
+    git::Index::StagedState state;
+    if (mHunks[i] == hunk)
+        state = stageState; // because the current hunk did not change the state yet.
+    else
+        state = mHunks[i]->stageState();
     if (state == git::Index::Staged)
         staged++;
     else if (state == git::Index::Unstaged)
@@ -482,20 +478,17 @@ void FileWidget::stageHunks(bool completeFile, bool completeFileStaged)
 
   if ((staged == mHunks.size() && mHunks.size() > 0) || (completeFile && completeFileStaged)) {
     // if the file does not contain hunks, it should be always staged!
-    index.setStaged({mPatch.name()}, true);
-    emit stageStateChanged(git::Index::Staged);
+    emit stageStateChanged(mModelIndex, git::Index::Staged);
     mSuppressUpdate = false;
     return;
   } else if (completeFile && !completeFileStaged) {
-      index.setStaged({mPatch.name()}, false);
-      emit stageStateChanged(git::Index::Unstaged);
+      emit stageStateChanged(mModelIndex, git::Index::Unstaged);
       mSuppressUpdate = false;
       return;
   }
 
   if (unstaged == mHunks.size()) {
-    index.setStaged({mPatch.name()}, false);
-    emit stageStateChanged(git::Index::Unstaged);
+    emit stageStateChanged(mModelIndex, git::Index::Unstaged);
     mSuppressUpdate = false;
     return;
   }
@@ -530,7 +523,8 @@ void FileWidget::stageHunks(bool completeFile, bool completeFileStaged)
   index.add(mPatch.name(), buffer);
   mSuppressUpdate = false;
 
-  emit stageStateChanged(git::Index::PartiallyStaged);
+  // TODO: index.add should notify the model directly!
+  emit stageStateChanged(mModelIndex, git::Index::PartiallyStaged);
 }
 
 void FileWidget::discardHunk() {
@@ -620,12 +614,17 @@ void FileWidget::headerCheckStateChanged(int state)
 {
     assert(state != Qt::PartiallyChecked); // makes no sense, that the user can select partially selected
 
-    mSupressStaging = true;
-    bool staged = state == Qt::Checked ? true : false;
-    for (int i = 0; i < mHunks.size(); ++i)
-        mHunks[i]->setStaged(staged);
-    mSupressStaging = false;
+    if (state == Qt::Checked)
+        emit stageStateChanged(mModelIndex, git::Index::Staged);
+    else
+        emit stageStateChanged(mModelIndex, git::Index::Unstaged);
 
-    // complete file must be staged
-    stageHunks(true, staged);
+//    mSupressStaging = true;
+//    bool staged = state == Qt::Checked ? true : false;
+//    for (int i = 0; i < mHunks.size(); ++i)
+//        mHunks[i]->setStaged(staged);
+//    mSupressStaging = false;
+
+//    // complete file must be staged
+//    stageHunks(true, staged);
 }

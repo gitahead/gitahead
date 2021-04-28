@@ -51,6 +51,7 @@ add_library(ui
   TemplateDialog.cpp
   ToolBar.cpp
   TreeModel.cpp
+  DiffTreeModel.cpp
   TreeProxy.cpp
   TreeView.cpp
   TreeWidget.cpp

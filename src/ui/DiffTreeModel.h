@@ -7,8 +7,8 @@
 // Author: Jason Haslam
 //
 
-#ifndef TREEMODEL
-#define TREEMODEL
+#ifndef DIFFTREEMODEL
+#define DIFFTREEMODEL
 
 #include "git/Diff.h"
 #include "git/Index.h"
@@ -16,8 +16,47 @@
 #include "git/Repository.h"
 #include <QAbstractItemModel>
 #include <QFileIconProvider>
+#include "git/Index.h"
 
-class TreeModel : public QAbstractItemModel
+class Node // item of the model
+{
+public:
+    Node(const QString &name, int patchIndex, Node *parent = nullptr);
+  ~Node();
+
+  enum class ParentStageState{
+      Any,
+      Staged,
+      Unstaged
+  };
+
+  QString name() const;
+  QString path(bool relative = false) const;
+
+  Node *parent() const;
+  bool hasChildren() const;
+  QList<Node *> children();
+  void addChild(const QStringList& pathPart, int patchIndex, int indexFirstDifferent);
+  git::Index::StagedState stageState(const git::Index& idx, ParentStageState searchingState);
+  void childFiles(QStringList &files);
+  int fileCount() const;
+  int patchIndex() const;
+  void patchIndices(QList<int>& list);
+
+private:
+  QString mName;
+  // Index of the patch in the diff
+  int mPatchIndex{-1};
+  Node *mParent;
+  QList<Node *> mChildren;
+};
+
+/*!
+ * \brief The DiffTreeModel class
+ * This Treemodel is similar to the normal tree model, but handles only the files in the diff it self
+ * and not the complete tree
+ */
+class DiffTreeModel : public QAbstractItemModel
 {
   Q_OBJECT
 
@@ -28,25 +67,31 @@ public:
     KindRole,
     AddedRole,
     ModifiedRole,
-    StatusRole
+    StatusRole,
+    PatchIndexRole,
   };
 
-  TreeModel(
+  DiffTreeModel(
     const git::Repository &repo,
     QObject *parent = nullptr);
-  virtual ~TreeModel();
+  virtual ~DiffTreeModel();
 
-  void setTree(const git::Tree &tree, const git::Diff &diff = git::Diff());
+  void setDiff(const git::Diff &diff = git::Diff());
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
+  int fileCount(const QModelIndex& parent = QModelIndex()) const;
+  QList<int> patchIndices(const QModelIndex& parent) const;
 
   QModelIndex parent(const QModelIndex &index) const override;
+  QList<QModelIndex> modelIndices(const QModelIndex &parent = QModelIndex(), bool recursive = true) const;
+  void modelIndices(const QModelIndex& parent, QList<QModelIndex>& list, bool recursive = true) const;
   QModelIndex index(
     int row,
     int column,
     const QModelIndex &parent = QModelIndex()) const override;
+  QModelIndex index(Node *n) const;
 
   QVariant data(
     const QModelIndex &index,
@@ -55,6 +100,8 @@ public:
     const QModelIndex &index,
     const QVariant &value,
     int role = Qt::EditRole) override;
+
+  void createDiffTree();
   /*!
    * Setting the data to the item
    * \brief setData
@@ -70,7 +117,7 @@ public:
   bool setData(
     const QModelIndex &index,
     const QVariant &value,
-    int role, bool ignoreIndexChanges = false);
+    int role, bool ignoreIndexChanges);
 
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 
@@ -78,36 +125,13 @@ signals:
   void checkStateChanged(const QModelIndex& index, int state);
 
 private:
-  class Node // item of the model
-  {
-  public:
-    Node(const QString &name, const git::Object &obj, Node *parent = nullptr);
-    ~Node();
-
-    QString name() const;
-    QString path(bool relative = false) const;
-
-    Node *parent() const;
-    bool hasChildren() const;
-    QList<Node *> children();
-
-    git::Object object() const;
-
-  private:
-    QString mName;
-    git::Object mObject;
-
-    Node *mParent{nullptr};
-    QList<Node *> mChildren;
-  };
-
   Node *node(const QModelIndex &index) const;
 
-  Node *mRoot = nullptr;
   QFileIconProvider mIconProvider;
 
   git::Diff mDiff;
+  Node *mRoot{nullptr};
   git::Repository mRepo;
 };
 
-#endif
+#endif /* DIFFTREEMODEL */

@@ -33,6 +33,8 @@ namespace {
       QString pressed = color.darker(115).name();
       return DiffViewStyle::kButtonStyleFmt.arg(color.name(), pressed);
     }
+
+    bool disclosure = false;
 }
 
 _HunkWidget::Header::Header(
@@ -110,6 +112,7 @@ _HunkWidget::Header::Header(
     mButton->setToolTip(
       mButton->isChecked() ? HunkWidget::tr("Collapse Hunk") : HunkWidget::tr("Expand Hunk"));
   });
+  mButton->setVisible(disclosure);
 
   QHBoxLayout *buttons = new QHBoxLayout;
   buttons->setContentsMargins(0,0,0,0);
@@ -139,15 +142,21 @@ _HunkWidget::Header::Header(
   // Collapse on check.
   connect(mCheck, &QCheckBox::clicked, [this](bool staged) {
     mButton->setChecked(!staged);
-    if (staged)
+    if (staged) {
         emit stageStateChanged(Qt::Checked);
-    else
+    } else {
         emit stageStateChanged(Qt::Unchecked);
+    }
   });
 }
 
-void _HunkWidget::Header::hunkStageStateChanged(int stageState) { // on the checkstate signal will not be reacted
-    mCheck->setCheckState(static_cast<Qt::CheckState>(stageState));
+void _HunkWidget::Header::setCheckState(git::Index::StagedState state) { // on the checkstate signal will not be reacted
+    if (state == git::Index::Staged)
+        mCheck->setCheckState(Qt::Checked);
+    else if (state == git::Index::Unstaged)
+        mCheck->setCheckState(Qt::Unchecked);
+    else
+        mCheck->setCheckState(Qt::PartiallyChecked);
 }
 
 QCheckBox *_HunkWidget::Header::check() const
@@ -208,7 +217,6 @@ HunkWidget::HunkWidget(
 
   mHeader = new _HunkWidget::Header(diff, patch, index, lfs, submodule, this);
   layout->addWidget(mHeader);
-  connect(this, &HunkWidget::stageStateChanged, mHeader, &_HunkWidget::Header::hunkStageStateChanged);
   connect(mHeader, &_HunkWidget::Header::discard, this, &HunkWidget::discard);
 
   mEditor = new Editor(this);
@@ -240,8 +248,8 @@ HunkWidget::HunkWidget(
   mEditor->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
   layout->addWidget(mEditor);
-  connect(mHeader->button(), &DisclosureButton::toggled,
-          mEditor, &TextEditor::setVisible);
+  if (disclosure)
+    connect(mHeader->button(), &DisclosureButton::toggled, mEditor, &TextEditor::setVisible);
   connect(mHeader, &_HunkWidget::Header::stageStateChanged, this , &HunkWidget::headerCheckStateChanged);
 
   // Handle conflict resolution.
@@ -536,34 +544,51 @@ void HunkWidget::stageSelected(int startLine, int end, bool emitSignal) {
  void HunkWidget::headerCheckStateChanged(int state) {
 
      assert(state != Qt::PartiallyChecked); // makes no sense, that the user can select partially selected
+     git::Index::StagedState stageState;
+     if (state == Qt::Checked)
+         stageState = git::Index::StagedState::Staged;
+     else
+         stageState = git::Index::StagedState::Unstaged;
 
-     bool staged = state == Qt::Checked ? true : false; // header cannot set to partially staged. Makes no sense there
-     setStaged(staged);
+     // must be done, because the stage state of the hole file is calculated
+     // from the staged lines in the editor
+    setStageState(stageState);
+
+
+    stageStateChanged(stageState);
  }
+
+ void HunkWidget::setStageState(git::Index::StagedState state) {
+
+      if (state == git::Index::StagedState::Staged ||
+          state == git::Index::StagedState::Unstaged)
+      {
+          mHeader->setCheckState(state);
+          // update the line markers
+          bool staged = state == git::Index::StagedState::Staged ? true : false;
+          int lineCount = mEditor->lineCount();
+          int count = 0;
+          for (int i = 0; i < lineCount; i++) {
+              int mask = mEditor->markers(i);
+              // if a line was not added or deleted, it cannot be staged so ignore all of them
+              if (mask & (1 << TextEditor::Marker::Addition | 1 << TextEditor::Marker::Deletion)) {
+                setStaged(i, staged, false);
+                count++;
+              }
+          }
+      }
+      mStagedStage = state;
+ }
+
 
  void HunkWidget::setStaged(bool staged)
  {
-     mStagedStateLoaded = false;
-     int lineCount = mEditor->lineCount();
-     int count = 0;
-     for (int i = 0; i < lineCount; i++) {
-       int mask = mEditor->markers(i);
-       if (mask & (1 << TextEditor::Marker::Addition | 1 << TextEditor::Marker::Deletion)) {
-         setStaged(i, staged, false);
-         count++;
-       }
-     }
-     // if count = 0. it must be a new file!
-     // TODO: how to check it
-     git::Index::StagedState state;
-     if (!staged)
-         state = git::Index::Unstaged;
-     else
-         state = git::Index::Staged;
-     mStagedStage = state;
-     if (count == 0)
-        mStagedStateLoaded = true;
-     emit stageStateChanged(state);
+    if (staged)
+        setStageState(git::Index::StagedState::Staged);
+    else
+        setStageState(git::Index::StagedState::Unstaged);
+
+
  }
 
  void HunkWidget::discard()
@@ -582,10 +607,10 @@ void HunkWidget::stageSelected(int startLine, int end, bool emitSignal) {
 
      if (staged) {
          stageSelected(lidx, lidx + 1, emitSignal);
-         return;
+     } else {
+        unstageSelected(lidx, lidx + 1, emitSignal);
      }
-
-     unstageSelected(lidx, lidx + 1, emitSignal);
+     mLoaded = true;
  }
 
  void HunkWidget::marginClicked(int pos, int modifier, int margin) {
@@ -654,6 +679,11 @@ QByteArray HunkWidget::tokenBuffer(const QList<HunkWidget::Token> &tokens)
   return list.join('\n');
 }
 
+void HunkWidget::load()
+{
+    load(mStaged, true);
+}
+
 void HunkWidget::load(git::Patch &staged, bool force)
 {
   if (!force && mLoaded )
@@ -696,13 +726,19 @@ void HunkWidget::load(git::Patch &staged, bool force)
 
   // number of staged hunks must not match the
   // number of total hunks.
+  // find index in the staged patch which matches with the path with index mIndex
   int stagedIndex = -1;
   QByteArray header = mPatch.header(mIndex);
+  int hunkLineStart = mPatch.lineNumber(mIndex, 0, git::Diff::OldFile);
+  assert(hunkLineStart >= 0);
   // TODO: handle conflicted patch.
   // There must exist a staged patch for it
   if (mStaged.isValid() && !mPatch.isConflicted()) {
       for (int i = 0; i < mStaged.count(); i++) {
-          if (mStaged.header(i) == header) {
+          int hunkStagedLineStart = mStaged.lineNumber(i, 0, git::Diff::OldFile);
+          assert(hunkStagedLineStart >= 0);
+          QString h = mStaged.header(i);
+          if (hunkLineStart == hunkStagedLineStart) {
               stagedIndex = i;
               break;
           }
@@ -895,9 +931,9 @@ void HunkWidget::load(git::Patch &staged, bool force)
   mEditor->updateGeometry();
 
   mLoading = false;
-  // update stageState after everythin is loaded
-  stageStateChanged(stageState());
-
+  // update stageState after everything is loaded
+  //stageStateChanged(stageState());
+    mHeader->setCheckState(stageState());
 }
 
 void HunkWidget::findMatchingLines(QList<Line>& lines, int lidx, int count, int& marker, int& countDiffLines, int& additions, int& deletions, bool& staged) const {

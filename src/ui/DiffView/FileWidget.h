@@ -5,6 +5,7 @@
 
 #include <QWidget>
 #include <QFrame>
+#include <QModelIndex>
 
 #include "git/Diff.h"
 #include "git/Patch.h"
@@ -79,11 +80,11 @@ class FileWidget : public QWidget
 
 public:
 
-  FileWidget(
-    DiffView *view,
+  FileWidget(DiffView *view,
     const git::Diff &diff,
     const git::Patch &patch,
     const git::Patch &staged,
+    const QModelIndex modelIndex,
     QWidget *parent = nullptr);
   bool isEmpty();
   void updatePatch(const git::Patch &patch, const git::Patch &staged);
@@ -108,6 +109,8 @@ public:
     int index,
     bool lfs,
     bool submodule);
+    void setStageState(git::Index::StagedState state);
+    QModelIndex modelIndex();
 public slots:
   void headerCheckStateChanged(int state);
   /*!
@@ -116,7 +119,7 @@ public slots:
    * current state of the hunk as parameter
    * \brief stageHunks
    */
-  void stageHunks(bool completeFile=false, bool completeFileStaged=false);
+  void stageHunks(const HunkWidget *hunk, git::Index::StagedState stageState, bool completeFile=false, bool completeFileStaged=false);
   /*!
    * Discard specific hunk
    * Emitted by the hunk it self
@@ -126,7 +129,7 @@ public slots:
 
 signals:
   void diagnosticAdded(TextEditor::DiagnosticKind kind);
-  void stageStateChanged(git::Index::StagedState state);
+  void stageStateChanged(const QModelIndex& idx, git::Index::StagedState state);
 
 private:
   void discard();
@@ -136,6 +139,7 @@ private:
 
   git::Diff mDiff;
   git::Patch mPatch;
+  QModelIndex mModelIndex;
 
   _FileWidget::Header *mHeader{nullptr};
   QList<QWidget *> mImages;

@@ -17,6 +17,8 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QVBoxLayout>
+#include "TreeProxy.h"
+#include <QMenu>
 
 #ifdef Q_OS_WIN
 #define ICON_SIZE 48
@@ -47,6 +49,27 @@ void TreeView::setModel(QAbstractItemModel *model)
   connect(this, &QTreeView::collapsed, this, &TreeView::itemCollapsed);
   connect(this, &QTreeView::expanded, this, &TreeView::itemExpanded);
   connect(model, &QAbstractItemModel::rowsInserted, this, QOverload<const QModelIndex &, int, int>::of(&TreeView::updateCollapseCount));
+
+  setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(this, &TreeView::customContextMenuRequested, this, &TreeView::onCustomContextMenu);
+}
+
+void TreeView::onCustomContextMenu(const QPointF& point)
+{
+    auto proxy = qobject_cast<TreeProxy*>(model());
+    if (!proxy)
+        return;
+
+//    QMenu menu;
+//    if (proxy->staged()) {
+//        menu.addAction(tr())
+//    } else {
+
+//    }
+//    QModelIndex index = ui->treeView->indexAt(point);
+//        if (index.isValid() && index.row() % 2 == 0) {
+//            contextMenu->exec(ui->treeView->viewport()->mapToGlobal(point));
+//        }
 }
 
 bool TreeView::eventFilter(QObject *obj, QEvent *event)
@@ -113,7 +136,13 @@ void TreeView::updateCollapseCount(const QModelIndex &parent, int first, int las
     setCollapseCount(countCollapsed());
 }
 
-int TreeView::countCollapsed(QModelIndex parent)
+/*!
+ * \brief TreeView::countCollapsed
+ * Takes long for many items
+ * \param parent
+ * \return
+ */
+int TreeView::countCollapsed(QModelIndex parent, bool recursive)
 {
     QAbstractItemModel* model = this->model();
 
@@ -122,7 +151,8 @@ int TreeView::countCollapsed(QModelIndex parent)
         QModelIndex idx = model->index(i, 0, parent);
         if (model->rowCount(idx) && !this->isExpanded(idx))
             count++;
-        count += countCollapsed(idx);
+        if (recursive)
+            count += countCollapsed(idx);
     }
     return count;
 }
@@ -140,7 +170,7 @@ void TreeView::collapseAll()
     mSupressItemExpandStateChanged = true;
     QTreeView::collapseAll();
     mSupressItemExpandStateChanged = false;
-    setCollapseCount(countCollapsed());
+    setCollapseCount(model()->rowCount());
 }
 
 void TreeView::itemExpanded(const QModelIndex& index)
@@ -148,7 +178,7 @@ void TreeView::itemExpanded(const QModelIndex& index)
     if (mSupressItemExpandStateChanged)
         return;
 
-    setCollapseCount(mCollapseCount - 1);
+    setCollapseCount(mCollapseCount - 1 + countCollapsed(index, false));
 }
 
 void TreeView::itemCollapsed(const QModelIndex& index)
@@ -156,8 +186,10 @@ void TreeView::itemCollapsed(const QModelIndex& index)
     if (mSupressItemExpandStateChanged)
         return;
 
-    setCollapseCount(mCollapseCount + 1);
+    setCollapseCount(mCollapseCount + 1 - countCollapsed(index, false));
 }
+
+
 
 
 

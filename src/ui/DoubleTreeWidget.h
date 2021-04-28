@@ -13,7 +13,7 @@
 #include "DetailView.h" // ContentWidget
 
 class QTreeView;
-class TreeModel;
+class DiffTreeModel;
 class TreeView;
 class BlameEditor;
 class StatePushButton;
@@ -32,6 +32,7 @@ class DoubleTreeWidget : public ContentWidget
   
 public:
   DoubleTreeWidget(const git::Repository &repo, QWidget *parent = nullptr);
+  QModelIndex selectedIndex() const override;
   QString selectedFile() const override;
 
   void setDiff(
@@ -58,7 +59,7 @@ private:
   void toggleCollapseStagedFiles();
   void toggleCollapseUnstagedFiles();
 
-  TreeModel* mTreeModel{nullptr};
+  DiffTreeModel* mDiffTreeModel{nullptr};
   TreeView* stagedFiles{nullptr};
   TreeView* unstagedFiles{nullptr};
   StatePushButton* collapseButtonStagedFiles{nullptr};

@@ -25,6 +25,7 @@
 class QCheckBox;
 class QVBoxLayout;
 class FileWidget;
+class DiffTreeModel;
 
 namespace DiffViewStyle {
     const int kIndent = 2;
@@ -87,12 +88,13 @@ public:
   void setDiff(const git::Diff &diff);
 
   bool scrollToFile(int index);
+
   /*!
-   * Filters for specific paths and shows only them
-   * \brief setFilter
-   * \param paths List of paths to be filtered
+   * \brief updateFiles
+   * Call this function to update the visible diff files.
+   * It fetches the files then from the diffTreeModel and the selection model
    */
-  void setFilter(const QStringList &paths);
+  void updateFiles();
 
   const QList<PluginRef> &plugins() const { return mPlugins; }
   const Account::CommitComments &comments() const { return mComments; }
@@ -105,6 +107,8 @@ public:
    * \param enable
    */
   void enable(bool enable);
+  void setModel(DiffTreeModel *model);
+  void diffTreeModelDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles);
 
 signals:
   void diagnosticAdded(TextEditor::DiagnosticKind kind);
@@ -135,6 +139,9 @@ private:
   Account::CommitComments mComments;
 
   bool mEnabled{true};
+  DiffTreeModel* mDiffTreeModel{nullptr};
+  QWidget* mParent{nullptr};
+  QVBoxLayout* mFileWidgetLayout{nullptr};
 };
 
 #endif
