@@ -11,6 +11,7 @@
 #include "Patch.h"
 #include "git2/patch.h"
 #include <algorithm>
+#include <QDebug>
 
 bool containsPath(QString &str, QString &occurence, Qt::CaseSensitivity cs)
 {
@@ -141,7 +142,7 @@ QByteArray Diff::print()
         }
 
     }
-    qDebug(diff);
+    qDebug() << QString(diff);
     return diff;
 }
 
