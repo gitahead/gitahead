@@ -98,6 +98,37 @@ QModelIndex DiffTreeModel::parent(const QModelIndex &index) const
   return createIndex(parent->parent()->children().indexOf(parent), 0, parent);
 }
 
+void DiffTreeModel::modelIndices(const QModelIndex& parent, QList<QModelIndex>& list, bool recursive) const
+{
+    // TODO: Method name a little bit missleading, because also the
+    // parent is added
+    Node* n = node(parent);
+    if (!n->hasChildren()) {
+        list.append(index(n));
+        return;
+    }
+
+    for (int i=0; i < n->children().length(); i++) {
+        auto child = createIndex(i, 0, n->children()[i]);
+        if (recursive)
+            modelIndices(child, list);
+        else if (!node(child)->hasChildren())
+            list.append(child);
+    }
+}
+
+QList<QModelIndex> DiffTreeModel::modelIndices(const QModelIndex& parent, bool recursive) const
+{
+    QList<QModelIndex> childs;
+
+    if (!parent.isValid())
+        return childs;
+
+    modelIndices(parent, childs, recursive);
+
+    return childs;
+}
+
 QModelIndex DiffTreeModel::index(
   int row,
   int column,
@@ -109,6 +140,12 @@ QModelIndex DiffTreeModel::index(
 
   auto n = node(parent)->children().at(row);
   return createIndex(row, column, n);
+}
+
+QModelIndex DiffTreeModel::index(Node* n) const
+{
+  int row = n->parent()->children().indexOf(n);
+  return createIndex(row, 0, n);
 }
 
 QVariant DiffTreeModel::data(const QModelIndex &index, int role) const
@@ -178,6 +215,9 @@ QVariant DiffTreeModel::data(const QModelIndex &index, int role) const
 
       return status;
     }
+  case PatchIndexRole: {
+      return node->patchIndex();
+  }
   }
 
   return QVariant();
@@ -199,12 +239,19 @@ bool DiffTreeModel::setData(const QModelIndex &index,
     case Qt::CheckStateRole: {
       QStringList files;
       Node *node = this->node(index);
-      QString prefix = node->path(true);
 
       if (!ignoreIndexChanges) {
           QStringList files;
           node->childFiles(files);
-          mDiff.index().setStaged(files, value.toBool());
+          git::Index::StagedState state = static_cast<git::Index::StagedState>(value.toInt());
+          if (state == git::Index::StagedState::Staged)
+            mDiff.index().setStaged(files, true);
+          else if (state == git::Index::StagedState::Unstaged)
+              mDiff.index().setStaged(files, false);
+          else if (state == git::Index::StagedState::PartiallyStaged)
+              // is done directly in the hunkwidget, because it gets to complicated to
+              // do line staging here.
+              (void)state;
       }
 
 	  // childs
@@ -243,7 +290,7 @@ Qt::ItemFlags DiffTreeModel::flags(const QModelIndex &index) const
   return QAbstractItemModel::flags(index) | Qt::ItemIsUserCheckable;
 }
 
-DiffTreeModel::Node *DiffTreeModel::node(const QModelIndex &index) const
+Node* DiffTreeModel::node(const QModelIndex &index) const
 {
   return index.isValid() ? static_cast<Node *>(index.internalPointer()) : mRoot;
 }
@@ -252,42 +299,42 @@ DiffTreeModel::Node *DiffTreeModel::node(const QModelIndex &index) const
 //######     DiffTreeModel::Node     ##############################################
 //#############################################################################
 
-DiffTreeModel::Node::Node(const QString &name, int patchIndex, Node *parent)
+Node::Node(const QString &name, int patchIndex, Node *parent)
   : mName(name), mPatchIndex(patchIndex), mParent(parent)
 {}
 
-DiffTreeModel::Node::~Node()
+Node::~Node()
 {
   qDeleteAll(mChildren);
 }
 
-QString DiffTreeModel::Node::name() const
+QString Node::name() const
 {
   return mName;
 }
 
-QString DiffTreeModel::Node::path(bool relative) const
+QString Node::path(bool relative) const
 {
   bool root = (!mParent || (relative && !mParent->mParent));
   return !root ? mParent->path(relative) % "/" % mName : mName;
 }
 
-DiffTreeModel::Node *DiffTreeModel::Node::parent() const
+Node *Node::parent() const
 {
   return mParent;
 }
 
-bool DiffTreeModel::Node::hasChildren() const
+bool Node::hasChildren() const
 {
   return mChildren.length() > 0;
 }
 
-QList<DiffTreeModel::Node *> DiffTreeModel::Node::children()
+QList<Node *> Node::children()
 {
   return mChildren;
 }
 
-void DiffTreeModel::Node::addChild(const QStringList& pathPart, int patchIndex, int indexFirstDifferent)
+void Node::addChild(const QStringList& pathPart, int patchIndex, int indexFirstDifferent)
 {
     for (auto c: mChildren) {
         if (c->name() == pathPart[indexFirstDifferent]) {
@@ -306,7 +353,7 @@ void DiffTreeModel::Node::addChild(const QStringList& pathPart, int patchIndex, 
     mChildren.append(n);
 }
 
-git::Index::StagedState DiffTreeModel::Node::stageState(const git::Index& idx, ParentStageState searchingState)
+git::Index::StagedState Node::stageState(const git::Index& idx, ParentStageState searchingState)
 {
     if (!hasChildren())
         return idx.isStaged(path(true));
@@ -331,7 +378,7 @@ git::Index::StagedState DiffTreeModel::Node::stageState(const git::Index& idx, P
     return childState;
 }
 
-void DiffTreeModel::Node::childFiles(QStringList& files)
+void Node::childFiles(QStringList& files)
 {
     if (!hasChildren()) {
         files.append(path(true));
@@ -342,7 +389,7 @@ void DiffTreeModel::Node::childFiles(QStringList& files)
         child->childFiles(files);
 }
 
-int  DiffTreeModel::Node::fileCount() const
+int  Node::fileCount() const
 {
     if (!hasChildren())
         return 1;
@@ -354,7 +401,7 @@ int  DiffTreeModel::Node::fileCount() const
     return count;
 }
 
-void DiffTreeModel::Node::patchIndices(QList<int>& list)
+void Node::patchIndices(QList<int>& list)
 {
     if (!hasChildren()) {
         assert(patchIndex() >= 0);
@@ -366,7 +413,7 @@ void DiffTreeModel::Node::patchIndices(QList<int>& list)
         child->patchIndices(list);
 }
 
-int DiffTreeModel::Node::patchIndex() const
+int Node::patchIndex() const
 {
     return mPatchIndex;
 }

@@ -40,7 +40,7 @@ namespace _HunkWidget {
       QToolButton *theirsButton() const;
 
     public slots:
-      void hunkStageStateChanged(int stageState);
+      void setCheckState(git::Index::StagedState state);
 
     protected:
       void mouseDoubleClickEvent(QMouseEvent *event) override;
@@ -96,6 +96,13 @@ public:
    * \return
    */
   QByteArray apply() const;
+  /*!
+   * \brief stageState
+   * Calculate stage state of the hunk. Git does not provide
+   * such functionality, so the staged and unstaged lines
+   * must be counted.
+   * \return
+   */
   git::Index::StagedState stageState();
   /*!
    * Stage/Unstage all
@@ -103,11 +110,13 @@ public:
    * \param staged
    */
   void setStaged(bool staged);
+  void setStageState(git::Index::StagedState state);
   /*!
    * Called by the hunk header
    * \brief discard
    */
   void discard();
+  void load();
   /*!
    * update hunk content
    * \brief load
@@ -144,7 +153,7 @@ signals:
    * \brief stageStateChanged
    * \param stageState
    */
-  void stageStateChanged(int stageState);
+  void stageStateChanged(git::Index::StagedState state);
   void discardSignal();
 
 protected:

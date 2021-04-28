@@ -108,6 +108,7 @@ public:
    */
   void enable(bool enable);
   void setModel(DiffTreeModel *model);
+  void diffTreeModelDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles);
 
 signals:
   void diagnosticAdded(TextEditor::DiagnosticKind kind);

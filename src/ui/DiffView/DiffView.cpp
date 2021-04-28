@@ -207,7 +207,7 @@ void DiffView::setDiff(const git::Diff &diff)
     }
   }
 
-  connect(repo.notifier(), &git::RepositoryNotifier::indexChanged, this, &DiffView::indexChanged);
+  //connect(repo.notifier(), &git::RepositoryNotifier::indexChanged, this, &DiffView::indexChanged);
 }
 
 bool DiffView::scrollToFile(int index)
@@ -234,7 +234,54 @@ void DiffView::enable(bool enable)
 
 void DiffView::setModel(DiffTreeModel* model)
 {
+    if (mDiffTreeModel)
+        disconnect(mDiffTreeModel, nullptr, this, nullptr);
+
     mDiffTreeModel = model;
+    connect(mDiffTreeModel, &DiffTreeModel::dataChanged, this, &DiffView::diffTreeModelDataChanged);
+}
+
+void DiffView::diffTreeModelDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles)
+{
+    assert(topLeft == bottomRight);
+
+    if (!topLeft.isValid())
+        return;
+    if (roles[0] != Qt::CheckStateRole)
+        return;
+
+    QString modelName = topLeft.data(Qt::DisplayRole).toString();
+
+    git::Index::StagedState stageState = static_cast<git::Index::StagedState>(topLeft.data(Qt::CheckStateRole).toInt());
+
+    for (auto file: mFiles) {
+        if (file->modelIndex().internalPointer() == topLeft.internalPointer()) {
+
+            // Respond to index changes only when file is visible in the diffview
+            RepoView *view = RepoView::parentView(this);
+            git::Repository repo = view->repo();
+
+            mStagedPatches.clear();
+            // Generate a diff between the head tree and index.
+            if (mDiff.isStatusDiff()) {
+              if (git::Reference head = repo.head()) {
+                if (git::Commit commit = head.target()) {
+                  git::Diff stagedDiff = repo.diffTreeToIndex(commit.tree());
+                  for (int i = 0; i < stagedDiff.count(); ++i)
+                    mStagedPatches[stagedDiff.name(i)] = stagedDiff.patch(i);
+                }
+              }
+            }
+
+            QString filename = file->name();
+            git::Patch stagedPatch = mStagedPatches[file->name()];
+            file->updateHunks(stagedPatch);
+            file->setStageState(stageState);
+
+
+            return;
+        }
+    }
 }
 
 void DiffView::updateFiles()
@@ -330,12 +377,13 @@ void DiffView::fetchMore()
   int addedFiles = 0;
 
   auto dtw = dynamic_cast<DoubleTreeWidget*>(mParent);
-  QList<int> patchIndices = mDiffTreeModel->patchIndices(dtw->selectedIndex());
-  int count = patchIndices.count();
+  //QList<int> patchIndices = mDiffTreeModel->patchIndices(dtw->selectedIndex());
+  QList<QModelIndex> indices = mDiffTreeModel->modelIndices(dtw->selectedIndex());
+  int count = indices.count();
 
   for (int i = mFiles.count(); i < count && addedFiles < maxNewFiles; ++i) {
 
-    int pidx = patchIndices[i];
+    int pidx = indices[i].data(DiffTreeModel::PatchIndexRole).toInt();
     addedFiles ++;
     git::Patch patch = mDiff.patch(pidx);
     if (!patch.isValid()) {
@@ -344,8 +392,11 @@ void DiffView::fetchMore()
       return;
     }
 
+    auto state = static_cast<git::Index::StagedState>(indices[i].data(Qt::CheckStateRole).toInt());
+
     git::Patch staged = mStagedPatches.value(patch.name());
-    FileWidget *file = new FileWidget(this, mDiff, patch, staged, widget());
+    FileWidget *file = new FileWidget(this, mDiff, patch, staged, indices[i], widget());
+    file->setStageState(state);
     mFileWidgetLayout->addWidget(file);
 
     mFiles.append(file);
@@ -360,7 +411,10 @@ void DiffView::fetchMore()
     connect(file, &FileWidget::diagnosticAdded,
             this, &DiffView::diagnosticAdded);
     connect(file, &FileWidget::stageStateChanged,
-            [this] (git::Index::StagedState state) {emit fileStageStateChanged(state);});
+            [this] (const QModelIndex index, int state) {
+        /*emit fileStageStateChanged(state);*/
+        mDiffTreeModel->setData(index, state, Qt::CheckStateRole);
+        });
   }
 
   // Finish layout.
@@ -381,12 +435,12 @@ void DiffView::fetchAll(int index)
 }
 
 void DiffView::indexChanged(const QStringList &paths) {
-    // Respond to index changes.
-    RepoView *view = RepoView::parentView(this);
-    git::Repository repo = view->repo();
+//    // Respond to index changes.
+//    RepoView *view = RepoView::parentView(this);
+//    git::Repository repo = view->repo();
 
-    mStagedPatches.clear();
-    // Generate a diff between the head tree and index.
+//    mStagedPatches.clear();
+//    // Generate a diff between the head tree and index.
 //    if (mDiff.isStatusDiff()) {
 //      if (git::Reference head = repo.head()) {
 //        if (git::Commit commit = head.target()) {

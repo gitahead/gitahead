@@ -18,6 +18,39 @@
 #include <QFileIconProvider>
 #include "git/Index.h"
 
+class Node // item of the model
+{
+public:
+    Node(const QString &name, int patchIndex, Node *parent = nullptr);
+  ~Node();
+
+  enum class ParentStageState{
+      Any,
+      Staged,
+      Unstaged
+  };
+
+  QString name() const;
+  QString path(bool relative = false) const;
+
+  Node *parent() const;
+  bool hasChildren() const;
+  QList<Node *> children();
+  void addChild(const QStringList& pathPart, int patchIndex, int indexFirstDifferent);
+  git::Index::StagedState stageState(const git::Index& idx, ParentStageState searchingState);
+  void childFiles(QStringList &files);
+  int fileCount() const;
+  int patchIndex() const;
+  void patchIndices(QList<int>& list);
+
+private:
+  QString mName;
+  // Index of the patch in the diff
+  int mPatchIndex{-1};
+  Node *mParent;
+  QList<Node *> mChildren;
+};
+
 /*!
  * \brief The DiffTreeModel class
  * This Treemodel is similar to the normal tree model, but handles only the files in the diff it self
@@ -34,7 +67,8 @@ public:
     KindRole,
     AddedRole,
     ModifiedRole,
-    StatusRole
+    StatusRole,
+    PatchIndexRole,
   };
 
   DiffTreeModel(
@@ -51,10 +85,13 @@ public:
   QList<int> patchIndices(const QModelIndex& parent) const;
 
   QModelIndex parent(const QModelIndex &index) const override;
+  QList<QModelIndex> modelIndices(const QModelIndex &parent = QModelIndex(), bool recursive = true) const;
+  void modelIndices(const QModelIndex& parent, QList<QModelIndex>& list, bool recursive = true) const;
   QModelIndex index(
     int row,
     int column,
     const QModelIndex &parent = QModelIndex()) const override;
+  QModelIndex index(Node *n) const;
 
   QVariant data(
     const QModelIndex &index,
@@ -80,46 +117,13 @@ public:
   bool setData(
     const QModelIndex &index,
     const QVariant &value,
-    int role, bool ignoreIndexChanges = false);
+    int role, bool ignoreIndexChanges);
 
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 
 signals:
   void checkStateChanged(const QModelIndex& index, int state);
 
-public:
-  class Node // item of the model
-  {
-  public:
-      Node(const QString &name, int patchIndex, Node *parent = nullptr);
-    ~Node();
-
-    enum class ParentStageState{
-        Any,
-        Staged,
-        Unstaged
-    };
-
-    QString name() const;
-    QString path(bool relative = false) const;
-
-    Node *parent() const;
-    bool hasChildren() const;
-	QList<Node *> children();
-    void addChild(const QStringList& pathPart, int patchIndex, int indexFirstDifferent);
-    git::Index::StagedState stageState(const git::Index& idx, ParentStageState searchingState);
-    void childFiles(QStringList &files);
-    int fileCount() const;
-    int patchIndex() const;
-    void patchIndices(QList<int>& list);
-
-  private:
-    QString mName;
-    // Index of the patch in the diff
-    int mPatchIndex{-1};
-    Node *mParent;
-    QList<Node *> mChildren;
-  };
 private:
   Node *node(const QModelIndex &index) const;
 
