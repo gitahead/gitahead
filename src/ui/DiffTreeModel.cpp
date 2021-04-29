@@ -13,6 +13,7 @@
 #include "git/Diff.h"
 #include "git/RevWalk.h"
 #include "git/Submodule.h"
+#include "git/Patch.h"
 #include <QStringBuilder>
 #include <QUrl>
 
@@ -228,6 +229,41 @@ bool DiffTreeModel::setData(const QModelIndex &index,
                         int role)
 {
     return setData(index, value, role, false);
+}
+
+bool DiffTreeModel::discard(const QModelIndex &index)
+{
+    assert(index.isValid());
+
+    Node *node = this->node(index);
+    QList<int> list;
+    node->patchIndices(list);
+
+    QStringList trackedPatches;
+    for (auto i: list) {
+       auto patch = mDiff.patch(i);
+       if (patch.isUntracked()) {
+           QString name = patch.name();
+           git::Repository repo = patch.repo();
+           QDir dir = repo.workdir();
+           if (QFileInfo(dir.filePath(name)).isDir()) {
+             if (dir.cd(name))
+               dir.removeRecursively();
+           } else {
+             dir.remove(name);
+           }
+       } else {
+          trackedPatches.append(patch.name());
+       }
+    }
+
+    if (list.length() > 0) {
+        int strategy = GIT_CHECKOUT_FORCE;
+        auto repo = mDiff.patch(list[0]).repo(); // does not matter which index is used all are in the same repo
+        if (!repo.checkout(git::Commit(), nullptr, trackedPatches, strategy))
+            return false;
+    }
+    return true;
 }
 
 bool DiffTreeModel::setData(const QModelIndex &index,

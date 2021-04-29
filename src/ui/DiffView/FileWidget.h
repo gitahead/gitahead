@@ -130,6 +130,7 @@ public slots:
 signals:
   void diagnosticAdded(TextEditor::DiagnosticKind kind);
   void stageStateChanged(const QModelIndex& idx, git::Index::StagedState state);
+  void discarded(const QModelIndex& idx);
 
 private:
   void discard();

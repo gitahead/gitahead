@@ -586,28 +586,10 @@ void FileWidget::discard() {
     QPushButton *discard =
       dialog->addButton(button, QMessageBox::AcceptRole);
     connect(discard, &QPushButton::clicked, [this, untracked] {
-      RepoView *view = RepoView::parentView(this);
-      git::Repository repo = mPatch.repo();
-      QString name = mPatch.name();
-      int strategy = GIT_CHECKOUT_FORCE;
-      if (untracked) {
-        QDir dir = repo.workdir();
-        if (QFileInfo(dir.filePath(name)).isDir()) {
-          if (dir.cd(name))
-            dir.removeRecursively();
-        } else {
-          dir.remove(name);
-        }
-      } else if (!repo.checkout(git::Commit(), nullptr, {name}, strategy)) {
-        LogEntry *parent = view->addLogEntry(mPatch.name(), FileWidget::tr("Discard"));
-        view->error(parent, FileWidget::tr("discard"), mPatch.name());
-      }
-
-      // FIXME: Work dir changed?
-      view->refresh();
+      emit discarded(mModelIndex);
     });
 
-    dialog->open();
+    dialog->exec();
 }
 
 void FileWidget::headerCheckStateChanged(int state)
@@ -618,13 +600,4 @@ void FileWidget::headerCheckStateChanged(int state)
         emit stageStateChanged(mModelIndex, git::Index::Staged);
     else
         emit stageStateChanged(mModelIndex, git::Index::Unstaged);
-
-//    mSupressStaging = true;
-//    bool staged = state == Qt::Checked ? true : false;
-//    for (int i = 0; i < mHunks.size(); ++i)
-//        mHunks[i]->setStaged(staged);
-//    mSupressStaging = false;
-
-//    // complete file must be staged
-//    stageHunks(true, staged);
 }

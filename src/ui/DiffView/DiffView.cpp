@@ -415,6 +415,15 @@ void DiffView::fetchMore()
         /*emit fileStageStateChanged(state);*/
         mDiffTreeModel->setData(index, state, Qt::CheckStateRole);
         });
+    connect(file, &FileWidget::discarded, [this](const QModelIndex& index) {
+        RepoView *view = RepoView::parentView(this);
+        if (!mDiffTreeModel->discard(index)) {
+            QString name = index.data(Qt::DisplayRole).toString();
+            LogEntry *parent = view->addLogEntry(name, FileWidget::tr("Discard"));
+            view->error(parent, FileWidget::tr("discard"), name);
+        }
+        view->refresh();
+    });
   }
 
   // Finish layout.

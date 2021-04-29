@@ -248,11 +248,15 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff,
     TreeProxy* proxy = static_cast<TreeProxy *>(unstagedFiles->model());
     DiffTreeModel* model = static_cast<DiffTreeModel*>(proxy->sourceModel());
     model->setDiff(diff);
+    // do not expand if to many files exist, it takes really long
+    // So do it only when there are less than 100
     if (diff.isValid() && diff.count() < 100)
         unstagedFiles->expandAll();
     else
         unstagedFiles->collapseAll();
 
+    // If statusDiff, there exist no staged/unstaged, but only
+    // the commited files must be shown
     if (!diff.isValid() || diff.isStatusDiff()) {
         mUnstagedCommitedFiles->setText(kUnstagedFiles);
         if (diff.isValid() && diff.count() < 100)

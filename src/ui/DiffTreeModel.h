@@ -39,15 +39,38 @@ public:
   void addChild(const QStringList& pathPart, int patchIndex, int indexFirstDifferent);
   git::Index::StagedState stageState(const git::Index& idx, ParentStageState searchingState);
   void childFiles(QStringList &files);
+  /*!
+   * \brief fileCount
+   * Counts all files below this node if this node is
+   * a folder, otherwise it returns 1 for the current
+   * node
+   * \return
+   */
   int fileCount() const;
+  /*!
+   * \brief patchIndex
+   * \return Current patch index. -1 means the node
+   * is a folder and so the index is not valid
+   */
   int patchIndex() const;
+  /*!
+   * \brief patchIndices
+   * Get all patch indices from the current Node
+   * and all his childs. If a Node is a folder,
+   * his index is -1 and then recursive all childs
+   * are checked and stored in \p list if they are
+   * valid indices (>=0)
+   * \param list Contains all patch indices
+   */
   void patchIndices(QList<int>& list);
 
 private:
   QString mName;
-  // Index of the patch in the diff
+  /*!
+   * Index of the patch in the diff
+   */
   int mPatchIndex{-1};
-  Node *mParent;
+  Node *mParent{nullptr};
   QList<Node *> mChildren;
 };
 
@@ -102,6 +125,13 @@ public:
     int role = Qt::EditRole) override;
 
   void createDiffTree();
+  /*!
+   * \brief discard
+   * Discard file or folder
+   * \param index
+   * \return
+   */
+  bool discard(const QModelIndex &index);
   /*!
    * Setting the data to the item
    * \brief setData

@@ -21,6 +21,7 @@ class TreeView : public QTreeView
 public:
   TreeView(QWidget *parent = nullptr);
 
+  void discard(const QModelIndex& index);
   void setModel(QAbstractItemModel *model) override;
   void onCustomContextMenu(const QPointF& point);
   bool eventFilter(QObject *obj, QEvent *event) override;
