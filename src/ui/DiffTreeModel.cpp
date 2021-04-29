@@ -257,7 +257,7 @@ bool DiffTreeModel::discard(const QModelIndex &index)
        }
     }
 
-    if (list.length() > 0) {
+    if (trackedPatches.length() > 0) {
         int strategy = GIT_CHECKOUT_FORCE;
         auto repo = mDiff.patch(list[0]).repo(); // does not matter which index is used all are in the same repo
         if (!repo.checkout(git::Commit(), nullptr, trackedPatches, strategy))
