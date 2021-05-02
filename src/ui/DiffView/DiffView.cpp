@@ -359,7 +359,7 @@ bool DiffView::canFetchMore()
 {
   auto dtw = dynamic_cast<DoubleTreeWidget*>(mParent); // for an unknown reason parent() and p are not the same
   assert(dtw);
-  return  mFiles.size() < mDiffTreeModel->fileCount(dtw->selectedIndex());
+  return  mDiff.isValid() && mFiles.size() < mDiffTreeModel->fileCount(dtw->selectedIndex());
 }
 
 /*!

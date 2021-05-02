@@ -149,6 +149,21 @@ QModelIndex DiffTreeModel::index(Node* n) const
   return createIndex(row, 0, n);
 }
 
+QModelIndex DiffTreeModel::index(const QString &name) const
+{
+    auto list = name.split("/");
+    if (list.length() == 0)
+        return QModelIndex();
+
+    for (auto c: mRoot->children()) {
+        auto n = c->child(list, 0);
+        if (n)
+            return index(n);
+    }
+
+    return QModelIndex();
+}
+
 QVariant DiffTreeModel::data(const QModelIndex &index, int role) const
 {
   if (!index.isValid())
@@ -452,4 +467,22 @@ void Node::patchIndices(QList<int>& list)
 int Node::patchIndex() const
 {
     return mPatchIndex;
+}
+
+Node* Node::child(const QStringList& name, int listIndex)
+{
+
+    if (name[listIndex] != mName)
+        return nullptr;
+
+    if (listIndex >= name.length() - 1) { // > should not occur
+        return this;
+    }
+
+    for (auto c: mChildren) {
+        Node* n = c->child(name, listIndex + 1);
+        if (n != nullptr)
+            return n;
+    }
+    return nullptr;
 }

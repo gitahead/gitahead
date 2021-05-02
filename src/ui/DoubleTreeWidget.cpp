@@ -182,7 +182,6 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
     });
 
     connect(mDiffTreeModel, &DiffTreeModel::checkStateChanged, this, &DoubleTreeWidget::treeModelStateChanged);
-
     connect(mDiffView, &DiffView::fileStageStateChanged, this, &DoubleTreeWidget::updateTreeModel);
 
     connect(stagedFiles, &TreeView::fileSelected, this, &DoubleTreeWidget::fileSelected);
@@ -235,12 +234,7 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff,
 									const QString &pathspec) {
     Q_UNUSED(pathspec);
 	// Remember selection.
-	QString name = file;
-	if (name.isEmpty()) {
-	  QModelIndexList indexes = stagedFiles->selectionModel()->selectedIndexes();
-	  if (!indexes.isEmpty())
-		name = indexes.first().data(Qt::EditRole).toString();
-	}
+    storeSelection();
 
     // Reset model.
     git::Tree tree = RepoView::parentView(this)->tree();
@@ -276,7 +270,7 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff,
     mDiffView->setDiff(diff);
 
 	// Restore selection.
-	//selectFile(name);
+    loadSelection();
 }
 
 void DoubleTreeWidget::updateTreeModel(git::Index::StagedState state)
@@ -293,6 +287,46 @@ void DoubleTreeWidget::updateTreeModel(git::Index::StagedState state)
 //      static_cast<TreeProxy*>(unstagedFiles->model())->setData(indexes.first(), state, Qt::CheckStateRole, true);
 //      return;
 //    }
+}
+
+void DoubleTreeWidget::storeSelection()
+{
+    QModelIndexList indexes = stagedFiles->selectionModel()->selectedIndexes();
+    if (!indexes.isEmpty()) {
+        mSelectedFile.filename = indexes.first().data(Qt::EditRole).toString();
+        mSelectedFile.stagedModel = true;
+      return;
+    }
+
+    indexes = unstagedFiles->selectionModel()->selectedIndexes();
+    if (!indexes.isEmpty()) {
+        mSelectedFile.filename = indexes.first().data(Qt::EditRole).toString();
+        mSelectedFile.stagedModel = false;
+        return;
+    }
+    mSelectedFile.filename = "";
+}
+
+void DoubleTreeWidget::loadSelection()
+{
+    if (mSelectedFile.filename == "")
+        return;
+
+    QModelIndex index = mDiffTreeModel->index(mSelectedFile.filename);
+    if (!index.isValid())
+        return;
+
+    mIgnoreSelectionChange = true;
+    if (mSelectedFile.stagedModel) {
+        TreeProxy* proxy = static_cast<TreeProxy *>(stagedFiles->model());
+        index = proxy->mapFromSource(index);
+        stagedFiles->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select);
+    } else {
+        TreeProxy* proxy = static_cast<TreeProxy *>(unstagedFiles->model());
+        index = proxy->mapFromSource(index);
+        unstagedFiles->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select);
+    }
+    mIgnoreSelectionChange = false;
 }
 
 void DoubleTreeWidget::treeModelStateChanged(const QModelIndex& index, int checkState) {
@@ -313,34 +347,6 @@ void DoubleTreeWidget::treeModelStateChanged(const QModelIndex& index, int check
 
 }
 
-void DoubleTreeWidget::selectFile(const QString &file)
-{
-    Q_UNUSED(file);
-//  if (file.isEmpty())
-//	return;
-
-//  QModelIndex index;
-//  QStringList path = file.split("/");
-//  QAbstractItemModel *model = mView->model();
-//  while (!path.isEmpty()) {
-//	QString elem = path.takeFirst();
-//	for (int row = 0; row < model->rowCount(index); ++row) {
-//	  QModelIndex current = model->index(row, 0, index);
-//	  if (model->data(current, Qt::DisplayRole).toString() == elem) {
-//		mView->selectionModel()->setCurrentIndex(current, kSelectionFlags);
-//		index = current;
-//		break;
-//	  }
-//	}
-//  }
-
-//  if (index.isValid())
-//	loadEditorContent(index);
-
-//  // FIXME: Selection does not draw correctly in the last column.
-//  // Scrolling down to an invisible index is also broken.
-}
-
 void DoubleTreeWidget::collapseCountChanged(int count)
 {
     TreeView* view = static_cast<TreeView*>(QObject::sender());
@@ -354,7 +360,7 @@ void DoubleTreeWidget::collapseCountChanged(int count)
 
 void DoubleTreeWidget::fileSelected(const QModelIndex &index) {
 
-	if (!index.isValid())
+    if (!index.isValid())
 		return;
 
 	QObject* obj = QObject::sender();

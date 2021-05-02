@@ -53,7 +53,6 @@ void TreeView::setModel(QAbstractItemModel *model)
   connect(this, &QTreeView::collapsed, this, &TreeView::itemCollapsed);
   connect(this, &QTreeView::expanded, this, &TreeView::itemExpanded);
   connect(model, &QAbstractItemModel::rowsInserted, this, QOverload<const QModelIndex &, int, int>::of(&TreeView::updateCollapseCount));
-
   setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, &TreeView::customContextMenuRequested, this, &TreeView::onCustomContextMenu);
 }

@@ -52,8 +52,9 @@ private:
       Diff,
   };
 
-  void selectFile(const QString& file);
   void treeModelStateChanged(const QModelIndex& index, int checkState);
+  void storeSelection();
+  void loadSelection();
   void fileSelected(const QModelIndex &index);
   void loadEditorContent(const QModelIndex &index);
   void toggleCollapseStagedFiles();
@@ -65,6 +66,15 @@ private:
   StatePushButton* collapseButtonStagedFiles{nullptr};
   StatePushButton* collapseButtonUnstagedFiles{nullptr};
   QLabel* mUnstagedCommitedFiles{nullptr};
+
+  struct SelectedFile {
+    QString filename;
+    bool stagedModel;
+  };
+
+  // Determines which file is selected.
+  // Is used to restore the selection after a new diff is set
+  struct SelectedFile mSelectedFile{"", false};
   /*!
    * needed to set the visibility. When the diff is a commit, no need for
    * a second TreeView. So the staged one gets hidden.
@@ -83,5 +93,6 @@ private:
    * Shows BlameEditor or DiffView
    */
   QStackedWidget* mFileView{nullptr};
+  bool mIgnoreSelectionChange{false};
 };
 #endif // DOUBLETREEWIDGET_H

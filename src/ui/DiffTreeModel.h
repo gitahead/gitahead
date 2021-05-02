@@ -63,6 +63,7 @@ public:
    * \param list Contains all patch indices
    */
   void patchIndices(QList<int>& list);
+  Node* child(const QStringList& name, int listIndex);
 
 private:
   QString mName;
@@ -115,6 +116,7 @@ public:
     int column,
     const QModelIndex &parent = QModelIndex()) const override;
   QModelIndex index(Node *n) const;
+  QModelIndex index(const QString &name) const;
 
   QVariant data(
     const QModelIndex &index,
