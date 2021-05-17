@@ -516,7 +516,7 @@
     <message>
         <location filename="../src/ui/DetailView.cpp" line="395"/>
         <source>Parents:</source>
-        <translation type="unfinished"></translation>
+        <translation>親:</translation>
     </message>
 </context>
 <context>
@@ -1145,17 +1145,17 @@
     <message>
         <location filename="../src/ui/DiffView.cpp" line="297"/>
         <source>Edit Working Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>作業コピーの編集</translation>
     </message>
     <message>
         <location filename="../src/ui/DiffView.cpp" line="308"/>
         <source>Edit New Revision</source>
-        <translation type="unfinished"></translation>
+        <translation>新リビジョンの編集</translation>
     </message>
     <message>
         <location filename="../src/ui/DiffView.cpp" line="323"/>
         <source>Edit Old Revision</source>
-        <translation type="unfinished"></translation>
+        <translation>古いリビジョンの編集</translation>
     </message>
 </context>
 <context>
@@ -3428,7 +3428,7 @@ Examples
     <message>
         <location filename="../src/ui/RepoView.cpp" line="408"/>
         <source>stage</source>
-        <translation type="unfinished"></translation>
+        <translation>ステージ</translation>
     </message>
     <message>
         <location filename="../src/ui/RepoView.cpp" line="415"/>
@@ -3495,7 +3495,7 @@ Examples
     <message>
         <location filename="../src/ui/RepoView.cpp" line="764"/>
         <source>initialize</source>
-        <translation type="unfinished"></translation>
+        <translation>初期化</translation>
     </message>
     <message>
         <location filename="../src/ui/RepoView.cpp" line="768"/>
@@ -3510,7 +3510,7 @@ Examples
     <message>
         <location filename="../src/ui/RepoView.cpp" line="775"/>
         <source>deinitialize</source>
-        <translation type="unfinished"></translation>
+        <translation>解除</translation>
     </message>
     <message>
         <location filename="../src/ui/RepoView.cpp" line="779"/>
@@ -4390,17 +4390,17 @@ This reverts commit %2.</source>
     <message>
         <location filename="../src/tools/ShowTool.cpp" line="19"/>
         <source>Finder</source>
-        <translation type="unfinished"></translation>
+        <translation>ファインダー</translation>
     </message>
     <message>
         <location filename="../src/tools/ShowTool.cpp" line="21"/>
         <source>Explorer</source>
-        <translation type="unfinished"></translation>
+        <translation>エクスプローラー</translation>
     </message>
     <message>
         <location filename="../src/tools/ShowTool.cpp" line="23"/>
         <source>Default File Browser</source>
-        <translation type="unfinished"></translation>
+        <translation>デフォルトのファイルブラウザ</translation>
     </message>
     <message>
         <location filename="../src/tools/ShowTool.cpp" line="37"/>
@@ -4794,12 +4794,12 @@ This reverts commit %2.</source>
     <message>
         <location filename="../src/ui/ToolBar.cpp" line="806"/>
         <source>Merge</source>
-        <translation type="unfinished">マージ</translation>
+        <translation>マージ</translation>
     </message>
     <message>
         <location filename="../src/ui/ToolBar.cpp" line="811"/>
         <source>Rebase</source>
-        <translation type="unfinished">リベース</translation>
+        <translation>リベース</translation>
     </message>
     <message>
         <location filename="../src/ui/ToolBar.cpp" line="821"/>
