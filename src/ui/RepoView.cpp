@@ -1056,6 +1056,15 @@ QFuture<git::Result> RepoView::fetch(
     RemoteCallbacks::Receive, entry, url, remote.name(), mWatcher, mRepo);
   connect(mCallbacks, &RemoteCallbacks::referenceUpdated,
           this, &RepoView::notifyReferenceUpdated);
+  connect(mCallbacks, &RemoteCallbacks::credentialsCanceled, [this] {
+    git::Config config = mRepo.appConfig();
+    bool defaultValue = Settings::instance()->value("global/autofetch/enable").toBool();
+    if (config.value<bool>("autofetch.enable", defaultValue)) {
+      // Disable autofetch; don't prompt for credentials again.
+      config.setValue("autofetch.enable", false);
+      mFetchTimer.stop();
+    }
+  });
 
   entry->setBusy(true);
   mWatcher->setFuture(QtConcurrent::run([this, remote, tags, submodules, prune] {

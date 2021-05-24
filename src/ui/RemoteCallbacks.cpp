@@ -311,6 +311,7 @@ void RemoteCallbacks::credentialsImpl(
   QString scheme = QUrl(url).scheme().toLower();
   bool https = (scheme == "http" || scheme == "https");
   dialog.setWindowTitle(https ? tr("HTTPS Credentials") : tr("SSH Passphrase"));
+  QObject::connect(&dialog, &QDialog::rejected, this, &RemoteCallbacks::credentialsCanceled);
 
   QLineEdit *usernameField = https ? new QLineEdit(username, &dialog) : nullptr;
   QLineEdit *passwordField = new QLineEdit(&dialog);
