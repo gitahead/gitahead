@@ -299,10 +299,9 @@ QByteArray Patch::apply(
     if (git_patch_get_hunk(&hunk, &lines, d.data(), i))
       continue;
 
-    // FIXME: Incorrectly prepends when there are zero lines
-    // of context and there's an addition after the first line.
     int index = hunk->old_start ? hunk->old_start - 1 : 0;
-    bool prepend = (index == 0);
+    bool prepend = false;
+    int pos = 0;
     for (int j = 0; j < lines; ++j) {
       const git_diff_line *line = nullptr;
       if (git_patch_get_line_in_hunk(&line, d.data(), i, j))
@@ -310,6 +309,8 @@ QByteArray Patch::apply(
 
       if (line->old_lineno > 0)
         index = line->old_lineno - 1;
+      if (line->content_offset == 0)
+        prepend = true;
 
       switch (line->origin) {
         case GIT_DIFF_LINE_CONTEXT:
@@ -318,7 +319,7 @@ QByteArray Patch::apply(
 
         case GIT_DIFF_LINE_ADDITION: {
           QByteArray text(line->content, line->content_len);
-          image[index].insert(prepend ? 0 : image.at(index).size(), text);
+          image[index].insert(prepend ? pos++ : image.at(index).size(), text);
           break;
         }
 
