@@ -534,10 +534,13 @@ void ReferenceView::contextMenuEvent(QContextMenuEvent *event)
   }
 
   if (ref.isRemoteBranch()) {
-    menu.addAction(tr("New Local Branch"), [this, ref] {
-      QString local = ref.name().section('/', 1);
+    QString local = ref.name().section('/', 1);
+    QAction *newLocalBranch = menu.addAction(tr("New Local Branch %1").arg(local),
+    [this, ref, local] {
       RepoView::parentView(this)->createBranch(local, ref.target(), ref, true);
     });
+
+    newLocalBranch->setEnabled(!view->repo().lookupBranch(local, GIT_BRANCH_LOCAL));
   }
 
   menu.addSeparator();
