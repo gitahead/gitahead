@@ -263,6 +263,7 @@ public:
   void applyStash(int index = 0);
   void dropStash(int index = 0);
   void popStash(int index = 0);
+  bool canStash() const;
 
   // tag
   void promptToAddTag(const git::Commit &commit);

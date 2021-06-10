@@ -992,7 +992,7 @@ void ToolBar::updateHistory()
 void ToolBar::updateStash()
 {
   RepoView *view = currentView();
-  mStashButton->setEnabled(view && view->isWorkingDirectoryDirty());
+  mStashButton->setEnabled(view && view->canStash());
   mStashPopButton->setEnabled(view && view->repo().stashRef().isValid());
 }
 
