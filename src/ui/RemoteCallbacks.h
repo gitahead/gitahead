@@ -68,6 +68,7 @@ public:
 
 signals:
   void referenceUpdated(const QString &name);
+  void credentialsCanceled();
 
   // These are implementation details.
   void queueCredentials(
