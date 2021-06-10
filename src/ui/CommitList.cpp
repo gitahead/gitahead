@@ -15,8 +15,8 @@
 #include "RepoView.h"
 #include "app/Application.h"
 #include "conf/Settings.h"
+#include "dialogs/DiffFileDialog.h"
 #include "dialogs/MergeDialog.h"
-#include "index/Index.h"
 #include "git/Branch.h"
 #include "git/Commit.h"
 #include "git/Config.h"
@@ -27,12 +27,16 @@
 #include "git/Signature.h"
 #include "git/TagRef.h"
 #include "git/Tree.h"
+#include "index/Index.h"
+#include "log/LogEntry.h"
 #include <QAbstractListModel>
 #include <QApplication>
+#include <QFileInfo>
 #include <QMenu>
 #include <QPainter>
 #include <QPainterPath>
 #include <QPushButton>
+#include <QSaveFile>
 #include <QStyledItemDelegate>
 #include <QTextLayout>
 #include <QtConcurrent>
@@ -1472,12 +1476,15 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
 
   } else {
     // multiple selection
-    bool anyStarred = false;
+    bool allValid = true, anyStarred = false;
     foreach (const QModelIndex &index, selectionModel()->selectedIndexes()) {
-      if (index.data(CommitRole).isValid() && index.data(CommitRole).value<git::Commit>().isStarred()) {
-        anyStarred = true;
-        break;
+      QVariant variant = index.data(CommitRole);
+      if (!variant.isValid()) {
+        allValid = false;
+        continue;
       }
+      if (variant.value<git::Commit>().isStarred())
+        anyStarred = true;
     }
 
     menu.addAction(anyStarred ? tr("Unstar") : tr("Star"), [this, anyStarred] {
@@ -1485,6 +1492,14 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
         if (index.data(CommitRole).isValid())
           index.data(CommitRole).value<git::Commit>().setStarred(!anyStarred);
     });
+
+    QAction *saveDiffAs = menu.addAction(tr("Save Diff As..."), [this] {
+      QString path = DiffFileDialog::getSaveFileName(this);
+      if (!path.isEmpty())
+        saveDiff(path);
+    });
+
+    saveDiffAs->setEnabled(allValid);
 
     // single selection
     if (selectionModel()->selectedIndexes().size() <= 1) {
@@ -1810,6 +1825,22 @@ bool CommitList::isStar(const QModelIndex &index, const QPoint &pos)
   QStyleOptionViewItem options = viewOptions();
   options.rect = visualRect(index);
   return delegate->starRect(options, index).contains(pos);
+}
+
+void CommitList::saveDiff(const QString &path) const
+{
+  RepoView *view = RepoView::parentView(this);
+  LogEntry *entry = view->addLogEntry(path, tr("Save Diff As"));
+
+  QSaveFile file(path);
+  if (file.open(QSaveFile::WriteOnly)) {
+    QByteArray buffer = selectedDiff().toBuffer();
+    if (file.write(buffer) != -1)
+      file.commit();
+  }
+
+  if (file.error() != QSaveFile::NoError)
+    view->error(entry, tr("save diff"), QFileInfo(path).fileName(), file.errorString());
 }
 
 #include "CommitList.moc"

@@ -214,6 +214,9 @@ public:
   // cherry-pick
   void cherryPick(const git::Commit &commit);
 
+  // diff
+  void promptToApplyDiff();
+
   // push
   void promptToForcePush(
     const git::Remote &remote = git::Remote(),
@@ -347,6 +350,8 @@ private:
     bool init = false);
 
   bool checkForConflicts(LogEntry *parent, const QString &action);
+
+  void applyDiff(const QString &path);
 
   git::Repository mRepo;
 
