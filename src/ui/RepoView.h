@@ -270,7 +270,7 @@ public:
     const git::Commit &commit,
     git_reset_t type,
     const git::Commit &commitToAmend = git::Commit());
-  void reset(
+  bool reset(
     const git::Commit &commit,
     git_reset_t type,
     const git::Commit &commitToAmend = git::Commit());

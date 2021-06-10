@@ -1972,7 +1972,16 @@ void RepoView::checkout(
     QPushButton *resetButton =
       dialog->addButton(tr("Reset Local Branch"), QMessageBox::AcceptRole);
     connect(resetButton, &QPushButton::clicked, [this, ref, local] {
-      createBranch(local, ref.target(), ref, true, true);
+      git::Branch head = mRepo.head();
+      if (head.isValid() && head.name() == local) {
+        // The local branch is currently checked out and cannot be replaced.
+        // We'll just reset it instead.
+        if (reset(ref.target(), GIT_RESET_HARD))
+          head.setUpstream(ref);
+      } else {
+        // Replace local branch.
+        createBranch(local, ref.target(), ref, true, true);
+      }
     });
   } else {
     dialog->setText(
@@ -2247,7 +2256,7 @@ void RepoView::promptToReset(
   dialog->open();
 }
 
-void RepoView::reset(
+bool RepoView::reset(
   const git::Commit &commit,
   git_reset_t type,
   const git::Commit &commitToAmend)
@@ -2259,8 +2268,12 @@ void RepoView::reset(
   QString text = tr("%1 to %2").arg(head.name(), commit.link());
   LogEntry *entry = addLogEntry(text, title);
 
-  if (!commit.reset(type))
+  if (!commit.reset(type)) {
     error(entry, commitToAmend ? tr("amend") : tr("reset"), head.name());
+    return false;
+  }
+
+  return true;
 }
 
 void RepoView::updateSubmodules(
