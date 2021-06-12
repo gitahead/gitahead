@@ -740,13 +740,13 @@
         <location filename="../src/ui/DetailView.cpp" line="1049"/>
         <source>Update %1</source>
         <translatorcomment>Comentário padrão para o commit...</translatorcomment>
-        <translation>Modificações efetuadas em: %1</translation>
+        <translation>Modificação efetuada em: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="1053"/>
         <source>Update %1 and %2</source>
-        <translatorcomment>Modificações efetuadas em  %1 e %2</translatorcomment>
-        <translation>Modificações efetuadas em %1 e %2</translation>
+        <translatorcomment>Comentário padrão para o commit...</translatorcomment>
+        <translation>Modificações efetuadas em: %1 e %2</translation>
     </message>
     <message>
         <location filename="../src/ui/DetailView.cpp" line="1057"/>
@@ -3637,58 +3637,69 @@ Exemplos
     <message>
         <location filename="../src/ui/RemoteCallbacks.cpp" line="163"/>
         <source>remote: %1</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Remoto...</translatorcomment>
+        <translation>remoto: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/RemoteCallbacks.cpp" line="222"/>
         <source>failed to execute pre-push hook: bash not found</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Falha ao executar o pré-push hook: bash não encontrado.</translatorcomment>
+        <translation>falha ao executar o pré-push hook: bash não encontrado</translation>
     </message>
     <message>
         <location filename="../src/ui/RemoteCallbacks.cpp" line="256"/>
         <source>failed to execute pre-push hook: %1</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>falha ao executar o pré-push hook...</translatorcomment>
+        <translation>falha ao executar o pré-push hook: %1</translation>
     </message>
     <message>
         <location filename="../src/ui/RemoteCallbacks.cpp" line="284"/>
         <source>HTTPS Credentials</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>HTTPS credenciais...</translatorcomment>
+        <translation>HTTPS credenciais</translation>
     </message>
     <message>
         <location filename="../src/ui/RemoteCallbacks.cpp" line="284"/>
         <source>SSH Passphrase</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Senha SSH...</translatorcomment>
+        <translation>Senha SSH</translation>
     </message>
     <message>
         <location filename="../src/ui/RemoteCallbacks.cpp" line="297"/>
         <source>Username:</source>
-        <translation type="unfinished">Nome do usuário:</translation>
+        <translatorcomment>Nome do usuário...</translatorcomment>
+        <translation>Nome do usuário:</translation>
     </message>
     <message>
         <location filename="../src/ui/RemoteCallbacks.cpp" line="298"/>
         <source>Password:</source>
-        <translation type="unfinished">Senha:</translation>
+        <translatorcomment>Senha...</translatorcomment>
+        <translation>Senha:</translation>
     </message>
     <message>
         <location filename="../src/ui/RemoteCallbacks.cpp" line="298"/>
         <source>Passphrase:</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Frase para a senha...</translatorcomment>
+        <translation>Frase-senha:</translation>
     </message>
     <message>
         <location filename="../src/ui/RemoteCallbacks.cpp" line="313"/>
         <source>authentication canceled</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>autenticação cancelada...</translatorcomment>
+        <translation>autenticação cancelada</translation>
     </message>
     <message>
         <location filename="../src/ui/RemoteCallbacks.cpp" line="412"/>
         <source>From %1</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Caminho inicial...</translatorcomment>
+        <translation>A partir de %1</translation>
     </message>
     <message>
         <location filename="../src/ui/RemoteCallbacks.cpp" line="412"/>
         <location filename="../src/ui/RemoteCallbacks.cpp" line="455"/>
         <source>To %1</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Caminho final...</translatorcomment>
+        <translation>Para %1</translation>
     </message>
 </context>
 <context>
@@ -3696,17 +3707,20 @@ Exemplos
     <message>
         <location filename="../src/dialogs/RemoteDialog.cpp" line="46"/>
         <source>Push all tags</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Envia todas as tags...</translatorcomment>
+        <translation>Enviar todas as tags</translation>
     </message>
     <message>
         <location filename="../src/dialogs/RemoteDialog.cpp" line="46"/>
         <source>Update existing tags</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Atualiza as tags existentes...</translatorcomment>
+        <translation>Atualize as tags existentes</translation>
     </message>
     <message>
         <location filename="../src/dialogs/RemoteDialog.cpp" line="54"/>
         <source>Merge</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Unir...</translatorcomment>
+        <translation>Mesclar</translation>
     </message>
     <message>
         <location filename="../src/dialogs/RemoteDialog.cpp" line="55"/>
@@ -4190,7 +4204,8 @@ Exemplos
     <message>
         <location filename="../src/ui/RepoView.cpp" line="1200"/>
         <source>Rebase</source>
-        <translation type="unfinished">Rebase</translation>
+        <translatorcomment>Rebase...</translatorcomment>
+        <translation>Rebase</translation>
     </message>
     <message>
         <location filename="../src/ui/RepoView.cpp" line="1201"/>
@@ -5394,7 +5409,8 @@ This reverts commit %2.</source>
     <message>
         <location filename="../src/ui/ToolBar.cpp" line="875"/>
         <source>Configure Settings</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Abre uma Janela com as configurações da Aplicação...</translatorcomment>
+        <translation>Configurações</translation>
     </message>
     <message>
         <location filename="../src/ui/ToolBar.cpp" line="884"/>
