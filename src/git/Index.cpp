@@ -422,15 +422,14 @@ Id Index::indexId(const QString &path, uint32_t *mode) const
 
 Id Index::workdirId(const QString &path, uint32_t *mode) const
 {
-  Repository repo(git_index_owner(d->index));
+  const git_index_entry *entry = git_index_get_bypath(d->index, path.toUtf8(), GIT_INDEX_ENTRY_STAGEMASK);
 
-  git_oid id;
-  if (int error = git_repository_hashfile(
-        &id, repo, path.toUtf8(), GIT_OBJECT_BLOB, nullptr))
-    return (error == GIT_EUSER) ? Id::invalidId() : Id();
+  if (!entry)
+    return Id();
 
   if (mode) {
     *mode = GIT_FILEMODE_BLOB;
+    Repository repo(git_index_owner(d->index));
     QFileInfo info(repo.workdir().filePath(path));
 #ifndef Q_OS_WIN
     if (info.isExecutable())
@@ -440,7 +439,7 @@ Id Index::workdirId(const QString &path, uint32_t *mode) const
       *mode = GIT_FILEMODE_LINK;
   }
 
-  return id;
+  return entry->id;
 }
 
 } // namespace git
