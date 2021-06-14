@@ -23,7 +23,11 @@ class Application : public QApplication
   Q_OBJECT
 
 public:
-  Application(int &argc, char **argv, bool haltOnParseError = false);
+  Application(
+    int &argc,
+    char **argv,
+    bool haltOnParseError = false,
+    const QString &defaultTheme = QString());
 
   void autoUpdate();
   bool restoreWindows();

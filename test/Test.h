@@ -18,14 +18,10 @@
 #define TEST_MAIN(TestClass) \
 int main(int argc, char *argv[]) \
 { \
-  std::vector<const char*> new_argv(argv, argv + argc); \
-  new_argv.push_back("--theme Default"); \
-  argc += 2; \
-  argv = const_cast<char**>(new_argv.data()); \
-  Application app(argc, argv); \
+  Application app(argc, argv, false, "Default"); \
   TestClass test; \
   QTEST_SET_MAIN_SOURCE_PATH \
-  return QTest::qExec(&test, {}); \
+  return QTest::qExec(&test, app.arguments()); \
 }
 
 class RepoView;
