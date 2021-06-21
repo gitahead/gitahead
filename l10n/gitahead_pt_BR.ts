@@ -2497,8 +2497,8 @@ Exemplos
     <message>
         <location filename="../src/ui/MainWindow.cpp" line="560"/>
         <source>up-to-date</source>
-        <translatorcomment>atualizado até à data...</translatorcomment>
-        <translation>atualizado até à data</translation>
+        <translatorcomment>Repositório local atualizado.</translatorcomment>
+        <translation>atualizado</translation>
     </message>
     <message>
         <location filename="../src/ui/MainWindow.cpp" line="561"/>
@@ -3363,7 +3363,7 @@ Exemplos
         <location filename="../src/ui/PathspecWidget.cpp" line="115"/>
         <source>Filter by Path</source>
         <translatorcomment>FIltra por diretório...</translatorcomment>
-        <translation>FIltrar por Diretório</translation>
+        <translation>FIltrar por diretório</translation>
     </message>
 </context>
 <context>
@@ -3725,72 +3725,80 @@ Exemplos
     <message>
         <location filename="../src/dialogs/RemoteDialog.cpp" line="55"/>
         <source>Rebase</source>
-        <translation type="unfinished">Rebase</translation>
+        <translatorcomment>Isso move toda a ramificação de recurso para começar na ponta da ramificação específicada, mas em vez de usar um commit de mesclagem, o rebase reescreve o histórico do projeto criando commits totalmente novos para cada commit na ramificação original, diferenciando-se do (Merge) que gera um commit da mesclagem.</translatorcomment>
+        <translation>Rebase</translation>
     </message>
     <message>
         <location filename="../src/dialogs/RemoteDialog.cpp" line="56"/>
         <source>Merge (No Fast-forward)</source>
-        <translation type="unfinished">Mesclar (sem avanço rápido)</translation>
+        <translatorcomment>Mescla sem avanço rápido...</translatorcomment>
+        <translation>Mesclar (sem avanço rápido)</translation>
     </message>
     <message>
         <location filename="../src/dialogs/RemoteDialog.cpp" line="57"/>
         <source>Merge (Fast-forward Only)</source>
-        <translation type="unfinished">Mesclar (avanço rápido)</translation>
+        <translatorcomment>Mescla avançando...</translatorcomment>
+        <translation>Mesclar (avançar apenas)</translation>
     </message>
     <message>
         <location filename="../src/dialogs/RemoteDialog.cpp" line="67"/>
         <source>Set upstream</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Seta o upstream...</translatorcomment>
+        <translation>Setar upstream</translation>
     </message>
     <message>
         <location filename="../src/dialogs/RemoteDialog.cpp" line="68"/>
         <source>Force</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Força...</translatorcomment>
+        <translation>Forçar</translation>
     </message>
     <message>
         <location filename="../src/dialogs/RemoteDialog.cpp" line="81"/>
         <source>Remote Reference:</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Referência remota...</translatorcomment>
+        <translation>Referência remota:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/RemoteDialog.cpp" line="106"/>
         <source>Prune references</source>
-        <translation type="unfinished"></translation>
+        <translation>referências prune</translation>
     </message>
     <message>
         <location filename="../src/dialogs/RemoteDialog.cpp" line="113"/>
         <source>Fetch</source>
-        <translation type="unfinished">Fetch</translation>
+        <translation>Fetch</translation>
     </message>
     <message>
         <location filename="../src/dialogs/RemoteDialog.cpp" line="117"/>
         <source>Pull</source>
-        <translation type="unfinished">Pull</translation>
+        <translatorcomment>Baixa as alterações...</translatorcomment>
+        <translation>Pull</translation>
     </message>
     <message>
         <location filename="../src/dialogs/RemoteDialog.cpp" line="121"/>
         <source>Push</source>
-        <translation type="unfinished">Push</translation>
+        <translatorcomment>Envia as alterações...</translatorcomment>
+        <translation>Push</translation>
     </message>
     <message>
         <location filename="../src/dialogs/RemoteDialog.cpp" line="127"/>
         <source>Remote:</source>
-        <translation type="unfinished"></translation>
+        <translation>Remoto:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/RemoteDialog.cpp" line="129"/>
         <source>Reference:</source>
-        <translation type="unfinished">Referência:</translation>
+        <translation>Referência:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/RemoteDialog.cpp" line="131"/>
         <source>Action:</source>
-        <translation type="unfinished">Açao:</translation>
+        <translation>Açao:</translation>
     </message>
     <message>
         <location filename="../src/dialogs/RemoteDialog.cpp" line="140"/>
         <source>Advanced:</source>
-        <translation type="unfinished">Avançado:</translation>
+        <translation>Avançado:</translation>
     </message>
 </context>
 <context>
@@ -3798,17 +3806,17 @@ Exemplos
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="43"/>
         <source>Remote Repository URL</source>
-        <translation type="unfinished"></translation>
+        <translation>Repositório remoto URL</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="45"/>
         <source>Choose protocol to authenticate with the remote.</source>
-        <translation type="unfinished"></translation>
+        <translation>Escolha o protocolo para autenticar-se com o remoto.</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="46"/>
         <source>Enter the URL of the remote repository or browse for a local directory</source>
-        <translation type="unfinished"></translation>
+        <translation>Digite a URL do repositório remoto ou navegue até um diretório local</translation>
     </message>
     <message>
         <location filename="../src/dialogs/CloneDialog.cpp" line="74"/>
@@ -3872,7 +3880,7 @@ Exemplos
     <message>
         <location filename="../src/ui/SideBar.cpp" line="338"/>
         <source>Connecting</source>
-        <translation type="unfinished">Conectando</translation>
+        <translation>Conectando</translation>
     </message>
     <message>
         <location filename="../src/ui/SideBar.cpp" line="361"/>
@@ -3896,22 +3904,22 @@ Exemplos
         <location filename="../src/ui/SideBar.cpp" line="378"/>
         <location filename="../src/ui/SideBar.cpp" line="387"/>
         <source>none</source>
-        <translation type="unfinished"></translation>
+        <translation>nenhum</translation>
     </message>
     <message>
         <location filename="../src/dialogs/StartDialog.cpp" line="112"/>
         <source>Clone Repository</source>
-        <translation type="unfinished">Clonar repositório</translation>
+        <translation>Clonar repositório</translation>
     </message>
     <message>
         <location filename="../src/dialogs/StartDialog.cpp" line="113"/>
         <source>Open Existing Repository</source>
-        <translation type="unfinished"></translation>
+        <translation>Abrir repositório existente</translation>
     </message>
     <message>
         <location filename="../src/dialogs/StartDialog.cpp" line="114"/>
         <source>Initialize New Repository</source>
-        <translation type="unfinished"></translation>
+        <translation>Inicializar novo repositório</translation>
     </message>
 </context>
 <context>
