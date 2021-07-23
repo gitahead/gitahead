@@ -35,5 +35,5 @@ endif()
 if(NOT USE_SYSTEM_LIBGIT2)
   add_subdirectory(libgit2)
   target_include_directories(
-    git2 INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/libgit2/include)
+    libgit2 INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/libgit2/include)
 endif()
