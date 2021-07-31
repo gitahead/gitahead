@@ -79,7 +79,7 @@ jobs:
         uses: jurplel/install-qt-action@v2.13.0
         timeout-minutes: 10
         with:
-          version: 5.15.4
+          version: 5.15.2
           target: desktop
           host: ${{ matrix.env.qtplatform }}
           install-deps: true
