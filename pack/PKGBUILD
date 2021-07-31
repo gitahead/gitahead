@@ -23,7 +23,6 @@ sha256sums=(
 
 prepare() {
   cd "$srcdir/gitahead"
-  patch --forward --strip=1 --input="../gitahead.patch"
 
   git submodule update --init --recursive
 }
