@@ -143,7 +143,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 # Install SSL libraries.
-if(NOT APPLE)
+if(FALSE) # NOT APPLE)
   if(WIN32)
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
       set(SSL_LIB_SUFFIX "-1_1-x64.dll")
