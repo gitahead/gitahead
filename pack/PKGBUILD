@@ -56,5 +56,5 @@ package() {
   install -D -m644 "${pkgdir}/usr/share/gitahead/Resources/GitAhead.iconset/icon_512x512.png" "${pkgdir}/usr/share/icons/hicolor/512x512/apps/gitahead.png"
 
   install -D -m644 ${srcdir}/gitahead/LICENSE.md "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
-  install -D -m644 "${srcdir}/gitahead/rsrc/gitahead.desktop" "${pkgdir}/usr/share/applications/gitahead.desktop"
+  install -D -m644 "${srcdir}/gitahead/rsrc/linux/io.github.gitahead.gitahead.desktop" "${pkgdir}/usr/share/applications/gitahead.desktop"
 }
