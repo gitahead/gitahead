@@ -9,6 +9,7 @@
 
 #include "FileContextMenu.h"
 #include "RepoView.h"
+#include "IgnoreDialog.h"
 #include "conf/Settings.h"
 #include "dialogs/SettingsDialog.h"
 #include "git/Index.h"
@@ -43,7 +44,9 @@ FileContextMenu::FileContextMenu(
   const QStringList &files,
   const git::Index &index,
   QWidget *parent)
-  : QMenu(parent)
+  : QMenu(parent),
+    mFiles(files),
+    mView(view)
 {
   // Show diff and merge tools for the currently selected diff.
   git::Diff diff = view->diff();
@@ -206,10 +209,8 @@ FileContextMenu::FileContextMenu(
     remove->setEnabled(!untracked.isEmpty());
 
     // Ignore
-    QAction *ignore = addAction(tr("Ignore"), [view, files] {
-      foreach (const QString &file, files)
-        view->ignore(file);
-    });
+    QAction *ignore = addAction(tr("Ignore"));
+    connect(ignore, &QAction::triggered, this, &FileContextMenu::ignoreFile);
 
     if (!diff.isValid()) {
       ignore->setEnabled(false);
@@ -230,7 +231,7 @@ FileContextMenu::FileContextMenu(
     // Checkout
     QAction *checkout = addAction(tr("Checkout"), [this, view, files] {
       view->checkout(view->commits().first(), files);
-      view->setViewMode(RepoView::Diff);
+      view->setViewMode(RepoView::DoubleTree);
     });
 
     checkout->setEnabled(!view->repo().isBare());
@@ -272,7 +273,7 @@ FileContextMenu::FileContextMenu(
     QString abs = QDir::toNativeSeparators(dir.filePath(file));
     QString name = QFileInfo(file).fileName();
     QMenu *copy = addMenu(tr("Copy File Name"));
-    if (name != file) {
+    if (!name.isEmpty() && name != file) {
       copy->addAction(name, [name] {
         QApplication::clipboard()->setText(name);
       });
@@ -326,6 +327,25 @@ FileContextMenu::FileContextMenu(
       exeAct->setEnabled(exe || mode == GIT_FILEMODE_BLOB);
     }
   }
+}
+
+void FileContextMenu::ignoreFile()
+{
+  QString ignore;
+
+  if (!mFiles.count())
+      return;
+
+  for (int i=0; i < mFiles.count() - 1; i++) {
+     ignore.append(mFiles[i] + "\n");
+  }
+  ignore.append(mFiles.last());
+
+ IgnoreDialog d(ignore, this);
+ if (d.exec()) {
+    if (!ignore.isEmpty())
+        mView->ignore(ignore);
+ }
 }
 
 void FileContextMenu::addExternalToolsAction(

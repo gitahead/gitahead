@@ -22,6 +22,8 @@ class Commit;
 
 class PullRequestDialog : public QDialog
 {
+  Q_OBJECT
+
 public:
   PullRequestDialog(RepoView *view);
 

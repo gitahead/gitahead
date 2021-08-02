@@ -19,15 +19,21 @@ class RepoView;
 
 class FileContextMenu : public QMenu
 {
+  Q_OBJECT
+
 public:
   FileContextMenu(
     RepoView *view,
     const QStringList &files,
     const git::Index &index = git::Index(),
     QWidget *parent = nullptr);
-
+private slots:
+  void ignoreFile();
 private:
   void addExternalToolsAction(const QList<ExternalTool *> &tools);
+
+  RepoView *mView;
+  const QStringList &mFiles;
 };
 
 #endif

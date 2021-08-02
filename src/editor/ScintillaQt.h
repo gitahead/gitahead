@@ -22,6 +22,7 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <memory>
 
 #include "Scintilla.h"
 #include "Platform.h"
@@ -39,10 +40,13 @@
 #include "LineMarker.h"
 #include "Style.h"
 #include "AutoComplete.h"
+#include "UniqueString.h"
 #include "ViewStyle.h"
 #include "CharClassify.h"
 #include "Decoration.h"
 #include "CaseFolder.h"
+#include "ILoader.h"
+#include "CharacterCategory.h"
 #include "Document.h"
 #include "Selection.h"
 #include "PositionCache.h"
@@ -61,12 +65,10 @@
 #include <QAbstractScrollArea>
 #include <QAction>
 #include <QClipboard>
+#include <QElapsedTimer>
 #include <QPaintEvent>
-#include <QTime>
 
-#ifdef SCI_NAMESPACE
 namespace Scintilla {
-#endif
 
 class ScintillaQt : public QAbstractScrollArea, public ScintillaBase
 {
@@ -135,6 +137,9 @@ protected:
   void inputMethodEvent(QInputMethodEvent *event) override;
   QVariant inputMethodQuery(Qt::InputMethodQuery query) const override;
   void scrollContentsBy(int dx, int dy) override {}
+  static sptr_t DirectFunction(
+    sptr_t ptr, unsigned int iMessage, uptr_t wParam, sptr_t lParam);
+  sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;
 
 private:
   void PasteFromMode(QClipboard::Mode);
@@ -147,10 +152,10 @@ private:
   void Finalise() override;
   bool DragThreshold(Point ptStart, Point ptNow) override;
   bool ValidCodePage(int codePage) const override;
-  void ScrollText(int linesToMove) override;
+  void ScrollText(Sci::Line linesToMove) override;
   void SetVerticalScrollPos() override;
   void SetHorizontalScrollPos() override;
-  bool ModifyScrollBars(int nMax, int nPage) override;
+  bool ModifyScrollBars(Sci::Line nMax, Sci::Line nPage) override;
   void ReconfigureScrollBars() override;
   void Copy() override;
   void CopyToClipboard(const SelectionText &selectedText) override;
@@ -158,7 +163,6 @@ private:
   void ClaimSelection() override;
   void NotifyChange() override;
   void NotifyParent(SCNotification scn) override;
-  bool FineTickerAvailable() override;
   bool FineTickerRunning(TickReason reason) override;
   void FineTickerStart(TickReason reason, int millis, int tolerance) override;
   void FineTickerCancel(TickReason reason) override;
@@ -170,14 +174,10 @@ private:
   std::string CaseMapString(const std::string &s, int caseMapping) override;
   void CreateCallTipWindow(PRectangle rc) override;
   void AddToPopUp(const char *label, int cmd = 0, bool enabled = true) override;
-  sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;
   sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;
 
-  static sptr_t DirectFunction(
-    sptr_t ptr, unsigned int iMessage, uptr_t wParam, sptr_t lParam);
-
 private:
-  QTime time;
+  QElapsedTimer timer;
 
   int preeditPos = -1;
   QString preeditString;
@@ -188,12 +188,8 @@ private:
   int vPage = 0, hPage = 0; // Scroll bar page sizes.
 
   bool haveMouseCapture = false;
-
-  friend class ScintillaEditBase;
 };
 
-#ifdef SCI_NAMESPACE
-}
-#endif
+} // namespace Scintilla
 
-#endif // SCINTILLAQT_H
+#endif

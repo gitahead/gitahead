@@ -121,9 +121,55 @@ int Submodule::status() const
   return status;
 }
 
+Result Submodule::reset(Remote::Callbacks *callbacks,
+                      git_reset_t type) const
+{
+    git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
+    opts.checkout_strategy |= GIT_CHECKOUT_DISABLE_PATHSPEC_MATCH;
+
+    git_repository *repo;
+    if (git_submodule_open(&repo, d.data()) < 0) {
+        // TODO: how to show message?
+        // problem
+        return -1;
+    }
+
+
+
+    /* Look up the target commit in the submodule. */
+    git_object* commit = nullptr;
+    int error;
+    // reset submodule to head
+    error = git_object_lookup(&commit, repo, git_submodule_index_id(d.data()), GIT_OBJECT_COMMIT);
+    if (error < 0) {
+        // if an error occurs commit must not be freed
+        // TODO: how to show message?
+        return !error;
+    }
+
+    // checkout a new detached head. So no other branch will be reset to the desired commit
+    error = git_repository_set_head_detached(repo, git_submodule_index_id(d.data()));
+    if (error < 0) {
+        // if an error occurs commit must not be freed
+        // TODO: how to show message?
+        return !error;
+    }
+
+    // for debugging
+    //const git_signature * signature = git_commit_author(reinterpret_cast<const git_commit*>(commit));
+
+
+    error = git_reset(repo, commit, type, &opts);
+
+    git_object_free(commit);
+    return !error;
+}
+
 Result Submodule::update(Remote::Callbacks *callbacks, bool init)
 {
   git_submodule_update_options opts = GIT_SUBMODULE_UPDATE_OPTIONS_INIT;
+  opts.fetch_opts.callbacks.connect = &Remote::Callbacks::connect;
+  opts.fetch_opts.callbacks.disconnect = &Remote::Callbacks::disconnect;
   opts.fetch_opts.callbacks.sideband_progress = &Remote::Callbacks::sideband;
   opts.fetch_opts.callbacks.credentials = &Remote::Callbacks::credentials;
   opts.fetch_opts.callbacks.certificate_check = &Remote::Callbacks::certificate;

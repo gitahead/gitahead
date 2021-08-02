@@ -12,12 +12,11 @@
 #include "Config.h"
 #include "Id.h"
 #include "TagRef.h"
-#include "conf/Settings.h"
 #include "git2/buffer.h"
 #include "git2/clone.h"
 #include "git2/remote.h"
 #include "git2/signature.h"
-#include <libssh2.h>
+#include <QCoreApplication>
 #include <QDir>
 #include <QFile>
 #include <QNetworkProxyFactory>
@@ -35,9 +34,20 @@ namespace {
 const QString kLogKey = "remote/log";
 const QStringList kKeyKinds = {"ed25519", "rsa", "dsa"};
 
-bool keyFile(QString &key)
+bool keyFile(QString &key, const QString &path = QString())
 {
   QDir dir = QDir::home();
+  if (!path.isEmpty()) {
+    QFileInfo file(path);
+
+    if (!file.isAbsolute())
+      file.setFile(dir.absolutePath() + '/' + file.filePath());
+
+    if (file.exists())
+      key = file.absoluteFilePath();
+    return file.exists();
+  }
+
   if (!dir.cd(".ssh"))
     return false;
 
@@ -134,13 +144,21 @@ public:
     QStringList patterns;
   };
 
-  ConfigFile()
+  ConfigFile(const QString &path)
   {
+    QFileInfo file(path);
     QDir dir = QDir::home();
-    if (!dir.cd(".ssh"))
-      return;
+    if (path.isEmpty()) {
+      if (!dir.cd(".ssh"))
+        return;
 
-    mFile.reset(new QFile(dir.filePath("config")));
+      file.setFile(dir.absoluteFilePath("config"));
+    }
+
+    if (!file.isAbsolute())
+      file.setFile(dir.absolutePath() + '/' + file.filePath());
+
+    mFile.reset(new QFile(file.absoluteFilePath()));
     if (!mFile->open(QFile::ReadOnly))
       return;
 
@@ -191,6 +209,24 @@ private:
 
 } // anon. namespace
 
+int Remote::Callbacks::connect(
+  git_remote *remote,
+  void *payload)
+{
+  Remote::Callbacks *cbs = reinterpret_cast<Remote::Callbacks *>(payload);
+  cbs->mRemote = remote;
+  return 0;
+}
+
+int Remote::Callbacks::disconnect(
+  git_remote *remote,
+  void *payload)
+{
+  Remote::Callbacks *cbs = reinterpret_cast<Remote::Callbacks *>(payload);
+  cbs->mRemote = nullptr;
+  return 0;
+}
+
 int Remote::Callbacks::sideband(
   const char *str,
   int len,
@@ -202,7 +238,7 @@ int Remote::Callbacks::sideband(
 }
 
 int Remote::Callbacks::credentials(
-  git_cred **out,
+  git_credential **out,
   const char *url,
   const char *name,
   unsigned int types,
@@ -215,25 +251,13 @@ int Remote::Callbacks::credentials(
     return -1;
 
   Remote::Callbacks *cbs = reinterpret_cast<Remote::Callbacks *>(payload);
-  if (types & GIT_CREDTYPE_SSH_KEY) {
+  if (types & GIT_CREDENTIAL_SSH_KEY) {
     // First try to get key from agent.
     if (!cbs->mAgentNames.contains(name)) {
       log(QString("agent: %1").arg(name));
       cbs->mAgentNames.insert(name);
-      LIBSSH2_SESSION *session = libssh2_session_init();
-      LIBSSH2_AGENT *agent = libssh2_agent_init(session);
-      int error = libssh2_agent_connect(agent);
-      if (error != LIBSSH2_ERROR_NONE) {
-        char *msg;
-        libssh2_session_last_error(session, &msg, nullptr, 0);
-        log(QString("agent: %1 (%2)").arg(msg).arg(error));
-      }
-
-      libssh2_agent_disconnect(agent);
-      libssh2_agent_free(agent);
-      libssh2_session_free(session);
-      if (error == LIBSSH2_ERROR_NONE)
-        return git_cred_ssh_key_from_agent(out, name);
+      if (cbs->connectToAgent())
+        return git_credential_ssh_key_from_agent(out, name);
 
     } else if (error) {
       log(error->message);
@@ -241,10 +265,10 @@ int Remote::Callbacks::credentials(
 
     // Read SSH config file.
     QString key;
-    ConfigFile configFile;
+    ConfigFile configFile(cbs->configFilePath());
     if (configFile.isValid()) {
-      // Extract hostname from SSH URL.
-      QString name = hostName(url);
+      // Extract hostname from the unresolved URL.
+      QString name = hostName(cbs->url());
       foreach (const ConfigFile::Host &host, configFile.parse()) {
         // Skip entries that don't have an identity file.
         if (host.file.isEmpty())
@@ -270,7 +294,7 @@ int Remote::Callbacks::credentials(
         git_error_set_str(GIT_ERROR_NET, err.toUtf8());
         return -1;
       }
-    } else if (!keyFile(key)) {
+    } else if (!keyFile(key, cbs->keyFilePath())) {
       git_error_set_str(GIT_ERROR_NET, "failed to find SSH identity file");
       return -1;
     }
@@ -292,7 +316,7 @@ int Remote::Callbacks::credentials(
     if (!line.startsWith("Proc-Type:") || !line.endsWith("ENCRYPTED")) {
       QByteArray base64 = QByteArray::fromBase64(line.toLocal8Bit());
       if (!base64.contains("aes256-ctr") || !base64.contains("bcrypt"))
-        return git_cred_ssh_key_new(out, name,
+        return git_credential_ssh_key_new(out, name,
           !pub.isEmpty() ? pub.toLocal8Bit().constData() : nullptr,
           key.toLocal8Bit(), nullptr);
     }
@@ -303,17 +327,17 @@ int Remote::Callbacks::credentials(
     if (!cbs->credentials(url, username, passphrase))
       return -1;
 
-    return git_cred_ssh_key_new(out, username.toUtf8(),
+    return git_credential_ssh_key_new(out, username.toUtf8(),
       !pub.isEmpty() ? pub.toLocal8Bit().constData() : nullptr,
       key.toLocal8Bit(), passphrase.toUtf8());
 
-  } else if (types & GIT_CREDTYPE_USERPASS_PLAINTEXT) {
+  } else if (types & GIT_CREDENTIAL_USERPASS_PLAINTEXT) {
     QString password;
     QString username = QUrl::fromPercentEncoding(name);
     if (!cbs->credentials(url, username, password))
       return -1;
 
-    return git_cred_userpass_plaintext_new(
+    return git_credential_userpass_plaintext_new(
       out, username.toUtf8(), password.toUtf8());
   }
 
@@ -397,7 +421,7 @@ int Remote::Callbacks::url(
 
   // Find matching config entry.
   if (!hostName.isEmpty()) {
-    ConfigFile configFile;
+    ConfigFile configFile(cbs->configFilePath());
     if (configFile.isValid()) {
       foreach (const ConfigFile::Host &host, configFile.parse()) {
         // Skip about entries that don't have a host name.
@@ -433,6 +457,12 @@ int Remote::Callbacks::url(
   return 0;
 }
 
+void Remote::Callbacks::stop()
+{
+  if (mRemote)
+    git_remote_stop(mRemote);
+}
+
 Remote::Remote() {}
 
 Remote::Remote(git_remote *remote)
@@ -454,7 +484,7 @@ void Remote::setName(const QString &name)
     return;
 
   // FIXME: Report problems?
-  git_strarray_free(&problems);
+  git_strarray_dispose(&problems);
 }
 
 QString Remote::url() const
@@ -468,9 +498,11 @@ void Remote::setUrl(const QString &url)
   git_remote_set_url(repo, git_remote_name(d.data()), url.toUtf8());
 }
 
-Result Remote::fetch(Callbacks *callbacks, bool tags)
+Result Remote::fetch(Callbacks *callbacks, bool tags, bool prune)
 {
   git_fetch_options opts = GIT_FETCH_OPTIONS_INIT;
+  opts.callbacks.connect = &Remote::Callbacks::connect;
+  opts.callbacks.disconnect = &Remote::Callbacks::disconnect;
   opts.callbacks.sideband_progress = &Remote::Callbacks::sideband;
   opts.callbacks.credentials = &Remote::Callbacks::credentials;
   opts.callbacks.certificate_check = &Remote::Callbacks::certificate;
@@ -485,6 +517,9 @@ Result Remote::fetch(Callbacks *callbacks, bool tags)
   if (tags)
     opts.download_tags = GIT_REMOTE_DOWNLOAD_TAGS_ALL;
 
+  if (prune)
+    opts.prune = GIT_FETCH_PRUNE;
+
   // Write reflog message.
   QString msg = QString("fetch: %1").arg(name());
 
@@ -494,6 +529,8 @@ Result Remote::fetch(Callbacks *callbacks, bool tags)
 Result Remote::push(Callbacks *callbacks, const QStringList &refspecs)
 {
   git_push_options opts = GIT_PUSH_OPTIONS_INIT;
+  opts.callbacks.connect = &Remote::Callbacks::connect;
+  opts.callbacks.disconnect = &Remote::Callbacks::disconnect;
   opts.callbacks.sideband_progress = &Remote::Callbacks::sideband;
   opts.callbacks.credentials = &Remote::Callbacks::credentials;
   opts.callbacks.certificate_check = &Remote::Callbacks::certificate;
@@ -551,11 +588,6 @@ Result Remote::push(
   return push(callbacks, refspecs);
 }
 
-void Remote::stop()
-{
-  git_remote_stop(d.data());
-}
-
 Result Remote::clone(
   Callbacks *callbacks,
   const QString &url,
@@ -564,6 +596,8 @@ Result Remote::clone(
 {
   git_repository *repo = nullptr;
   git_clone_options opts = GIT_CLONE_OPTIONS_INIT;
+  opts.fetch_opts.callbacks.connect = &Remote::Callbacks::connect;
+  opts.fetch_opts.callbacks.disconnect = &Remote::Callbacks::disconnect;
   opts.fetch_opts.callbacks.sideband_progress = &Remote::Callbacks::sideband;
   opts.fetch_opts.callbacks.credentials = &Remote::Callbacks::credentials;
   opts.fetch_opts.callbacks.certificate_check = &Remote::Callbacks::certificate;
@@ -617,7 +651,12 @@ void Remote::log(const QString &text)
   if (!isLoggingEnabled())
     return;
 
-  QFile file(Settings::tempDir().filePath("remote.log"));
+  QString name = QCoreApplication::applicationName();
+  QDir tempDir = QDir::temp();
+  tempDir.mkpath(name);
+  tempDir.cd(name);
+
+  QFile file(tempDir.filePath("remote.log"));
   if (!file.open(QFile::WriteOnly | QIODevice::Append))
     return;
 

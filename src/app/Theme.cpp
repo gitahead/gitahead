@@ -87,10 +87,6 @@ QString Theme::styleSheet() const
       "  border-left: 1px solid palette(light)"
       "}"
 
-      "AdvancedSearchWidget QLabel {"
-      "  color: palette(bright-text)"
-      "}"
-
       "ColumnView, ColumnView QAbstractItemView {"
       "  background: palette(base);"
       "  border-right: 1px solid palette(light)"
@@ -100,7 +96,7 @@ QString Theme::styleSheet() const
       "  background: palette(base)"
       "}"
       "DetailView #separator {"
-      "  border-top: 1px solid palette(light)"
+      "  border-top: 1px solid palette(midlight)"
       "}"
       "CommitEditor {"
       "  background: palette(window)"
@@ -109,18 +105,18 @@ QString Theme::styleSheet() const
       "DiffView {"
       "  background: palette(mid)"
       "}"
-      "DiffView .QFrame {"
-      "  background: palette(midlight)"
+      "DiffView FileWidget {"
+      "  background: palette(window)"
       "}"
       "DiffView HunkWidget {"
-      "  background: palette(base)"
+      "  border-top: 1px solid palette(mid)"
       "}"
       "DiffView HunkWidget QLabel {"
       "  color: palette(bright-text)"
       "}"
 
       "FileList {"
-      "  border-top: 1px solid palette(light)"
+      "  border-top: 1px solid palette(midlight)"
       "}"
       "FileList QToolButton:pressed {"
       "  background: #6C6C6C"
@@ -238,10 +234,6 @@ QString Theme::styleSheet() const
   }
 
   return
-    "AdvancedSearchWidget QLabel {"
-    "  color: #646464"
-    "}"
-
     "ColumnView, ColumnView QAbstractItemView {"
     "  background: palette(base);"
     "  border-right: 1px solid palette(light)"
@@ -257,11 +249,12 @@ QString Theme::styleSheet() const
     "DiffView {"
     "  background: palette(dark)"
     "}"
-    "DiffView .QFrame {"
+    "DiffView FileWidget {"
     "  background: #E4E8EE"
     "}"
     "DiffView HunkWidget {"
-    "  background: #FFFFFF"
+    "  background: palette(midlight);"
+    "  border-top: 1px solid palette(dark)"
     "}"
     "DiffView HunkWidget QLabel {"
     "  color: #4F4F4F"
@@ -416,7 +409,7 @@ QString Theme::styleSheet() const
 
 void Theme::polish(QPalette &palette) const
 {
-  palette.setColor(QPalette::BrightText, "#808080");
+  palette.setColor(QPalette::BrightText, mDark ? "#9C9C9C" : "#646464");
   palette.setColor(QPalette::Light, mDark ? "#121212" : "#E6E6E6");
   palette.setColor(QPalette::Shadow, palette.color(QPalette::Mid));
 
@@ -513,6 +506,7 @@ QColor Theme::buttonChecked()
 QPalette Theme::commitList()
 {
   QPalette palette;
+  QColor bright = palette.color(QPalette::BrightText);
 
   // highlight
 #ifdef Q_OS_WIN
@@ -525,10 +519,26 @@ QPalette Theme::commitList()
   palette.setColor(QPalette::Active, QPalette::HighlightedText, Qt::white);
   palette.setColor(QPalette::Inactive, QPalette::HighlightedText, inactive);
   palette.setColor(QPalette::Active, QPalette::WindowText, "#C0C0C0");
-  palette.setColor(QPalette::Inactive, QPalette::WindowText, "#808080");
+  palette.setColor(QPalette::Inactive, QPalette::WindowText, bright);
 #endif
 
   return palette;
+}
+
+QColor Theme::commitEditor(CommitEditor color)
+{
+  if (mDark) {
+    switch (color) {
+      case CommitEditor::SpellError:    return "#BC0009";
+      case CommitEditor::SpellIgnore:   return "#E1E5F2";
+      case CommitEditor::LengthWarning: return "#464614";
+    }
+  }
+  switch (color) {
+    case CommitEditor::SpellError:    return Qt::red;
+    case CommitEditor::SpellIgnore:   return Qt::gray;
+    case CommitEditor::LengthWarning: return "#EFF0F1";
+  }
 }
 
 QColor Theme::diff(Diff color)
@@ -597,11 +607,6 @@ QColor Theme::remoteComment(Comment color)
 QColor Theme::star()
 {
   return "#FFCE6D";
-}
-
-QColor Theme::windowBrightText()
-{
-  return "#808080";
 }
 
 void Theme::drawCloseButton(

@@ -31,6 +31,8 @@
 
 namespace {
 
+const QString kRemoteExpandedGroup = "remote/expanded";
+
 const QString kStyleSheet =
   "QTreeView {"
 #ifdef Q_OS_MAC
@@ -99,6 +101,8 @@ protected:
 
 class RepoModel : public QAbstractItemModel
 {
+  Q_OBJECT
+
 public:
   enum RootRow
   {
@@ -499,6 +503,33 @@ public:
         }
       }
 
+      case Qt::ToolTipRole: {
+        if (!parent.isValid() || mShowFullPath) // makes no sense to show tooltip when path is already shown completely
+            return "";
+
+        switch (parent.row()) {
+          case Repo:
+            if (mTabs->count()) {
+              RepoView *view = static_cast<RepoView *>(mTabs->widget(row));
+              return view->repo().workdir().path();
+            }
+
+            return "";
+
+          case Recent: {
+            RecentRepositories *recent = RecentRepositories::instance();
+            if (recent->count()) {
+              RecentRepository *repo = repos->repository(row);
+              return repo->path();
+            }
+
+            return "";
+          }
+
+          default:
+            return QVariant();
+        }
+      }
       default:
         return QVariant();
     }
@@ -548,6 +579,48 @@ bool isRepoIndex(const QModelIndex &index)
           parent.row() == RepoModel::Repo);
 }
 
+bool isRemoteIndex(const QModelIndex &index)
+{
+  QModelIndex parent = index.parent();
+  return (parent.isValid() && !parent.parent().isValid() &&
+          parent.row() == RepoModel::Remote);
+}
+
+void storeExpansionState(QTreeView *view)
+{
+  QSettings settings;
+  settings.beginGroup(kRemoteExpandedGroup);
+
+  QAbstractItemModel *model = view->model();
+  QModelIndex remote = model->index(RepoModel::Remote, 0);
+  for (int i = 0; i < model->rowCount(remote); ++i) {
+    QModelIndex index = model->index(i, 0, remote);
+    QString key = index.data(Qt::DisplayRole).toString();
+    settings.setValue(key, view->isExpanded(index));
+  }
+
+  settings.endGroup();
+}
+
+void restoreExpansionState(QTreeView *view)
+{
+  QAbstractItemModel *model = view->model();
+  for (int i = 0; i < model->rowCount(); ++i)
+    view->expand(model->index(i, 0));
+
+  QSettings settings;
+  settings.beginGroup(kRemoteExpandedGroup);
+
+  QModelIndex remote = model->index(RepoModel::Remote, 0);
+  for (int i = 0; i < model->rowCount(remote); ++i) {
+    QModelIndex index = model->index(i, 0, remote);
+    QString key = index.data(Qt::DisplayRole).toString();
+    view->setExpanded(index, settings.value(key, true).toBool());
+  }
+
+  settings.endGroup();
+}
+
 } // anon. namespace
 
 SideBar::SideBar(TabWidget *tabs, QWidget *parent)
@@ -568,16 +641,24 @@ SideBar::SideBar(TabWidget *tabs, QWidget *parent)
   RepoModel *model = new RepoModel(tabs, view);
   view->setModel(model);
 
-  // Try really hard to make sure all pending events are
-  // processed before resetting selection and expansion.
+  // Restore selection and expansion state after model reset.
   connect(model, &RepoModel::modelReset, view, [view, model] {
-    QCoreApplication::processEvents();
     view->setCurrentIndex(model->currentIndex());
-    view->expandAll();
-  }, Qt::QueuedConnection);
+    restoreExpansionState(view);
+  });
 
   connect(tabs, &TabWidget::currentChanged, view, [view, model] {
     view->setCurrentIndex(model->currentIndex());
+  });
+
+  // Store expansion state when it changes.
+  connect(view, &QTreeView::collapsed, [view](const QModelIndex &index) {
+    if (isRemoteIndex(index))
+      storeExpansionState(view);
+  });
+  connect(view, &QTreeView::expanded, [view](const QModelIndex &index) {
+    if (isRemoteIndex(index))
+      storeExpansionState(view);
   });
 
   connect(view, &QTreeView::clicked, [tabs](const QModelIndex &index) {
@@ -627,12 +708,16 @@ SideBar::SideBar(TabWidget *tabs, QWidget *parent)
   });
 
   connect(view, &QTreeView::customContextMenuRequested,
-  [view](const QPoint &point) {
+  [this, view](const QPoint &point) {
     QMenu menu;
     QModelIndex index = view->indexAt(point);
     if (RepoView *view = index.data(TabRole).value<RepoView *>()) {
       menu.addAction(tr("Close"), view, &RepoView::close);
     } else if (Account *account = index.data(AccountRole).value<Account *>()) {
+      menu.addAction(tr("Remove"), [this, account] {
+        promptToRemoveAccount(account);
+      });
+
       if (account->isAuthorizeSupported())
         menu.addAction(tr("Authorize"), account, &Account::authorize);
     }
@@ -719,26 +804,7 @@ SideBar::SideBar(TabWidget *tabs, QWidget *parent)
         RecentRepositories::instance()->remove(index.row());
 
       } else if (auto account = index.data(AccountRole).value<Account *>()) {
-        QString name = index.data(Qt::DisplayRole).toString();
-        QString fmt =
-          tr("<p>Are you sure you want to remove the %1 account for '%2'?</p>"
-             "<p>Only the account association will be removed. Remote "
-             "configurations and local clones will not be affected.</p>");
-
-        QMessageBox *dialog = new QMessageBox(
-          QMessageBox::Warning, tr("Remove Account?"),
-          fmt.arg(Account::name(account->kind()), name),
-          QMessageBox::Cancel, this);
-        dialog->setAttribute(Qt::WA_DeleteOnClose);
-
-        QPushButton *remove =
-          dialog->addButton(tr("Remove"), QMessageBox::AcceptRole);
-        remove->setFocus();
-        connect(remove, &QPushButton::clicked, [index] {
-          Accounts::instance()->removeAccount(index.row());
-        });
-
-        dialog->open();
+        promptToRemoveAccount(account);
 
       } else if (auto repo = index.data(RepositoryRole).value<Repository *>()) {
         QString fmt =
@@ -832,3 +898,28 @@ QSize SideBar::minimumSizeHint() const
 {
   return QSize(0, 0);
 }
+
+void SideBar::promptToRemoveAccount(Account *account)
+{
+  QString fmt =
+    tr("<p>Are you sure you want to remove the %1 account for '%2'?</p>"
+       "<p>Only the account association will be removed. Remote "
+       "configurations and local clones will not be affected.</p>");
+
+  QMessageBox *dialog = new QMessageBox(
+    QMessageBox::Warning, tr("Remove Account?"),
+    fmt.arg(Account::name(account->kind()), account->username()),
+    QMessageBox::Cancel, this);
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+
+  QPushButton *remove =
+    dialog->addButton(tr("Remove"), QMessageBox::AcceptRole);
+  remove->setFocus();
+  connect(remove, &QPushButton::clicked, [account] {
+    Accounts::instance()->removeAccount(account);
+  });
+
+  dialog->open();
+}
+
+#include "SideBar.moc"

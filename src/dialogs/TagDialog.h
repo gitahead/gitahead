@@ -11,10 +11,12 @@
 #define TAGDIALOG_H
 
 #include <QDialog>
+#include "git/Remote.h"
 
 class QCheckBox;
 class QLineEdit;
 class QTextEdit;
+class QListWidget;
 
 namespace git {
 class Repository;
@@ -28,16 +30,24 @@ public:
   TagDialog(
     const git::Repository &repo,
     const QString &id,
+    const git::Remote &remote = git::Remote(),
     QWidget *parent = nullptr);
 
   bool force() const;
+  git::Remote remote() const;
   QString name() const;
   QString message() const;
 
 private:
+  git::Remote mRemote;
   QLineEdit *mNameField;
   QCheckBox *mForce;
+  QCheckBox *mPush;
   QTextEdit *mMessage;
+  QListWidget* mListWidget{nullptr};
+  QStringList mExistingTags;
+  QStringList mFilteredTags;
+  QString mOldTagname;
 };
 
 #endif

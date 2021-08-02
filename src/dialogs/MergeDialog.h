@@ -24,6 +24,8 @@ class Reference;
 
 class MergeDialog : public QDialog
 {
+  Q_OBJECT
+
 public:
   MergeDialog(
     RepoView::MergeFlags flags,

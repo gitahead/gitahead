@@ -28,9 +28,7 @@
 #define SC_INDICATOR_CONVERTED INDIC_IME+2
 #define SC_INDICATOR_UNKNOWN INDIC_IME_MAX
 
-#ifdef SCI_NAMESPACE
-using namespace Scintilla;
-#endif
+namespace Scintilla {
 
 namespace {
 
@@ -107,7 +105,7 @@ bool IsHangul(const QChar qchar)
 ScintillaQt::ScintillaQt(QWidget *parent)
   : QAbstractScrollArea(parent)
 {
-  time.start();
+  timer.start();
 
   // Set Qt defaults.
   setAcceptDrops(true);
@@ -158,8 +156,6 @@ bool ScintillaQt::event(QEvent *event)
     // Circumvent the tab focus convention.
     keyPressEvent(static_cast<QKeyEvent *>(event));
     return event->isAccepted();
-  } else if (event->type() == QEvent::Hide) {
-    setMouseTracking(false);
   }
 
   return QAbstractScrollArea::event(event);
@@ -291,7 +287,8 @@ void ScintillaQt::keyPressEvent(QKeyEvent *event)
   bool alt   = QApplication::keyboardModifiers() & Qt::AltModifier;
 
   bool consumed = false;
-  bool added = KeyDown(key, shift, ctrl, alt, &consumed) != 0;
+  bool added = KeyDownWithModifiers(
+    key, ModifierFlags(shift, ctrl, alt), &consumed);
   if (!consumed)
     consumed = added;
 
@@ -350,18 +347,19 @@ void ScintillaQt::mousePressEvent(QMouseEvent *event)
   }
 
   if (event->button() == Qt::LeftButton) {
-    bool shift = QApplication::keyboardModifiers() & Qt::ShiftModifier;
-    bool ctrl  = QApplication::keyboardModifiers() & Qt::ControlModifier;
+    Qt::KeyboardModifiers modifiers = event->modifiers();
+    bool shift = modifiers & Qt::ShiftModifier;
+    bool ctrl  = modifiers & Qt::ControlModifier;
 #ifdef Q_WS_X11
     // On X allow choice of rectangular modifier since most window
     // managers grab alt + click for moving windows.
-    bool alt = QApplication::keyboardModifiers() &
-               modifierTranslated(rectangularSelectionModifier);
+    bool alt = modifiers & modifierTranslated(rectangularSelectionModifier);
 #else
-    bool alt = QApplication::keyboardModifiers() & Qt::AltModifier;
+    bool alt = modifiers & Qt::AltModifier;
 #endif
 
-    ButtonDown(pos, time.elapsed(), shift, ctrl, alt);
+    ButtonDownWithModifiers(
+      pos, timer.elapsed(), ModifierFlags(shift, ctrl, alt));
   }
 }
 
@@ -370,7 +368,8 @@ void ScintillaQt::mouseReleaseEvent(QMouseEvent *event)
   Point point = PointFromQPoint(event->pos());
   bool ctrl  = QApplication::keyboardModifiers() & Qt::ControlModifier;
   if (event->button() == Qt::LeftButton)
-    ButtonUp(point, time.elapsed(), ctrl);
+    ButtonUpWithModifiers(
+      point, timer.elapsed(), ModifierFlags(false, ctrl, false));
 
   int pos = send(SCI_POSITIONFROMPOINT, point.x, point.y);
   int line = send(SCI_LINEFROMPOSITION, pos);
@@ -400,9 +399,7 @@ void ScintillaQt::mouseMoveEvent(QMouseEvent *event)
   bool alt   = QApplication::keyboardModifiers() & Qt::AltModifier;
 #endif
 
-  int modifiers = (shift ? SCI_SHIFT : 0) | (ctrl ? SCI_CTRL : 0) | (alt ? SCI_ALT : 0);
-
-  ButtonMoveWithModifiers(pos, modifiers);
+  ButtonMoveWithModifiers(pos, timer.elapsed(), ModifierFlags(shift, ctrl, alt));
 }
 
 void ScintillaQt::contextMenuEvent(QContextMenuEvent *event)
@@ -428,7 +425,7 @@ void ScintillaQt::dragEnterEvent(QDragEnterEvent *event)
 
 void ScintillaQt::dragLeaveEvent(QDragLeaveEvent *event)
 {
-  SetDragPosition(SelectionPosition(invalidPosition));
+  SetDragPosition(SelectionPosition(Sci::invalidPosition));
 }
 
 void ScintillaQt::dragMoveEvent(QDragMoveEvent *event)
@@ -481,7 +478,7 @@ void ScintillaQt::DrawImeIndicator(int indicator, int len)
   if (indicator < 8 || indicator > INDIC_MAX) {
     return;
   }
-  pdoc->decorations.SetCurrentIndicator(indicator);
+  pdoc->decorations->SetCurrentIndicator(indicator);
   for (size_t r = 0; r < sel.Count(); ++r) {
     int positionInsert = sel.Range(r).Start().Position();
     pdoc->DecorationFillRange(positionInsert - len, 1, len);
@@ -493,12 +490,13 @@ void ScintillaQt::inputMethodEvent(QInputMethodEvent *event)
   // Copy & paste by johnsonj with a lot of helps of Neil
   // Great thanks for my forerunners, jiniya and BLUEnLIVE
 
+	bool initialCompose = false;
   if (pdoc->TentativeActive()) {
     pdoc->TentativeUndo();
   } else {
     // No tentative undo means start of this composition so
     // Fill in any virtual spaces.
-    FillVirtualSpace();
+		initialCompose = true;
   }
 
   view.imeCaretBlockOverride = false;
@@ -525,6 +523,8 @@ void ScintillaQt::inputMethodEvent(QInputMethodEvent *event)
       return;
     }
 
+		if (initialCompose)
+			ClearBeforeTentativeStart();
     pdoc->TentativeStart(); // TentativeActive() from now on.
 
     // Mark segments and get ime caret position.
@@ -775,7 +775,7 @@ bool ScintillaQt::ValidCodePage(int codePage) const
   return (codePage == SC_CP_UTF8);
 }
 
-void ScintillaQt::ScrollText(int linesToMove)
+void ScintillaQt::ScrollText(Sci::Line linesToMove)
 {
   viewport()->scroll(0, vs.lineHeight * linesToMove);
 }
@@ -790,7 +790,7 @@ void ScintillaQt::SetHorizontalScrollPos()
   horizontalScrollBar()->setValue(xOffset);
 }
 
-bool ScintillaQt::ModifyScrollBars(int nMax, int nPage)
+bool ScintillaQt::ModifyScrollBars(Sci::Line nMax, Sci::Line nPage)
 {
   bool modified = false;
 
@@ -990,11 +990,6 @@ void ScintillaQt::NotifyParent(SCNotification scn)
   }
 }
 
-bool ScintillaQt::FineTickerAvailable()
-{
-  return true;
-}
-
 bool ScintillaQt::FineTickerRunning(TickReason reason)
 {
   return timers[reason] != 0;
@@ -1094,7 +1089,7 @@ void ScintillaQt::StartDrag()
   }
 
   inDragDrop = ddNone;
-  SetDragPosition(SelectionPosition(invalidPosition));
+  SetDragPosition(SelectionPosition(Sci::invalidPosition));
 }
 
 void ScintillaQt::CreateCallTipWindow(PRectangle rc)
@@ -1144,12 +1139,6 @@ sptr_t ScintillaQt::WndProc(unsigned int message, uptr_t wParam, sptr_t lParam)
     case SCI_GETDIRECTPOINTER:
       return reinterpret_cast<sptr_t>(this);
 
-#ifdef SCI_LEXER
-      case SCI_LOADLEXERLIBRARY:
-        LexerManager::GetInstance()->Load(reinterpret_cast<const char *>(lParam));
-        break;
-#endif
-
     default:
       return ScintillaBase::WndProc(message, wParam, lParam);
   }
@@ -1167,3 +1156,5 @@ sptr_t ScintillaQt::DirectFunction(
 {
   return reinterpret_cast<ScintillaQt *>(ptr)->WndProc(iMessage, wParam, lParam);
 }
+
+} // namespace Scintilla

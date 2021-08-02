@@ -15,6 +15,8 @@
 
 class GitHub : public Account
 {
+  Q_OBJECT
+
 public:
   GitHub(const QString &username);
 

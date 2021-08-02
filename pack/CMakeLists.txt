@@ -30,6 +30,10 @@ else()
 endif()
 
 foreach(QT_PLUGIN ${QT_PLUGINS})
+  if(NOT TARGET Qt5::${QT_PLUGIN})
+    continue()
+  endif()
+
   get_target_property(PLUGIN Qt5::${QT_PLUGIN} LOCATION_${CMAKE_BUILD_TYPE})
   get_filename_component(FILE_NAME ${PLUGIN} NAME)
   get_filename_component(DIR ${PLUGIN} DIRECTORY)
@@ -49,7 +53,19 @@ foreach(QT_PLUGIN ${QT_PLUGINS})
       ${CMAKE_COMMAND} -E copy_if_different
         ${PLUGIN} ${CMAKE_BINARY_DIR}/${PLUGIN_PATH}
     )
-  elseif(NOT APPLE)
+  elseif(APPLE)
+    # Sign plugin.
+    if(CODESIGN_IDENTITY)
+      install(CODE
+        "execute_process(COMMAND
+          codesign --timestamp --options runtime
+            -s \"${CODESIGN_IDENTITY}\"
+            \${CMAKE_INSTALL_PREFIX}/${CONTENTS_DIR}/${PLUGIN_PATH}
+        )"
+        COMPONENT ${GITAHEAD_NAME}
+      )
+    endif()
+  else()
     # Delete runpath.
     install(CODE
       "execute_process(COMMAND chrpath --delete
@@ -127,7 +143,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 # Install SSL libraries.
-if(NOT APPLE)
+if(FALSE) # NOT APPLE)
   if(WIN32)
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
       set(SSL_LIB_SUFFIX "-1_1-x64.dll")
@@ -179,7 +195,8 @@ endif()
 if(APPLE AND CODESIGN_IDENTITY)
   install(CODE
     "execute_process(COMMAND
-      codesign --deep -s \"${CODESIGN_IDENTITY}\"
+      codesign --deep --timestamp --options runtime
+        -s \"${CODESIGN_IDENTITY}\"
         \${CMAKE_INSTALL_PREFIX}/${GITAHEAD_NAME}.app
     )"
     COMPONENT ${GITAHEAD_NAME}

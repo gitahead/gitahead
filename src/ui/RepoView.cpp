@@ -25,6 +25,8 @@
 #include "conf/Settings.h"
 #include "dialogs/CheckoutDialog.h"
 #include "dialogs/CommitDialog.h"
+#include "dialogs/DeleteBranchDialog.h"
+#include "dialogs/DeleteTagDialog.h"
 #include "dialogs/NewBranchDialog.h"
 #include "dialogs/RemoteDialog.h"
 #include "dialogs/SettingsDialog.h"
@@ -209,12 +211,12 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
       mHistory->clean();
   });
 
-  QWidget *sidebar = new QWidget(this);
-  QVBoxLayout *sidebarLayout = new QVBoxLayout(sidebar);
+  mSideBar = new QWidget(this);
+  QVBoxLayout *sidebarLayout = new QVBoxLayout(mSideBar);
   sidebarLayout->setContentsMargins(0,0,0,0);
   sidebarLayout->setSpacing(0);
 
-  QWidget *header = new QWidget(sidebar);
+  QWidget *header = new QWidget(mSideBar);
   QVBoxLayout *headerLayout = new QVBoxLayout(header);
   headerLayout->setContentsMargins(4,4,4,4);
   headerLayout->setSpacing(4);
@@ -253,7 +255,7 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   headerLayout->addWidget(mPathspec);
 
   // Create commit list.
-  mCommits = new CommitList(mIndex, sidebar);
+  mCommits = new CommitList(mIndex, mSideBar);
   sidebarLayout->addWidget(mCommits);
 
   connect(commitToolBar, &CommitToolBar::settingsChanged,
@@ -293,19 +295,15 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   });
 
   // Respond to commit list selection change.
-  connect(mCommits, &CommitList::diffSelected,
-  [this](const git::Diff &diff, const QString &file, bool spontaneous) {
-    mHistory->update(diff.isValid() ? location() : Location(), spontaneous);
-    mDetails->setDiff(diff, file, mPathspec->pathspec());
-  });
+  connect(mCommits, &CommitList::diffSelected, this, &RepoView::diffSelected, Qt::ConnectionType::DirectConnection);
 
   // Refresh the diff when a whole directory is added to the index.
   // FIXME: This is a workaround.
   connect(notifier, &git::RepositoryNotifier::directoryStaged,
           this, &RepoView::refresh, Qt::QueuedConnection);
   connect(notifier, &git::RepositoryNotifier::directoryAboutToBeStaged,
-  [this](const QString &dir, int count, bool &allow, bool &prompt) {
-    if (!prompt)
+  [this](const QString &dir, int count, bool &allow) {
+    if (!Settings::instance()->prompt(Settings::PromptDirectories))
       return;
 
     QString title = tr("Stage Directory?");
@@ -325,13 +323,13 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
     dialog.exec();
     allow = (dialog.clickedButton() == button);
     if (cb->isChecked())
-      prompt = false;
+      Settings::instance()->setPrompt(Settings::PromptDirectories, false);
   });
 
   // large file size warning
   connect(notifier, &git::RepositoryNotifier::largeFileAboutToBeStaged,
-  [this](const QString &file, int size, bool &allow, bool &prompt) {
-    if (!prompt)
+  [this](const QString &file, int size, bool &allow) {
+    if (!Settings::instance()->prompt(Settings::PromptLargeFiles))
       return;
 
     QString title = tr("Stage Large File?");
@@ -356,7 +354,7 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
     dialog.exec();
     allow = (dialog.clickedButton() == stage);
     if (cb->isChecked())
-      prompt = false;
+      Settings::instance()->setPrompt(Settings::PromptLargeFiles, false);
 
     if (dialog.clickedButton() == track)
       configureSettings(ConfigDialog::Lfs);
@@ -369,15 +367,15 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   connect(mCommits, &CommitList::statusChanged,
           watcher, &RepositoryWatcher::cancelPendingNotification);
 
-  QSplitter *splitter = new QSplitter(Qt::Horizontal, this);
-  splitter->setChildrenCollapsible(false);
-  splitter->setHandleWidth(0);
-  splitter->addWidget(sidebar);
-  splitter->addWidget(mDetails);
-  splitter->setStretchFactor(0, 1);
-  splitter->setStretchFactor(1, 3);
-  connect(splitter, &QSplitter::splitterMoved, [this, splitter] {
-    QSettings().setValue(kSplitterKey, splitter->saveState());
+  mDetailSplitter = new QSplitter(Qt::Horizontal, this);
+  mDetailSplitter->setChildrenCollapsible(false);
+  mDetailSplitter->setHandleWidth(0);
+  mDetailSplitter->addWidget(mSideBar);
+  mDetailSplitter->addWidget(mDetails);
+  mDetailSplitter->setStretchFactor(0, 1);
+  mDetailSplitter->setStretchFactor(1, 3);
+  connect(mDetailSplitter, &QSplitter::splitterMoved, [this] {
+    QSettings().setValue(kSplitterKey, mDetailSplitter->saveState());
   });
 
   // Create log.
@@ -403,7 +401,7 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   });
 
   connect(notifier, &git::RepositoryNotifier::indexStageError, this, [this] {
-    error(mLogRoot, "stage");
+    error(mLogRoot, tr("stage"));
   });
 
   QObject *context = new QObject(this);
@@ -423,7 +421,7 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   connect(mLogView->model(), &QAbstractItemModel::dataChanged,
           this, &RepoView::startLogTimer);
 
-  addWidget(splitter);
+  addWidget(mDetailSplitter);
   addWidget(mLogView);
   setCollapsible(0, false);
   setStretchFactor(0, 1);
@@ -434,12 +432,19 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   });
 
   // Restore splitter state.
-  splitter->restoreState(QSettings().value(kSplitterKey).toByteArray());
+  mDetailSplitter->restoreState(QSettings().value(kSplitterKey).toByteArray());
 
   // Connect automatic fetch timer.
   connect(&mFetchTimer, &QTimer::timeout, [this] {
     fetch(git::Remote(), false, false);
   });
+}
+
+void RepoView::diffSelected(const git::Diff diff, const QString &file, bool spontaneous)
+{
+    git::Diff diff2 = diff;
+    mHistory->update(diff.isValid() ? location() : Location(), spontaneous); // why this changes diff?
+    mDetails->setDiff(diff2, file, mPathspec->pathspec());
 }
 
 RepoView::~RepoView()
@@ -630,12 +635,17 @@ void RepoView::visitLink(const QString &link)
   }
 
   if (action == "push") {
+    git::Remote remote;
+
+    QString value = query.queryItemValue("to");
+    if (!value.isEmpty())
+      remote = mRepo.lookupRemote(value);
+
     if (query.queryItemValue("force") == "true") {
-      promptToForcePush();
+      promptToForcePush(remote, ref);
     } else {
-      git::Reference ref = mRepo.lookupRef(query.queryItemValue("ref"));
       bool setUpstream = query.queryItemValue("set-upstream") == "true";
-      push(git::Remote(), ref, QString(), setUpstream);
+      push(remote, ref, QString(), setUpstream);
     }
 
     return;
@@ -754,7 +764,7 @@ void RepoView::lfsInitialize()
 {
   LogEntry *entry = addLogEntry(tr("Git LFS"), tr("Initialize"));
   if (!mRepo.lfsInitialize()) {
-    error(entry, "initialize");
+    error(entry, tr("initialize"));
     return;
   }
 
@@ -765,7 +775,7 @@ void RepoView::lfsDeinitialize()
 {
   LogEntry *entry = addLogEntry(tr("Git LFS"), tr("Deinitialize"));
   if (!mRepo.lfsDeinitialize()) {
-    error(entry, "deinitialize");
+    error(entry, tr("deinitialize"));
     return;
   }
 
@@ -946,8 +956,29 @@ void RepoView::startFetchTimer()
   if (!config.value<bool>("autofetch.enable", enable))
     return;
 
-  fetch(git::Remote(), false, false);
-  mFetchTimer.start(config.value<int>("autofetch.minutes", minutes) * 60 * 1000);
+  bool prune = settings->value("global/autoprune/enable").toBool();
+  fetch(git::Remote(), false, false, nullptr, nullptr,
+    config.value<bool>("autoprune.enable", prune));
+
+  mFetchTimer.start(config.value<int>("autofetch.minutes", minutes) * 60000);
+}
+
+void RepoView::fetchAll()
+{
+  QList<git::Remote> remotes = mRepo.remotes();
+  if (remotes.isEmpty())
+    return;
+
+  if (remotes.size() == 1) {
+    fetch();
+    return;
+  }
+
+  // Queue up all remotes to fetch them serially.
+  QString text = tr("%1 remotes").arg(remotes.size());
+  LogEntry *entry = addLogEntry(text, tr("Fetch All"));
+  foreach (const git::Remote &remote, remotes)
+    fetch(remote, false, true, entry);
 }
 
 QFuture<git::Result> RepoView::fetch(
@@ -957,11 +988,24 @@ QFuture<git::Result> RepoView::fetch(
   LogEntry *parent,
   QStringList *submodules)
 {
+  bool prune = Settings::instance()->value("global/autoprune/enable").toBool();
+  return fetch(rmt, tags, interactive, parent, submodules,
+    mRepo.appConfig().value<bool>("autoprune.enable", prune));
+}
+
+QFuture<git::Result> RepoView::fetch(
+  const git::Remote &rmt,
+  bool tags,
+  bool interactive,
+  LogEntry *parent,
+  QStringList *submodules,
+  bool prune)
+{
   if (mWatcher) {
     // Queue fetch.
     connect(mWatcher, &QFutureWatcher<git::Result>::finished, mWatcher,
-    [this, rmt, tags, interactive, parent, submodules] {
-      fetch(rmt, tags, interactive, parent, submodules);
+    [this, rmt, tags, interactive, parent, submodules, prune] {
+      fetch(rmt, tags, interactive, parent, submodules, prune);
     });
 
     return QFuture<git::Result>();
@@ -1017,8 +1061,8 @@ QFuture<git::Result> RepoView::fetch(
           this, &RepoView::notifyReferenceUpdated);
 
   entry->setBusy(true);
-  mWatcher->setFuture(QtConcurrent::run([this, remote, tags, submodules] {
-    git::Result result = git::Remote(remote).fetch(mCallbacks, tags);
+  mWatcher->setFuture(QtConcurrent::run([this, remote, tags, submodules, prune] {
+    git::Result result = git::Remote(remote).fetch(mCallbacks, tags, prune);
 
     if (result && submodules) {
       // Scan for unmodified submodules on the fetch thread.
@@ -1037,7 +1081,8 @@ QFuture<git::Result> RepoView::fetch(
 void RepoView::pull(
   MergeFlags flags,
   const git::Remote &rmt,
-  bool tags)
+  bool tags,
+  bool prune)
 {
   if (mWatcher) {
     // Queue pull.
@@ -1109,7 +1154,7 @@ void RepoView::pull(
     merge(mf, git::Reference(), git::AnnotatedCommit(), entry, callback);
   });
 
-  watcher->setFuture(fetch(remote, tags, true, entry, submodules));
+  watcher->setFuture(fetch(remote, tags, true, entry, submodules, prune));
   if (watcher->isCanceled()) {
     delete watcher;
     delete submodules;
@@ -1123,19 +1168,20 @@ void RepoView::merge(
   LogEntry *parent,
   const std::function<void()> &callback)
 {
+  git::Reference head = mRepo.head();
+
   git::AnnotatedCommit upstream;
   QString upstreamName = tr("<i>no upstream</i>");
-
-  git::Branch head = mRepo.head();
-  if (commit.isValid()){
+  if (commit.isValid()) {
     upstream = commit;
     upstreamName = commit.commit().link();
   } else if (ref.isValid()) {
     upstream = ref.annotatedCommit();
     upstreamName = ref.name();
-  } else if (head.isValid()) {
-    upstream = head.annotatedCommitFromFetchHead();
-    git::Branch up = head.upstream();
+  } else if (head.isValid() && head.isBranch()) {
+    git::Branch headBranch = head;
+    upstream = headBranch.annotatedCommitFromFetchHead();
+    git::Branch up = headBranch.upstream();
     if (up.isValid())
       upstreamName = up.name();
   }
@@ -1145,11 +1191,12 @@ void RepoView::merge(
   bool ff = (analysis & GIT_MERGE_ANALYSIS_FASTFORWARD);
   bool noff = (flags & NoFastForward);
   bool ffonly = (flags & FastForward);
+  bool squashflag = (flags & Squash);
 
   // Write log entry.
   QString title = tr("Merge");
   QString textFmt = tr("%1 into %2");
-  if (ffonly || (!noff && ff)) {
+  if ((ffonly || (!noff && ff)) && !squashflag) {
     title = tr("Fast-forward");
     textFmt = tr("%2 to %1");
   } else if (flags & Rebase) {
@@ -1161,12 +1208,14 @@ void RepoView::merge(
   QString text = textFmt.arg(upstreamName, headName);
   LogEntry *entry = addLogEntry(text, title, parent);
 
-  // Validate inputs.
+  // Empty repository.
   if (!head.isValid()) {
-    entry->addEntry(LogEntry::Error, tr("You are not currently on a branch."));
+    entry->addEntry(LogEntry::Error,
+      tr("The repository is empty."));
     return;
   }
 
+  // Validate inputs.
   if (!upstream.isValid()) {
     entry->addEntry(LogEntry::Error,
       tr("The current branch '%1' has no upstream branch.").arg(headName));
@@ -1179,12 +1228,12 @@ void RepoView::merge(
     return;
   }
 
-  if (!ff && ffonly) {
+  if (!ff && ffonly && !squashflag) {
     entry->addEntry(LogEntry::Error, tr("Unable to fast-forward."));
     return;
   }
 
-  if (ff && !noff) {
+  if (ff && !noff && !squashflag) {
     fastForward(ref, upstream, entry, callback);
     return;
   }
@@ -1198,6 +1247,11 @@ void RepoView::merge(
     return;
   }
 
+  if (squashflag) {
+    squash(upstream, entry);
+    return;
+  }
+
   merge(flags, upstream, entry, callback);
 }
 
@@ -1207,7 +1261,7 @@ void RepoView::fastForward(
   LogEntry *parent,
   const std::function<void()> &callback)
 {
-  git::Branch head = mRepo.head();
+  git::Reference head = mRepo.head();
   Q_ASSERT(head.isValid());
 
   git::Commit commit = upstream.commit();
@@ -1257,7 +1311,7 @@ void RepoView::merge(
   LogEntry *parent,
   const std::function<void()> &callback)
 {
-  git::Branch head = mRepo.head();
+  git::Reference head = mRepo.head();
   Q_ASSERT(head.isValid());
 
   // Try to merge.
@@ -1328,13 +1382,17 @@ void RepoView::mergeAbort(LogEntry *parent)
   if (!commit.isValid())
     return;
 
+  bool ignoreWhitespace = Settings::instance()->isWhitespaceIgnored();
+
   QSet<QString> paths;
-  git::Diff index = mRepo.diffTreeToIndex(commit.tree());
+  git::Diff index =
+    mRepo.diffTreeToIndex(commit.tree(), git::Index(), ignoreWhitespace);
   for (int i = 0; i < index.count(); ++i)
     paths.insert(index.name(i));
 
   QStringList conflicts;
-  git::Diff workdir = mRepo.diffIndexToWorkdir();
+  git::Diff workdir =
+    mRepo.diffIndexToWorkdir(git::Index(), nullptr, ignoreWhitespace);
   for (int i = 0; i < workdir.count(); ++i) {
     QString name = workdir.name(i);
     if (workdir.status(i) != GIT_DELTA_CONFLICTED && paths.contains(name))
@@ -1351,7 +1409,7 @@ void RepoView::mergeAbort(LogEntry *parent)
   }
 
   int state = mRepo.state();
-  if (!commit.reset(GIT_RESET_HARD, paths.toList()))
+  if (!commit.reset(GIT_RESET_HARD, paths.values()))
     return;
 
   QString text = tr("merge");
@@ -1440,6 +1498,38 @@ void RepoView::rebase(
   // Finalize.
   if (rebase.finish() && callback)
     callback();
+}
+
+void RepoView::squash(
+  const git::AnnotatedCommit &upstream,
+  LogEntry *parent)
+{
+    git::Branch head = mRepo.head();
+    Q_ASSERT(head.isValid());
+
+    // Try to merge.
+    if (!mRepo.merge(upstream)) {
+      LogEntry *err = error(parent, tr("squash"), head.name());
+
+      // Add stash hint if the failure was because of uncommitted changes.
+      QString msg = git::Repository::lastError();
+      int kind = git::Repository::lastErrorKind();
+      if (kind == GIT_ERROR_MERGE && msg.contains("overwritten by merge")) {
+        QString text =
+          tr("You may be able to rebase by <a href='action:stash'>stashing</a> "
+             "before trying to <a href='action:merge'>merge</a>. Then "
+             "<a href='action:unstash'>unstash</a> to restore your changes.");
+        err->addEntry(LogEntry::Hint, text);
+      }
+
+      return;
+    }
+
+    // Make squash effect.
+    mRepo.cleanupState();
+
+    // Check for conflicts.
+    checkForConflicts(parent, tr("squash"));
 }
 
 void RepoView::revert(const git::Commit &commit)
@@ -1531,7 +1621,9 @@ void RepoView::cherryPick(const git::Commit &commit)
   this->commit(msg, git::AnnotatedCommit(), parent);
 }
 
-void RepoView::promptToForcePush()
+void RepoView::promptToForcePush(
+  const git::Remote &remote,
+  const git::Reference &src)
 {
   // FIXME: Check if force is really required?
 
@@ -1548,8 +1640,8 @@ void RepoView::promptToForcePush()
 
   QPushButton *accept =
     dialog->addButton(tr("Force Push"), QMessageBox::AcceptRole);
-  connect(accept, &QPushButton::clicked, [this] {
-    push(git::Remote(), git::Reference(), QString(), false, true);
+  connect(accept, &QPushButton::clicked, [this, remote, src] {
+    push(remote, src, QString(), false, true);
   });
 
   dialog->open();
@@ -1648,7 +1740,7 @@ void RepoView::push(
 
   mWatcher = new QFutureWatcher<git::Result>(this);
   connect(mWatcher, &QFutureWatcher<git::Result>::finished, mWatcher,
-  [this, src, setUpstream, remote, entry, remoteBranchName] {
+  [this, src, ref, setUpstream, remote, entry, remoteBranchName] {
     entry->setBusy(false);
 
     git::Result result = mWatcher->result();
@@ -1659,15 +1751,28 @@ void RepoView::push(
       QString errString = result.errorString();
       LogEntry *errorEntry = error(entry, tr("push to"), name, errString);
       if (err == GIT_ENONFASTFORWARD) {
-        QString hint1 =
-          tr("You may want to integrate remote commits first by "
-          "<a href='action:pull'>pulling</a>. Then "
-          "<a href='action:push'>push</a> again.");
-        QString hint2 =
-          tr("If you really want the remote to lose commits, you may "
-          "be able to <a href='action:push?force=true'>force push</a>.");
-        errorEntry->addEntry(LogEntry::Hint, hint1);
-        errorEntry->addEntry(LogEntry::Warning, hint2);
+        if (ref.isTag()) {
+          QString hint1 =
+            tr("The tag update may cause the remote to lose commits.");
+          QString hint2 =
+            tr("If you want to risk the remote losing commits, you can "
+            "<a href='action:push?ref=%1&to=%2&force=true'>force push</a>.");
+
+          errorEntry->addEntry(LogEntry::Hint, hint1);
+          errorEntry->addEntry(LogEntry::Warning, hint2.arg(
+            ref.qualifiedName().toHtmlEscaped(), name.toHtmlEscaped()));
+
+        } else {
+          QString hint1 =
+            tr("You may want to integrate remote commits first by "
+            "<a href='action:pull'>pulling</a>. Then "
+            "<a href='action:push'>push</a> again.");
+          QString hint2 =
+            tr("If you really want the remote to lose commits, you may "
+            "be able to <a href='action:push?force=true'>force push</a>.");
+          errorEntry->addEntry(LogEntry::Hint, hint1);
+          errorEntry->addEntry(LogEntry::Warning, hint2);
+        }
       }
     } else {
       mCallbacks->storeDeferredCredentials();
@@ -1759,18 +1864,6 @@ bool RepoView::commit(
     error->addEntry(LogEntry::Hint, hint1);
     error->addEntry(LogEntry::Hint, hint2);
     error->addEntry(LogEntry::Hint, hint3);
-  }
-
-  // Cleanup merge state.
-  switch (mRepo.state()) {
-    case GIT_REPOSITORY_STATE_MERGE:
-    case GIT_REPOSITORY_STATE_REVERT:
-    case GIT_REPOSITORY_STATE_CHERRYPICK:
-      mRepo.cleanupState();
-      break;
-
-    default:
-      break;
   }
 
   // Automatically push if enabled.
@@ -1975,6 +2068,13 @@ git::Branch RepoView::createBranch(
   return branch;
 }
 
+void RepoView::promptToDeleteBranch(const git::Reference &ref)
+{
+  DeleteBranchDialog *dialog = new DeleteBranchDialog(ref, this);
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+  dialog->open();
+}
+
 void RepoView::promptToStash()
 {
   // Prompt to edit stash commit message.
@@ -2054,22 +2154,35 @@ void RepoView::popStash(int index)
   refresh();
 }
 
-void RepoView::promptToTag(const git::Commit &commit)
+void RepoView::promptToAddTag(const git::Commit &commit)
 {
-  TagDialog *dialog = new TagDialog(mRepo, commit.shortId(), this);
+  TagDialog *dialog = new TagDialog(mRepo, commit.shortId(),
+    mRepo.defaultRemote(), this);
+
   connect(dialog, &TagDialog::accepted, this, [this, commit, dialog] {
     bool force = dialog->force();
     QString name = dialog->name();
     QString msg = dialog->message();
     git::TagRef tag = mRepo.createTag(commit, name, msg, force);
 
+    git::Remote remote = dialog->remote();
+
     QString link = commit.link();
     QString text = tag.isValid() ? tr("%1 as %2").arg(link, tag.name()) : link;
     LogEntry *entry = addLogEntry(text, tr("Tag"));
     if (!tag.isValid())
       error(entry, tr("tag"), link);
+    else if (remote.isValid())
+      push(remote, tag);
   });
 
+  dialog->open();
+}
+
+void RepoView::promptToDeleteTag(const git::Reference &ref)
+{
+  DeleteTagDialog *dialog = new DeleteTagDialog(ref, this);
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
   dialog->open();
 }
 
@@ -2142,6 +2255,138 @@ void RepoView::reset(
 
   if (!commit.reset(type))
     error(entry, commitToAmend ? tr("amend") : tr("reset"), head.name());
+
+  resetSubmodules(mRepo.submodules(), true, type, entry);
+
+
+}
+
+void RepoView::resetSubmodules(const QList<git::Submodule> &submodules,
+                               bool recursive,
+                               git_reset_t type,
+                               LogEntry *parent)
+{
+    if (mWatcher) {
+      // Queue update. synchrone
+      connect(mWatcher, &QFutureWatcher<git::Result>::finished, mWatcher,
+      [this, submodules, recursive, type, parent] {
+        resetSubmodules(submodules, recursive, type, parent);
+      });
+
+      return;
+    }
+
+    QList<git::Submodule> modules =
+      !submodules.isEmpty() ? submodules : mRepo.submodules();
+    if (modules.isEmpty())
+      return;
+
+    if (type == GIT_RESET_HARD) {
+        // Start updating asynchronously.
+        QList<SubmoduleInfo> infos = submoduleResetInfoList(mRepo, modules, parent);
+        resetSubmodulesAsync(infos, recursive, type);
+    }
+}
+
+/*!
+ * \brief RepoView::resetSubmodulesAsync
+ *
+ * \param submodules
+ * \param recursive
+ * \param type
+ * \param parent
+ */
+void RepoView::resetSubmodulesAsync(const QList<SubmoduleInfo> &submodules, bool recursive, git_reset_t type)
+{
+    if (submodules.isEmpty()) {
+      refresh();
+      return;
+    }
+
+    // Remove first submodule from the list.
+    QList<SubmoduleInfo> tail = submodules;
+    SubmoduleInfo info = tail.takeFirst();
+    git::Submodule submodule = info.submodule;
+    LogEntry *entry = info.entry->addEntry(submodule.name(), tr("Reset"));
+
+    mWatcher = new QFutureWatcher<git::Result>(this);
+    connect(mWatcher, &QFutureWatcher<git::Result>::finished, mWatcher,
+    [this, recursive, tail, type, info, entry] {
+      entry->setBusy(false);
+
+      git::Result result = mWatcher->result();
+      if (mCallbacks->isCanceled()) {
+        entry->addEntry(LogEntry::Error, tr("Reset canceled."));
+      } else if (!result) {
+        QString name = info.submodule.name();
+        error(entry, tr("update submodule"), name, result.errorString());
+      } else {
+        mCallbacks->storeDeferredCredentials();
+      }
+
+      mWatcher->deleteLater();
+      mWatcher = nullptr;
+      mCallbacks = nullptr;
+
+      // Build list of submodules recursively.
+      QList<SubmoduleInfo> prefix;
+      if (recursive) {
+        if (git::Repository repo = info.submodule.open()) {
+          QList<git::Submodule> submodules = repo.submodules();
+          if (!submodules.isEmpty())
+            prefix = submoduleResetInfoList(repo, submodules, entry);
+        }
+      }
+
+      // Restart with smaller list.
+      resetSubmodulesAsync(prefix + tail, recursive, type);
+    });
+
+    QString url = submodule.url();
+    git::Repository repo = submodule.open();
+    mCallbacks = new RemoteCallbacks(
+      RemoteCallbacks::Receive, entry, url, QString(), mWatcher, repo);
+
+    entry->setBusy(true);
+    mWatcher->setFuture(QtConcurrent::run(
+      submodule, &git::Submodule::reset, mCallbacks, type));
+}
+
+/*!
+ * \brief RepoView::submoduleResetInfoList
+ * Return a list of Submodules which should be resetted
+ * Additionally create the log message
+ * \param repo
+ * \param submodules
+ * \param init
+ * \param parent
+ * \return
+ */
+QList<RepoView::SubmoduleInfo> RepoView::submoduleResetInfoList(
+  const git::Repository &repo,
+  const QList<git::Submodule> &submodules,
+  LogEntry *parent)
+{
+  // Only reset modified submodules
+  QList<git::Submodule> modules;
+  foreach (const git::Submodule &submodule, submodules) {
+    int status = submodule.status();
+
+    if (status & (GIT_SUBMODULE_STATUS_WD_MODIFIED | GIT_SUBMODULE_STATUS_WD_WD_MODIFIED | GIT_SUBMODULE_STATUS_WD_INDEX_MODIFIED))
+        modules.append(submodule);
+  }
+
+  QString text =
+    tr("%1 of %2 submodules").arg(modules.size()).arg(submodules.size());
+  LogEntry *entry = addLogEntry(text, tr("Reset"), parent);
+
+  if (modules.isEmpty())
+    entry->addEntry(tr("Untouched"));
+
+  QList<SubmoduleInfo> list;
+  foreach (const git::Submodule &module, modules)
+    list.append({module, repo, entry});
+  return list;
 }
 
 void RepoView::updateSubmodules(
@@ -2151,7 +2396,7 @@ void RepoView::updateSubmodules(
   LogEntry *parent)
 {
   if (mWatcher) {
-    // Queue update.
+    // Queue update. synchrone
     connect(mWatcher, &QFutureWatcher<git::Result>::finished, mWatcher,
     [this, submodules, recursive, init, parent] {
       updateSubmodules(submodules, recursive, init, parent);
@@ -2166,11 +2411,21 @@ void RepoView::updateSubmodules(
     return;
 
   // Start updating asynchronously.
-  QList<SubmoduleInfo> infos = submoduleInfoList(mRepo, modules, init, parent);
+  QList<SubmoduleInfo> infos = submoduleUpdateInfoList(mRepo, modules, init, parent);
   updateSubmodulesAsync(infos, recursive, init);
 }
 
-QList<RepoView::SubmoduleInfo> RepoView::submoduleInfoList(
+/*!
+ * \brief RepoView::submoduleUpdateInfoList
+ * Return a list of Submodules which should be updated
+ * Additionally create the log message
+ * \param repo
+ * \param submodules
+ * \param init
+ * \param parent
+ * \return
+ */
+QList<RepoView::SubmoduleInfo> RepoView::submoduleUpdateInfoList(
   const git::Repository &repo,
   const QList<git::Submodule> &submodules,
   bool init,
@@ -2243,7 +2498,7 @@ void RepoView::updateSubmodulesAsync(
       if (git::Repository repo = info.submodule.open()) {
         QList<git::Submodule> submodules = repo.submodules();
         if (!submodules.isEmpty())
-          prefix = submoduleInfoList(repo, submodules, init, entry);
+          prefix = submoduleUpdateInfoList(repo, submodules, init, entry);
       }
     }
 
@@ -2407,6 +2662,11 @@ RepoView *RepoView::parentView(const QWidget *widget)
   return parentView(parent);
 }
 
+bool RepoView::detailsMaximized()
+{
+    return mMaximized;
+}
+
 void RepoView::showEvent(QShowEvent *event)
 {
   QSplitter::showEvent(event);
@@ -2517,13 +2777,78 @@ bool RepoView::checkForConflicts(LogEntry *parent, const QString &action)
   details->addEntry(LogEntry::Entry, commit.arg(action));
   mLogView->setEntryExpanded(details, false);
 
-  QString abort =
-    tr("You can <a href='action:abort'>abort</a> the %1 "
-       "to return the repository to its previous state.");
-  entry->addEntry(LogEntry::Hint, abort.arg(action));
+  if (action != tr("squash")) {
+    QString abort =
+      tr("You can <a href='action:abort'>abort</a> the %1 "
+         "to return the repository to its previous state.");
+    entry->addEntry(LogEntry::Hint, abort.arg(action));
+  }
 
   refresh();
   return true;
+}
+
+bool RepoView::match(QObject* search, QObject* parent)
+{
+    QObjectList children = parent->children();
+    for (auto child : children) {
+        if (child == search)
+            return true;
+
+        if (match(search, child))
+            return true;
+    }
+    return false;
+}
+
+RepoView::DetailSplitterWidgets RepoView::detailSplitterMaximize(bool maximized, DetailSplitterWidgets maximizeWidget)
+{
+    QWidget* widget = mDetailSplitter->focusWidget();
+
+    DetailSplitterWidgets newMaximized = DetailSplitterWidgets::NotDefined;
+
+    if (maximizeWidget != DetailSplitterWidgets::NotDefined)
+        newMaximized = maximizeWidget;
+
+    mMaximized = maximized;
+
+    if (mMaximized) {
+        bool found = false;
+        for (int i=0; i < mDetailSplitter->count(); i++) {
+            QWidget* w = mDetailSplitter->widget(i);
+            if (maximizeWidget == DetailSplitterWidgets::SideBar) {
+                if (w == mSideBar) {
+                    mSideBar->setVisible(true);
+                    found = true;
+                    continue;
+                }
+            } else if(maximizeWidget == DetailSplitterWidgets::DetailView) {
+                if (w == mDetails) {
+                    mDetails->setVisible(true);
+                    found = true;
+                    continue;
+                }
+            } else if (!widget)
+                return DetailSplitterWidgets::NotDefined;
+            else if (w == widget || match(widget, w)) {
+                w->setVisible(true);
+                found = true;
+                if (w == mSideBar)
+                    newMaximized = DetailSplitterWidgets::SideBar;
+                else if (w == mDetails)
+                    newMaximized = DetailSplitterWidgets::DetailView;
+                continue;
+            }
+            w->setVisible(false);
+        }
+
+        assert(found);
+    } else {
+        for (int i=0; i < mDetailSplitter->count(); i++)
+           mDetailSplitter->widget(i)->setVisible(true);
+    }
+
+    return newMaximized;
 }
 
 #include "RepoView.moc"

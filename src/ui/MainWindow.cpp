@@ -22,6 +22,8 @@
 #include "git/Submodule.h"
 #include <QApplication>
 #include <QCloseEvent>
+#include <QGuiApplication>
+#include <QScreen>
 #include <QCryptographicHash>
 #include <QDesktopWidget>
 #include <QMessageBox>
@@ -43,9 +45,30 @@ const QString kSidebarKey = "sidebar";
 const QString kGeometryKey = "geometry";
 const QString kWindowsGroup = "windows";
 
+class TabName
+{
+public:
+  TabName(const QString &path)
+    : mPath(path)
+  {}
+
+  QString name() const
+  {
+    return mPath.section('/', -mSections);
+  }
+
+  void increment()
+  {
+    ++mSections;
+  }
+
+private:
+  QString mPath;
+  int mSections = 1;
+};
+
 } // anon. namespace
 
-bool MainWindow::sExiting = false;
 bool MainWindow::sSaveWindowSettings = false;
 
 MainWindow::MainWindow(
@@ -59,7 +82,7 @@ MainWindow::MainWindow(
   setAcceptDrops(true);
 
   // Create new menu bar for this window if there isn't a shared one.
-  MenuBar *menuBar = MenuBar::instance(this);
+  mMenuBar = MenuBar::instance(this);
 
   // Create tool bar.
   mToolBar = new ToolBar(this);
@@ -68,9 +91,9 @@ MainWindow::MainWindow(
   // Initialize search.
   SearchField *searchField = mToolBar->searchField();
   connect(searchField, &QLineEdit::textEdited,
-          menuBar, &MenuBar::updateUndoRedo);
+          mMenuBar, &MenuBar::updateUndoRedo);
   connect(searchField, &QLineEdit::selectionChanged,
-          menuBar, &MenuBar::updateCutCopyPaste);
+          mMenuBar, &MenuBar::updateCutCopyPaste);
 
   // Hook up advanced search.
   AdvancedSearchWidget *advancedSearch = new AdvancedSearchWidget(this);
@@ -112,6 +135,11 @@ MainWindow::MainWindow(
     MenuBar::instance(this)->update();
   });
 
+  connect(tabs, QOverload<>::of(&TabWidget::tabInserted),
+          this, &MainWindow::updateTabNames);
+  connect(tabs, QOverload<>::of(&TabWidget::tabRemoved),
+          this, &MainWindow::updateTabNames);
+
   splitter->addWidget(new SideBar(tabs, splitter));
   splitter->addWidget(tabs);
   splitter->setCollapsible(1, false);
@@ -128,7 +156,7 @@ MainWindow::MainWindow(
   // Set default size and position.
   resize(kDefaultWidth, kDefaultHeight);
 
-  QRect desktop = QApplication::desktop()->availableGeometry();
+  QRect desktop = QGuiApplication::primaryScreen()->availableGeometry();
   int x = (desktop.width() / 2) - (kDefaultWidth / 2);
   int y = (desktop.height() / 2) - (kDefaultHeight / 2);
   move(x, y);
@@ -140,7 +168,7 @@ MainWindow::MainWindow(
   // Restore sidebar.
   setSideBarVisible(QSettings().value(kSidebarKey, true).toBool());
 
-  // Set inital state of interface.
+  // Set initial state of interface.
   updateInterface();
 }
 
@@ -226,6 +254,7 @@ RepoView *MainWindow::addTab(const git::Repository &repo)
   }
 
   RepoView *view = new RepoView(repo, this);
+  view->detailSplitterMaximize(mMenuBar->isMaximized());
   git::RepositoryNotifier *notifier = repo.notifier();
   connect(notifier, &git::RepositoryNotifier::referenceUpdated,
           this, &MainWindow::updateInterface);
@@ -374,11 +403,6 @@ MainWindow *MainWindow::open(const git::Repository &repo)
   return window;
 }
 
-void MainWindow::setExiting(bool exiting)
-{
-  sExiting = exiting;
-}
-
 void MainWindow::setSaveWindowSettings(bool enabled)
 {
   sSaveWindowSettings = enabled;
@@ -423,6 +447,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
   }
 
+  mClosing = true;
   QMainWindow::closeEvent(event);
 }
 
@@ -459,10 +484,33 @@ void MainWindow::warnInvalidRepo(const QString &path)
   QMessageBox::warning(nullptr, title, text.arg(path));
 }
 
+void MainWindow::updateTabNames()
+{
+  QList<TabName> names;
+  for (int i = 0; i < count(); ++i) {
+    TabName name(view(i)->repo().workdir().path());
+    auto functor = [&name](const TabName &rhs) {
+      return (name.name() == rhs.name());
+    };
+
+    QList<TabName>::iterator it, end = names.end();
+    while ((it = std::find_if(names.begin(), end, functor)) != end) {
+      it->increment();
+      name.increment();
+    }
+
+    names.append(name);
+  }
+
+  TabWidget *tabs = tabWidget();
+  for (int i = 0; i < count(); ++i)
+    tabs->setTabText(i, names.at(i).name());
+}
+
 void MainWindow::updateInterface()
 {
-  // Avoid updating during exit.
-  if (sExiting)
+  // Avoid updating during close.
+  if (mClosing)
     return;
 
   int ahead = 0;

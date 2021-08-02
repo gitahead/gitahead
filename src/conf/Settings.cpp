@@ -22,10 +22,6 @@
 
 namespace {
 
-const QString kTempDir = "GitAhead";
-const QStandardPaths::StandardLocation kUserLocation =
-  QStandardPaths::AppLocalDataLocation;
-
 const QString kIgnoreWsKey = "diff/whitespace/ignore";
 const QString kLastPathKey = "lastpath";
 
@@ -66,9 +62,28 @@ QString promptKey(Settings::PromptKind kind)
     case Settings::PromptCherryPick:
       key = "cherrypick";
       break;
+
+    case Settings::PromptDirectories:
+      key = "directories";
+      break;
+
+    case Settings::PromptLargeFiles:
+      key = "largeFiles";
+      break;
   }
 
   return QString("window/prompt/%1").arg(key);
+}
+
+QDir rootDir()
+{
+  QDir dir(QCoreApplication::applicationDirPath());
+
+#ifdef Q_OS_MAC
+  dir.cdUp(); // Contents
+#endif
+
+  return dir;
 }
 
 } // anon. namespace
@@ -198,6 +213,12 @@ QString Settings::promptDescription(PromptKind kind) const
 
     case PromptCherryPick:
       return tr("Prompt to edit commit message before cherry-picking");
+
+    case PromptDirectories:
+      return tr("Prompt to stage directories");
+
+    case PromptLargeFiles:
+      return tr("Prompt to stage large files");
   }
 }
 
@@ -244,15 +265,24 @@ QDir Settings::docDir()
 
 QDir Settings::confDir()
 {
-  QDir dir(QCoreApplication::applicationDirPath());
-
-#ifdef Q_OS_MAC
-  // Search bundle.
-  dir.cdUp(); // Contents
-#endif
-
+  QDir dir = rootDir();
   if (!dir.cd("Resources"))
     dir = QDir(CONF_DIR);
+  return dir;
+}
+
+QDir Settings::l10nDir()
+{
+  QDir dir = rootDir();
+  if (!dir.cd("Resources/l10n"))
+    dir = QDir(L10N_DIR);
+  return dir;
+}
+
+QDir Settings::dictionariesDir()
+{
+  QDir dir = confDir();
+  dir.cd("dictionaries");
   return dir;
 }
 
@@ -280,14 +310,16 @@ QDir Settings::pluginsDir()
 
 QDir Settings::userDir()
 {
-  return QStandardPaths::writableLocation(kUserLocation);
+  return QStandardPaths::writableLocation(
+           QStandardPaths::AppLocalDataLocation);
 }
 
 QDir Settings::tempDir()
 {
+  QString name = QCoreApplication::applicationName();
   QDir dir = QDir::temp();
-  dir.mkpath(kTempDir);
-  dir.cd(kTempDir);
+  dir.mkpath(name);
+  dir.cd(name);
   return dir;
 }
 

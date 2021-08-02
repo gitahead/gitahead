@@ -12,9 +12,7 @@
 
 #include "ScintillaQt.h"
 
-#ifdef SCI_NAMESPACE
 namespace Scintilla {
-#endif
 
 class ScintillaIFace : public ScintillaQt
 {
@@ -548,16 +546,6 @@ public:
      * Get the size of the dots used to mark space characters.
      */
     int whitespaceSize() const;
-    /**
-     * Divide each styling byte into lexical class bits (default: 5) and indicator
-     * bits (default: 3). If a lexer requires more than 32 lexical states, then this
-     * is used to expand the possible states.
-     */
-    void setStyleBits(int bits);
-    /**
-     * Retrieve number of bits in style bytes used to hold the lexical state.
-     */
-    int styleBits() const;
     /**
      * Used to hold extra styling information for each line.
      */
@@ -1246,7 +1234,7 @@ public:
      */
     void setWrapVisualFlags(int wrapVisualFlags);
     /**
-     * Retrive the display mode of visual flags for wrapped lines.
+     * Retrieve the display mode of visual flags for wrapped lines.
      */
     int wrapVisualFlags() const;
     /**
@@ -1254,7 +1242,7 @@ public:
      */
     void setWrapVisualFlagsLocation(int wrapVisualFlagsLocation);
     /**
-     * Retrive the location of visual flags for wrapped lines.
+     * Retrieve the location of visual flags for wrapped lines.
      */
     int wrapVisualFlagsLocation() const;
     /**
@@ -1262,7 +1250,7 @@ public:
      */
     void setWrapStartIndent(int indent);
     /**
-     * Retrive the start indent for wrapped lines.
+     * Retrieve the start indent for wrapped lines.
      */
     int wrapStartIndent() const;
     /**
@@ -2763,10 +2751,6 @@ public:
      */
     int propertyInt(const QString & key) const;
     /**
-     * Retrieve the number of bits the current lexer needs for styling.
-     */
-    int styleBitsNeeded() const;
-    /**
      * Retrieve the name of the lexer.
      * Return the length of the text.
      * Result is NUL-terminated.
@@ -2841,8 +2825,6 @@ public:
   //--
 };
 
-#ifdef SCI_NAMESPACE
-}
-#endif
+} // namespace Scintilla
 
 #endif

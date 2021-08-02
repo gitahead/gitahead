@@ -29,6 +29,7 @@ public:
   virtual ~ContentWidget();
 
   virtual QString selectedFile() const = 0;
+  virtual QModelIndex selectedIndex() const = 0;
 
   virtual void setDiff(
     const git::Diff &diff,

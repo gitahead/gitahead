@@ -45,9 +45,25 @@ public:
   Id indexId() const;
   Id workdirId() const;
 
+  /*!
+   * \brief status
+   * Return the status of the submodule as a combination of flags described in
+   * https://libgit2.org/libgit2/index.html#HEAD/type/git_submodule_status_t
+   * \return current status
+   */
   int status() const;
 
   Result update(Remote::Callbacks *callbacks, bool init = false);
+
+  /*!
+   * \brief reset
+   * Reset working directory to current head
+   * \param type
+   * \param paths
+   * \return
+   */
+  Result reset(Remote::Callbacks *callbacks,
+    git_reset_t type = GIT_RESET_MIXED) const;
 
   Repository open() const;
 

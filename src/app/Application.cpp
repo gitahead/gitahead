@@ -27,8 +27,8 @@
 #include <QNetworkReply>
 #include <QOperatingSystemVersion>
 #include <QSettings>
-#include <QSysInfo>
 #include <QTimer>
+#include <QTranslator>
 #include <QUrlQuery>
 #include <QUuid>
 
@@ -135,6 +135,7 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   parser.addOption({{"d", "debug-menu"}, "Show debug menu."});
   parser.addOption({{"t", "theme"}, "Choose theme.", "name"});
   parser.addOption({{"f", "filter"}, "Set the pathspec filter.", "pathspec"});
+  parser.addOption({"no-translation", "Disable translation."});
 
   if (haltOnParseError) {
     parser.process(arguments());
@@ -156,6 +157,35 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   setStyle(mTheme->style());
   setStyleSheet(mTheme->styleSheet());
 
+  // Read translation settings
+  QSettings settings;
+  if ((!settings.value("translation/disable", false).toBool()) &&
+      (!parser.isSet("no-translation"))) {
+    // Load translation files.
+    QLocale locale;
+    QDir l10n = Settings::l10nDir();
+    QString name = QString(GITAHEAD_NAME).toLower();
+    QTranslator *translator = new QTranslator(this);
+    if (translator->load(locale, name, "_", l10n.absolutePath())) {
+      installTranslator(translator);
+    } else {
+      delete translator;
+    }
+
+    // Load Qt translation file.
+    QTranslator *qt = new QTranslator(this);
+    if (qt->load(locale, "qtbase", "_", l10n.absolutePath())) {
+      installTranslator(qt);
+    } else {
+      QDir dir(QT_TRANSLATIONS_DIR);
+      if (dir.exists() && qt->load(locale, "qtbase", "_", dir.absolutePath())) {
+        installTranslator(qt);
+      } else {
+        delete qt;
+      }
+    }
+  }
+
   // Enable system proxy auto-detection.
   QNetworkProxyFactory::setUseSystemConfiguration(true);
 
@@ -165,11 +195,12 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   registerService();
 
   // Load SF Mono font from Terminal.app.
-  QDir dir("/Applications/Utilities/Terminal.app/Contents/Resources/Fonts");
-  QFontDatabase::addApplicationFont(dir.filePath("SFMono-Regular.otf"));
-
-  // Don't quit on close.
-  setQuitOnLastWindowClosed(false);
+  QDir dir("/System/Applications");
+  if (!dir.exists())
+    dir.setPath("/Applications");
+  dir.cd("Utilities/Terminal.app/Contents/Resources/Fonts");
+  foreach (const QString &name, dir.entryList({"SF*Mono-*.otf"}, QDir::Files))
+    QFontDatabase::addApplicationFont(dir.filePath(name));
 
   // Create shared menu bar on Mac.
   (void) MenuBar::instance(nullptr);
@@ -187,13 +218,13 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   setWindowIcon(icon);
 #endif
 
+  // Set path to emoji description file.
+  git::Commit::setEmojiFile(Settings::confDir().filePath("emoji.json"));
+
   // Initialize git library.
   git::Repository::init();
 
   connect(this, &Application::aboutToQuit, [this] {
-    // Avoid updating interface during exit.
-    MainWindow::setExiting(true);
-
     // Clean up git library.
     // Make sure windows are really deleted.
     sendPostedEvents(nullptr, QEvent::DeferredDelete);
@@ -201,7 +232,6 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   });
 
   // Read tracking settings.
-  QSettings settings;
   settings.beginGroup("tracking");
   QByteArray tid(GITAHEAD_TRACKING_ID);
   if (!tid.isEmpty() && settings.value("enabled", true).toBool()) {
@@ -253,7 +283,7 @@ bool Application::restoreWindows()
     // Check for command line repo.
     QString arg = mPositionalArguments.first();
     if (QFileInfo(arg).isAbsolute()) {
-      dir = arg;
+      dir.setPath(arg);
     } else {
       dir.cd(arg);
     }
@@ -329,12 +359,13 @@ void Application::track(const QUrlQuery &query)
     return;
 
   QString sys = userAgentSystem();
+  QString language = QLocale().uiLanguages().first();
   QString userAgent = kUserAgentFmt.arg(GITAHEAD_NAME, GITAHEAD_VERSION, sys);
 
   QUrlQuery tmp = query;
   tmp.addQueryItem("v", "1");
   tmp.addQueryItem("ds", "app");
-  tmp.addQueryItem("ul", "en-us");
+  tmp.addQueryItem("ul", language);
   tmp.addQueryItem("ua", userAgent);
   tmp.addQueryItem("an", GITAHEAD_NAME);
   tmp.addQueryItem("av", GITAHEAD_VERSION);

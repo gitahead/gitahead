@@ -8,7 +8,7 @@
 //
 
 #include "DiffWidget.h"
-#include "DiffView.h"
+#include "DiffView/DiffView.h"
 #include "FileList.h"
 #include "FindWidget.h"
 #include "RepoView.h"
@@ -67,7 +67,7 @@ DiffWidget::DiffWidget(const git::Repository &repo, QWidget *parent)
     QModelIndexList indexes = mFiles->selectionModel()->selectedIndexes();
     foreach (const QModelIndex &index, indexes)
       paths.append(index.data().toString());
-    mDiffView->setFilter(paths);
+    mDiffView->updateFiles();
   });
 
   connect(mDiffView->verticalScrollBar(), &QScrollBar::valueChanged,

@@ -24,7 +24,9 @@ public:
     PromptStash,
     PromptMerge,
     PromptRevert,
-    PromptCherryPick
+    PromptCherryPick,
+    PromptDirectories,
+    PromptLargeFiles
   };
 
   QString group() const;
@@ -48,7 +50,7 @@ public:
   bool isWhitespaceIgnored() const;
   void setWhitespaceIgnored(bool ignored);
 
-  // Last repository path
+  // last repository path
   QString lastPath() const;
   void setLastPath(const QString &lastPath);
 
@@ -56,6 +58,8 @@ public:
   static QDir appDir();
   static QDir docDir();
   static QDir confDir();
+  static QDir l10nDir();
+  static QDir dictionariesDir();
   static QDir lexerDir();
   static QDir themesDir();
   static QDir pluginsDir();

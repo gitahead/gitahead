@@ -16,6 +16,7 @@
 #include "MainWindow.h"
 #include "RepoView.h"
 #include "TabWidget.h"
+#include "StateAction.h"
 #include "app/Application.h"
 #include "conf/RecentRepositories.h"
 #include "conf/RecentRepository.h"
@@ -162,9 +163,7 @@ MenuBar::MenuBar(QWidget *parent)
   QAction *quit = file->addAction(tr("Exit"));
   quit->setMenuRole(QAction::QuitRole);
   quit->setShortcut(QKeySequence::Quit);
-  connect(quit, &QAction::triggered, [] {
-    QCoreApplication::postEvent(qApp, new QCloseEvent);
-  });
+  connect(quit, &QAction::triggered, &QApplication::closeAllWindows);
 #endif
 
   // Edit
@@ -321,11 +320,26 @@ MenuBar::MenuBar(QWidget *parent)
     view->setLogVisible(!view->isLogVisible());
   });
 
+  mToggleMaximize = new StateAction(tr("Normal"), tr("Maximize"), viewMenu);
+  viewMenu->addAction(mToggleMaximize);
+  mToggleMaximize->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
+  connect(mToggleMaximize, &QAction::triggered, [this] {
+    bool maximize = mToggleMaximize->isActive();
+    RepoView* view = this->view();
+    RepoView::DetailSplitterWidgets widget = view->detailSplitterMaximize(maximize);
+    assert(!maximize || (maximize == true && widget != RepoView::DetailSplitterWidgets::NotDefined));
+
+    QList<RepoView*> repos = this->views();
+    for (auto repo : repos) {
+        repo->detailSplitterMaximize(maximize, widget);
+    }
+  });
+
   mToggleView = viewMenu->addAction(tr("Show Tree View"));
   connect(mToggleView, &QAction::triggered, [this] {
     RepoView *view = this->view();
-    bool diff = (view->viewMode() == RepoView::Diff);
-    view->setViewMode(diff ? RepoView::Tree : RepoView::Diff);
+    bool diff = (view->viewMode() == RepoView::DoubleTree);
+    view->setViewMode(diff ? RepoView::Tree : RepoView::DoubleTree);
   });
 
   // Repository
@@ -370,7 +384,7 @@ MenuBar::MenuBar(QWidget *parent)
   QMenu *lfs = repository->addMenu(tr("Git LFS"));
   mLfsUnlock = lfs->addAction(tr("Remove all locks"));
   connect(mLfsUnlock, &QAction::triggered, [this] {
-    view()->lfsSetLocked(view()->repo().lfsLocks().toList(), false);
+    view()->lfsSetLocked(view()->repo().lfsLocks().values(), false);
   });
 
   lfs->addSeparator();
@@ -395,6 +409,12 @@ MenuBar::MenuBar(QWidget *parent)
   mFetch->setShortcut(tr("Ctrl+Shift+Alt+F"));
   connect(mFetch, &QAction::triggered, [this] {
     view()->fetch();
+  });
+
+  mFetchAll = remote->addAction(tr("Fetch All"));
+  mFetchAll->setShortcut(tr("Ctrl+Shift+Alt+A"));
+  connect(mFetchAll, &QAction::triggered, [this] {
+    view()->fetchAll();
   });
 
   mFetchFrom = remote->addAction(tr("Fetch From..."));
@@ -488,6 +508,19 @@ MenuBar::MenuBar(QWidget *parent)
     RepoView *view = this->view();
     MergeDialog *dialog =
       new MergeDialog(RepoView::Rebase, view->repo(), view);
+    connect(dialog, &QDialog::accepted, [view, dialog] {
+      view->merge(dialog->flags(), dialog->reference());
+    });
+
+    dialog->open();
+  });
+
+  mSquash = branch->addAction(tr("Squash..."));
+  mSquash->setShortcut(tr("Ctrl+Shift+Q"));
+  connect(mSquash, &QAction::triggered, [this] {
+    RepoView *view = this->view();
+    MergeDialog *dialog =
+      new MergeDialog(RepoView::Squash, view->repo(), view);
     connect(dialog, &QDialog::accepted, [view, dialog] {
       view->merge(dialog->flags(), dialog->reference());
     });
@@ -633,7 +666,9 @@ MenuBar::MenuBar(QWidget *parent)
   QString name = QCoreApplication::applicationName();
   QAction *about = help->addAction(tr("About %1").arg(name));
   about->setMenuRole(QAction::AboutRole);
-  connect(about, &QAction::triggered, &AboutDialog::openSharedInstance);
+  connect(about, &QAction::triggered, [] {
+    AboutDialog::openSharedInstance();
+  });
 
   QAction *update = help->addAction(tr("Check For Updates..."));
   update->setMenuRole(QAction::ApplicationSpecificRole);
@@ -816,13 +851,14 @@ void MenuBar::updateView()
   mRefresh->setEnabled(view);
   mToggleLog->setEnabled(view);
   mToggleView->setEnabled(view);
+  mToggleMaximize->setEnabled(view);
 
   if (!view)
     return;
 
-  bool diff = (view->viewMode() == RepoView::Diff);
+  bool diff = (view->viewMode() == RepoView::DoubleTree);
   mToggleLog->setText(view->isLogVisible() ? tr("Hide Log") : tr("Show Log"));
-  mToggleView->setText(diff ? tr("Show Tree View") : tr("Show Diff View"));
+  mToggleView->setText(diff ? tr("Show Tree View") : tr("Show Double Tree View"));
 }
 
 void MenuBar::updateRepository()
@@ -846,6 +882,7 @@ void MenuBar::updateRemote()
   RepoView *view = win ? win->currentView() : nullptr;
   mConfigureRemotes->setEnabled(view);
   mFetch->setEnabled(view);
+  mFetchAll->setEnabled(view);
   mPull->setEnabled(view && !view->repo().isBare());
   mPush->setEnabled(view);
   mFetchFrom->setEnabled(view);
@@ -867,9 +904,9 @@ void MenuBar::updateBranch()
   mCheckout->setEnabled(head.isValid() && !view->repo().isBare());
   mNewBranch->setEnabled(head.isValid());
 
-  git::Branch headBranch = head;
-  mMerge->setEnabled(headBranch.isValid());
-  mRebase->setEnabled(headBranch.isValid());
+  mMerge->setEnabled(head.isValid());
+  mRebase->setEnabled(head.isValid());
+  mSquash->setEnabled(head.isValid());
 
   bool merging = false;
   QString text = tr("Merge");
@@ -899,6 +936,7 @@ void MenuBar::updateBranch()
     }
   }
 
+  git::Branch headBranch = head;
   mAbort->setText(tr("Abort %1").arg(text));
   mAbort->setEnabled(headBranch.isValid() && merging);
 }
@@ -954,6 +992,17 @@ RepoView *MenuBar::view() const
   return static_cast<MainWindow *>(window())->currentView();
 }
 
+QList<RepoView*> MenuBar::views() const
+{
+   MainWindow* win = static_cast<MainWindow *>(window());
+
+   QList<RepoView*> repos;
+   for (int i=0; i< win->count(); i++) {
+       repos.append(win->view(i));
+   }
+   return repos;
+}
+
 void MenuBar::setDebugMenuVisible(bool visible)
 {
   sDebugMenuVisible = visible;
@@ -978,4 +1027,9 @@ MenuBar *MenuBar::instance(QWidget *widget)
 
   return static_cast<MenuBar *>(window->menuBar());
 #endif
+}
+
+bool MenuBar::isMaximized()
+{
+    return mToggleMaximize->isActive();
 }

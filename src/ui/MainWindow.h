@@ -16,6 +16,7 @@
 class RepoView;
 class TabWidget;
 class ToolBar;
+class MenuBar;
 
 namespace git {
 class Submodule;
@@ -29,7 +30,7 @@ public:
   MainWindow(
     const git::Repository &repo,
     QWidget *parent = nullptr,
-    Qt::WindowFlags flags = 0);
+    Qt::WindowFlags flags = Qt::WindowFlags());
 
   ToolBar *toolBar() const { return mToolBar; }
 
@@ -56,9 +57,6 @@ public:
   static MainWindow *open(const QString &path, bool warnOnInvalid = true);
   static MainWindow *open(const git::Repository &repo = git::Repository());
 
-  // Avoid updating interface during exit.
-  static void setExiting(bool exiting);
-
   // Save window settings on close.
   static void setSaveWindowSettings(bool enabled);
 
@@ -69,6 +67,7 @@ protected:
   void dropEvent(QDropEvent *event) override;
 
 private:
+  void updateTabNames();
   void updateInterface();
   void updateWindowTitle(int ahead = -1, int behind = -1);
 
@@ -81,12 +80,14 @@ private:
   void updateTouchBar(int ahead = -1, int behind = -1);
 
   ToolBar *mToolBar;
+  MenuBar* mMenuBar;
+
   bool mFullPath = false;
   bool mIsSideBarVisible = true;
 
   bool mShown = false;
+  bool mClosing = false;
 
-  static bool sExiting;
   static bool sSaveWindowSettings;
 };
 

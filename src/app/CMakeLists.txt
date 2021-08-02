@@ -13,6 +13,7 @@ set(EMOJI ${CONF_DIR}/emoji.json)
 set(MERGETOOLS ${CONF_DIR}/mergetools)
 
 file(GLOB CONFIG_FILES ${CONF_DIR}/*.lua)
+file(GLOB DICTIONARIES ${CONF_DIR}/dictionaries/*.aff ${CONF_DIR}/dictionaries/*.dic ${CONF_DIR}/dictionaries/*.txt)
 file(GLOB THEMES ${CONF_DIR}/themes/*.lua)
 file(GLOB SCINTILLUA_LEXERS ${SCINTILLUA_LEXERS_DIR}/*.lua)
 file(GLOB LUA_PLUGINS ${CONF_DIR}/plugins/*.lua ${CONF_DIR}/plugins/*.txt)
@@ -57,6 +58,7 @@ target_compile_definitions(app
     GITAHEAD_VERSION="${GITAHEAD_VERSION}"
   PRIVATE
     GITAHEAD_TRACKING_ID="${GITAHEAD_TRACKING_ID}"
+    QT_TRANSLATIONS_DIR="${QT_TRANSLATIONS_DIR}"
 )
 
 target_link_libraries(app
@@ -67,12 +69,17 @@ target_link_libraries(app
   Qt5::Widgets
 )
 
+set_target_properties(app PROPERTIES
+  AUTOMOC ON
+)
+
 # Add main executable.
 add_executable(gitahead WIN32 MACOSX_BUNDLE
   GitAhead.cpp
   ${ICON}
   ${RC_FILE}
   ${CONFIG_FILES}
+  ${DICTIONARIES}
   ${EMOJI}
   ${MERGETOOLS}
   ${THEMES}
@@ -110,6 +117,10 @@ elseif(APPLE)
     ${ICON} ${EMOJI} ${MERGETOOLS} ${CONFIG_FILES}
     ${CHANGELOG_HTML} ${ACKNOWLEDGMENTS_HTML} ${PRIVACY_HTML} ${PLUGIN_HTML}
     PROPERTIES MACOSX_PACKAGE_LOCATION Resources
+  )
+
+  set_source_files_properties(${DICTIONARIES} PROPERTIES
+    MACOSX_PACKAGE_LOCATION Resources/dictionaries
   )
 
   set_source_files_properties(${THEMES} PROPERTIES
@@ -197,6 +208,11 @@ else()
       COMPONENT ${GITAHEAD_NAME}
     )
   endforeach()
+
+  install(FILES ${DICTIONARIES}
+    DESTINATION Resources/dictionaries
+    COMPONENT ${GITAHEAD_NAME}
+  )
 
   install(FILES ${THEMES}
     DESTINATION Resources/themes

@@ -1,7 +1,8 @@
 if(PKG_CONFIG_FOUND)
-  pkg_check_modules(LIBSSH2 libssh2)
-endif()
-if(NOT LIBSSH2_FOUND)
+   pkg_check_modules(LIBSSH2 libssh2)
+ endif()
+#if(NOT LIBSSH2_FOUND)
+if(TRUE)
   set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
   set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
 

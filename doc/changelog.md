@@ -1,3 +1,120 @@
+### v2.6.3 - 2020-07-14
+
+#### Added
+
+* Added external tool definitions for Beyond Compare 4. (Stefan Knotzer)
+* Added option to disable translation. (Stefan Knotzer)
+* Added options to delete branches and tags from the commit list context menu. (Stefan Knotzer)
+* Added button to the clone dialog to navigate to a local directory. (Stefan Knotzer)
+* Added Brazilian Portuguese translation. (Francisco)
+
+#### Fixed
+
+* Fixed incorrect setting change when checking the "update submodules after pull" check box.
+* Fixed failure to stage some renames. (Maickonn Richard)
+* Fixed crash on right-click when a both the status diff and another commit are selected. (Stefan Knotzer)
+* Fixed the definition of an identifier in indexed search to include a dash followed a digit.
+* (Mac) Fixed failure to load translations.
+
+----
+
+### v2.6.2 - 2020-05-03
+
+#### Added
+
+* Added Spanish translation. (Gustavo Velasco-Hernandez)
+* Added command line flag (--no-translation) to disable automatic loading of translation files.
+* Added option to create a squash merge (git merge --squash). (Maickonn Richard)
+* Added settings to specify SHH config and key file paths. (Kas)
+* Added settings for prompt to stage directories and large files. (Maickonn Richard)
+
+#### Fixed
+
+* Fixed crash on Fetch All without an open repo. (Maickonn Richard)
+* (Mac) Fixed crash on window close.
+* (Linux) Fixed failure to quit from the menu. (Kas)
+
+#### Changed
+
+* Changed layout of diff view to more clearly group hunks with their file.
+* (Mac) Quit when the last window is closed.
+
+----
+
+### v2.6.1 - 2019-12-26
+
+#### Fixed
+
+* Fixed potential crash on adding a remote account from the sidebar.
+* Fixed width of ID column in compact history mode for some fonts.
+* (Mac) Fixed missing translations for some items in app menu.
+* (Mac) Fixed incorrect UI language when English comes before German in list of preferred languages.
+
+----
+
+### v2.6.0 - 2019-12-12
+
+#### Added
+
+* Added options to automatically prune remote tracking branches on fetch/pull. (Kas)
+* Added context menu action to push tags to the default remote. (Kas)
+* Added prompt to delete tags (including from the remote). (Kas)
+* Added German language translation. (Kas)
+* Added theme variables to color the tab bar independently. (Kas)
+* Added compact history mode (in the gear popup menu). (Attila Greguss)
+
+#### Fixed
+
+* Jump to matching reference on click instead of selection change.
+* Fixed possible invalid commit editor message after revert, cherry-pick, etc.
+* Fixed inconsistent history list font size on some displays.
+* Fixed failure to cancel some remote transfer operations.
+* Removed artificial limitation on merging and rebasing with a detached HEAD.
+* Fixed crash when merging or rebasing with a detached HEAD. (Kas)
+
+----
+
+### v2.5.11 - 2019-10-30
+
+#### Added
+
+* Added context menu item to remove remote account from the sidebar.
+* Added usage reporting setting to the 'General' preferences panel.
+* Remember sidebar remote account expansion state.
+* Unique sidebar and open tab names in the same way as recent repositories.
+* Added 'Fetch All' item to 'Remote' menu.
+
+#### Fixed
+
+* Fixed failure to launch external edit tools with spaces in their path.
+* Disallow pasting rich text into the commit editor.
+* (Win) Fixed several issues relating to symlinks.
+
+#### Changed
+
+* Allow more than 99 columns in line length plugin interface.
+* Clarify copyright statement in the about dialog.
+* (Mac) Enable the hardened runtime to allow notarization on macOS Catalina.
+
+----
+
+### v2.5.10 - 2019-08-29
+
+#### Added
+
+* Automatically switch between light and dark mode on macOS Mojave when using the native theme.
+
+#### Fixed
+
+* Fixed stash performance issue.
+* Fixed crash on LFS-not-found error.
+* Avoid reporting the LFS-not-found error multiple times.
+* Fixed possible failure to look up the correct SSH identity file when the config file contains a 'HostName' entry.
+* Fixed failure to draw tree view badges in some cases.
+* Add missing dark mode colors for some lexers that reference colors directly (e.g. markdown).
+
+----
+
 ### v2.5.9 - 2019-08-10
 
 #### Fixed

@@ -12,6 +12,7 @@ target_link_libraries(conf
 
 target_compile_definitions(conf PRIVATE
   CONF_DIR="${CMAKE_SOURCE_DIR}/conf"
+  L10N_DIR="${CMAKE_BINARY_DIR}/l10n"
   SCINTILLUA_LEXERS_DIR="${SCINTILLUA_LEXERS_DIR}"
 )
 

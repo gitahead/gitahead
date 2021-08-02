@@ -12,9 +12,7 @@
 #include "Scintilla.h"
 #include <QVarLengthArray>
 
-#ifdef SCI_NAMESPACE
 namespace Scintilla {
-#endif
 
 namespace {
 
@@ -693,16 +691,6 @@ void ScintillaIFace::setWhitespaceSize(int size)
 int ScintillaIFace::whitespaceSize() const
 {
   return (int)send(SCI_GETWHITESPACESIZE, 0, 0);
-}
-
-void ScintillaIFace::setStyleBits(int bits)
-{
-  send(SCI_SETSTYLEBITS, (uptr_t)bits, 0);
-}
-
-int ScintillaIFace::styleBits() const
-{
-  return (int)send(SCI_GETSTYLEBITS, 0, 0);
 }
 
 void ScintillaIFace::setLineState(int line, int state)
@@ -1656,12 +1644,16 @@ void ScintillaIFace::appendText(const QString & text)
 
 bool ScintillaIFace::twoPhaseDraw() const
 {
-  return send(SCI_GETTWOPHASEDRAW, 0, 0) != 0;
+  return send(SCI_GETPHASESDRAW, 0, 0) != 0;
 }
 
 void ScintillaIFace::setTwoPhaseDraw(bool twoPhase)
 {
-  send(SCI_SETTWOPHASEDRAW, (uptr_t)twoPhase, 0);
+  int phases = 1;
+  if (twoPhase)
+      phases = 2;
+
+  send(SCI_SETPHASESDRAW, phases, 0);
 }
 
 int ScintillaIFace::phasesDraw() const
@@ -3370,11 +3362,6 @@ int ScintillaIFace::propertyInt(const QString & key) const
   return (int)send(SCI_GETPROPERTYINT, (uptr_t)keyUtf8.constData(), 0);
 }
 
-int ScintillaIFace::styleBitsNeeded() const
-{
-  return (int)send(SCI_GETSTYLEBITSNEEDED, 0, 0);
-}
-
 int ScintillaIFace::lexerLanguage(char * text) const
 {
   return (int)send(SCI_GETLEXERLANGUAGE, 0, (sptr_t)text);
@@ -3460,6 +3447,4 @@ int ScintillaIFace::subStyleBases(char * styles) const
 
 //--
 
-#ifdef SCI_NAMESPACE
-}
-#endif
+} // namespace Scintilla
