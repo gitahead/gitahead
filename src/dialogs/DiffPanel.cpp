@@ -100,7 +100,24 @@ DiffPanel::DiffPanel(const git::Repository &repo, QWidget *parent)
     settings->setValue("collapse/deleted", checked);
   });
 
+  // hunk limit
+  QSpinBox *hunkLimit = new QSpinBox(this);
+  QHBoxLayout *hunkLimitLayout = new QHBoxLayout;
+  hunkLimitLayout->addWidget(new QLabel(tr("Show first"), this));
+  hunkLimitLayout->addWidget(hunkLimit);
+  hunkLimitLayout->addWidget(new QLabel(tr("hunks only"), this));
+  hunkLimitLayout->addStretch();
+  hunkLimit->setMinimum(10);
+  hunkLimit->setMaximum(10000);
+  hunkLimit->setValue(settings->value("diff/hunklimit").toInt());
+
+  auto hunkLimitSignal = QOverload<int>::of(&QSpinBox::valueChanged);
+  connect(hunkLimit, hunkLimitSignal, [settings](int value) {
+    settings->setValue("diff/hunklimit", value);
+  });
+
   layout->addRow(tr("Whitespace:"), ignoreWs);
   layout->addRow(tr("Auto Collapse:"), collapseAdded);
   layout->addRow(QString(), collapseDeleted);
+  layout->addRow(tr("Hunk:"), hunkLimitLayout);
 }
