@@ -179,11 +179,11 @@ QString Account::helpText(Kind kind)
 {
   switch (kind) {
     case GitHub: return tr(
-      "<b>Note:</b> Basic authentication is not supported if you have "
-      "two-factor authentication enabled. Use a <a href='https://help."
-      "github.com/articles/creating-a-personal-access-token-for-the-"
-      "command-line/'>personal access token</a> in the password field "
-      "instead.");
+      "<b>Note:</b> Basic authentication is not supported. Use a "
+      "<a href='https://docs.github.com/en/github/authenticating-"
+      "to-github/keeping-your-account-and-data-secure/creating-a-"
+      "personal-access-token'>personal access token</a> in the "
+      "password field instead.");
 
     case GitLab: return tr(
       "<b>Note:</b> Basic authentication is not supported. Use a "
