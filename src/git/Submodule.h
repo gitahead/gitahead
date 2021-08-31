@@ -58,6 +58,7 @@ private:
   QSharedPointer<git_submodule> d;
 
   friend class Index;
+  friend class Remote;
   friend class Repository;
 };
 

@@ -11,6 +11,7 @@
 #include "AddRemoteDialog.h"
 #include "BranchDelegate.h"
 #include "BranchTableModel.h"
+#include "CloneDialog.h"
 #include "DeleteBranchDialog.h"
 #include "DiffPanel.h"
 #include "NewBranchDialog.h"
@@ -348,7 +349,7 @@ class SubmodulesPanel : public QWidget
 {
 public:
   SubmodulesPanel(RepoView *view, QWidget *parent = nullptr)
-    : QWidget(parent)
+    : QWidget(parent), mRepo(view->repo())
   {
     QTableView *table = new QTableView(this);
     table->verticalHeader()->setVisible(false);
@@ -357,7 +358,7 @@ public:
     table->setSelectionMode(QAbstractItemView::ExtendedSelection);
     table->setShowGrid(false);
 
-    table->setModel(new SubmoduleTableModel(view->repo(), this));
+    table->setModel(new SubmoduleTableModel(mRepo, this));
     table->setItemDelegate(new SubmoduleDelegate(table));
 
     // Set section resize mode after model is set.
@@ -372,14 +373,23 @@ public:
     });
 
     Footer *footer = new Footer(table);
-    footer->setPlusEnabled(false);
     footer->setMinusEnabled(false);
+    connect(footer, &Footer::plusClicked, this, &SubmodulesPanel::addSubmodule);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setSpacing(0);
     layout->addWidget(table);
     layout->addWidget(footer);
   }
+
+private:
+  void addSubmodule()
+  {
+    CloneDialog *dialog = new CloneDialog(CloneDialog::Submodule, this, nullptr, mRepo);
+    dialog->open();
+  }
+
+  git::Repository mRepo;
 };
 
 class SearchPanel : public QWidget
