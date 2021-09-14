@@ -98,6 +98,17 @@ where `<path-to-qt>` points to the Qt install directory that contains
 **Build**
 
     ninja
+    
+How to Install
+-----------------
+**Linux**
+The easies way to install GitAhead is by using [Flatpak](https://www.flatpak.org/)
+Ubuntu: apt-get install flatpak flatpak-builder
+
+1) Download flatpak manifest located in the repository at `gitahead/pack/flatpak/io.github.gitahead.gitahead.json`
+2) Build and install flatpak package (must be executed as root): 
+
+    flatpak-builder --force-clean --install ./build io.github.gitahead.gitahead.json
 
 How to Contribute
 -----------------
