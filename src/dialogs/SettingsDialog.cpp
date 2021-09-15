@@ -134,6 +134,7 @@ public:
     form->addRow(tr("Credentials:"), mStoreCredentials);
     form->addRow(tr("Usage reporting:"), mUsageReporting);
     form->addRow(QString(), privacy);
+    form->addRow(QString(), new QLabel(tr("%1 will be replaced with the repository's directory")));
     form->addRow(tr("Terminal emulator command:"), mTerminalCommand);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
