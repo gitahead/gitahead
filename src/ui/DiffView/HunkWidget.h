@@ -199,6 +199,7 @@ private:
   git::Patch mPatch;
   git::Patch mStaged;
   int mIndex;
+  bool mLfs;
 
   _HunkWidget::Header *mHeader;
   TextEditor *mEditor;

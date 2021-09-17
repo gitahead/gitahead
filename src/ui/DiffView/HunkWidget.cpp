@@ -208,7 +208,7 @@ HunkWidget::HunkWidget(
   bool lfs,
   bool submodule,
   QWidget *parent)
-  : QFrame(parent), mView(view), mPatch(patch), mStaged(staged), mIndex(index)
+  : QFrame(parent), mView(view), mPatch(patch), mStaged(staged), mIndex(index), mLfs(lfs)
 {
   setObjectName("HunkWidget");
   QVBoxLayout *layout = new QVBoxLayout(this);
@@ -716,6 +716,11 @@ void HunkWidget::load(git::Patch &staged, bool force)
     mEditor->setReadOnly(true);
 
     return;
+  }
+
+  if (mLfs) {
+      // TODO: show pdfs, if it is a pdf!
+      return;
   }
 
   // Load hunk.
