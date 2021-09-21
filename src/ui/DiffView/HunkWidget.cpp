@@ -735,10 +735,9 @@ void HunkWidget::load(git::Patch &staged, bool force)
   int stagedIndex = -1;
   QByteArray header = mPatch.header(mIndex);
   int hunkLineStart = mPatch.lineNumber(mIndex, 0, git::Diff::OldFile);
-  assert(hunkLineStart >= 0);
   // TODO: handle conflicted patch.
   // There must exist a staged patch for it
-  if (mStaged.isValid() && !mPatch.isConflicted()) {
+  if (hunkLineStart >= 0 && mStaged.isValid() && !mPatch.isConflicted()) {
       for (int i = 0; i < mStaged.count(); i++) {
           int hunkStagedLineStart = mStaged.lineNumber(i, 0, git::Diff::OldFile);
           assert(hunkStagedLineStart >= 0);
