@@ -39,6 +39,7 @@ NewBranchDialog::NewBranchDialog(
 
   mCheckout = new QCheckBox(tr("Checkout branch"), this);
   mCheckout->setVisible(qobject_cast<RepoView *>(parent));
+  mCheckout->setChecked(true);
 
   ExpandButton *expand = new ExpandButton(this);
   QFormLayout *form = new QFormLayout;
