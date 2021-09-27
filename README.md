@@ -1,6 +1,14 @@
 [![Actions Status](https://github.com/gitahead/gitahead/workflows/GitAhead%20%28master%29/badge.svg)](https://github.com/gitahead/gitahead/actions) [![Actions Status](https://github.com/gitahead/gitahead/workflows/GitAhead%20%28stage%29/badge.svg)](https://github.com/gitahead/gitahead/actions)
 
 
+Please Note!
+============
+GitAhead is no longer under active development. Low-level maintenance and bug
+fix releases will be made as necessary for the forseeable future, but no new
+features or major changes are planned at this time. Please consider continuing
+development in a *rebranded* fork for anything other than trivial changes.
+
+
 GitAhead - Understand Your History
 ==================================
 
@@ -8,21 +16,6 @@ GitAhead is a graphical Git client designed to help you understand
 and manage your source code history. It's available as a [pre-built
 binary for Windows, Linux, and macOS](https://gitahead.github.io/gitahead.com/), or can be built from source by
 following the directions below.
-
-How to Get Help
----------------
-
-Ask questions about building or using GitAhead on
-[Stack Overflow](http://stackoverflow.com/questions/tagged/gitahead) by
-including the `gitahead` tag. Remember to search for existing questions
-before creating a new one.
-
-Report bugs in GitAhead by opening an issue in the
-[issue tracker](https://github.com/gitahead/gitahead/issues).
-Remember to search for existing issues before creating a new one.
-
-If you still need help, email us at
-[support@gitahead.com](mailto:support@gitahead.com).
 
 Build Environment
 -----------------
@@ -98,20 +91,6 @@ where `<path-to-qt>` points to the Qt install directory that contains
 **Build**
 
     ninja
-
-How to Contribute
------------------
-
-We welcome contributions of all kinds, including bug fixes, new features,
-documentation and translations. By contributing, you agree to release
-your contributions under the terms of the license.
-
-Contribute by following the typical
-[GitHub workflow](https://guides.github.com/introduction/flow/index.html)
-for pull requests. Fork the repository and make changes on a new named
-branch. Create pull requests against the `master` branch. Follow the
-[seven guidelines](https://chris.beams.io/posts/git-commit/) to writing a
-great commit message.
 
 License
 -------
