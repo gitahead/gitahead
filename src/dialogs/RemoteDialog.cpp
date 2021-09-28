@@ -89,7 +89,7 @@ RemoteDialog::RemoteDialog(Kind kind, RepoView *parent)
     connect(mRefs, &ReferenceList::referenceSelected,
     [this](const git::Reference &ref) {
       QString value = QString();
-      if (ref.isValid()) {
+      if (ref.isValid() && ref.isLocalBranch() && git::Branch(ref).upstream().isValid()) {
         QString key = QString("branch.%1.merge").arg(ref.name());
         git::Config config = RepoView::parentView(this)->repo().config();
         value = config.value<QString>(key);

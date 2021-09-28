@@ -571,7 +571,7 @@ Result Remote::push(
   QString refspec = prefix + src.qualifiedName();
   if (!dst.isEmpty()) {
     refspec += ":" + dst;
-  } else {
+  } else if (src.isLocalBranch() && git::Branch(src).upstream().isValid()) {
     QString key = QString("branch.%1.merge").arg(src.name());
     QString upstream = repo.config().value<QString>(key);
     if (!upstream.isEmpty())
