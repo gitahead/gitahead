@@ -213,7 +213,7 @@ int TreeView::countCollapsed(QModelIndex parent, bool recursive)
     int count = 0;
     for (int i=0; i < model->rowCount(parent); i++) {
         QModelIndex idx = model->index(i, 0, parent);
-        if (model->rowCount(idx) && !this->isExpanded(idx))
+        if (model->rowCount(idx) && !this->isExpanded(idx) && model->hasChildren(idx))
             count++;
         if (recursive)
             count += countCollapsed(idx);
