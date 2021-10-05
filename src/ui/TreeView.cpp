@@ -39,8 +39,8 @@ const QString kLabelFmt = "<p style='color: gray; font-weight: bold'>%1</p>";
 
 } // anon. namespace
 
-TreeView::TreeView(QWidget *parent)
-  : QTreeView(parent), mSharedDelegate(new ViewDelegate(this))
+TreeView::TreeView(QWidget *parent, const QString& name)
+  : QTreeView(parent), mSharedDelegate(new ViewDelegate(this)), mName(name)
 {
 }
 
@@ -55,6 +55,8 @@ void TreeView::setModel(QAbstractItemModel *model)
   connect(model, &QAbstractItemModel::rowsInserted, this, QOverload<const QModelIndex &, int, int>::of(&TreeView::updateCollapseCount));
   setContextMenuPolicy(Qt::CustomContextMenu);
   connect(this, &TreeView::customContextMenuRequested, this, &TreeView::onCustomContextMenu);
+//  connect(model, &QAbstractItemModel::modelReset, [this]{
+//      setCollapseCount(countCollapsed());});
 }
 
 void TreeView::discard(const QModelIndex& index)
@@ -179,6 +181,7 @@ void TreeView::handleSelectionChange(
 
 void TreeView::setCollapseCount(int value)
 {
+    qDebug() << "Name: " << mName << "Current Collapsed: " << mCollapseCount << "; New Collapsed: " << value;
     assert(value >= 0);
     mCollapseCount = value;
     emit collapseCountChanged(mCollapseCount);
@@ -214,13 +217,16 @@ int TreeView::countCollapsed(QModelIndex parent, bool recursive)
     for (int i=0; i < model->rowCount(parent); i++) {
         QModelIndex idx = model->index(i, 0, parent);
         auto data = idx.data();
-        if (model->rowCount(idx) && !this->isExpanded(idx) && model->hasChildren(idx)) {
+        if (model->hasChildren(idx) && !this->isExpanded(idx)) {
             count++;
-        } else if (recursive) {
+        } else if (this->isExpanded(idx) && recursive) {
             // Count only if the item is expanded and if recursive is on
             count += countCollapsed(idx);
         }
+        qDebug() << "Name: " << mName << " Row: " << i << ": " << data.toString() << "; Count: " << count;
     }
+
+    qDebug() << "Name: " << mName << ", countCollapsed():" << count;
     return count;
 }
 
@@ -237,15 +243,24 @@ void TreeView::collapseAll()
     mSupressItemExpandStateChanged = true;
     QTreeView::collapseAll();
     mSupressItemExpandStateChanged = false;
-    setCollapseCount(model()->rowCount());
+
+    // Count only folders not files, because they are not able to expand/collapse
+    int count = 0;
+    for (int i=0; i < model()->rowCount(); i++) {
+        auto child = model()->index(i, 0);
+        if (model()->hasChildren(child))
+            count++;
+    }
+
+    setCollapseCount(count);
 }
 
 void TreeView::itemExpanded(const QModelIndex& index)
 {
     if (mSupressItemExpandStateChanged)
         return;
-
-    setCollapseCount(mCollapseCount - 1 + countCollapsed(index, false));
+    qDebug() << "Name: " << mName << ", Index data: " << index.data().toString();
+    setCollapseCount(mCollapseCount + countCollapsed(index, false));
 }
 
 void TreeView::itemCollapsed(const QModelIndex& index)
@@ -253,7 +268,8 @@ void TreeView::itemCollapsed(const QModelIndex& index)
     if (mSupressItemExpandStateChanged)
         return;
 
-    setCollapseCount(mCollapseCount + 1 - countCollapsed(index, false));
+    qDebug() << "Name: " << mName << ", Index data: " << index.data().toString();
+    setCollapseCount(mCollapseCount - countCollapsed(index, false));
 }
 
 void TreeView::deselectAll() {

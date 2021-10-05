@@ -113,7 +113,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
         // staged files
 	QVBoxLayout* vBoxLayout = new QVBoxLayout();
 	QLabel* label = new QLabel(tr("Staged Files"));
-	stagedFiles = new TreeView(this);
+    stagedFiles = new TreeView(this, "Staged");
     mDiffTreeModel = new DiffTreeModel(repo, this);
     mDiffView->setModel(mDiffTreeModel);
 	TreeProxy* treewrapperStaged = new TreeProxy(true, this);
@@ -137,7 +137,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
         // unstaged files
 	vBoxLayout = new QVBoxLayout();
     mUnstagedCommitedFiles = new QLabel(kUnstagedFiles);
-	unstagedFiles = new TreeView(this);
+    unstagedFiles = new TreeView(this, "Unstaged");
 	TreeProxy* treewrapperUnstaged = new TreeProxy(false, this);
     treewrapperUnstaged->setSourceModel(mDiffTreeModel);
 	unstagedFiles->setModel(treewrapperUnstaged);

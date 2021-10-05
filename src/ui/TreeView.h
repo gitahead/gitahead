@@ -19,7 +19,7 @@ class TreeView : public QTreeView
   Q_OBJECT
 
 public:
-  TreeView(QWidget *parent = nullptr);
+  TreeView(QWidget *parent = nullptr, const QString& name=QString());
 
   void discard(const QModelIndex& index);
   void setModel(QAbstractItemModel *model) override;
@@ -91,6 +91,7 @@ private:
   bool mSupressItemExpandStateChanged{false};
 
   QItemDelegate *mSharedDelegate;
+  QString mName;
 };
 
 #endif // TREEVIEW_H
