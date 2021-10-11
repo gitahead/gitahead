@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>io.github.gitahead.gitahead</id>
+  <id>io.github.gittyup.gittyup</id>
   <metadata_license>FSFAP</metadata_license>
   <project_license>MIT License</project_license>
-  <name>GitAhead</name>
+  <name>Gittyup</name>
   <summary>Graphical Git client designed to help you understand and manage your source code history</summary>
 
   <description>
@@ -13,7 +13,7 @@
     </ul>
   </description>
 
-  <launchable type="desktop-id">io.github.gitahead.gitahead.desktop</launchable>
+  <launchable type="desktop-id">io.github.gittyup.gittyup.desktop</launchable>
 
   <screenshots>
     <screenshot type="default">
@@ -22,11 +22,11 @@
     </screenshot>
   </screenshots>
 
-  <url type="homepage">https://gitahead.github.io/gitahead.com/</url>
+  <url type="homepage">https://github.com/Murmele/gitahead</url>
 
   <provides>
-    <binary>GitAhead</binary>
-    <id>io.github.gitahead.gitahead</id>
+    <binary>Gittyup</binary>
+    <id>io.github.gittyup.gittyup</id>
   </provides>
 
   <releases>
@@ -66,6 +66,6 @@
     <content_attribute id="money-purchasing">none</content_attribute>
     <content_attribute id="money-gambling">none</content_attribute>
   </content_rating>
-  
+
 </component>
 
