@@ -1,12 +1,12 @@
 [Desktop Entry]
 Encoding=UTF-8
-Name=GitAhead
+Name=Gittyup
 Comment=Graphical Git client for Windows, Linux and macOS
-Exec=GitAhead
-StartupWMClass=gitahead
-Icon=gitahead
+Exec=Gittyup
+StartupWMClass=gittyup
+Icon=gittyup
 Terminal=false
 Type=Application
 Categories=Development;
 X-Desktop-File-Install-Version=0.1
-Name[de_DE]=GitAhead
+Name[de_DE]=io.github.gittyup.gittyup.desktop
