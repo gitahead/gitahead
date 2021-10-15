@@ -24,7 +24,7 @@ Report bugs in Gittyup by opening an issue in the
 Remember to search for existing issues before creating a new one.
 
 If you still need help, check out our Matrix channel
-[GitAheadFork:martix.org](https://matrix.to/#/#GitAheadFork:matrix.org).
+[GitAheadFork:martix.org](https://matrix.to/#/#Gittyup:matrix.org).
 
 Build Environment
 -----------------
