@@ -1,13 +1,13 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
-  <file>GitAhead.iconset/icon_128x128.png</file>
-  <file>GitAhead.iconset/icon_128x128@2x.png</file>
-  <file>GitAhead.iconset/icon_16x16.png</file>
-  <file>GitAhead.iconset/icon_16x16@2x.png</file>
-  <file>GitAhead.iconset/icon_32x32.png</file>
-  <file>GitAhead.iconset/icon_32x32@2x.png</file>
-  <file>GitAhead.iconset/icon_64x64.png</file>
-  <file>GitAhead.iconset/icon_64x64@2x.png</file>
+  <file>Gittyup.iconset/icon_128x128.png</file>
+  <file>Gittyup.iconset/icon_128x128@2x.png</file>
+  <file>Gittyup.iconset/icon_16x16.png</file>
+  <file>Gittyup.iconset/icon_16x16@2x.png</file>
+  <file>Gittyup.iconset/icon_32x32.png</file>
+  <file>Gittyup.iconset/icon_32x32@2x.png</file>
+  <file>Gittyup.iconset/icon_64x64.png</file>
+  <file>Gittyup.iconset/icon_64x64@2x.png</file>
   <file>beanstalk.png</file>
   <file>bitbucket.png</file>
   <file>branches.png</file>
