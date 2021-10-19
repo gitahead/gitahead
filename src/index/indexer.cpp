@@ -57,13 +57,13 @@ static LONG WINAPI exceptionFilter(PEXCEPTION_POINTERS info)
   GetTempPath(MAX_PATH, temp);
 
   char dir[MAX_PATH];
-  StringCchPrintf(dir, MAX_PATH, "%sGitAhead", temp);
+  StringCchPrintf(dir, MAX_PATH, "%sGittyup", temp);
   CreateDirectory(dir, NULL);
 
   char fileName[MAX_PATH];
   StringCchPrintf(fileName, MAX_PATH,
     "%s\\%s-%s-%04d%02d%02d-%02d%02d%02d-%ld-%ld.dmp",
-    dir, "indexer", GITAHEAD_VERSION,
+    dir, "indexer", GITTYUP_VERSION,
     localTime.wYear, localTime.wMonth, localTime.wDay,
     localTime.wHour, localTime.wMinute, localTime.wSecond,
     GetCurrentProcessId(), GetCurrentThreadId());

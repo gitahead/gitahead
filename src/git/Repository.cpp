@@ -61,7 +61,7 @@ namespace git {
 
 namespace {
 
-const QString kConfigDir = "gitahead";
+const QString kConfigDir = "gittyup";
 const QString kConfigFile = "config";
 const QString kStarFile = "starred";
 

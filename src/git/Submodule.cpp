@@ -14,7 +14,7 @@
 
 namespace git {
 
-const QString kUrl = "https://gitahead.com";
+const QString kUrl = "https://github.com/Murmele/Gittyup";
 
 Submodule::Submodule() {}
 

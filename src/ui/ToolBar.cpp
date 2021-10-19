@@ -858,7 +858,7 @@ ToolBar::ToolBar(MainWindow *parent)
     currentView()->refresh();
   });
 
-  if (!qgetenv("GITAHEAD_OAUTH").isEmpty()) {
+  if (!qgetenv("GITTYUP_OAUTH").isEmpty()) {
     addWidget(new Spacer(4, this));
 
     mPullRequestButton = new PullRequestButton(this);

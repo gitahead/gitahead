@@ -2,7 +2,7 @@ set(CONF_DIR ${CMAKE_SOURCE_DIR}/conf)
 set(RSRC_DIR ${CMAKE_SOURCE_DIR}/rsrc)
 
 set(MAC $<PLATFORM_ID:Darwin>)
-set(CONTENTS_DIR ${GITAHEAD_NAME}.app/Contents)
+set(CONTENTS_DIR ${GITTYUP_NAME}.app/Contents)
 
 # Install Qt plugins.
 set(QT_PLUGINS
@@ -44,7 +44,7 @@ foreach(QT_PLUGIN ${QT_PLUGINS})
     DESTINATION $<${MAC}:${CONTENTS_DIR}/>Plugins/${DIR_NAME}
     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
       GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-    COMPONENT ${GITAHEAD_NAME}
+    COMPONENT ${GITTYUP_NAME}
   )
 
   if(WIN32)
@@ -62,7 +62,7 @@ foreach(QT_PLUGIN ${QT_PLUGINS})
             -s \"${CODESIGN_IDENTITY}\"
             \${CMAKE_INSTALL_PREFIX}/${CONTENTS_DIR}/${PLUGIN_PATH}
         )"
-        COMPONENT ${GITAHEAD_NAME}
+        COMPONENT ${GITTYUP_NAME}
       )
     endif()
   else()
@@ -71,7 +71,7 @@ foreach(QT_PLUGIN ${QT_PLUGINS})
       "execute_process(COMMAND chrpath --delete
         \${CMAKE_INSTALL_PREFIX}/${PLUGIN_PATH}
       )"
-      COMPONENT ${GITAHEAD_NAME}
+      COMPONENT ${GITTYUP_NAME}
     )
   endif()
 endforeach()
@@ -85,7 +85,7 @@ foreach(QT_MODULE ${QT_MODULES})
     set(DEST_DIR ${CONTENTS_DIR}/Frameworks)
     install(DIRECTORY ${QT_FRAMEWORK}
       DESTINATION ${DEST_DIR}
-      COMPONENT ${GITAHEAD_NAME}
+      COMPONENT ${GITTYUP_NAME}
       PATTERN "*.prl" EXCLUDE
       PATTERN "*_debug" EXCLUDE
       PATTERN "Headers" EXCLUDE
@@ -110,7 +110,7 @@ foreach(QT_MODULE ${QT_MODULES})
       DESTINATION .
       PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
         GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-      COMPONENT ${GITAHEAD_NAME}
+      COMPONENT ${GITTYUP_NAME}
       RENAME ${TARGET_NAME}
     )
 
@@ -120,7 +120,7 @@ foreach(QT_MODULE ${QT_MODULES})
         "execute_process(COMMAND chrpath --delete
           \${CMAKE_INSTALL_PREFIX}/${TARGET_NAME}
         )"
-        COMPONENT ${GITAHEAD_NAME}
+        COMPONENT ${GITTYUP_NAME}
       )
     endif()
   endif()
@@ -137,7 +137,7 @@ if(UNIX AND NOT APPLE)
     DESTINATION .
     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
       GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-    COMPONENT ${GITAHEAD_NAME}
+    COMPONENT ${GITTYUP_NAME}
     RENAME ${LIB_NAME}.so.5
   )
 endif()
@@ -169,7 +169,7 @@ if(FALSE) # NOT APPLE)
       DESTINATION .
       PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
         GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-      COMPONENT ${GITAHEAD_NAME}
+      COMPONENT ${GITTYUP_NAME}
       OPTIONAL # if we use the system libssh, we have not built openssl
     )
   endforeach()
@@ -179,14 +179,14 @@ endif()
 set(QT_CONF ${CONF_DIR}/qt.conf)
 install(FILES ${QT_CONF}
   DESTINATION $<${MAC}:${CONTENTS_DIR}/Resources/>.
-  COMPONENT ${GITAHEAD_NAME}
+  COMPONENT ${GITTYUP_NAME}
 )
 
 if(NOT APPLE)
   if(UNIX)
-    install(DIRECTORY ${RSRC_DIR}/GitAhead.iconset
+    install(DIRECTORY ${RSRC_DIR}/Gittyup.iconset
       DESTINATION Resources
-      COMPONENT ${GITAHEAD_NAME}
+      COMPONENT ${GITTYUP_NAME}
     )
   endif()
 endif()
@@ -197,32 +197,32 @@ if(APPLE AND CODESIGN_IDENTITY)
     "execute_process(COMMAND
       codesign --deep --timestamp --options runtime
         -s \"${CODESIGN_IDENTITY}\"
-        \${CMAKE_INSTALL_PREFIX}/${GITAHEAD_NAME}.app
+        \${CMAKE_INSTALL_PREFIX}/${GITTYUP_NAME}.app
     )"
-    COMPONENT ${GITAHEAD_NAME}
+    COMPONENT ${GITTYUP_NAME}
   )
 endif()
 
 # Add package rule.
 if(APPLE)
   set(CPACK_GENERATOR DragNDrop)
-  set(CPACK_DMG_VOLUME_NAME ${GITAHEAD_NAME})
+  set(CPACK_DMG_VOLUME_NAME ${GITTYUP_NAME})
   set(CPACK_DMG_DS_STORE ${RSRC_DIR}/DS_Store)
   set(CPACK_DMG_BACKGROUND_IMAGE ${RSRC_DIR}/background.png)
 elseif(WIN32)
   set(CPACK_GENERATOR NSIS)
   set(CPACK_NSIS_CREATE_ICONS_EXTRA
     "CreateShortCut \
-    \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${GITAHEAD_NAME}.lnk\\\" \
-    \\\"$INSTDIR\\\\${GITAHEAD_NAME}.exe\\\""
+    \\\"$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${GITTYUP_NAME}.lnk\\\" \
+    \\\"$INSTDIR\\\\${GITTYUP_NAME}.exe\\\""
   )
   set (CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
-  set (CPACK_NSIS_MUI_FINISHPAGE_RUN ${GITAHEAD_NAME}.exe)
+  set (CPACK_NSIS_MUI_FINISHPAGE_RUN ${GITTYUP_NAME}.exe)
 
   if(CMAKE_CL_64)
     install(FILES ${RSRC_DIR}/vcredist_x64.exe
       DESTINATION .
-      COMPONENT ${GITAHEAD_NAME}
+      COMPONENT ${GITTYUP_NAME}
     )
     set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS
       "ExecWait '\\\"$INSTDIR\\\\vcredist_x64.exe\\\" /q /norestart'"
@@ -231,7 +231,7 @@ elseif(WIN32)
   else()
     install(FILES ${RSRC_DIR}/vcredist_x86.exe
       DESTINATION .
-      COMPONENT ${GITAHEAD_NAME}
+      COMPONENT ${GITTYUP_NAME}
     )
     set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS
       "ExecWait '\\\"$INSTDIR\\\\vcredist_x86.exe\\\" /q /norestart'"
@@ -242,35 +242,35 @@ else()
   set(CPACK_GENERATOR STGZ)
 endif()
 
-set(PACKAGE_FILE_NAME "${GITAHEAD_NAME}${PLATFORM}-${GITAHEAD_VERSION}")
+set(PACKAGE_FILE_NAME "${GITTYUP_NAME}${PLATFORM}-${GITTYUP_VERSION}")
 
 set(CPACK_MONOLITHIC_INSTALL true)
 set(CPACK_INSTALL_CMAKE_PROJECTS
-  ${CMAKE_BINARY_DIR} ${GITAHEAD_NAME} ${GITAHEAD_NAME} /
+  ${CMAKE_BINARY_DIR} ${GITTYUP_NAME} ${GITTYUP_NAME} /
 )
 
 # Add Context Menu Shortcuts
 if(WIN32)
   set(CPACK_NSIS_EXTRA_INSTALL_COMMANDS "${CPACK_NSIS_EXTRA_INSTALL_COMMANDS}
-    WriteRegStr HKCR 'Directory\\\\Background\\\\shell\\\\GitAhead' '' 'Open with GitAhead'
-    WriteRegStr HKCR 'Directory\\\\Background\\\\shell\\\\GitAhead' 'Icon' '\\\"$INSTDIR\\\\gitahead.exe\\\"'
-    WriteRegStr HKCR 'Directory\\\\Background\\\\shell\\\\GitAhead\\\\command' '' '\\\"$INSTDIR\\\\gitahead.exe\\\" \\\"%V\\\"'
-    WriteRegStr HKCR 'Directory\\\\shell\\\\GitAhead' '' 'Open with GitAhead'
-    WriteRegStr HKCR 'Directory\\\\shell\\\\GitAhead' 'Icon' '\\\"$INSTDIR\\\\gitahead.exe\\\"'
-    WriteRegStr HKCR 'Directory\\\\shell\\\\GitAhead\\\\command' '' '\\\"$INSTDIR\\\\gitahead.exe\\\" \\\"%L\\\"'"
+    WriteRegStr HKCR 'Directory\\\\Background\\\\shell\\\\Gittyup' '' 'Open with Gittyup'
+    WriteRegStr HKCR 'Directory\\\\Background\\\\shell\\\\Gittyup' 'Icon' '\\\"$INSTDIR\\\\gittyup.exe\\\"'
+    WriteRegStr HKCR 'Directory\\\\Background\\\\shell\\\\Gittyup\\\\command' '' '\\\"$INSTDIR\\\\gittyup.exe\\\" \\\"%V\\\"'
+    WriteRegStr HKCR 'Directory\\\\shell\\\\Gittyup' '' 'Open with Gittyup'
+    WriteRegStr HKCR 'Directory\\\\shell\\\\Gittyup' 'Icon' '\\\"$INSTDIR\\\\gittyup.exe\\\"'
+    WriteRegStr HKCR 'Directory\\\\shell\\\\Gittyup\\\\command' '' '\\\"$INSTDIR\\\\gittyup.exe\\\" \\\"%L\\\"'"
   )
   set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "${CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS}
-    DeleteRegKey HKCR 'Directory\\\\Background\\\\shell\\\\GitAhead'
-    DeleteRegKey HKCR 'Directory\\\\shell\\\\GitAhead'"
+    DeleteRegKey HKCR 'Directory\\\\Background\\\\shell\\\\Gittyup'
+    DeleteRegKey HKCR 'Directory\\\\shell\\\\Gittyup'"
   )
 endif(WIN32)
 
 set(CPACK_PACKAGE_FILE_NAME ${PACKAGE_FILE_NAME})
-set(CPACK_PACKAGE_INSTALL_DIRECTORY ${GITAHEAD_NAME})
+set(CPACK_PACKAGE_INSTALL_DIRECTORY ${GITTYUP_NAME})
 set(CPACK_PACKAGE_VENDOR "Scientific Toolworks, Inc.")
-set(CPACK_PACKAGE_VERSION_MAJOR ${GITAHEAD_VERSION_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${GITAHEAD_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH ${GITAHEAD_VERSION_PATCH})
+set(CPACK_PACKAGE_VERSION_MAJOR ${GITTYUP_VERSION_MAJOR})
+set(CPACK_PACKAGE_VERSION_MINOR ${GITTYUP_VERSION_MINOR})
+set(CPACK_PACKAGE_VERSION_PATCH ${GITTYUP_VERSION_PATCH})
 
 if(WIN32)
 set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE.md)
@@ -288,9 +288,9 @@ if(WIN32)
       ${CMAKE_BINARY_DIR}/${PACKAGE_FILE_NAME}.exe
     COMMAND ${CMAKE_COMMAND} -E make_directory ${PACKAGE_DIR}
     COMMAND ${CMAKE_COMMAND} -E copy
-      ${CMAKE_BINARY_DIR}/GitAhead.exe ${PACKAGE_DIR}
+      ${CMAKE_BINARY_DIR}/Gittyup.exe ${PACKAGE_DIR}
     COMMAND ${CMAKE_COMMAND} -E copy
-      ${CMAKE_BINARY_DIR}/GitAhead.pdb ${PACKAGE_DIR}
+      ${CMAKE_BINARY_DIR}/Gittyup.pdb ${PACKAGE_DIR}
     COMMAND ${CMAKE_COMMAND} -E copy
       ${CMAKE_BINARY_DIR}/indexer.exe ${PACKAGE_DIR}
     COMMAND ${CMAKE_COMMAND} -E copy

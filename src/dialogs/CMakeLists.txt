@@ -30,8 +30,8 @@ add_library(dialogs
 )
 
 target_compile_definitions(dialogs PRIVATE
-  GITAHEAD_BUILD_DATE="${GITAHEAD_BUILD_DATE}"
-  GITAHEAD_BUILD_REVISION="${GITAHEAD_BUILD_REVISION}"
+  GITTYUP_BUILD_DATE="${GITTYUP_BUILD_DATE}"
+  GITTYUP_BUILD_REVISION="${GITTYUP_BUILD_REVISION}"
 )
 
 target_include_directories(dialogs PRIVATE
