@@ -2,7 +2,7 @@
 <component type="desktop-application">
   <id>io.github.gittyup.gittyup</id>
   <metadata_license>FSFAP</metadata_license>
-  <project_license>MIT License</project_license>
+  <project_license>MIT</project_license>
   <name>Gittyup</name>
   <summary>Graphical Git client designed to help you understand and manage your source code history</summary>
 
