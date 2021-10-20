@@ -13,7 +13,7 @@
     </ul>
   </description>
 
-  <launchable type="desktop-id">io.github.gittyup.gittyup.desktop</launchable>
+  <launchable type="desktop-id">com.github.Murmele.gittyup.desktop</launchable>
 
   <screenshots>
     <screenshot type="default">
@@ -26,7 +26,7 @@
 
   <provides>
     <binary>Gittyup</binary>
-    <id>io.github.gittyup.gittyup</id>
+    <id>com.github.Murmele.gittyup</id>
   </provides>
 
   <releases>
