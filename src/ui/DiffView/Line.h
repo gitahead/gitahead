@@ -1,6 +1,8 @@
 #ifndef LINE_H
 #define LINE_H
 
+#include <QString>
+
 class Line
 {
 public:
@@ -20,6 +22,8 @@ public:
 
   int matchingLine() const { return mMatchingLine; }
   void setMatchingLine(int line) { mMatchingLine = line; }
+
+  QString print() {return QString("Origin: ") + mOrigin + QString("; OldLine: ") + QString(mOldLine) + QString("; NewLine: ") + QString(mNewLine);}
 
 private:
   char mOrigin = -1;

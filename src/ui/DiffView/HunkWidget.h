@@ -134,7 +134,7 @@ public:
    * \param stagedAdditions Number of additions which are staged until current line. This variable is increased in this function if it is staged.
    * \param staged Determines if the line is staged or not
    */
-  static void findStagedLines(QList<Line>& lines, int& additions, int lidx, int offset, QList<Line> &linesStaged, int &stagedAdditions, bool &staged);
+  static void findStagedLines(QList<Line>& lines, int& additions, int& deletions, int lidx, int offset, QList<Line> &linesStaged, int &stagedAdditions, int &stagedDeletions, bool &staged);
   /*!
    * Determines the line offset between the lines in the patch and the staged Lines
    * \brief determineLineOffset
@@ -182,6 +182,24 @@ private slots:
 
 private:
   void createMarkersAndLineNumbers(const Line& line, int lidx, Account::FileComments& comments, int width) const;
+
+  /*!
+   * \brief setEditorLineInfos
+   * Setting marker, line numbers and staged icon to the lines
+   */
+  void setEditorLineInfos(QList<Line> &lines, QList<Line> &linesStaged, int contentOffset);
+  /*!
+   * \brief findMatchingLines
+   * Find lines which should be marked as (addition, deletion, ours, theirs, ...)
+   * \param lines
+   * \param lidx
+   * \param count
+   * \param marker
+   * \param countDiffLines
+   * \param additions
+   * \param deletions
+   * \param staged
+   */
   void findMatchingLines(QList<Line> &lines, int lidx, int count, int& marker, int &countDiffLines, int& additions, int& deletions, bool& staged) const;
   struct Token
   {

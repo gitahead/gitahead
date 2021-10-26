@@ -266,6 +266,16 @@ int Patch::lineNumber(int hidx, int ln, Diff::File file) const
   return (file == Diff::NewFile) ? line->new_lineno : line->old_lineno;
 }
 
+git_off_t Patch::contentOffset(int hidx) const
+{
+	if (isConflicted())
+	  return 0;
+
+	const git_diff_line *line = nullptr;
+	int result = git_patch_get_line_in_hunk(&line, d.data(), hidx, 0); // TODO: line index 0?
+	return result == 0 ? line->content_offset : 0;
+}
+
 QByteArray Patch::lineContent(int hidx, int ln) const
 {
   if (isConflicted())

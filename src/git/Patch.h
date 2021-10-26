@@ -91,6 +91,7 @@ public:
    */
   char lineOrigin(int hidx, int line) const;
   int lineNumber(int hidx, int line, Diff::File file = Diff::NewFile) const;
+  git_off_t contentOffset(int hidx) const;
 
   /*!
    * Returns the content of the line of hunk hidx and line line
