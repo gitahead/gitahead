@@ -28,6 +28,8 @@ endif()
 # Explicitly disable shared libraries.
 set(BUILD_SHARED_LIBS OFF)
 
+option(FLATPAK "Building for flatpak" OFF)
+
 # Require C++17.
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
@@ -60,6 +62,9 @@ if(APPLE)
 endif()
 
 find_package(Qt5 5.15 COMPONENTS ${QT_MODULES} LinguistTools REQUIRED)
+if (FLATPAK)
+    find_package(Qt5 5.15 COMPONENTS XcbQpa REQUIRED)
+endif()
 
 set(QT_TRANSLATIONS_DIR "${Qt5_DIR}/../../../translations")
 set(QT_TRANSLATIONS_DIR "/usr/share/qt/translations")

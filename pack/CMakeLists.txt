@@ -29,158 +29,167 @@ else()
   )
 endif()
 
-foreach(QT_PLUGIN ${QT_PLUGINS})
-  if(NOT TARGET Qt5::${QT_PLUGIN})
-    continue()
-  endif()
+if (FLATPAK)
+    qt_import_plugins(gittyup INCLUDE ${QT_PLUGINS})
+else()
 
-  get_target_property(PLUGIN Qt5::${QT_PLUGIN} LOCATION_${CMAKE_BUILD_TYPE})
-  get_filename_component(FILE_NAME ${PLUGIN} NAME)
-  get_filename_component(DIR ${PLUGIN} DIRECTORY)
-  get_filename_component(DIR_NAME ${DIR} NAME)
-  set(PLUGIN_PATH Plugins/${DIR_NAME}/${FILE_NAME})
+    foreach(QT_PLUGIN ${QT_PLUGINS})
+      if(NOT TARGET Qt5::${QT_PLUGIN})
+	continue()
+      endif()
 
-  install(FILES ${PLUGIN}
-    DESTINATION $<${MAC}:${CONTENTS_DIR}/>Plugins/${DIR_NAME}
-    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-      GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-    COMPONENT ${GITTYUP_NAME}
-  )
+      get_target_property(PLUGIN Qt5::${QT_PLUGIN} LOCATION_${CMAKE_BUILD_TYPE})
+      get_filename_component(FILE_NAME ${PLUGIN} NAME)
+      get_filename_component(DIR ${PLUGIN} DIRECTORY)
+      get_filename_component(DIR_NAME ${DIR} NAME)
+      set(PLUGIN_PATH Plugins/${DIR_NAME}/${FILE_NAME})
 
-  if(WIN32)
-    # Copy into build dir.
-    execute_process(COMMAND
-      ${CMAKE_COMMAND} -E copy_if_different
-        ${PLUGIN} ${CMAKE_BINARY_DIR}/${PLUGIN_PATH}
-    )
-  elseif(APPLE)
-    # Sign plugin.
-    if(CODESIGN_IDENTITY)
-      install(CODE
-        "execute_process(COMMAND
-          codesign --timestamp --options runtime
-            -s \"${CODESIGN_IDENTITY}\"
-            \${CMAKE_INSTALL_PREFIX}/${CONTENTS_DIR}/${PLUGIN_PATH}
-        )"
-        COMPONENT ${GITTYUP_NAME}
+      install(FILES ${PLUGIN}
+	DESTINATION $<${MAC}:${CONTENTS_DIR}/>Plugins/${DIR_NAME}
+	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+	  GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+	COMPONENT ${GITTYUP_NAME}
       )
-    endif()
-  else()
-    # Delete runpath.
-    install(CODE
-      "execute_process(COMMAND chrpath --delete
-        \${CMAKE_INSTALL_PREFIX}/${PLUGIN_PATH}
-      )"
-      COMPONENT ${GITTYUP_NAME}
-    )
-  endif()
-endforeach()
 
-# Install Qt libraries.
-foreach(QT_MODULE ${QT_MODULES})
-  get_target_property(QT_LIBRARY Qt5::${QT_MODULE} LOCATION_${CMAKE_BUILD_TYPE})
-
-  if(APPLE)
-    get_filename_component(QT_FRAMEWORK ${QT_LIBRARY} DIRECTORY)
-    set(DEST_DIR ${CONTENTS_DIR}/Frameworks)
-    install(DIRECTORY ${QT_FRAMEWORK}
-      DESTINATION ${DEST_DIR}
-      COMPONENT ${GITTYUP_NAME}
-      PATTERN "*.prl" EXCLUDE
-      PATTERN "*_debug" EXCLUDE
-      PATTERN "Headers" EXCLUDE
-      PATTERN ".DS_Store" EXCLUDE
-    )
-  else()
-    if(WIN32)
-      get_filename_component(TARGET_NAME ${QT_LIBRARY} NAME)
-
-      # Copy into build dir.
-      execute_process(COMMAND
-        ${CMAKE_COMMAND} -E copy_if_different
-          ${QT_LIBRARY} ${CMAKE_BINARY_DIR}
-      )
-    else()
-      # Strip minor and patch version extensions.
-      get_filename_component(TARGET_NAME_WE ${QT_LIBRARY} NAME_WE)
-      set(TARGET_NAME ${TARGET_NAME_WE}.so.5)
-    endif()
-
-    install(FILES ${QT_LIBRARY}
-      DESTINATION .
-      PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-        GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-      COMPONENT ${GITTYUP_NAME}
-      RENAME ${TARGET_NAME}
-    )
-
-    if(NOT WIN32)
-      # Delete runpath.
-      install(CODE
-        "execute_process(COMMAND chrpath --delete
-          \${CMAKE_INSTALL_PREFIX}/${TARGET_NAME}
-        )"
-        COMPONENT ${GITTYUP_NAME}
-      )
-    endif()
-  endif()
-endforeach()
-
-# Install XcbQpa library.
-if(UNIX AND NOT APPLE)
-  set(LIB_NAME libQt5XcbQpa)
-  get_target_property(QT_CORE_LIBRARY Qt5::Core LOCATION)
-  get_filename_component(LIB_PATH ${QT_CORE_LIBRARY} PATH)
-  get_filename_component(LIB_EXT ${QT_CORE_LIBRARY} EXT)
-
-  install(FILES "${LIB_PATH}/${LIB_NAME}${LIB_EXT}"
-    DESTINATION .
-    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-      GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-    COMPONENT ${GITTYUP_NAME}
-    RENAME ${LIB_NAME}.so.5
-  )
+      if(WIN32)
+	# Copy into build dir.
+	execute_process(COMMAND
+	  ${CMAKE_COMMAND} -E copy_if_different
+	    ${PLUGIN} ${CMAKE_BINARY_DIR}/${PLUGIN_PATH}
+	)
+      elseif(APPLE)
+	# Sign plugin.
+	if(CODESIGN_IDENTITY)
+	  install(CODE
+	    "execute_process(COMMAND
+	      codesign --timestamp --options runtime
+		-s \"${CODESIGN_IDENTITY}\"
+		\${CMAKE_INSTALL_PREFIX}/${CONTENTS_DIR}/${PLUGIN_PATH}
+	    )"
+	    COMPONENT ${GITTYUP_NAME}
+	  )
+	endif()
+      else()
+	# Delete runpath.
+	install(CODE
+	  "execute_process(COMMAND chrpath --delete
+	    \${CMAKE_INSTALL_PREFIX}/${PLUGIN_PATH}
+	  )"
+	  COMPONENT ${GITTYUP_NAME}
+	)
+      endif()
+    endforeach()
 endif()
 
-# Install SSL libraries.
-if(FALSE) # NOT APPLE)
-  if(WIN32)
-    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-      set(SSL_LIB_SUFFIX "-1_1-x64.dll")
-    else()
-      set(SSL_LIB_SUFFIX "-1_1.dll")
-    endif()
-  else()
-    set(SSL_LIB_SUFFIX ".so.1.1")
-  endif()
+if (NOT FLATPAK)
+    # Install Qt libraries.
+    foreach(QT_MODULE ${QT_MODULES})
+      get_target_property(QT_LIBRARY Qt5::${QT_MODULE} LOCATION_${CMAKE_BUILD_TYPE})
 
-  foreach(SSL_LIB_NAME ssl crypto)
-    set(SSL_LIB "${OPENSSL_DIR}/lib${SSL_LIB_NAME}${SSL_LIB_SUFFIX}")
+      if(APPLE)
+	get_filename_component(QT_FRAMEWORK ${QT_LIBRARY} DIRECTORY)
+	set(DEST_DIR ${CONTENTS_DIR}/Frameworks)
+	install(DIRECTORY ${QT_FRAMEWORK}
+	  DESTINATION ${DEST_DIR}
+	  COMPONENT ${GITTYUP_NAME}
+	  PATTERN "*.prl" EXCLUDE
+	  PATTERN "*_debug" EXCLUDE
+	  PATTERN "Headers" EXCLUDE
+	  PATTERN ".DS_Store" EXCLUDE
+	)
+      else()
+	if(WIN32)
+	  get_filename_component(TARGET_NAME ${QT_LIBRARY} NAME)
 
-    if(WIN32)
-      # Copy into build dir.
-      execute_process(COMMAND
-        ${CMAKE_COMMAND} -E copy_if_different
-          ${SSL_LIB} ${CMAKE_BINARY_DIR}
+	  # Copy into build dir.
+	  execute_process(COMMAND
+	    ${CMAKE_COMMAND} -E copy_if_different
+	      ${QT_LIBRARY} ${CMAKE_BINARY_DIR}
+	  )
+	else()
+	  # Strip minor and patch version extensions.
+	  get_filename_component(TARGET_NAME_WE ${QT_LIBRARY} NAME_WE)
+	  set(TARGET_NAME ${TARGET_NAME_WE}.so.5)
+	endif()
+
+	install(FILES ${QT_LIBRARY}
+	  DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+	  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+	    GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+	  COMPONENT ${GITTYUP_NAME}
+	  RENAME ${TARGET_NAME}
+	)
+
+	if(NOT WIN32)
+	  # Delete runpath.
+	  install(CODE
+	    "execute_process(COMMAND chrpath --delete
+	      \${CMAKE_INSTALL_PREFIX}/${TARGET_NAME}
+	    )"
+	    COMPONENT ${GITTYUP_NAME}
+	  )
+	endif()
+      endif()
+    endforeach()
+
+    # Install XcbQpa library.
+    if(UNIX AND NOT APPLE)
+      set(LIB_NAME libQt5XcbQpa)
+      get_target_property(QT_CORE_LIBRARY Qt5::Core LOCATION)
+      get_filename_component(LIB_PATH ${QT_CORE_LIBRARY} PATH)
+      get_filename_component(LIB_EXT ${QT_CORE_LIBRARY} EXT)
+
+      install(FILES "${LIB_PATH}/${LIB_NAME}${LIB_EXT}"
+	DESTINATION .
+	PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+	  GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+	COMPONENT ${GITTYUP_NAME}
+	RENAME ${LIB_NAME}.so.5
       )
     endif()
 
-    install(FILES ${SSL_LIB}
-      DESTINATION .
-      PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-        GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-      COMPONENT ${GITTYUP_NAME}
-      OPTIONAL # if we use the system libssh, we have not built openssl
-    )
-  endforeach()
+    # Install SSL libraries.
+    if(FALSE) # NOT APPLE)
+      if(WIN32)
+	if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+	  set(SSL_LIB_SUFFIX "-1_1-x64.dll")
+	else()
+	  set(SSL_LIB_SUFFIX "-1_1.dll")
+	endif()
+      else()
+	set(SSL_LIB_SUFFIX ".so.1.1")
+      endif()
+
+      foreach(SSL_LIB_NAME ssl crypto)
+	set(SSL_LIB "${OPENSSL_DIR}/lib${SSL_LIB_NAME}${SSL_LIB_SUFFIX}")
+
+	if(WIN32)
+	  # Copy into build dir.
+	  execute_process(COMMAND
+	    ${CMAKE_COMMAND} -E copy_if_different
+	      ${SSL_LIB} ${CMAKE_BINARY_DIR}
+	  )
+	endif()
+
+	install(FILES ${SSL_LIB}
+	  DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+	  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+	    GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+	  COMPONENT ${GITTYUP_NAME}
+	  OPTIONAL # if we use the system libssh, we have not built openssl
+	)
+      endforeach()
+    endif()
 endif()
 
-# Install config files.
-set(QT_CONF ${CONF_DIR}/qt.conf)
-install(FILES ${QT_CONF}
-  DESTINATION $<${MAC}:${CONTENTS_DIR}/Resources/>.
-  COMPONENT ${GITTYUP_NAME}
-)
+if (NOT FLATPAK)
+    # Install config files.
+    set(QT_CONF ${CONF_DIR}/qt.conf)
+    install(FILES ${QT_CONF}
+      DESTINATION $<${MAC}:${CONTENTS_DIR}/Resources/>.
+      COMPONENT ${GITTYUP_NAME}
+    )
+endif()
 
 if(NOT APPLE)
   if(UNIX)
