@@ -75,6 +75,8 @@ public:
    */
   QByteArray header(int hidx) const;
 
+  const git_diff_hunk *header_struct(int hidx) const;
+
   /*!
    * Number of lines in hunk with index hidx
    * \brief Patch::lineCount

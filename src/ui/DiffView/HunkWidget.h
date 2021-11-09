@@ -187,7 +187,7 @@ private:
    * \brief setEditorLineInfos
    * Setting marker, line numbers and staged icon to the lines
    */
-  void setEditorLineInfos(QList<Line> &lines, QList<Line> &linesStaged, int contentOffset);
+  void setEditorLineInfos(QList<Line> &lines);
   /*!
    * \brief findMatchingLines
    * Find lines which should be marked as (addition, deletion, ours, theirs, ...)

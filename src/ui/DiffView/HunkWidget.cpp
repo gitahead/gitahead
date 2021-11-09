@@ -1,5 +1,6 @@
 #include "HunkWidget.h"
 #include "Line.h"
+#include "git/Diff.h"
 #include "DiffView.h"
 #include "DisclosureButton.h"
 #include "EditButton.h"
@@ -844,7 +845,7 @@ void HunkWidget::load(git::Patch &staged, bool force)
   // Get comments for this file.
   Account::FileComments comments = mView->comments().files.value(mPatch.name());
 
-  setEditorLineInfos(lines, linesStaged, mStaged.contentOffset(stagedIndex));
+  setEditorLineInfos(lines);
 
   // Set margin width.
   QByteArray text(mPatch.isConflicted() ? conflictWidth : width, ' ');
@@ -1004,17 +1005,23 @@ void HunkWidget::findStagedLines(QList<Line>& lines, int &additions, int &deleti
     }
 }
 
-void HunkWidget::setEditorLineInfos(QList<Line>& lines, QList<Line>& linesStaged, int contentOffset)
+void HunkWidget::setEditorLineInfos(QList<Line>& lines)
 {
     qDebug() << "Patch lines:" << lines.count();
     for (auto line: lines) {
         qDebug() << line.print();
     }
 
-    qDebug() << "Staged linesStaged:" << linesStaged.count();
-    for (auto line: linesStaged) {
-        qDebug() << line.print();
-    }
+	qDebug() << "Staged linesStaged:" << mStaged.count();
+	for (int i=0; i < mStaged.count(); i++) {
+		for (int lidx=0; lidx < mStaged.lineCount(i); lidx++) {
+			auto origin = mStaged.lineOrigin(i, lidx);
+			int oldLineStaged = mStaged.lineNumber(i, lidx, git::Diff::OldFile);
+			int newLineStaged = mStaged.lineNumber(i, lidx, git::Diff::NewFile);
+			auto line = Line(origin, oldLineStaged, newLineStaged);
+			qDebug() << line.print();
+		}
+	}
 
     // TODO: check index of linestaged exists!!!!!!!!!!!!!!!!!!!!!!!
     // Setting markes, line numbers, and staged/unstaged flag
@@ -1024,6 +1031,8 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, QList<Line>& linesStaged
     int additions = 0, deletions = 0;
     int stagedAdditions = 0, stagedDeletions = 0;
     bool staged = false;
+	auto patch_header_struct = mPatch.header_struct(mIndex);
+	int corresponding_staged_line_offset = 0; // TODO: find initial offset between hunk and staged patch
 
     for (int lidx = 0; lidx < count; ++lidx) {
         marker = -1;
@@ -1034,6 +1043,7 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, QList<Line>& linesStaged
             marker = TextEditor::Context;
             additions = 0;
             deletions = 0;
+			corresponding_staged_line_offset ++;
             break;
 
           case GIT_DIFF_LINE_ADDITION: {
@@ -1059,16 +1069,29 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, QList<Line>& linesStaged
               deletions = 0;
             }
             // Check if staged
-            if (linesStaged.count() > 0) {
+			if (mStaged.count() > 0) {
+				auto lineNumber = patch_header_struct->old_start + lidx;
+				int stagedIndex = -1;
+				int lineoffset = -1;
+				for (int i=0; i < mStaged.count(); i++) {
+					auto staged_header = mStaged.header_struct(i);
+					if (lineNumber >= staged_header->old_start && lineNumber < (staged_header->old_start + staged_header->old_lines)) {
+						stagedIndex = i;
+						lineoffset = staged_header->old_start - patch_header_struct->old_start; break;
+					}
+				}
                 //linesStaged[lidx - offset]
                 // check if line is already staged
                 //QByteArray newLine = lines[lidx].newLine();
                 // check if line is in staged lines
-				Line lineStaged = linesStaged[lidx + contentOffset/* - stagedDeletions*/]; // - (additions - stagedAdditions) + (deletions - stagedDeletions)];
-                if (lineStaged.origin() == '+') {
-                  stagedAdditions++;
-                  staged = true;
-                }
+				if (stagedIndex >= 0) {
+					auto line_origin = mStaged.lineOrigin(stagedIndex, lidx - lineoffset);
+					assert(mStaged.lineContent(stagedIndex, lidx - lineoffset) == mPatch.lineContent(mIndex, lidx));
+					if (line_origin == '+') {
+					  stagedAdditions++;
+					  staged = true;
+					}
+				}
             }
             break;
 
@@ -1079,15 +1102,29 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, QList<Line>& linesStaged
             countDiffLines++;
 
             // Check if staged
-            if (linesStaged.count() > 0) {
-				auto stagedLine = linesStaged[lidx + contentOffset];
-                QByteArray oldLine = lines[lidx].oldLine();
-                assert(stagedLine.oldLine() == oldLine);
-                if (stagedLine.origin() == '-') {
-                    stagedDeletions++;
-                    staged = true;
-                }
-            }
+			if (mStaged.count() > 0) {
+				auto lineNumber = patch_header_struct->old_start + lidx;
+				int stagedIndex = -1;
+				int lineoffset = -1;
+				for (int i=0; i < mStaged.count(); i++) {
+					auto header = mStaged.header_struct(i);
+					if (lineNumber >= header->old_start && lineNumber < (header->old_start + header->old_lines)) {
+						stagedIndex = i;
+						lineoffset = header->old_start - patch_header_struct->old_start; break;
+					}
+				}
+				//linesStaged[lidx - offset]
+				// check if line is already staged
+				//QByteArray newLine = lines[lidx].newLine();
+				// check if line is in staged lines
+				if (stagedIndex >= 0) {
+					auto line_origin = mStaged.lineOrigin(stagedIndex, lidx - lineoffset);
+					if (line_origin == '-') {
+					  stagedDeletions++;
+					  staged = true;
+					}
+				}
+			}
             break;
 
           } case 'O':

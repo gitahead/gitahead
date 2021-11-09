@@ -221,6 +221,16 @@ QByteArray Patch::header(int hidx) const
   return !result ? hunk->header : QByteArray();
 }
 
+const git_diff_hunk* Patch::header_struct(int hidx) const
+{
+	if (isConflicted())
+	  return nullptr;
+
+	const git_diff_hunk *hunk = nullptr;
+	int result = git_patch_get_hunk(&hunk, nullptr, d.data(), hidx);
+	return hunk;
+}
+
 int Patch::lineCount(int hidx) const
 {
   if (isConflicted())
