@@ -14,6 +14,8 @@
 #include <QSettings>
 #include <QStandardPaths>
 
+#include <QDebug>
+
 #ifdef Q_OS_WIN
 #define CS Qt::CaseInsensitive
 #else
@@ -257,7 +259,7 @@ QDir Settings::appDir()
 
 QDir Settings::docDir()
 {
-  QDir dir(QCoreApplication::applicationDirPath());
+  QDir dir = rootDir();
   if (!dir.cd("doc"))
     dir = confDir();
   return dir;
@@ -273,9 +275,11 @@ QDir Settings::confDir()
 
 QDir Settings::l10nDir()
 {
-  QDir dir = rootDir();
-  if (!dir.cd("Resources/l10n"))
+  QDir dir = confDir();
+  if (!dir.cd("l10n"))
     dir = QDir(L10N_DIR);
+
+  qDebug() << "l10n dir: " << dir;
   return dir;
 }
 
@@ -283,6 +287,7 @@ QDir Settings::dictionariesDir()
 {
   QDir dir = confDir();
   dir.cd("dictionaries");
+  qDebug() << "Dictionaries dir: " << dir;
   return dir;
 }
 
@@ -291,6 +296,7 @@ QDir Settings::lexerDir()
   QDir dir = confDir();
   if (!dir.cd("lexers"))
     dir = QDir(SCINTILLUA_LEXERS_DIR);
+  qDebug() << "Lexers dir: " << dir;
   return dir;
 }
 
@@ -298,6 +304,7 @@ QDir Settings::themesDir()
 {
   QDir dir = confDir();
   dir.cd("themes");
+  qDebug() << "Theme dir: " << dir;
   return dir;
 }
 
@@ -305,6 +312,7 @@ QDir Settings::pluginsDir()
 {
   QDir dir = confDir();
   dir.cd("plugins");
+  qDebug() << "Plugins dir: " << dir;
   return dir;
 }
 
