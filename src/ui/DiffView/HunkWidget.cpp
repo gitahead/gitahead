@@ -1035,7 +1035,6 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines)
 	int corresponding_staged_line_offset = 0; // TODO: find initial offset between hunk and staged patch
 	int current_staged_index = -1;
 
-	const git_diff_hunk* staged_header_struct = nullptr;
 	// Find the first staged hunk which is within this patch
 	for (int i = 0; i < mStaged.count(); i++) {
 		if (patch_header_struct->old_start > mStaged.header_struct(i)->old_start + mStaged.header_struct(i)->old_lines)
@@ -1046,19 +1045,17 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines)
 		}
 	}
 
-	int no_changes = 0;
 	int current_staged_line_idx = 0;
 	int deletions2 = 0, additions2 = 0;
 	 for (int lidx = 0; lidx < count; ++lidx) {
-		 marker = -1;
+		marker = -1;
 		staged = false;
 
 		// Align staged patch with total patch
-		auto temp = mStaged.header_struct(current_staged_index + 1);
-		if (temp && mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile) == temp->old_start) {
+		auto staged_header_struct_next = mStaged.header_struct(current_staged_index + 1);
+		if (staged_header_struct_next && mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile) == staged_header_struct_next->old_start) {
 			current_staged_index ++;
 			assert(mPatch.lineContent(mIndex, lidx) == mStaged.lineContent(current_staged_index, 0));
-			staged_header_struct = mStaged.header_struct(current_staged_index);
 			current_staged_line_idx = 0;
 		}
 
@@ -1068,7 +1065,6 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines)
             additions = 0;
             deletions = 0;
 			corresponding_staged_line_offset ++;
-			no_changes ++;
 			current_staged_line_idx++;
             break;
 
