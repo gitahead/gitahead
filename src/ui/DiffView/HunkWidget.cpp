@@ -754,18 +754,18 @@ void HunkWidget::load(git::Patch &staged, bool force)
   // TODO: handle conflicted patch.
   // There must exist a staged patch for it
   // Finding staged hunk which corresponds to this hunk
-  if (hunkLineStart >= 0 && mStaged.isValid() && !mPatch.isConflicted()) {
-      for (int i = 0; i < mStaged.count(); i++) {
-          int hunkStagedLineStart = mStaged.lineNumber(i, 0, git::Diff::NewFile);
-          assert(hunkStagedLineStart >= 0);
-          QString h = mStaged.header(i);
-		  auto offsetStaged = mStaged.contentOffset(i);
-		  if (hunkLineStart + offset == hunkStagedLineStart + offsetStaged) {
-              stagedIndex = i;
-              break;
-          }
-      }
-  }
+//  if (hunkLineStart >= 0 && mStaged.isValid() && !mPatch.isConflicted()) {
+//      for (int i = 0; i < mStaged.count(); i++) {
+//          int hunkStagedLineStart = mStaged.lineNumber(i, 0, git::Diff::NewFile);
+//          assert(hunkStagedLineStart >= 0);
+//          QString h = mStaged.header(i);
+//		  auto offsetStaged = mStaged.contentOffset(i);
+//		  if (hunkLineStart + offset == hunkStagedLineStart + offsetStaged) {
+//              stagedIndex = i;
+//              break;
+//          }
+//      }
+//  }
 
   // Create content for the editor
   QByteArray headerStaged = mStaged.header(stagedIndex);
@@ -789,28 +789,28 @@ void HunkWidget::load(git::Patch &staged, bool force)
         content += mPatch.lineContent(mIndex, lidx);
     }
 
-    if (!mStaged.isValid() || stagedIndex < 0) {
-      // not valid, when not initialized with a patch
-      // this occurs, when nothing is staged
-      continue;
-    }
+//    if (!mStaged.isValid() || stagedIndex < 0) {
+//      // not valid, when not initialized with a patch
+//      // this occurs, when nothing is staged
+//      continue;
+//    }
 
-      EOL = false;
-      origin = mStaged.lineOrigin(stagedIndex, lidx);
-      if (origin == GIT_DIFF_LINE_CONTEXT_EOFNL ||
-          origin == GIT_DIFF_LINE_ADD_EOFNL ||
-          origin == GIT_DIFF_LINE_DEL_EOFNL) {
-        Q_ASSERT(!linesStaged.isEmpty());
-        linesStaged.last().setNewline(false);
-        contentStaged += '\n';
-        EOL = true;
-      }
-      if (!EOL) {
-          int oldLineStaged = mStaged.lineNumber(stagedIndex, lidx, git::Diff::OldFile);
-          int newLineStaged = mStaged.lineNumber(stagedIndex, lidx, git::Diff::NewFile);
-          linesStaged << Line(origin, oldLineStaged, newLineStaged);
-          contentStaged += mStaged.lineContent(stagedIndex, lidx);
-      }
+//      EOL = false;
+//      origin = mStaged.lineOrigin(stagedIndex, lidx);
+//      if (origin == GIT_DIFF_LINE_CONTEXT_EOFNL ||
+//          origin == GIT_DIFF_LINE_ADD_EOFNL ||
+//          origin == GIT_DIFF_LINE_DEL_EOFNL) {
+//        Q_ASSERT(!linesStaged.isEmpty());
+//        linesStaged.last().setNewline(false);
+//        contentStaged += '\n';
+//        EOL = true;
+//      }
+//      if (!EOL) {
+////          int oldLineStaged = mStaged.lineNumber(stagedIndex, lidx, git::Diff::OldFile);
+////          int newLineStaged = mStaged.lineNumber(stagedIndex, lidx, git::Diff::NewFile);
+////          linesStaged << Line(origin, oldLineStaged, newLineStaged);
+////          contentStaged += mStaged.lineContent(stagedIndex, lidx);
+//      }
   }
 
   qDebug() << "Content Patch";
@@ -1013,7 +1013,7 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines)
     }
 
 	qDebug() << "Staged linesStaged:" << mStaged.count();
-	for (int i=0; i < mStaged.count(); i++) {
+	for (int i=0; i < mStaged.count(); i++) {qDebug() << "Staged patch No. " << i;
 		for (int lidx=0; lidx < mStaged.lineCount(i); lidx++) {
 			auto origin = mStaged.lineOrigin(i, lidx);
 			int oldLineStaged = mStaged.lineNumber(i, lidx, git::Diff::OldFile);
@@ -1033,10 +1033,55 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines)
     bool staged = false;
 	auto patch_header_struct = mPatch.header_struct(mIndex);
 	int corresponding_staged_line_offset = 0; // TODO: find initial offset between hunk and staged patch
+	int current_staged_index = -1;
 
-    for (int lidx = 0; lidx < count; ++lidx) {
-        marker = -1;
-        staged = false;
+	const git_diff_hunk* staged_header_struct = nullptr;
+//	if (mStaged.count() > 0) {
+//		current_staged_index = 0;
+//		staged_header_struct = mStaged.header_struct(0);
+//		//staged_header_struct->old_start;
+//	}
+
+	// Find the first staged hunk which is within this patch
+	for (int i = 0; i < mStaged.count(); i++) {
+		if (patch_header_struct->old_start > mStaged.header_struct(i)->old_start + mStaged.header_struct(i)->old_lines)
+			continue;
+		else {
+			current_staged_index = i;
+			break;
+		}
+	}
+
+//	for (int i=0; i < mStaged.count(); i++) {
+//		auto staged_start = mStaged.header_struct(i)->old_start;
+//		if (staged_start != patch_header_struct->old_start)
+//	}
+
+	int no_changes = 0;
+	int current_staged_line_idx = 0;
+	auto patch_start_line = patch_header_struct->old_start;
+	auto offset_patch_old_new = patch_header_struct->new_start - patch_header_struct->old_start;
+	int deletions2 = 0, additions2 = 0;
+	bool valid = false;
+	 for (int lidx = 0; lidx < count; ++lidx) {
+		 marker = -1;
+		staged = false;
+
+		// Align staged patch with total patch
+		auto temp = mStaged.header_struct(current_staged_index + 1);
+		if (temp && mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile) == temp->old_start) {
+			current_staged_index ++;
+			assert(mPatch.lineContent(mIndex, lidx) == mStaged.lineContent(current_staged_index, 0));
+			staged_header_struct = mStaged.header_struct(current_staged_index);
+			current_staged_line_idx = 0;
+		}
+
+		// TODO: staged_header_struct must not exist if no staging
+//		if (mStaged.count() > 0 && patch_start_line + stagedAdditions + stagedDeletions + no_changes > (staged_header_struct->old_start + mStaged.lineCount(current_staged_index)) && current_staged_index < mStaged.count() -1) {
+//			current_staged_index++;
+//			staged_header_struct = mStaged.header_struct(current_staged_index);
+//			current_staged_line_idx = 0;
+//		}
 
         switch (lines[lidx].origin()) {
           case GIT_DIFF_LINE_CONTEXT:
@@ -1044,6 +1089,8 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines)
             additions = 0;
             deletions = 0;
 			corresponding_staged_line_offset ++;
+			no_changes ++;
+			current_staged_line_idx++;
             break;
 
           case GIT_DIFF_LINE_ADDITION: {
@@ -1069,62 +1116,76 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines)
               deletions = 0;
             }
             // Check if staged
-			if (mStaged.count() > 0) {
-				auto lineNumber = patch_header_struct->old_start + lidx;
-				int stagedIndex = -1;
-				int lineoffset = -1;
-				for (int i=0; i < mStaged.count(); i++) {
-					auto staged_header = mStaged.header_struct(i);
-					if (lineNumber >= staged_header->old_start && lineNumber < (staged_header->old_start + staged_header->old_lines)) {
-						stagedIndex = i;
-						lineoffset = staged_header->old_start - patch_header_struct->old_start; break;
-					}
+
+			if (mStaged.count() > 0 && current_staged_index >= 0 && current_staged_line_idx < mStaged.lineCount(current_staged_index)) {
+				auto line_origin = mStaged.lineOrigin(current_staged_index, current_staged_line_idx);
+				auto staged_file = mStaged.lineNumber(current_staged_index, current_staged_line_idx, git::Diff::NewFile);
+				auto patch_file = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile) - additions2 + deletions2; // - offset_patch_old_new;
+				if (line_origin == '+' && staged_file == patch_file) {
+				  assert(mStaged.lineContent(current_staged_index, current_staged_line_idx) == mPatch.lineContent(mIndex, lidx));
+				  stagedAdditions++;
+				  current_staged_line_idx++;
+				  staged = true;
 				}
-                //linesStaged[lidx - offset]
-                // check if line is already staged
-                //QByteArray newLine = lines[lidx].newLine();
-                // check if line is in staged lines
-				if (stagedIndex >= 0) {
-					auto line_origin = mStaged.lineOrigin(stagedIndex, lidx - lineoffset);
-					assert(mStaged.lineContent(stagedIndex, lidx - lineoffset) == mPatch.lineContent(mIndex, lidx));
-					if (line_origin == '+') {
-					  stagedAdditions++;
-					  staged = true;
-					}
-				}
-            }
+			}
+			additions2++;
+
+//			if (mStaged.count() > 0 && staged_header_struct->old_start < patch_header_struct->old_start + patch_header_struct->old_lines) {
+
+//				auto line_origin = mStaged.lineOrigin(current_staged_index, current_staged_line_idx);
+//				//assert(mStaged.lineContent(current_staged_index, current_staged_line_idx) == mPatch.lineContent(mIndex, lidx));
+//				auto staged_new_file = mStaged.lineNumber(current_staged_index, current_staged_line_idx, git::Diff::NewFile);
+//				auto patch_new_file = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile);
+//				if (line_origin == '+' && staged_new_file == patch_new_file) {
+//				  stagedAdditions++;
+//				  current_staged_line_idx++;
+//				  staged = true;
+//				}
+//            }
+
+//			for (int i=0; i < mStaged.count(); i++) {
+//				// find out staged patch index
+//				if (patch_header_struct->old_start + no_changes + stagedAdditions - stagedDeletions == mStaged.header_struct(i)->old_start) {
+//					// i is the index we need
+
+//					break;
+//				}
+//			}
+
+
+//			if (mStaged.count() > 0 && staged_header_struct->old_start < patch_header_struct->old_start + patch_header_struct->old_lines) {
+
+//				auto line_origin = mStaged.lineOrigin(current_staged_index, current_staged_line_idx);
+//				//assert(mStaged.lineContent(current_staged_index, current_staged_line_idx) == mPatch.lineContent(mIndex, lidx));
+//				auto staged_new_file = mStaged.lineNumber(current_staged_index, current_staged_line_idx, git::Diff::NewFile);
+//				auto patch_new_file = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile);
+//				if (line_origin == '+' && staged_new_file == patch_new_file) {
+//				  stagedAdditions++;
+//				  current_staged_line_idx++;
+//				  staged = true;
+//				}
+//			}
             break;
 
           } case GIT_DIFF_LINE_DELETION: {
             marker = TextEditor::Deletion;
             deletions++;
+			deletions2++;
             // Deletions are still visible in the patch so ++
             countDiffLines++;
 
             // Check if staged
-			if (mStaged.count() > 0) {
-				auto lineNumber = patch_header_struct->old_start + lidx;
-				int stagedIndex = -1;
-				int lineoffset = -1;
-				for (int i=0; i < mStaged.count(); i++) {
-					auto header = mStaged.header_struct(i);
-					if (lineNumber >= header->old_start && lineNumber < (header->old_start + header->old_lines)) {
-						stagedIndex = i;
-						lineoffset = header->old_start - patch_header_struct->old_start; break;
-					}
-				}
-				//linesStaged[lidx - offset]
-				// check if line is already staged
-				//QByteArray newLine = lines[lidx].newLine();
-				// check if line is in staged lines
-				if (stagedIndex >= 0) {
-					auto line_origin = mStaged.lineOrigin(stagedIndex, lidx - lineoffset);
-					if (line_origin == '-') {
-					  stagedDeletions++;
-					  staged = true;
-					}
+			if (mStaged.count() > 0 && current_staged_index >= 0 && current_staged_line_idx < mStaged.lineCount(current_staged_index)) {
+				auto line_origin = mStaged.lineOrigin(current_staged_index, current_staged_line_idx);
+				auto staged_old_file = mStaged.lineNumber(current_staged_index, current_staged_line_idx, git::Diff::OldFile);
+				auto patch_old_file = mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile);
+				if (line_origin == '-' && staged_old_file == patch_old_file) {
+				  assert(mStaged.lineContent(current_staged_index, current_staged_line_idx) == mPatch.lineContent(mIndex, lidx));
+				  stagedDeletions++;
+				  staged = true;
 				}
 			}
+			current_staged_line_idx++; // must be in staged and in the unstaged case
             break;
 
           } case 'O':
@@ -1139,7 +1200,7 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines)
         // Add marker.
         if (marker >= 0)
             mEditor->markerAdd(lidx, marker);
-        if (staged)
+		 if (staged)
           setStaged(lidx, true);
 
 
