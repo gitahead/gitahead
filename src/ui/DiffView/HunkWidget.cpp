@@ -1122,7 +1122,6 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines)
 				auto staged_file = mStaged.lineNumber(current_staged_index, current_staged_line_idx, git::Diff::NewFile);
 				auto patch_file = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile) - (additions2 - stagedAdditions) + (deletions2 - stagedDeletions); // - offset_patch_old_new;
 				if (line_origin == '+' && staged_file == patch_file && mStaged.lineContent(current_staged_index, current_staged_line_idx) == mPatch.lineContent(mIndex, lidx)) {
-				  assert(mStaged.lineContent(current_staged_index, current_staged_line_idx) == mPatch.lineContent(mIndex, lidx));
 				  stagedAdditions++;
 				  current_staged_line_idx++;
 				  staged = true;
