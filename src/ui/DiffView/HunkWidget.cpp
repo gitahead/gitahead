@@ -846,6 +846,24 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 		}
 	}
 
+//	New file line number change for different line origins
+//	| diff HEAD         | diff –cached |   |
+//	|-------------------|--------------|---|
+//	| no change         | +            | + |
+//	| unstaged addition | +            | / |
+//	| staged addition   | +            | + |
+//	| unstaged deletion | /            | + |
+//	| staged deletion   | /            | / |
+
+// Patch index change for different line origins
+//	| diff HEAD         | diff –cached |   |
+//	|-------------------|--------------|---|
+//	| no change         | +            | + |
+//	| unstaged addition | +            | / |
+//	| staged addition   | +            | + |
+//	| unstaged deletion | +            | / |
+//	| staged deletion   | +            | + |
+
     // TODO: check index of linestaged exists!!!!!!!!!!!!!!!!!!!!!!!
     int count = lines.size();
     int marker = -1;
