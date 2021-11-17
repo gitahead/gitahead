@@ -849,7 +849,6 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
     // TODO: check index of linestaged exists!!!!!!!!!!!!!!!!!!!!!!!
     int count = lines.size();
     int marker = -1;
-    int countDiffLines = 0; // used to calculate
     int additions = 0, deletions = 0;
     int stagedAdditions = 0, stagedDeletions = 0;
     bool staged = false;
@@ -896,7 +895,6 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
           case GIT_DIFF_LINE_ADDITION: {
             marker = TextEditor::Addition;
             additions++;
-            countDiffLines ++;
             // Find matching lines
             if (lidx + 1 >= count ||
                 mPatch.lineOrigin(mIndex, lidx + 1) != GIT_DIFF_LINE_ADDITION) { // end of file, or the last addition line
@@ -934,8 +932,6 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
             marker = TextEditor::Deletion;
             deletions++;
 			deletions2++;
-            // Deletions are still visible in the patch so ++
-            countDiffLines++;
 
             // Check if staged
 			if (mStaged.count() > 0 && current_staged_index >= 0 && current_staged_line_idx < mStaged.lineCount(current_staged_index)) {
