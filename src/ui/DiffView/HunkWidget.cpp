@@ -787,7 +787,7 @@ void HunkWidget::load(git::Patch &staged, bool force)
   // Get comments for this file.
   Account::FileComments comments = mView->comments().files.value(mPatch.name());
 
-  setEditorLineInfos(lines);
+  setEditorLineInfos(lines, comments, width);
 
   // Set margin width.
   QByteArray text(mPatch.isConflicted() ? conflictWidth : width, ' ');
@@ -828,7 +828,7 @@ void HunkWidget::load(git::Patch &staged, bool force)
     mHeader->setCheckState(stageState());
 }
 
-void HunkWidget::setEditorLineInfos(QList<Line>& lines)
+void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& comments, int width)
 {
     qDebug() << "Patch lines:" << lines.count();
 	for (int i=0; i < lines.count(); i++) {
@@ -872,6 +872,9 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines)
 	 for (int lidx = 0; lidx < count; ++lidx) {
 		marker = -1;
 		staged = false;
+
+		const Line& line = lines.at(lidx);
+		createMarkersAndLineNumbers(line, lidx, comments, width);
 
 		// Align staged patch with total patch
 		auto staged_header_struct_next = mStaged.header_struct(current_staged_index + 1);
@@ -962,10 +965,58 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines)
             mEditor->markerAdd(lidx, marker);
 		 if (staged)
           setStaged(lidx, true);
-
-
-
     }
+
+
+
+	 // Diff matching lines. Highlight changes within the line!
+	for (int lidx = 0; lidx < count; ++lidx) {
+	  const Line &line = lines.at(lidx);
+	  int matchingLine = line.matchingLine();
+	  if (line.origin() == GIT_DIFF_LINE_DELETION && matchingLine >= 0) {
+		// Split lines into tokens and diff corresponding tokens.
+		QList<Token> oldTokens = tokens(lidx);
+		QList<Token> newTokens = tokens(matchingLine);
+		QByteArray oldBuffer = tokenBuffer(oldTokens);
+		QByteArray newBuffer = tokenBuffer(newTokens);
+		git::Patch patch = git::Patch::fromBuffers(oldBuffer, newBuffer);
+		for (int pidx = 0; pidx < patch.count(); ++pidx) {
+		  // Find the boundary between additions and deletions.
+		  int index;
+		  int count = patch.lineCount(pidx);
+		  for (index = 0; index < count; ++index) {
+			if (patch.lineOrigin(pidx, index) == GIT_DIFF_LINE_ADDITION)
+			  break;
+		  }
+
+		  // Map differences onto the deletion line.
+		  if (index > 0) {
+			int first = patch.lineNumber(pidx, 0, git::Diff::OldFile) - 1;
+			int last = patch.lineNumber(pidx, index - 1, git::Diff::OldFile);
+
+			int size = oldTokens.size();
+			if (first >= 0 && first < size && last >= 0 && last < size) {
+			  int pos = oldTokens.at(first).pos;
+			  mEditor->setIndicatorCurrent(TextEditor::WordDeletion);
+			  mEditor->indicatorFillRange(pos, oldTokens.at(last).pos - pos);
+			}
+		  }
+
+		  // Map differences onto the addition line.
+		  if (index < count) {
+			int first = patch.lineNumber(pidx, index, git::Diff::NewFile) - 1;
+			int last = patch.lineNumber(pidx, count - 1, git::Diff::NewFile);
+
+			int size = newTokens.size();
+			if (first >= 0 && first < size && last >= 0 && last < size) {
+			  int pos = newTokens.at(first).pos;
+			  mEditor->setIndicatorCurrent(TextEditor::WordAddition);
+			  mEditor->indicatorFillRange(pos, newTokens.at(last).pos - pos);
+			}
+		  }
+		}
+	  }
+	}
 }
 
 void HunkWidget::createMarkersAndLineNumbers(const Line& line, int lidx, Account::FileComments& comments, int width) const

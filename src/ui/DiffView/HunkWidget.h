@@ -166,7 +166,7 @@ private:
    * \brief setEditorLineInfos
    * Setting marker, line numbers and staged icon to the lines
    */
-  void setEditorLineInfos(QList<Line> &lines);
+  void setEditorLineInfos(QList<Line> &lines, Account::FileComments &comments, int width);
 
   struct Token
   {
