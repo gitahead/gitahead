@@ -850,13 +850,14 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
     int count = lines.size();
     int marker = -1;
     int additions = 0, deletions = 0;
+	int additions_tot =0, deletions_tot = 0;
     int stagedAdditions = 0, stagedDeletions = 0;
     bool staged = false;
-	auto patch_header_struct = mPatch.header_struct(mIndex);
-	int corresponding_staged_line_offset = 0; // TODO: find initial offset between hunk and staged patch
 	int current_staged_index = -1;
+	int current_staged_line_idx = 0;
 
 	// Find the first staged hunk which is within this patch
+	auto patch_header_struct = mPatch.header_struct(mIndex);
 	for (int i = 0; i < mStaged.count(); i++) {
 		if (patch_header_struct->old_start > mStaged.header_struct(i)->old_start + mStaged.header_struct(i)->old_lines)
 			continue;
@@ -866,8 +867,6 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 		}
 	}
 
-	int current_staged_line_idx = 0;
-	int deletions_tot = 0, additions_tot = 0;
 	 for (int lidx = 0; lidx < count; ++lidx) {
 		marker = -1;
 		staged = false;
@@ -888,7 +887,6 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
             marker = TextEditor::Context;
             additions = 0;
             deletions = 0;
-			corresponding_staged_line_offset ++;
 			current_staged_line_idx++;
             break;
 
