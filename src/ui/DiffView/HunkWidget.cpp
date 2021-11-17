@@ -884,6 +884,7 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 		}
 	}
 
+	bool first_staged_patch_match = false;
 	 for (int lidx = 0; lidx < count; ++lidx) {
 		marker = -1;
 		staged = false;
@@ -891,12 +892,18 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 		const Line& line = lines.at(lidx);
 		createMarkersAndLineNumbers(line, lidx, comments, width);
 
-		// Align staged patch with total patch
-		auto staged_header_struct_next = mStaged.header_struct(current_staged_index + 1);
-		if (staged_header_struct_next && mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile) == staged_header_struct_next->old_start) {
-			current_staged_index ++;
-			assert(mPatch.lineContent(mIndex, lidx) == mStaged.lineContent(current_staged_index, 0));
-			current_staged_line_idx = 0;
+		if (current_staged_index >= 0) {
+			auto staged_header_struct_next = mStaged.header_struct(current_staged_index + 1);
+			if (!first_staged_patch_match) {
+				if (mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile) == mStaged.header_struct(current_staged_index)->old_start)
+					first_staged_patch_match = true;
+				current_staged_line_idx = 0;
+			} else if(staged_header_struct_next && mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile) == staged_header_struct_next->old_start) {
+				// Align staged patch with total patch
+				current_staged_index ++;
+				assert(mPatch.lineContent(mIndex, lidx) == mStaged.lineContent(current_staged_index, 0));
+				current_staged_line_idx = 0;
+			}
 		}
 
         switch (lines[lidx].origin()) {

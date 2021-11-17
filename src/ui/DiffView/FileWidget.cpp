@@ -338,7 +338,7 @@ FileWidget::FileWidget(DiffView *view,
 void FileWidget::updateHunks(git::Patch stagedPatch)
 {
     for (auto hunk: mHunks)
-		hunk->load(stagedPatch);
+		hunk->load(stagedPatch, true);
 }
 
 bool FileWidget::isEmpty()
