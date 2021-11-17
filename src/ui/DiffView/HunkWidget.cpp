@@ -1005,6 +1005,7 @@ void HunkWidget::findStagedLines(QList<Line>& lines, int &additions, int &deleti
     }
 }
 
+// Setting markes, line numbers, and staged/unstaged flag
 void HunkWidget::setEditorLineInfos(QList<Line>& lines)
 {
     qDebug() << "Patch lines:" << lines.count();
@@ -1024,7 +1025,6 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines)
 	}
 
     // TODO: check index of linestaged exists!!!!!!!!!!!!!!!!!!!!!!!
-    // Setting markes, line numbers, and staged/unstaged flag
     int count = lines.size();
     int marker = -1;
     int countDiffLines = 0; // used to calculate
@@ -1036,12 +1036,6 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines)
 	int current_staged_index = -1;
 
 	const git_diff_hunk* staged_header_struct = nullptr;
-//	if (mStaged.count() > 0) {
-//		current_staged_index = 0;
-//		staged_header_struct = mStaged.header_struct(0);
-//		//staged_header_struct->old_start;
-//	}
-
 	// Find the first staged hunk which is within this patch
 	for (int i = 0; i < mStaged.count(); i++) {
 		if (patch_header_struct->old_start > mStaged.header_struct(i)->old_start + mStaged.header_struct(i)->old_lines)
@@ -1052,17 +1046,9 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines)
 		}
 	}
 
-//	for (int i=0; i < mStaged.count(); i++) {
-//		auto staged_start = mStaged.header_struct(i)->old_start;
-//		if (staged_start != patch_header_struct->old_start)
-//	}
-
 	int no_changes = 0;
 	int current_staged_line_idx = 0;
-	auto patch_start_line = patch_header_struct->old_start;
-	auto offset_patch_old_new = patch_header_struct->new_start - patch_header_struct->old_start;
 	int deletions2 = 0, additions2 = 0;
-	bool valid = false;
 	 for (int lidx = 0; lidx < count; ++lidx) {
 		 marker = -1;
 		staged = false;
@@ -1075,13 +1061,6 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines)
 			staged_header_struct = mStaged.header_struct(current_staged_index);
 			current_staged_line_idx = 0;
 		}
-
-		// TODO: staged_header_struct must not exist if no staging
-//		if (mStaged.count() > 0 && patch_start_line + stagedAdditions + stagedDeletions + no_changes > (staged_header_struct->old_start + mStaged.lineCount(current_staged_index)) && current_staged_index < mStaged.count() -1) {
-//			current_staged_index++;
-//			staged_header_struct = mStaged.header_struct(current_staged_index);
-//			current_staged_line_idx = 0;
-//		}
 
         switch (lines[lidx].origin()) {
           case GIT_DIFF_LINE_CONTEXT:
@@ -1128,42 +1107,6 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines)
 				}
 			}
 			additions2++;
-
-//			if (mStaged.count() > 0 && staged_header_struct->old_start < patch_header_struct->old_start + patch_header_struct->old_lines) {
-
-//				auto line_origin = mStaged.lineOrigin(current_staged_index, current_staged_line_idx);
-//				//assert(mStaged.lineContent(current_staged_index, current_staged_line_idx) == mPatch.lineContent(mIndex, lidx));
-//				auto staged_new_file = mStaged.lineNumber(current_staged_index, current_staged_line_idx, git::Diff::NewFile);
-//				auto patch_new_file = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile);
-//				if (line_origin == '+' && staged_new_file == patch_new_file) {
-//				  stagedAdditions++;
-//				  current_staged_line_idx++;
-//				  staged = true;
-//				}
-//            }
-
-//			for (int i=0; i < mStaged.count(); i++) {
-//				// find out staged patch index
-//				if (patch_header_struct->old_start + no_changes + stagedAdditions - stagedDeletions == mStaged.header_struct(i)->old_start) {
-//					// i is the index we need
-
-//					break;
-//				}
-//			}
-
-
-//			if (mStaged.count() > 0 && staged_header_struct->old_start < patch_header_struct->old_start + patch_header_struct->old_lines) {
-
-//				auto line_origin = mStaged.lineOrigin(current_staged_index, current_staged_line_idx);
-//				//assert(mStaged.lineContent(current_staged_index, current_staged_line_idx) == mPatch.lineContent(mIndex, lidx));
-//				auto staged_new_file = mStaged.lineNumber(current_staged_index, current_staged_line_idx, git::Diff::NewFile);
-//				auto patch_new_file = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile);
-//				if (line_origin == '+' && staged_new_file == patch_new_file) {
-//				  stagedAdditions++;
-//				  current_staged_line_idx++;
-//				  staged = true;
-//				}
-//			}
             break;
 
           } case GIT_DIFF_LINE_DELETION: {
@@ -1205,86 +1148,6 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines)
 
 
     }
-
-
-//    // Add markers and line numbers.
-//    // old line number and new line number are written in the same margin
-//    int additions = 0;
-//    int deletions = 0;
-//    int additions_staged = 0;
-//    int deletions_staged = 0;
-//    int stagedAdditions = 0;
-//    int stagedDeletions = 0;
-//    int countDiffLines = 0;
-//    int count = lines.size();
-//    for (int lidx = 0; lidx < count; ++lidx) {
-//      const Line& line = lines.at(lidx);
-//      createMarkersAndLineNumbers(line, lidx, comments, width);
-
-//      int marker = -1;
-//      bool staged = false;
-//      findMatchingLines(lines, lidx, count, marker, countDiffLines, additions, deletions, staged);
-
-//      // Add marker.
-//      if (marker >= 0)
-//        mEditor->markerAdd(lidx, marker);
-
-
-//      if (linesStaged.count()) {
-//          findStagedLines(lines, additions_staged, deletions_staged, lidx, offset, linesStaged, stagedAdditions, stagedDeletions, staged);
-//          if (staged)
-//              setStaged(lidx, true);
-//      }
-//    }
-
-//    // Diff matching lines.
-//    for (int lidx = 0; lidx < count; ++lidx) {
-//      const Line &line = lines.at(lidx);
-//      int matchingLine = line.matchingLine();
-//      if (line.origin() == GIT_DIFF_LINE_DELETION && matchingLine >= 0) {
-//        // Split lines into tokens and diff corresponding tokens.
-//        QList<Token> oldTokens = tokens(lidx);
-//        QList<Token> newTokens = tokens(matchingLine);
-//        QByteArray oldBuffer = tokenBuffer(oldTokens);
-//        QByteArray newBuffer = tokenBuffer(newTokens);
-//        git::Patch patch = git::Patch::fromBuffers(oldBuffer, newBuffer);
-//        for (int pidx = 0; pidx < patch.count(); ++pidx) {
-//          // Find the boundary between additions and deletions.
-//          int index;
-//          int count = patch.lineCount(pidx);
-//          for (index = 0; index < count; ++index) {
-//            if (patch.lineOrigin(pidx, index) == GIT_DIFF_LINE_ADDITION)
-//              break;
-//          }
-
-//          // Map differences onto the deletion line.
-//          if (index > 0) {
-//            int first = patch.lineNumber(pidx, 0, git::Diff::OldFile) - 1;
-//            int last = patch.lineNumber(pidx, index - 1, git::Diff::OldFile);
-
-//            int size = oldTokens.size();
-//            if (first >= 0 && first < size && last >= 0 && last < size) {
-//              int pos = oldTokens.at(first).pos;
-//              mEditor->setIndicatorCurrent(TextEditor::WordDeletion);
-//              mEditor->indicatorFillRange(pos, oldTokens.at(last).pos - pos);
-//            }
-//          }
-
-//          // Map differences onto the addition line.
-//          if (index < count) {
-//            int first = patch.lineNumber(pidx, index, git::Diff::NewFile) - 1;
-//            int last = patch.lineNumber(pidx, count - 1, git::Diff::NewFile);
-
-//            int size = newTokens.size();
-//            if (first >= 0 && first < size && last >= 0 && last < size) {
-//              int pos = newTokens.at(first).pos;
-//              mEditor->setIndicatorCurrent(TextEditor::WordAddition);
-//              mEditor->indicatorFillRange(pos, newTokens.at(last).pos - pos);
-//            }
-//          }
-//        }
-//      }
-//    }
 }
 
 void HunkWidget::createMarkersAndLineNumbers(const Line& line, int lidx, Account::FileComments& comments, int width) const
