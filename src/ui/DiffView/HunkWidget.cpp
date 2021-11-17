@@ -1008,8 +1008,8 @@ void HunkWidget::findStagedLines(QList<Line>& lines, int &additions, int &deleti
 void HunkWidget::setEditorLineInfos(QList<Line>& lines)
 {
     qDebug() << "Patch lines:" << lines.count();
-    for (auto line: lines) {
-        qDebug() << line.print();
+	for (int i=0; i < lines.count(); i++) {
+		qDebug() << i << ") " << lines[i].print();
     }
 
 	qDebug() << "Staged linesStaged:" << mStaged.count();
@@ -1019,7 +1019,7 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines)
 			int oldLineStaged = mStaged.lineNumber(i, lidx, git::Diff::OldFile);
 			int newLineStaged = mStaged.lineNumber(i, lidx, git::Diff::NewFile);
 			auto line = Line(origin, oldLineStaged, newLineStaged);
-			qDebug() << line.print();
+			qDebug() << lidx << ") " << line.print();
 		}
 	}
 
@@ -1120,8 +1120,8 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines)
 			if (mStaged.count() > 0 && current_staged_index >= 0 && current_staged_line_idx < mStaged.lineCount(current_staged_index)) {
 				auto line_origin = mStaged.lineOrigin(current_staged_index, current_staged_line_idx);
 				auto staged_file = mStaged.lineNumber(current_staged_index, current_staged_line_idx, git::Diff::NewFile);
-				auto patch_file = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile) - additions2 + deletions2; // - offset_patch_old_new;
-				if (line_origin == '+' && staged_file == patch_file) {
+				auto patch_file = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile) - (additions2 - stagedAdditions) + (deletions2 - stagedDeletions); // - offset_patch_old_new;
+				if (line_origin == '+' && staged_file == patch_file && mStaged.lineContent(current_staged_index, current_staged_line_idx) == mPatch.lineContent(mIndex, lidx)) {
 				  assert(mStaged.lineContent(current_staged_index, current_staged_line_idx) == mPatch.lineContent(mIndex, lidx));
 				  stagedAdditions++;
 				  current_staged_line_idx++;
