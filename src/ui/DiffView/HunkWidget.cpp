@@ -751,22 +751,6 @@ void HunkWidget::load(git::Patch &staged, bool force)
   auto offset = mPatch.contentOffset(mIndex);
   mPatch.lineCount(mIndex);
 
-  // TODO: handle conflicted patch.
-  // There must exist a staged patch for it
-  // Finding staged hunk which corresponds to this hunk
-//  if (hunkLineStart >= 0 && mStaged.isValid() && !mPatch.isConflicted()) {
-//      for (int i = 0; i < mStaged.count(); i++) {
-//          int hunkStagedLineStart = mStaged.lineNumber(i, 0, git::Diff::NewFile);
-//          assert(hunkStagedLineStart >= 0);
-//          QString h = mStaged.header(i);
-//		  auto offsetStaged = mStaged.contentOffset(i);
-//		  if (hunkLineStart + offset == hunkStagedLineStart + offsetStaged) {
-//              stagedIndex = i;
-//              break;
-//          }
-//      }
-//  }
-
   // Create content for the editor
   QByteArray headerStaged = mStaged.header(stagedIndex);
   int patchCount = mPatch.lineCount(mIndex);
@@ -788,35 +772,7 @@ void HunkWidget::load(git::Patch &staged, bool force)
         lines << Line(origin, oldLine, newLine);
         content += mPatch.lineContent(mIndex, lidx);
     }
-
-//    if (!mStaged.isValid() || stagedIndex < 0) {
-//      // not valid, when not initialized with a patch
-//      // this occurs, when nothing is staged
-//      continue;
-//    }
-
-//      EOL = false;
-//      origin = mStaged.lineOrigin(stagedIndex, lidx);
-//      if (origin == GIT_DIFF_LINE_CONTEXT_EOFNL ||
-//          origin == GIT_DIFF_LINE_ADD_EOFNL ||
-//          origin == GIT_DIFF_LINE_DEL_EOFNL) {
-//        Q_ASSERT(!linesStaged.isEmpty());
-//        linesStaged.last().setNewline(false);
-//        contentStaged += '\n';
-//        EOL = true;
-//      }
-//      if (!EOL) {
-////          int oldLineStaged = mStaged.lineNumber(stagedIndex, lidx, git::Diff::OldFile);
-////          int newLineStaged = mStaged.lineNumber(stagedIndex, lidx, git::Diff::NewFile);
-////          linesStaged << Line(origin, oldLineStaged, newLineStaged);
-////          contentStaged += mStaged.lineContent(stagedIndex, lidx);
-//      }
   }
-
-  qDebug() << "Content Patch";
-  qDebug() << content;
-  qDebug() << "Content staged";
-  qDebug() << contentStaged;
 
   // Trim final line end.
   // Don't do that because then the editor line
