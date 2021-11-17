@@ -736,7 +736,7 @@ void HunkWidget::load(git::Patch &staged, bool force)
 
   // Load hunk.
   QList<Line> lines;
-  QByteArray content; // just for debugging
+  QByteArray content;
 
   // Create content for the editor
   int patchCount = mPatch.lineCount(mIndex);
