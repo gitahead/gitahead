@@ -698,8 +698,6 @@ void HunkWidget::load(git::Patch &staged, bool force)
 
   mEditor->markerDeleteAll(-1); // delete all markers on each line
 
-  //qDebug() << staged.print();
-
   // Load entire file.
   git::Repository repo = mPatch.repo();
   if (mIndex < 0) {
@@ -738,21 +736,9 @@ void HunkWidget::load(git::Patch &staged, bool force)
 
   // Load hunk.
   QList<Line> lines;
-  QList<Line> linesStaged;
   QByteArray content; // just for debugging
-  QByteArray contentStaged; // just for debugging
-
-  // number of staged hunks must not match the
-  // number of total hunks.
-  // find index in the staged patch which matches with the path with index mIndex
-  int stagedIndex = -1;
-  QByteArray header = mPatch.header(mIndex);
-  int hunkLineStart = mPatch.lineNumber(mIndex, 0, git::Diff::NewFile);
-  auto offset = mPatch.contentOffset(mIndex);
-  mPatch.lineCount(mIndex);
 
   // Create content for the editor
-  QByteArray headerStaged = mStaged.header(stagedIndex);
   int patchCount = mPatch.lineCount(mIndex);
   for (int lidx = 0; lidx < patchCount; ++lidx) {
     char origin = mPatch.lineOrigin(mIndex, lidx);
