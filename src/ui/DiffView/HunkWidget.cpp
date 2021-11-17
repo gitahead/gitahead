@@ -1423,8 +1423,11 @@ git::Index::StagedState HunkWidget::stageState()
           continue;
 
       diffLines++;
-      if (mask & 1 << TextEditor::Marker::StagedMarker)
+	  if (mask & 1 << TextEditor::Marker::StagedMarker) {
           staged++;
+		  if (staged < diffLines)
+			  break; // No need to check more, because it is already clear that it is partially staged
+	  }
   }
 
   if (!staged)
