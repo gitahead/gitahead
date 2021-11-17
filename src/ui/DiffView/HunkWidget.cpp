@@ -867,7 +867,7 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 	}
 
 	int current_staged_line_idx = 0;
-	int deletions2 = 0, additions2 = 0;
+	int deletions_tot = 0, additions_tot = 0;
 	 for (int lidx = 0; lidx < count; ++lidx) {
 		marker = -1;
 		staged = false;
@@ -918,20 +918,20 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 			if (mStaged.count() > 0 && current_staged_index >= 0 && current_staged_line_idx < mStaged.lineCount(current_staged_index)) {
 				auto line_origin = mStaged.lineOrigin(current_staged_index, current_staged_line_idx);
 				auto staged_file = mStaged.lineNumber(current_staged_index, current_staged_line_idx, git::Diff::NewFile);
-				auto patch_file = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile) - (additions2 - stagedAdditions) + (deletions2 - stagedDeletions); // - offset_patch_old_new;
+				auto patch_file = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile) - (additions_tot - stagedAdditions) + (deletions_tot - stagedDeletions); // - offset_patch_old_new;
 				if (line_origin == '+' && staged_file == patch_file && mStaged.lineContent(current_staged_index, current_staged_line_idx) == mPatch.lineContent(mIndex, lidx)) {
 				  stagedAdditions++;
 				  current_staged_line_idx++;
 				  staged = true;
 				}
 			}
-			additions2++;
+			additions_tot++;
             break;
 
           } case GIT_DIFF_LINE_DELETION: {
             marker = TextEditor::Deletion;
             deletions++;
-			deletions2++;
+			deletions_tot++;
 
             // Check if staged
 			if (mStaged.count() > 0 && current_staged_index >= 0 && current_staged_line_idx < mStaged.lineCount(current_staged_index)) {
