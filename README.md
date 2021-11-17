@@ -105,12 +105,15 @@ How to Install
 -----------------
 **Linux**
 The easies way to install Gittyup is by using [Flatpak](https://www.flatpak.org/)
-Ubuntu: apt-get install flatpak flatpak-builder
 
-1) Download flatpak manifest located in the repository at `gittyup/pack/flatpak/io.github.gittyup.gittyup.json`
-2) Build and install flatpak package (must be executed as root):
+Ubuntu: 
 
-    flatpak-builder --force-clean --install ./build io.github.gittyup.gittyup.json
+    sudo apt-get install flatpak && flatpak install flathub com.github.Murmele.Gittyup
+Arch: 
+
+    sudo pacman -S flatpak && flatpak install flathub com.github.Murmele.Gittyup
+
+
 
 How to Contribute
 -----------------
