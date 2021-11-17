@@ -221,6 +221,16 @@ QByteArray Patch::header(int hidx) const
   return !result ? hunk->header : QByteArray();
 }
 
+const git_diff_hunk* Patch::header_struct(int hidx) const
+{
+	if (isConflicted())
+	  return nullptr;
+
+	const git_diff_hunk *hunk = nullptr;
+	int result = git_patch_get_hunk(&hunk, nullptr, d.data(), hidx);
+	return hunk;
+}
+
 int Patch::lineCount(int hidx) const
 {
   if (isConflicted())
@@ -264,6 +274,16 @@ int Patch::lineNumber(int hidx, int ln, Diff::File file) const
     return -1;
 
   return (file == Diff::NewFile) ? line->new_lineno : line->old_lineno;
+}
+
+git_off_t Patch::contentOffset(int hidx) const
+{
+	if (isConflicted())
+	  return 0;
+
+	const git_diff_line *line = nullptr;
+	int result = git_patch_get_line_in_hunk(&line, d.data(), hidx, 0); // TODO: line index 0?
+	return result == 0 ? line->content_offset : 0;
 }
 
 QByteArray Patch::lineContent(int hidx, int ln) const

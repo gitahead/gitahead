@@ -75,6 +75,8 @@ public:
    */
   QByteArray header(int hidx) const;
 
+  const git_diff_hunk *header_struct(int hidx) const;
+
   /*!
    * Number of lines in hunk with index hidx
    * \brief Patch::lineCount
@@ -91,6 +93,7 @@ public:
    */
   char lineOrigin(int hidx, int line) const;
   int lineNumber(int hidx, int line, Diff::File file = Diff::NewFile) const;
+  git_off_t contentOffset(int hidx) const;
 
   /*!
    * Returns the content of the line of hunk hidx and line line
