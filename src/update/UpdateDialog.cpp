@@ -45,7 +45,7 @@ UpdateDialog::UpdateDialog(
   setAttribute(Qt::WA_DeleteOnClose);
   setWindowTitle(tr("Update %1").arg(appName));
 
-  QIcon icon(":/GitAhead.iconset/icon_128x128.png");
+  QIcon icon(":/Gittyup.iconset/icon_128x128.png");
   IconLabel *iconLabel = new IconLabel(icon, 128, 128, this);
 
   QVBoxLayout *iconLayout = new QVBoxLayout;

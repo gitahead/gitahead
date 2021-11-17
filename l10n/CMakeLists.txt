@@ -21,7 +21,7 @@ file(GLOB_RECURSE SOURCE_FILES
 )
 
 foreach(LANGUAGE ${LANGUAGES})
-  set(TS_FILES ${TS_FILES} gitahead_${LANGUAGE}.ts)
+  set(TS_FILES ${TS_FILES} gittyup_${LANGUAGE}.ts)
 endforeach()
 
 if(UPDATE_TRANSLATIONS)
@@ -32,16 +32,16 @@ else()
 endif()
 
 add_custom_target(translations DEPENDS ${QM_FILES})
-add_dependencies(gitahead translations)
+add_dependencies(gittyup translations)
 
-set(CONTENTS_DIR ${GITAHEAD_NAME}.app/Contents)
+set(CONTENTS_DIR ${GITTYUP_NAME}.app/Contents)
 foreach(LANGUAGE ${LANGUAGES})
   set(QT_QM_FILES ${QT_QM_FILES}
     ${QT_TRANSLATIONS_DIR}/qtbase_${LANGUAGE}.qm
   )
 
   if(APPLE)
-    get_target_property(DIR gitahead RUNTIME_OUTPUT_DIRECTORY)
+    get_target_property(DIR gittyup RUNTIME_OUTPUT_DIRECTORY)
     add_custom_command(TARGET translations POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E make_directory
         ${DIR}/${CONTENTS_DIR}/Resources/${LANGUAGE}.lproj
@@ -54,7 +54,7 @@ foreach(QM_FILE ${QM_FILES} ${QT_QM_FILES})
   if(EXISTS ${QM_FILE})
     install(FILES ${QM_FILE}
       DESTINATION $<${MAC}:${CONTENTS_DIR}/>Resources/l10n
-      COMPONENT ${GITAHEAD_NAME}
+      COMPONENT ${GITTYUP_NAME}
     )
   endif()
 endforeach()

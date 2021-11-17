@@ -17,6 +17,7 @@
 #include <QFileInfo>
 #include <QProcess>
 #include <QTemporaryFile>
+#include <QDebug>
 
 MergeTool::MergeTool(
   const QString &file,
@@ -91,7 +92,8 @@ bool MergeTool::start()
   QProcess *process = new QProcess(this);
   git::Repository repo = mLocalBlob.repo();
   auto signal = QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished);
-  QObject::connect(process, signal, [this, repo, backupPath] {
+  QObject::connect(process, signal, [this, repo, backupPath, process] {
+	//qDebug() << "Merge Process Exited!";
     // FIXME: Trust exit code?
     QFileInfo merged(mFile);
     QFileInfo backup(backupPath);
@@ -115,6 +117,26 @@ bool MergeTool::start()
   env.insert("BASE", basePath);
   process->setProcessEnvironment(env);
 
+#define TEST_FLATPAK_SPAWN 0
+#if defined(FLATPAK) || TEST_FLATPAK_SPAWN
+  QStringList arguments = {
+	"--host",
+	"--env=LOCAL=" + local->fileName(),
+	"--env=REMOTE=" + remote->fileName(),
+	"--env=MERGED=" + mFile,
+	"--env=BASE=" + basePath
+  };
+  arguments.append("sh");
+  arguments.append("-c");
+  arguments.append(command);
+  //qDebug() << "Command: " << "flatpak-spawn";
+  process->start("flatpak-spawn", arguments);
+  //qDebug() << "QProcess Arguments: " << process->arguments();
+  if (!process->waitForStarted()) {
+	qDebug() << "MergeTool starting failed";
+	return false;
+  }
+#else
   QString bash = git::Command::bashPath();
   if (!bash.isEmpty()) {
     process->start(bash, {"-c", command});
@@ -125,9 +147,11 @@ bool MergeTool::start()
     return false;
   }
 
+  // TODO: why executing second time?
   process->start(bash, {"-c", command});
   if (!process->waitForStarted())
-    return false;
+	return false;
+#endif
 
   // Detach from parent.
   setParent(nullptr);

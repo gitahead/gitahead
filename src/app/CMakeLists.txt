@@ -2,11 +2,11 @@ set(CONF_DIR ${CMAKE_SOURCE_DIR}/conf)
 set(RSRC_DIR ${CMAKE_SOURCE_DIR}/rsrc)
 
 if(APPLE)
-  set(ICON ${RSRC_DIR}/GitAhead.icns)
+  set(ICON ${RSRC_DIR}/Gittyup.icns)
   set(APP_IMPL_FILE Application_mac.mm)
   set(THEME_IMPL_FILE CustomTheme_mac.mm)
 elseif(WIN32)
-  set(RC_FILE ${RSRC_DIR}/GitAhead.rc)
+  set(RC_FILE ${RSRC_DIR}/Gittyup.rc)
 endif()
 
 set(EMOJI ${CONF_DIR}/emoji.json)
@@ -54,10 +54,10 @@ add_library(app
 
 target_compile_definitions(app
   PUBLIC
-    GITAHEAD_NAME="${GITAHEAD_NAME}"
-    GITAHEAD_VERSION="${GITAHEAD_VERSION}"
+    GITTYUP_NAME="${GITTYUP_NAME}"
+    GITTYUP_VERSION="${GITTYUP_VERSION}"
   PRIVATE
-    GITAHEAD_TRACKING_ID="${GITAHEAD_TRACKING_ID}"
+    GITTYUP_TRACKING_ID="${GITTYUP_TRACKING_ID}"
     QT_TRANSLATIONS_DIR="${QT_TRANSLATIONS_DIR}"
 )
 
@@ -74,8 +74,8 @@ set_target_properties(app PROPERTIES
 )
 
 # Add main executable.
-add_executable(gitahead WIN32 MACOSX_BUNDLE
-  GitAhead.cpp
+add_executable(gittyup WIN32 MACOSX_BUNDLE
+  Gittyup.cpp
   ${ICON}
   ${RC_FILE}
   ${CONFIG_FILES}
@@ -91,25 +91,25 @@ add_executable(gitahead WIN32 MACOSX_BUNDLE
   ${PLUGIN_HTML}
 )
 
-target_link_libraries(gitahead app)
+target_link_libraries(gittyup app)
 
-set_target_properties(gitahead PROPERTIES
-  OUTPUT_NAME ${GITAHEAD_NAME}
+set_target_properties(gittyup PROPERTIES
+  OUTPUT_NAME ${GITTYUP_NAME}
   RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 
 if(WIN32)
   target_link_libraries(app Dbghelp.lib)
 elseif(APPLE)
-  set_target_properties(gitahead PROPERTIES
+  set_target_properties(gittyup PROPERTIES
     INSTALL_RPATH "/usr/local/qt;@loader_path/../Frameworks"
     MACOSX_BUNDLE_INFO_PLIST ${RSRC_DIR}/Info.plist.in
-    MACOSX_BUNDLE_ICON_FILE ${GITAHEAD_NAME}
-    MACOSX_BUNDLE_BUNDLE_NAME ${GITAHEAD_NAME}
-    MACOSX_BUNDLE_BUNDLE_VERSION ${GITAHEAD_VERSION}
-    MACOSX_BUNDLE_LONG_VERSION_STRING ${GITAHEAD_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${GITAHEAD_VERSION}
-    MACOSX_BUNDLE_GUI_IDENTIFIER "com.gitahead.GitAhead"
+    MACOSX_BUNDLE_ICON_FILE ${GITTYUP_NAME}
+    MACOSX_BUNDLE_BUNDLE_NAME ${GITTYUP_NAME}
+    MACOSX_BUNDLE_BUNDLE_VERSION ${GITTYUP_VERSION}
+    MACOSX_BUNDLE_LONG_VERSION_STRING ${GITTYUP_VERSION}
+    MACOSX_BUNDLE_SHORT_VERSION_STRING ${GITTYUP_VERSION}
+    MACOSX_BUNDLE_GUI_IDENTIFIER "com.Murmele.Gittyup"
   )
 
   # Copy config files into bundle.
@@ -135,18 +135,28 @@ elseif(APPLE)
     MACOSX_PACKAGE_LOCATION Resources/lexers
   )
 else()
-  set_target_properties(gitahead PROPERTIES
-    INSTALL_RPATH "$ORIGIN"
-  )
+
+  if (NOT FLATPAK)
+      set_target_properties(gittyup PROPERTIES
+	INSTALL_RPATH "$ORIGIN")
+  endif()
 endif()
 
-add_dependencies(gitahead indexer relauncher)
+add_dependencies(gittyup indexer relauncher)
 
-# Install application.
-install(TARGETS gitahead
-  DESTINATION .
-  COMPONENT ${GITAHEAD_NAME}
-)
+if (FLATPAK)
+    # Install application.
+    install(TARGETS gittyup
+      DESTINATION ./bin # otherwise the executable will not be found by flatpak
+      COMPONENT ${GITTYUP_NAME}
+    )
+else()
+    # Install application.
+    install(TARGETS gittyup
+      DESTINATION .
+      COMPONENT ${GITTYUP_NAME}
+    )
+endif()
 
 if(APPLE)
   get_target_property(QT_LIBRARY Qt5::Core LOCATION)
@@ -154,7 +164,7 @@ if(APPLE)
   get_filename_component(RPATH ${QT_FRAMEWORK} DIRECTORY)
 
   # Fixup relauncher RPATH.
-  set(RELAUNCHER ${GITAHEAD_NAME}.app/Contents/MacOS/relauncher)
+  set(RELAUNCHER ${GITTYUP_NAME}.app/Contents/MacOS/relauncher)
   install(CODE
     "execute_process(COMMAND
       ${CMAKE_INSTALL_NAME_TOOL} -delete_rpath \"${RPATH}\"
@@ -168,11 +178,11 @@ if(APPLE)
       ${CMAKE_INSTALL_NAME_TOOL} -add_rpath \"@loader_path/../Frameworks\"
         \"\${CMAKE_INSTALL_PREFIX}/${RELAUNCHER}\"
     )"
-    COMPONENT ${GITAHEAD_NAME}
+    COMPONENT ${GITTYUP_NAME}
   )
 
   # Fixup indexer RPATH.
-  set(INDEXER ${GITAHEAD_NAME}.app/Contents/MacOS/indexer)
+  set(INDEXER ${GITTYUP_NAME}.app/Contents/MacOS/indexer)
   install(CODE
     "execute_process(COMMAND
       ${CMAKE_INSTALL_NAME_TOOL} -delete_rpath \"${RPATH}\"
@@ -186,48 +196,48 @@ if(APPLE)
       ${CMAKE_INSTALL_NAME_TOOL} -add_rpath \"@loader_path/../Frameworks\"
         \"\${CMAKE_INSTALL_PREFIX}/${INDEXER}\"
     )"
-    COMPONENT ${GITAHEAD_NAME}
+    COMPONENT ${GITTYUP_NAME}
   )
 else()
   # Install config files.
   if(CHANGELOG_HTML AND ACKNOWLEDGMENTS_HTML AND PRIVACY_HTML AND PLUGIN_HTML)
     install(FILES ${CHANGELOG_HTML} ${ACKNOWLEDGMENTS_HTML} ${PRIVACY_HTML} ${PLUGIN_HTML}
       DESTINATION Resources
-      COMPONENT ${GITAHEAD_NAME}
+      COMPONENT ${GITTYUP_NAME}
     )
   endif()
 
   install(FILES ${EMOJI} ${MERGETOOLS}
     DESTINATION Resources
-    COMPONENT ${GITAHEAD_NAME}
+    COMPONENT ${GITTYUP_NAME}
   )
 
   foreach(CONFIG_FILE ${CONFIG_FILES})
     install(FILES ${CONFIG_FILE}
       DESTINATION Resources
-      COMPONENT ${GITAHEAD_NAME}
+      COMPONENT ${GITTYUP_NAME}
     )
   endforeach()
 
   install(FILES ${DICTIONARIES}
     DESTINATION Resources/dictionaries
-    COMPONENT ${GITAHEAD_NAME}
+    COMPONENT ${GITTYUP_NAME}
   )
 
   install(FILES ${THEMES}
     DESTINATION Resources/themes
-    COMPONENT ${GITAHEAD_NAME}
+    COMPONENT ${GITTYUP_NAME}
   )
 
   install(FILES ${LUA_PLUGINS}
     DESTINATION Resources/plugins
-    COMPONENT ${GITAHEAD_NAME}
+    COMPONENT ${GITTYUP_NAME}
   )
 
   foreach(SCINTILLUA_LEXER ${SCINTILLUA_LEXERS})
     install(FILES ${SCINTILLUA_LEXER}
       DESTINATION Resources/lexers
-      COMPONENT ${GITAHEAD_NAME}
+      COMPONENT ${GITTYUP_NAME}
     )
   endforeach()
 endif()

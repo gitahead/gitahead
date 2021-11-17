@@ -394,7 +394,7 @@ StartDialog::StartDialog(QWidget *parent)
   setAttribute(Qt::WA_DeleteOnClose);
   setWindowTitle(tr("Choose Repository"));
 
-  QIcon icon(":/GitAhead.iconset/icon_128x128.png");
+  QIcon icon(":/Gittyup.iconset/icon_128x128.png");
   IconLabel *iconLabel = new IconLabel(icon, 128, 128, this);
 
   QIcon title(":/logo-type.png");

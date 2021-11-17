@@ -1,32 +1,34 @@
 cmake_minimum_required(VERSION 3.6.2)
-project(GitAhead)
+project(Gittyup)
 
 # Set name and version.
-set(GITAHEAD_NAME "GitAhead")
-set(GITAHEAD_VERSION_MAJOR 2)
-set(GITAHEAD_VERSION_MINOR 6)
-set(GITAHEAD_VERSION_PATCH 3)
-set(GITAHEAD_VERSION
-  "${GITAHEAD_VERSION_MAJOR}.${GITAHEAD_VERSION_MINOR}.${GITAHEAD_VERSION_PATCH}"
+set(GITTYUP_NAME "Gittyup")
+set(GITTYUP_VERSION_MAJOR 2)
+set(GITTYUP_VERSION_MINOR 6)
+set(GITTYUP_VERSION_PATCH 3)
+set(GITTYUP_VERSION
+  "${GITTYUP_VERSION_MAJOR}.${GITTYUP_VERSION_MINOR}.${GITTYUP_VERSION_PATCH}"
 )
 
 # Generate build date.
-string(TIMESTAMP GITAHEAD_BUILD_DATE)
+string(TIMESTAMP GITTYUP_BUILD_DATE)
 
 # Lookup git revision.
 find_package(Git)
 if(GIT_FOUND)
   execute_process(
     COMMAND ${GIT_EXECUTABLE} --git-dir=${CMAKE_SOURCE_DIR}/.git show -s --format=%h HEAD
-    OUTPUT_VARIABLE GITAHEAD_BUILD_REVISION
+    OUTPUT_VARIABLE GITTYUP_BUILD_REVISION
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
 else()
-  set(GITAHEAD_BUILD_REVISION "unknown")
+  set(GITTYUP_BUILD_REVISION "unknown")
 endif()
 
 # Explicitly disable shared libraries.
 set(BUILD_SHARED_LIBS OFF)
+
+option(FLATPAK "Building for flatpak" OFF)
 
 # Require C++17.
 set(CMAKE_CXX_STANDARD 17)
@@ -60,6 +62,9 @@ if(APPLE)
 endif()
 
 find_package(Qt5 5.15 COMPONENTS ${QT_MODULES} LinguistTools REQUIRED)
+if (FLATPAK)
+    find_package(Qt5 5.15 COMPONENTS XcbQpa REQUIRED)
+endif()
 
 set(QT_TRANSLATIONS_DIR "${Qt5_DIR}/../../../translations")
 set(QT_TRANSLATIONS_DIR "/usr/share/qt/translations")

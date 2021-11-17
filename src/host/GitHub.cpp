@@ -122,7 +122,7 @@ GitHub::GitHub(const QString &username)
 
       // Read images.
       QString icon;
-      QFile iconFile(":/GitAhead.iconset/icon_64x64.png");
+      QFile iconFile(":/Gittyup.iconset/icon_64x64.png");
       if (iconFile.open(QFile::ReadOnly))
         icon = iconFile.readAll().toBase64();
 
@@ -366,7 +366,7 @@ bool GitHub::isAuthorizeSupported()
 {
   QByteArray id(GITHUB_CLIENT_ID);
   QByteArray secret(GITHUB_CLIENT_SECRET);
-  QByteArray env = qgetenv("GITAHEAD_OAUTH");
+  QByteArray env = qgetenv("GITTYUP_OAUTH");
   return (!id.isEmpty() && !secret.isEmpty() && !env.isEmpty());
 }
 
