@@ -95,6 +95,8 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
     assert(index == DoubleTreeWidget::Blame);
     index = mFileView->addWidget(mDiffView);
     assert(index == DoubleTreeWidget::Diff);
+	mEditor->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+	mDiffView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     const QButtonGroup* viewGroup = segmentedButton->buttonGroup();
     QHBoxLayout* buttonLayout = new QHBoxLayout();
@@ -114,6 +116,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 	QVBoxLayout* vBoxLayout = new QVBoxLayout();
 	QLabel* label = new QLabel(tr("Staged Files"));
     stagedFiles = new TreeView(this, "Staged");
+	stagedFiles->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
     mDiffTreeModel = new DiffTreeModel(repo, this);
     mDiffView->setModel(mDiffTreeModel);
 	TreeProxy* treewrapperStaged = new TreeProxy(true, this);
@@ -138,6 +141,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 	vBoxLayout = new QVBoxLayout();
     mUnstagedCommitedFiles = new QLabel(kUnstagedFiles);
     unstagedFiles = new TreeView(this, "Unstaged");
+	unstagedFiles->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
 	TreeProxy* treewrapperUnstaged = new TreeProxy(false, this);
     treewrapperUnstaged->setSourceModel(mDiffTreeModel);
 	unstagedFiles->setModel(treewrapperUnstaged);
