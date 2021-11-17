@@ -864,11 +864,10 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 //	| unstaged deletion | +            | / |
 //	| staged deletion   | +            | + |
 
-    // TODO: check index of linestaged exists!!!!!!!!!!!!!!!!!!!!!!!
     int count = lines.size();
     int marker = -1;
     int additions = 0, deletions = 0;
-	int additions_tot =0, deletions_tot = 0;
+	int additions_tot = 0, deletions_tot = 0;
     int stagedAdditions = 0, stagedDeletions = 0;
     bool staged = false;
 	int current_staged_index = -1;
