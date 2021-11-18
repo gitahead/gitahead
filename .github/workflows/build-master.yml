@@ -30,7 +30,6 @@ jobs:
       with:
         bundle: com.github.Murmele.Gittyup
         manifest-path: com.github.Murmele.Gittyup/com.github.Murmele.Gittyup.yml
-        cache-key: flatpak-builder-${{ github.sha }}
   build:
     runs-on: ${{ matrix.env.os }}
     strategy:
