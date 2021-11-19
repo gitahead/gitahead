@@ -876,16 +876,21 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 	int diff_staged_patch_old_new_file = -1;
 
 	// Find the first staged hunk which is within this patch
-	auto patch_header_struct = mPatch.header_struct(mIndex);
-	for (int i = 0; i < mStaged.count(); i++) {
-		if (patch_header_struct->old_start > mStaged.header_struct(i)->old_start + mStaged.header_struct(i)->old_lines)
-			continue;
-		else {
-			current_staged_index = i;
-			break;
+	if (!mPatch.isConflicted()) {
+		auto patch_header_struct = mPatch.header_struct(mIndex);
+		for (int i = 0; i < mStaged.count(); i++) {
+			if (patch_header_struct->old_start > mStaged.header_struct(i)->old_start + mStaged.header_struct(i)->old_lines)
+				continue;
+			else {
+				current_staged_index = i;
+				break;
+			}
 		}
 	}
 
+	// Set all editor markers, like green background for adding, red background for deletion
+	// Blue background for OURS or magenta background for Theirs
+	// Setting also the staged symbol
 	bool first_staged_patch_match = false;
 	 for (int lidx = 0; lidx < count; ++lidx) {
 		marker = -1;
@@ -894,7 +899,7 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 		const Line& line = lines.at(lidx);
 		createMarkersAndLineNumbers(line, lidx, comments, width);
 
-		if (current_staged_index >= 0) {
+		if (!mPatch.isConflicted() && current_staged_index >= 0) {
 			auto staged_header_struct_next = mStaged.header_struct(current_staged_index + 1);
 			if (!first_staged_patch_match) {
 				if (mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile) == mStaged.header_struct(current_staged_index)->old_start) {
@@ -942,7 +947,7 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
             }
             // Check if staged
 
-			if (mStaged.count() > 0 && current_staged_index >= 0 && current_staged_line_idx < mStaged.lineCount(current_staged_index)) {
+			if (!mPatch.isConflicted() && mStaged.count() > 0 && current_staged_index >= 0 && current_staged_line_idx < mStaged.lineCount(current_staged_index)) {
 				auto line_origin = mStaged.lineOrigin(current_staged_index, current_staged_line_idx);
 				auto staged_file = mStaged.lineNumber(current_staged_index, current_staged_line_idx, git::Diff::NewFile) - diff_staged_patch_old_new_file;
 				auto patch_file = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile) - (additions_tot - stagedAdditions) + (deletions_tot - stagedDeletions) - diff_patch_old_new_file; // - offset_patch_old_new;
@@ -961,7 +966,7 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 			deletions_tot++;
 
             // Check if staged
-			if (mStaged.count() > 0 && current_staged_index >= 0 && current_staged_line_idx < mStaged.lineCount(current_staged_index)) {
+			if (!mPatch.isConflicted() && mStaged.count() > 0 && current_staged_index >= 0 && current_staged_line_idx < mStaged.lineCount(current_staged_index)) {
 				auto line_origin = mStaged.lineOrigin(current_staged_index, current_staged_line_idx);
 				auto staged_old_file = mStaged.lineNumber(current_staged_index, current_staged_line_idx, git::Diff::OldFile);
 				auto patch_old_file = mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile);
