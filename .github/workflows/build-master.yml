@@ -30,6 +30,7 @@ jobs:
       with:
         bundle: com.github.Murmele.Gittyup
         manifest-path: com.github.Murmele.Gittyup/com.github.Murmele.Gittyup.yml
+        cache: false
   build:
     runs-on: ${{ matrix.env.os }}
     strategy:
