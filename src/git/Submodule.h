@@ -53,17 +53,7 @@ public:
    */
   int status() const;
 
-  Result update(Remote::Callbacks *callbacks, bool init = false);
-
-  /*!
-   * \brief reset
-   * Reset working directory to current head
-   * \param type
-   * \param paths
-   * \return
-   */
-  Result reset(Remote::Callbacks *callbacks,
-    git_reset_t type = GIT_RESET_MIXED) const;
+  Result update(Remote::Callbacks *callbacks, bool init = false, bool checkout_force = false);
 
   Repository open() const;
 
