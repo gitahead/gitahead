@@ -127,7 +127,7 @@ GitHub::GitHub(const QString &username)
         icon = iconFile.readAll().toBase64();
 
       QString name;
-      QFile nameFile(":/logo-type.png");
+	  QFile nameFile(":/logo-type_light@2x.png");
       if (nameFile.open(QFile::ReadOnly))
         name = nameFile.readAll().toBase64();
 

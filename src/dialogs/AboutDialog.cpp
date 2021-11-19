@@ -71,7 +71,7 @@ AboutDialog::AboutDialog(QWidget *parent)
   QIcon icon(":/Gittyup.iconset/icon_128x128.png");
   IconLabel *iconLabel = new IconLabel(icon, 128, 128, this);
 
-  QIcon title(":/logo-type.png");
+  QIcon title(":/logo-type_light@2x.png");
   IconLabel *titleLabel = new IconLabel(title, 163, 38, this);
 
   QString subtitleText = kSubtitleFmt.arg(tr("Understand your history!"));
