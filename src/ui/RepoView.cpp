@@ -1131,7 +1131,7 @@ void RepoView::pull(
         QList<git::Submodule> modules;
         foreach (const QString &name, names)
           modules.append(mRepo.lookupSubmodule(name));
-        updateSubmodules(modules, true, false, entry);
+		updateSubmodules(modules, true, false, false, entry);
       };
     }
 
@@ -2256,9 +2256,7 @@ void RepoView::reset(
   if (!commit.reset(type))
     error(entry, commitToAmend ? tr("amend") : tr("reset"), head.name());
 
-  resetSubmodules(mRepo.submodules(), true, type, entry);
-
-
+  updateSubmodules(mRepo.submodules(), true, false, (type == GIT_RESET_HARD) ? true : false, entry);
 }
 
 void RepoView::resetSubmodules(const QList<git::Submodule> &submodules,
@@ -2349,7 +2347,7 @@ void RepoView::resetSubmodulesAsync(const QList<SubmoduleInfo> &submodules, bool
 
     entry->setBusy(true);
     mWatcher->setFuture(QtConcurrent::run(
-      submodule, &git::Submodule::reset, mCallbacks, type));
+	  submodule, &git::Submodule::update, mCallbacks, false, true));
 }
 
 /*!
@@ -2393,13 +2391,14 @@ void RepoView::updateSubmodules(
   const QList<git::Submodule> &submodules,
   bool recursive,
   bool init,
+  bool checkout_force,
   LogEntry *parent)
 {
   if (mWatcher) {
     // Queue update. synchrone
     connect(mWatcher, &QFutureWatcher<git::Result>::finished, mWatcher,
-    [this, submodules, recursive, init, parent] {
-      updateSubmodules(submodules, recursive, init, parent);
+	[this, submodules, recursive, init, checkout_force, parent] {
+	  updateSubmodules(submodules, recursive, init, checkout_force, parent);
     });
 
     return;
@@ -2411,8 +2410,8 @@ void RepoView::updateSubmodules(
     return;
 
   // Start updating asynchronously.
-  QList<SubmoduleInfo> infos = submoduleUpdateInfoList(mRepo, modules, init, parent);
-  updateSubmodulesAsync(infos, recursive, init);
+  QList<SubmoduleInfo> infos = submoduleUpdateInfoList(mRepo, modules, init, checkout_force, parent);
+  updateSubmodulesAsync(infos, recursive, init, checkout_force);
 }
 
 /*!
@@ -2429,6 +2428,7 @@ QList<RepoView::SubmoduleInfo> RepoView::submoduleUpdateInfoList(
   const git::Repository &repo,
   const QList<git::Submodule> &submodules,
   bool init,
+  bool checkout_force,
   LogEntry *parent)
 {
   // Gather list of submodules.
@@ -2438,7 +2438,7 @@ QList<RepoView::SubmoduleInfo> RepoView::submoduleUpdateInfoList(
     if (!init && !submodule.isInitialized())
       continue;
 
-    if (submodule.workdirId() == submodule.headId())
+	if (!checkout_force && submodule.workdirId() == submodule.headId()) // indexId == headId?
       continue;
 
     modules.append(submodule);
@@ -2460,7 +2460,8 @@ QList<RepoView::SubmoduleInfo> RepoView::submoduleUpdateInfoList(
 void RepoView::updateSubmodulesAsync(
   const QList<SubmoduleInfo> &submodules,
   bool recursive,
-  bool init)
+  bool init,
+  bool checkout_force)
 {
   if (submodules.isEmpty()) {
     refresh();
@@ -2475,7 +2476,7 @@ void RepoView::updateSubmodulesAsync(
 
   mWatcher = new QFutureWatcher<git::Result>(this);
   connect(mWatcher, &QFutureWatcher<git::Result>::finished, mWatcher,
-  [this, init, recursive, tail, info, entry] {
+  [this, init, recursive, checkout_force, tail, info, entry] {
     entry->setBusy(false);
 
     git::Result result = mWatcher->result();
@@ -2498,12 +2499,12 @@ void RepoView::updateSubmodulesAsync(
       if (git::Repository repo = info.submodule.open()) {
         QList<git::Submodule> submodules = repo.submodules();
         if (!submodules.isEmpty())
-          prefix = submoduleUpdateInfoList(repo, submodules, init, entry);
+		  prefix = submoduleUpdateInfoList(repo, submodules, init, checkout_force, entry);
       }
     }
 
     // Restart with smaller list.
-    updateSubmodulesAsync(prefix + tail, recursive, init);
+	updateSubmodulesAsync(prefix + tail, recursive, init, checkout_force);
   });
 
   QString url = submodule.url();
@@ -2513,7 +2514,7 @@ void RepoView::updateSubmodulesAsync(
 
   entry->setBusy(true);
   mWatcher->setFuture(QtConcurrent::run(
-    submodule, &git::Submodule::update, mCallbacks, init));
+	submodule, &git::Submodule::update, mCallbacks, init, checkout_force));
 }
 
 bool RepoView::openSubmodule(const git::Submodule &submodule)

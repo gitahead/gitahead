@@ -280,11 +280,11 @@ public:
   void resetSubmodules(const QList<git::Submodule> &submodules,
           bool recursive, git_reset_t type,
           LogEntry *parent);
-  void updateSubmodules(
-    const QList<git::Submodule> &submodules = QList<git::Submodule>(),
-    bool recursive = true,
-    bool init = false,
-    LogEntry *parent = nullptr);
+  void updateSubmodules(const QList<git::Submodule> &submodules = QList<git::Submodule>(),
+	bool recursive = true,
+	bool init = false,
+	bool checkout_force = false,
+	LogEntry *parent = nullptr);
   bool openSubmodule(const git::Submodule &submodule);
 
   // config
@@ -370,15 +370,13 @@ private:
   bool suspendLogTimer();
   void resumeLogTimer(bool suspended = true);
 
-  QList<SubmoduleInfo> submoduleUpdateInfoList(
-    const git::Repository &repo,
-    const QList<git::Submodule> &submodules,
-    bool init,
-    LogEntry *parent);
-  void updateSubmodulesAsync(
-    const QList<SubmoduleInfo> &submodules,
-    bool recursive = true,
-    bool init = false);
+  QList<SubmoduleInfo> submoduleUpdateInfoList(const git::Repository &repo,
+	const QList<git::Submodule> &submodules,
+	bool init, bool checkout_force,
+	LogEntry *parent);
+  void updateSubmodulesAsync(const QList<SubmoduleInfo> &submodules,
+	bool recursive = true,
+	bool init = false, bool checkout_force = false);
 
   QList<SubmoduleInfo> submoduleResetInfoList(const git::Repository &repo,
     const QList<git::Submodule> &submodules,

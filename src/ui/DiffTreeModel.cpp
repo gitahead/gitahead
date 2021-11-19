@@ -272,12 +272,28 @@ bool DiffTreeModel::discard(const QModelIndex &index)
        }
     }
 
-    if (trackedPatches.length() > 0) {
-        int strategy = GIT_CHECKOUT_FORCE;
-        auto repo = mDiff.patch(list[0]).repo(); // does not matter which index is used all are in the same repo
-        if (!repo.checkout(git::Commit(), nullptr, trackedPatches, strategy))
-            return false;
-    }
+	auto s = mRepo.submodules();
+	QStringList filePatches;
+	for (auto trackedPatch: trackedPatches) {
+		bool is_submodule = false;
+		for (auto submodule: s) {
+			if (submodule.path() == trackedPatch) {
+				is_submodule = true;
+				submodule.update(nullptr, false, true); // In Repo view it is done asynchron. Maybe changing here too!
+				break;
+			}
+			if (!is_submodule)
+				filePatches.append(trackedPatch);
+
+		}
+	}
+
+	if (filePatches.length() > 0) {
+		int strategy = GIT_CHECKOUT_FORCE;
+		auto repo = mDiff.patch(list[0]).repo(); // does not matter which index is used all are in the same repo
+		if (!repo.checkout(git::Commit(), nullptr, trackedPatches, strategy))
+			return false;
+	}
     return true;
 }
 
