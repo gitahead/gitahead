@@ -15,8 +15,8 @@ How to Get Help
 ---------------
 
 Ask questions about building or using Gittyup on
-[Stack Overflow](http://stackoverflow.com/questions/tagged/gitahead) by
-including the `gitahead` tag. Remember to search for existing questions
+[Stack Overflow](http://stackoverflow.com/questions/tagged/gittyup) by
+including the `gittyup` tag. Remember to search for existing questions
 before creating a new one.
 
 Report bugs in Gittyup by opening an issue in the
