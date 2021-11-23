@@ -26,11 +26,20 @@ jobs:
       with:
         owner: 'flathub'
         repository: 'com.github.Murmele.Gittyup'
+    - run: >
+        sed -i 's/tag:\ gittyup_v[1-9]*\.[0-9]*\.[0-9]*/commit: '$GITHUB_SHA'/' com.github.Murmele.Gittyup/com.github.Murmele.Gittyup.yml
+    - run: sed -i s@url:\ .*\.git@url:\ $GITHUB_SERVER_URL/$GITHUB_REPOSITORY@ com.github.Murmele.Gittyup/com.github.Murmele.Gittyup.yml
+    #- run: cat com.github.Murmele.Gittyup/com.github.Murmele.Gittyup.yml
     - uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v4
       with:
         bundle: com.github.Murmele.Gittyup.flatpak
         manifest-path: com.github.Murmele.Gittyup/com.github.Murmele.Gittyup.yml
         cache: false
+    - name: Upload Flatpak package
+      uses: actions/upload-artifact@v2
+      with:
+        path: com.github.Murmele.Gittyup.flatpak
+        retention-days: 20
   build:
     runs-on: ${{ matrix.env.os }}
     strategy:
