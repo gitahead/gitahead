@@ -10,8 +10,8 @@
 #include "PlatQt.h"
 #include "ScintillaQt.h"
 #ifdef SCI_LEXER
-#include "LexerModule.h"
-#include "ExternalLexer.h"
+#include <LexerModule.h>
+#include <ExternalLexer.h>
 #endif
 
 #include <QApplication>
