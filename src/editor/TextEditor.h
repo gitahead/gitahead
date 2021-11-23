@@ -12,12 +12,12 @@
 
 // Do not reorder.
 #include <cstddef>
-#include "ILexer.h"
-#include "LexerModule.h"
-#include "Catalogue.h"
-#include "SciLexer.h"
+#include <ILexer.h>
+#include <LexerModule.h>
+#include <Catalogue.h>
+#include <SciLexer.h>
 #include "ScintillaIFace.h"
-#include "Platform.h"
+#include <Platform.h>
 
 class TextEditor : public Scintilla::ScintillaIFace
 {

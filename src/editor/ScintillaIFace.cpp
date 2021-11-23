@@ -8,8 +8,8 @@
 //
 
 #include "ScintillaIFace.h"
-#include "Platform.h"
-#include "Scintilla.h"
+#include <Platform.h>
+#include <Scintilla.h>
 #include <QVarLengthArray>
 
 namespace Scintilla {
