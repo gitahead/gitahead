@@ -28,7 +28,7 @@ jobs:
         repository: 'com.github.Murmele.Gittyup'
     - uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v4
       with:
-        bundle: com.github.Murmele.Gittyup
+        bundle: com.github.Murmele.Gittyup.flatpak
         manifest-path: com.github.Murmele.Gittyup/com.github.Murmele.Gittyup.yml
         cache: false
   build:
