@@ -14,6 +14,7 @@
 #include <QApplication>
 #include <QMenu>
 #include <QPainter>
+#include <QPainterPath>
 #include <QProxyStyle>
 #include <QStyleOption>
 #include <QToolButton>

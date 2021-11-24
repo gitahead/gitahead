@@ -10,6 +10,7 @@
 #include "Badge.h"
 #include "app/Application.h"
 #include <QPainter>
+#include <QPainterPath>
 #include <QStyleOption>
 
 namespace {

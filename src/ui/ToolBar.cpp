@@ -21,6 +21,7 @@
 #include <QHBoxLayout>
 #include <QMenu>
 #include <QPainter>
+#include <QPainterPath>
 #include <QStyleOptionToolButton>
 #include <QToolButton>
 #include <QWindow>

@@ -9,6 +9,7 @@
 
 #include "SearchField.h"
 #include <QPainter>
+#include <QPainterPath>
 #include <QStyle>
 #include <QToolButton>
 

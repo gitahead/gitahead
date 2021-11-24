@@ -15,6 +15,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPainter>
+#include <QPainterPath>
 #include <QShortcut>
 #include <QShowEvent>
 #include <QStyleOption>

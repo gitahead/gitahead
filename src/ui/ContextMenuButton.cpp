@@ -9,6 +9,7 @@
 
 #include "ContextMenuButton.h"
 #include <QPainter>
+#include <QPainterPath>
 #include <QStyleOption>
 #include <QStylePainter>
 #include <QToolBar>

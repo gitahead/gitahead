@@ -30,6 +30,7 @@
 #include <QApplication>
 #include <QMenu>
 #include <QPainter>
+#include <QPainterPath>
 #include <QPushButton>
 #include <QStyledItemDelegate>
 #include <QTextLayout>
