@@ -744,7 +744,6 @@ private:
 SettingsDialog::SettingsDialog(Index index, QWidget *parent)
   : QMainWindow(parent, Qt::Dialog)
 {
-  setMinimumWidth(500);
   setAttribute(Qt::WA_DeleteOnClose);
   setUnifiedTitleAndToolBarOnMac(true);
   setContextMenuPolicy(Qt::NoContextMenu);
@@ -897,6 +896,8 @@ SettingsDialog::SettingsDialog(Index index, QWidget *parent)
 
   // Select the requested index.
   actions->actions().at(index)->trigger();
+
+  setMinimumWidth(toolbar->sizeHint().width());
 }
 
 void SettingsDialog::openSharedInstance(Index index)
