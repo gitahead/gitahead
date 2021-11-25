@@ -34,14 +34,6 @@ option(FLATPAK "Building for flatpak" OFF)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
-# Disable exceptions and RTTI.
-if(WIN32)
-  string(REPLACE "/EHsc" "/EHs-c-" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-  string(REPLACE "/GR" "/GR-" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
-else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-endif()
-
 if(UNIX AND NOT APPLE)
   set(CMAKE_EXE_LINKER_FLAGS -ldl)
 endif()
