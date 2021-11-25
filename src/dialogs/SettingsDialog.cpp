@@ -267,6 +267,14 @@ public:
     layout->addRow(tr("External diff:"), diffTool);
     layout->addRow(tr("External merge:"), mergeTool);
     layout->addRow(tr("Backup files:"), backup);
+
+    QLineEdit *mFileManagerCommand = new QLineEdit(this);
+    layout->addRow(tr("File manager command:"), mFileManagerCommand);
+
+    connect(mFileManagerCommand, &QLineEdit::textChanged, [](const QString &text) {
+      Settings::instance()->setValue("filemanager/command", text);
+    });
+    mFileManagerCommand->setText(Settings::instance()->value("filemanager/command").toString());
   }
 
 private:

@@ -43,6 +43,7 @@
 #include "index/Index.h"
 #include "log/LogEntry.h"
 #include "log/LogView.h"
+#include "tools/ShowTool.h"
 #include "watcher/RepositoryWatcher.h"
 #include <QCheckBox>
 #include <QCloseEvent>
@@ -2557,6 +2558,11 @@ ConfigDialog *RepoView::configureSettings(ConfigDialog::Index index)
   ConfigDialog *dialog = new ConfigDialog(this, index);
   dialog->open();
   return dialog;
+}
+
+void RepoView::openFileManager()
+{
+  ShowTool::openFileManager(mRepo.workdir().absolutePath());
 }
 
 void RepoView::ignore(const QString &name)

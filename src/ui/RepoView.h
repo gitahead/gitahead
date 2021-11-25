@@ -291,6 +291,9 @@ public:
   ConfigDialog *configureSettings(
     ConfigDialog::Index index = ConfigDialog::General);
 
+  // file manager
+  void openFileManager();
+
   // ignore
   void ignore(const QString &name);
 
