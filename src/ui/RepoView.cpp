@@ -2200,7 +2200,20 @@ void RepoView::promptToReset(
   }
 
   QString id = commitToAmend ? commitToAmend.shortId() : commit.shortId();
-  QString title = commitToAmend ? tr("Amend?") : tr("Reset?");
+  QString title = commitToAmend ? tr("Amend") : tr("Reset");
+  switch (type) {
+	case GIT_RESET_SOFT:
+	  title += " Soft";
+	  break;
+	case GIT_RESET_MIXED:
+	  title += " Mixed";
+	  break;
+	case GIT_RESET_HARD:
+	  title += " Hard";
+	  break;
+  }
+  title += "?";
+
   QString text = commitToAmend ?
     tr("Are you sure you want to amend '%1'?").arg(id) :
     tr("Are you sure you want to reset '%1' to '%2'?").arg(head.name(), id);
