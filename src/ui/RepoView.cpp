@@ -2392,26 +2392,35 @@ void RepoView::openTerminal()
 
 #elif defined(Q_OS_UNIX)
     static QString detectedTerminal = nullptr;
-    static const char *candidates[] = {
+	static const QStringList candidates = {
       "x-terminal-emulator",
       "xdg-terminal",
       "i3-sensible-terminal",
       "gnome-terminal",
       "konsole",
       "xterm",
-      nullptr
     };
 
     if (detectedTerminal.isNull()) {
       detectedTerminal = "";
 
-      for (const char **candidate = candidates; *candidate; ++candidate) {
-        QString exePath = QStandardPaths::findExecutable(*candidate);
-
-        if (!exePath.isEmpty()) {
-          detectedTerminal = '"' + exePath.replace("\\", "\\\\").replace("\"", "\\\"") + '"';
-          break;
-        }
+	  for (auto candidate: candidates) {
+		#if defined(FLATPAK)
+			// There is no graphical terminal in the flatpak environment. Use the host terminal
+			QProcess process;
+			process.start("flatpak-spawn", {"--host", "which", candidate});
+			process.waitForFinished(-1); // will wait forever until finished
+			if (!process.readAllStandardOutput().isEmpty()) {
+				detectedTerminal = candidate;
+				break;
+			}
+		#else
+			QString exePath = QStandardPaths::findExecutable(candidate);
+			if (!exePath.isEmpty()) {
+			  detectedTerminal = '"' + exePath.replace("\\", "\\\\").replace("\"", "\\\"") + '"';
+			  break;
+			}
+		#endif
       }
     }
 
@@ -2456,11 +2465,18 @@ void RepoView::openTerminal()
   CloseHandle(processInfo.hThread);
 
 #elif defined(Q_OS_UNIX)
-  QProcess child;
-  child.setProgram("sh");
-  child.setArguments(QStringList() << "-c" << terminalCmd);
-  child.setWorkingDirectory(mRepo.workdir().absolutePath());
-  child.startDetached();
+
+	QProcess child;
+	#if defined(FLATPAK)
+	  child.setProgram("flatpak-spawn");
+	  child.setArguments(QStringList() << "--host" << terminalCmd);
+	#else
+	  child.setProgram("sh");
+	  child.setArguments(QStringList() << "-c" << terminalCmd);
+	#endif
+	  child.setWorkingDirectory(mRepo.workdir().absolutePath());
+	  qDebug() << "Execute Terminal: Arguments: " << child.arguments();
+	  child.startDetached();
 #endif
 }
 
