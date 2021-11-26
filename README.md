@@ -105,7 +105,7 @@ How to Install
 -----------------
 ### Linux
 
-The easies way to install Gittyup is by using [Flatpak](https://flathub.org/apps/details/com.github.Murmele.Gittyup)
+The easiest way to install Gittyup is by using [Flatpak](https://flathub.org/apps/details/com.github.Murmele.Gittyup).
 
 **Arch Linux**
 
