@@ -53,12 +53,39 @@ bool EditTool::start()
   if (editor.isEmpty())
     return QDesktopServices::openUrl(QUrl::fromLocalFile(mFile));
 
+  // Find arguments.
+  QStringList args = editor.split("\" \"");
+
+  if (args.count() > 1) {
+    // Format 1: "Command" "Argument1" "Argument2"
+    editor = args[0];
+    for (int i = 1; i < args.count(); i++)
+      args[i].remove("\"");
+  } else {
+    int fi = editor.indexOf("\"");
+    int li = editor.lastIndexOf("\"");
+    if ((fi == 0) && (li > fi) && (li < (editor.length() - 1))) {
+      // Format 2: "Command" Argument1 Argument2
+      args = editor.right(editor.length() - li - 2).split(" ");
+      args.insert(0, "dummy");
+      editor = editor.left(li + 1);
+    } else {
+      // Format 3: "Command" (no argument)
+      // Format 4: Command (no argument)
+    }
+  }
+
+  // Remove command, add filename, trim command.
+  args.removeFirst();
+  args.append(mFile);
+  editor.remove("\"");
+
   // Destroy this after process finishes.
   QProcess *process = new QProcess(this);
   auto signal = QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished);
   QObject::connect(process, signal, this, &ExternalTool::deleteLater);
 
-  process->start(editor, {mFile});
+  process->start(editor, args);
   if (!process->waitForStarted())
     return false;
 

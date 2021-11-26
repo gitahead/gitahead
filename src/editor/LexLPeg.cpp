@@ -70,7 +70,7 @@ LUALIB_API int luaopen_lpeg(lua_State *L);
 
 using namespace Scintilla;
 
-class LexerLPeg : public ILexer {
+class LexerLPeg : public ILexer5 {
   // Shared lua state.
   static lua_State *L;
 
@@ -291,20 +291,22 @@ class LexerLPeg : public ILexer {
    * properties are set.
    */
   bool init(const char *lexer) {
-    char lexers[FILENAME_MAX], themes[FILENAME_MAX], theme[FILENAME_MAX];
-    props.GetExpanded("lexer.lpeg.lexers", lexers);
+    char home[FILENAME_MAX], themes[FILENAME_MAX], theme[FILENAME_MAX];
+    props.GetExpanded("lexer.lpeg.home", home);
     props.GetExpanded("lexer.lpeg.themes", themes);
     props.GetExpanded("lexer.lpeg.theme", theme);
-    if (!*lexers || !*lexer) return false;
+    if (!*home || !*lexer) return false;
 
     lua_pushlightuserdata(L, reinterpret_cast<void *>(&props));
     lua_setfield(L, LUA_REGISTRYINDEX, "sci_props");
 
-    // Modify `package.path` to find lexers.
-    lua_getglobal(L, "package"), lua_getfield(L, -1, "path");
-    int orig_path = luaL_ref(L, LUA_REGISTRYINDEX); // restore later
-    lua_pushstring(L, lexers), lua_pushstring(L, "/?.lua"), lua_concat(L, 2);
-    lua_setfield(L, -2, "path"), lua_pop(L, 1); // package
+    // Set `package.path` to find lexers.
+    lua_getglobal(L, "package");
+    lua_pushstring(L, home);
+    lua_pushstring(L, "/?.lua");
+    lua_concat(L, 2);
+    lua_setfield(L, -2, "path");
+    lua_pop(L, 1); // package
 
     // Load the lexer module.
     lua_getglobal(L, "require");
@@ -337,12 +339,6 @@ class LexerLPeg : public ILexer {
           lua_pcall(L, 0, 0, 0) != LUA_OK) return (l_error(L), false);
       lua_pop(L, 1); // theme
     }
-
-    // Restore `package.path`.
-    lua_getglobal(L, "package");
-    lua_getfield(L, -1, "path"), lua_setfield(L, -3, "LEXERPATH");
-    lua_rawgeti(L, LUA_REGISTRYINDEX, orig_path), lua_setfield(L, -2, "path");
-    luaL_unref(L, LUA_REGISTRYINDEX, orig_path), lua_pop(L, 1); // package
 
     // Load the language lexer.
     lua_getfield(L, -1, "load");
@@ -589,8 +585,54 @@ public:
   const char * SCI_METHOD DescribeWordListSets() { return ""; }
   Sci_Position SCI_METHOD WordListSet(int, const char *) { return -1; }
 
+  int SCI_METHOD LineEndTypesSupported() noexcept override {return SC_LINE_END_TYPE_UNICODE;}
+
+  int SCI_METHOD AllocateSubStyles(int styleBase, int numberStyles) override {
+      return 0;
+  }
+  int SCI_METHOD SubStylesStart(int styleBase) override {
+      return 0;
+  }
+  int SCI_METHOD SubStylesLength(int styleBase) override {
+      return 0;
+  }
+  int SCI_METHOD StyleFromSubStyle(int subStyle) override {
+      return 0;
+  }
+  int SCI_METHOD PrimaryStyleFromStyle(int style) noexcept override {
+      return 0;
+  }
+  void SCI_METHOD FreeSubStyles() override {
+  }
+  void SCI_METHOD SetIdentifiers(int style, const char *identifiers) override {
+  }
+  int SCI_METHOD DistanceToSecondaryStyles() noexcept override {
+      return 0;
+  }
+  const char * SCI_METHOD GetSubStyleBases() noexcept override {
+      return "";
+  }
+  int SCI_METHOD NamedStyles() override {
+      return 0;
+  }
+  const char * SCI_METHOD NameOfStyle(int style) override {
+      return "";
+  }
+  const char * SCI_METHOD TagsOfStyle(int style) override {
+      return "";
+  }
+  const char * SCI_METHOD DescriptionOfStyle(int style) override {
+      return "";
+  }
+
+  const char * SCI_METHOD GetName() override {return "";}
+
+  int SCI_METHOD  GetIdentifier() override { return 0; }
+
+  const char * SCI_METHOD PropertyGet(const char *key) {return "";}
+
   /** Constructs a new instance of the lexer. */
-  static ILexer *LexerFactoryLPeg() { return new LexerLPeg(); }
+  static ILexer5 *LexerFactoryLPeg() { return new LexerLPeg(); }
 };
 
 lua_State *LexerLPeg::L = NULL;

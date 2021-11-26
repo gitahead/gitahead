@@ -10,8 +10,8 @@
 #include "PlatQt.h"
 #include "ScintillaQt.h"
 #ifdef SCI_LEXER
-#include "LexerModule.h"
-#include "ExternalLexer.h"
+#include <LexerModule.h>
+#include <ExternalLexer.h>
 #endif
 
 #include <QApplication>
@@ -28,9 +28,7 @@
 #define SC_INDICATOR_CONVERTED INDIC_IME+2
 #define SC_INDICATOR_UNKNOWN INDIC_IME_MAX
 
-#ifdef SCI_NAMESPACE
-using namespace Scintilla;
-#endif
+namespace Scintilla {
 
 namespace {
 
@@ -107,7 +105,7 @@ bool IsHangul(const QChar qchar)
 ScintillaQt::ScintillaQt(QWidget *parent)
   : QAbstractScrollArea(parent)
 {
-  time.start();
+  timer.start();
 
   // Set Qt defaults.
   setAcceptDrops(true);
@@ -158,8 +156,6 @@ bool ScintillaQt::event(QEvent *event)
     // Circumvent the tab focus convention.
     keyPressEvent(static_cast<QKeyEvent *>(event));
     return event->isAccepted();
-  } else if (event->type() == QEvent::Hide) {
-    setMouseTracking(false);
   }
 
   return QAbstractScrollArea::event(event);
@@ -351,19 +347,19 @@ void ScintillaQt::mousePressEvent(QMouseEvent *event)
   }
 
   if (event->button() == Qt::LeftButton) {
-    bool shift = QApplication::keyboardModifiers() & Qt::ShiftModifier;
-    bool ctrl  = QApplication::keyboardModifiers() & Qt::ControlModifier;
+    Qt::KeyboardModifiers modifiers = event->modifiers();
+    bool shift = modifiers & Qt::ShiftModifier;
+    bool ctrl  = modifiers & Qt::ControlModifier;
 #ifdef Q_WS_X11
     // On X allow choice of rectangular modifier since most window
     // managers grab alt + click for moving windows.
-    bool alt = QApplication::keyboardModifiers() &
-               modifierTranslated(rectangularSelectionModifier);
+    bool alt = modifiers & modifierTranslated(rectangularSelectionModifier);
 #else
-    bool alt = QApplication::keyboardModifiers() & Qt::AltModifier;
+    bool alt = modifiers & Qt::AltModifier;
 #endif
 
     ButtonDownWithModifiers(
-      pos, time.elapsed(), ModifierFlags(shift, ctrl, alt));
+      pos, timer.elapsed(), ModifierFlags(shift, ctrl, alt));
   }
 }
 
@@ -373,7 +369,7 @@ void ScintillaQt::mouseReleaseEvent(QMouseEvent *event)
   bool ctrl  = QApplication::keyboardModifiers() & Qt::ControlModifier;
   if (event->button() == Qt::LeftButton)
     ButtonUpWithModifiers(
-      point, time.elapsed(), ModifierFlags(false, ctrl, false));
+      point, timer.elapsed(), ModifierFlags(false, ctrl, false));
 
   int pos = send(SCI_POSITIONFROMPOINT, point.x, point.y);
   int line = send(SCI_LINEFROMPOSITION, pos);
@@ -403,7 +399,7 @@ void ScintillaQt::mouseMoveEvent(QMouseEvent *event)
   bool alt   = QApplication::keyboardModifiers() & Qt::AltModifier;
 #endif
 
-  ButtonMoveWithModifiers(pos, time.elapsed(), ModifierFlags(shift, ctrl, alt));
+  ButtonMoveWithModifiers(pos, timer.elapsed(), ModifierFlags(shift, ctrl, alt));
 }
 
 void ScintillaQt::contextMenuEvent(QContextMenuEvent *event)
@@ -1143,12 +1139,6 @@ sptr_t ScintillaQt::WndProc(unsigned int message, uptr_t wParam, sptr_t lParam)
     case SCI_GETDIRECTPOINTER:
       return reinterpret_cast<sptr_t>(this);
 
-#ifdef SCI_LEXER
-      case SCI_LOADLEXERLIBRARY:
-        LexerManager::GetInstance()->Load(reinterpret_cast<const char *>(lParam));
-        break;
-#endif
-
     default:
       return ScintillaBase::WndProc(message, wParam, lParam);
   }
@@ -1166,3 +1156,5 @@ sptr_t ScintillaQt::DirectFunction(
 {
   return reinterpret_cast<ScintillaQt *>(ptr)->WndProc(iMessage, wParam, lParam);
 }
+
+} // namespace Scintilla

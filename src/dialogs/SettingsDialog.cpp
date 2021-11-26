@@ -92,6 +92,8 @@ public:
 
 class GeneralPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   GeneralPanel(QWidget *parent = nullptr)
     : QWidget(parent)
@@ -112,6 +114,8 @@ public:
 
     mPushCommit = new QCheckBox(tr("Push after each commit"), this);
     mPullUpdate = new QCheckBox(tr("Update submodules after pull"), this);
+    mAutoPrune = new QCheckBox(tr("Prune when fetching"), this);
+    mNoTranslation = new QCheckBox(tr("No translation"), this);
 
     mStoreCredentials = new QCheckBox(
       tr("Store credentials in secure storage"), this);
@@ -122,6 +126,7 @@ public:
     connect(privacy, &QLabel::linkActivated, [] {
       AboutDialog::openSharedInstance(AboutDialog::Privacy);
     });
+	mUsageReporting->setEnabled(false);
 
 
     QFormLayout *form = new QFormLayout;
@@ -130,6 +135,8 @@ public:
     form->addRow(tr("Automatic actions:"), fetchLayout);
     form->addRow(QString(), mPushCommit);
     form->addRow(QString(), mPullUpdate);
+    form->addRow(QString(), mAutoPrune);
+    form->addRow(tr("Language:"), mNoTranslation);
     form->addRow(tr("Credentials:"), mStoreCredentials);
     form->addRow(tr("Usage reporting:"), mUsageReporting);
     form->addRow(QString(), privacy);
@@ -171,6 +178,14 @@ public:
       Settings::instance()->setValue("global/autoupdate/enable", checked);
     });
 
+    connect(mAutoPrune, &QCheckBox::toggled, [](bool checked) {
+      Settings::instance()->setValue("global/autoprune/enable", checked);
+    });
+
+    connect(mNoTranslation, &QCheckBox::toggled, [](bool checked) {
+      Settings::instance()->setValue("translation/disable", checked);
+    });
+
     connect(mStoreCredentials, &QCheckBox::toggled, [](bool checked) {
       Settings::instance()->setValue("credential/store", checked);
       delete CredentialHelper::instance();
@@ -196,8 +211,10 @@ public:
 
     mPushCommit->setChecked(settings->value("autopush/enable").toBool());
     mPullUpdate->setChecked(settings->value("autoupdate/enable").toBool());
+    mAutoPrune->setChecked(settings->value("autoprune/enable").toBool());
     settings->endGroup();
 
+    mNoTranslation->setChecked(settings->value("translation/disable").toBool());
     mStoreCredentials->setChecked(settings->value("credential/store").toBool());
     mUsageReporting->setChecked(settings->value("tracking/enabled").toBool());
   }
@@ -210,12 +227,16 @@ private:
   QSpinBox *mFetchMinutes;
   QCheckBox *mPushCommit;
   QCheckBox *mPullUpdate;
+  QCheckBox *mAutoPrune;
+  QCheckBox *mNoTranslation;
   QCheckBox *mStoreCredentials;
   QCheckBox *mUsageReporting;
 };
 
 class ToolsPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   ToolsPanel(QWidget *parent = nullptr)
     : QWidget(parent), mConfig(git::Config::global())
@@ -256,6 +277,14 @@ public:
     connect(mTerminalCommand, &QLineEdit::textChanged, [](const QString &text) {
       Settings::instance()->setValue("terminal/command", text);
     });
+    
+    QLineEdit *mFileManagerCommand = new QLineEdit(this);
+    layout->addRow(tr("File manager command:"), mFileManagerCommand);
+
+    connect(mFileManagerCommand, &QLineEdit::textChanged, [](const QString &text) {
+      Settings::instance()->setValue("filemanager/command", text);
+    });
+    mFileManagerCommand->setText(Settings::instance()->value("filemanager/command").toString());
   }
 
 private:
@@ -302,6 +331,8 @@ private:
 
 class WindowPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   WindowPanel(QWidget *parent = nullptr)
     : QWidget(parent)
@@ -490,6 +521,20 @@ public:
       Settings::instance()->setPrompt(Settings::PromptStash, checked);
     });
 
+    QString largeFilesText = settings->promptDescription(Settings::PromptLargeFiles);
+    QCheckBox *largeFiles = new QCheckBox(largeFilesText, this);
+    largeFiles->setChecked(settings->prompt(Settings::PromptLargeFiles));
+    connect(largeFiles, &QCheckBox::toggled, [](bool checked) {
+      Settings::instance()->setPrompt(Settings::PromptLargeFiles, checked);
+    });
+
+    QString directoriesText = settings->promptDescription(Settings::PromptDirectories);
+    QCheckBox *directories = new QCheckBox(directoriesText, this);
+    directories->setChecked(settings->prompt(Settings::PromptDirectories));
+    connect(directories, &QCheckBox::toggled, [](bool checked) {
+      Settings::instance()->setPrompt(Settings::PromptDirectories, checked);
+    });
+
     QFormLayout *layout = new QFormLayout(this);
 
     layout->addRow(tr("Theme:"), comboBox);
@@ -501,11 +546,15 @@ public:
     layout->addRow(QString(), revert);
     layout->addRow(QString(), cherryPick);
     layout->addRow(QString(), stash);
+    layout->addRow(QString(), directories);
+    layout->addRow(QString(), largeFiles);
   }
 };
 
 class EditorPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   EditorPanel(QWidget *parent = nullptr)
     : QWidget(parent)
@@ -577,6 +626,8 @@ public:
 
 class UpdatePanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   UpdatePanel(QWidget *parent = nullptr)
     : QWidget(parent)
@@ -611,9 +662,37 @@ public:
   }
 };
 
+class MiscPanel : public QWidget
+{
+  Q_OBJECT
+
+public:
+  MiscPanel(QWidget *parent = nullptr)
+    : QWidget(parent)
+  {
+    Settings *settings = Settings::instance();
+
+    QLineEdit *sshConfigPathBox = new QLineEdit(settings->value("ssh/configFilePath").toString(), this);
+    connect(sshConfigPathBox, &QLineEdit::textChanged, [](const QString &text) {
+      Settings::instance()->setValue("ssh/configFilePath", text);
+    });
+
+    QLineEdit *sshKeyPathBox = new QLineEdit(settings->value("ssh/keyFilePath").toString(), this);
+    connect(sshKeyPathBox, &QLineEdit::textChanged, [](const QString &text) {
+      Settings::instance()->setValue("ssh/keyFilePath", text);
+    });
+
+    QFormLayout *layout = new QFormLayout(this);
+    layout->addRow(tr("Path to SSH config file:"), sshConfigPathBox);
+    layout->addRow(tr("Path to default / fallback SSH key file:"), sshKeyPathBox);
+  }
+};
+
 #ifdef Q_OS_UNIX
 class TerminalPanel : public QWidget
 {
+  Q_OBJECT
+
 public:
   TerminalPanel(QWidget *parent = nullptr)
     : QWidget(parent)
@@ -673,9 +752,8 @@ private:
 } // anon. namespace
 
 SettingsDialog::SettingsDialog(Index index, QWidget *parent)
-  : QMainWindow(parent)
+  : QMainWindow(parent, Qt::Dialog)
 {
-  setMinimumWidth(500);
   setAttribute(Qt::WA_DeleteOnClose);
   setUnifiedTitleAndToolBarOnMac(true);
   setContextMenuPolicy(Qt::NoContextMenu);
@@ -800,6 +878,14 @@ SettingsDialog::SettingsDialog(Index index, QWidget *parent)
 
   stack->addWidget(new PluginsPanel(git::Repository(), this));
 
+  // Add misc panel.
+  QAction *misc = toolbar->addAction(QIcon(":/misc.png"), tr("Misc"));
+  misc->setData(Misc);
+  misc->setActionGroup(actions);
+  misc->setCheckable(true);
+
+  stack->addWidget(new MiscPanel(this));
+
 #ifdef Q_OS_UNIX
   // Add terminal panel.
   QAction *terminal = toolbar->addAction(QIcon(":/terminal.png"), tr("Terminal"));
@@ -820,6 +906,8 @@ SettingsDialog::SettingsDialog(Index index, QWidget *parent)
 
   // Select the requested index.
   actions->actions().at(index)->trigger();
+
+  setMinimumWidth(toolbar->sizeHint().width());
 }
 
 void SettingsDialog::openSharedInstance(Index index)
@@ -837,3 +925,5 @@ void SettingsDialog::openSharedInstance(Index index)
   dialog = new SettingsDialog(index);
   dialog->show();
 }
+
+#include "SettingsDialog.moc"

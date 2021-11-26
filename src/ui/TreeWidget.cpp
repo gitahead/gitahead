@@ -70,6 +70,11 @@ QString TreeWidget::selectedFile() const
          indexes.first().data(Qt::EditRole).toString();
 }
 
+QModelIndex TreeWidget::selectedIndex() const {
+    QModelIndexList indexes = mView->selectionModel()->selectedIndexes();
+    return indexes.isEmpty() ? QModelIndex(): indexes.first();
+}
+
 void TreeWidget::setDiff(
   const git::Diff &diff,
   const QString &file,

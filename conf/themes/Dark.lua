@@ -122,6 +122,13 @@ theme['checkbox']  = {
   outline          = '#3C3C42'
 }
 
+-- commit editor colors
+theme['commiteditor'] = {
+  spellerror       = '#BC0009', -- spell check error
+  spellignore      = '#E1E5F2', -- spell check ignored word(s)
+  lengthwarning    = '#464614'  -- line length limit warning (background)
+}
+
 -- diff view colors
 theme['diff']      = {
   addition         = '#394734', -- added lines
@@ -148,6 +155,13 @@ theme['link']      = {
 theme['menubar']   = {
   text             = '#212226',
   background       = '#F0F0F0'
+}
+
+-- tabbar background color (uncomment lines to customize)
+theme['tabbar']   = {
+  -- text             = theme['widget']['text'],
+  -- base             = theme['palette']['dark'],
+  -- selected         = theme['window']['background'],
 }
 
 -- remote comment colors

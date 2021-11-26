@@ -13,6 +13,8 @@
 #include "index/Index.h"
 #include "index/Query.h"
 #include <QApplication>
+#include <QGuiApplication>
+#include <QScreen>
 #include <QCalendarWidget>
 #include <QComboBox>
 #include <QDesktopWidget>
@@ -57,7 +59,7 @@ public:
     mCalendar->setVisible(true);
 
     QPoint pos = mapToGlobal(rect().bottomLeft());
-    QRect screen = QApplication::desktop()->availableGeometry(pos);
+    QRect screen = QGuiApplication::screenAt(pos)->availableGeometry();
 
     QSize size = mCalendar->sizeHint();
     if (pos.x() + size.width() > screen.right())

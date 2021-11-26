@@ -158,11 +158,13 @@ QString CustomTheme::styleSheet() const
     "DiffView {"
     "  background: palette(light)"
     "}"
-    "DiffView .QFrame {"
+    "DiffView FileWidget {"
     "  background: palette(mid)"
     "}"
-    "DiffView HunkWidget, DiffView HunkWidget QLabel {"
-    "  background: palette(mid);"
+    "DiffView HunkWidget {"
+    "  border-top: 1px solid palette(light)"
+    "}"
+    "DiffView HunkWidget QLabel {"
     "  color: palette(bright-text)"
     "}"
 
@@ -219,11 +221,12 @@ QString CustomTheme::styleSheet() const
 
     "TabBar::tab {"
     "  border: none;"
-    "  border-right: 1px solid palette(dark);"
-    "  background: palette(dark)"
+    "  border-right: 1px solid %5;"
+    "  background: %5;"
+    "  color: %6;"
     "}"
     "TabBar::tab:selected {"
-    "  background: palette(window)"
+    "  background: %7;"
     "}"
 
     "ToolBar {"
@@ -259,11 +262,28 @@ QString CustomTheme::styleSheet() const
 
   QVariantMap button = mMap.value("button").toMap();
   QVariantMap menubar = mMap.value("menubar").toMap();
+  QVariantMap tabbar = mMap.value("tabbar").toMap();
+
+  QString tabbarBase = tabbar.value("base").toString();
+  if (tabbarBase.isEmpty())
+    tabbarBase = "palette(dark)";
+
+  QString tabbarText = tabbar.value("text").toString();
+  if (tabbarText.isEmpty())
+    tabbarText = "palette(text)";
+
+  QString tabbarSelected = tabbar.value("selected").toString();
+  if (tabbarSelected.isEmpty())
+    tabbarSelected = "palette(window)";
+
   return text.arg(
     button.value("background").toMap().value("pressed").toString(),
     menubar.value("background").toString(),
     menubar.value("text").toString(),
-    button.value("background").toMap().value("checked").toString());
+    button.value("background").toMap().value("checked").toString(),
+    tabbarBase,
+    tabbarText,
+    tabbarSelected);
 }
 
 void CustomTheme::polish(QPalette &palette) const
@@ -389,6 +409,17 @@ QPalette CustomTheme::commitList()
   setPaletteColors(palette, QPalette::HighlightedText, commitList.value("highlighted_text"));
   setPaletteColors(palette, QPalette::WindowText, commitList.value("highlighted_bright_text"));
   return palette;
+}
+
+QColor CustomTheme::commitEditor(CommitEditor color)
+{
+  QVariantMap commitEditor = mMap.value("commiteditor").toMap();
+
+  switch (color) {
+    case CommitEditor::SpellError:    return commitEditor.value("spellerror").value<QColor>();
+    case CommitEditor::SpellIgnore:   return commitEditor.value("spellignore").value<QColor>();
+    case CommitEditor::LengthWarning: return commitEditor.value("lengthwarning").value<QColor>();
+  }
 }
 
 QColor CustomTheme::diff(Diff color)

@@ -14,6 +14,8 @@
 
 class SettingsDialog : public QMainWindow
 {
+  Q_OBJECT
+
 public:
   enum Index
   {
@@ -24,6 +26,7 @@ public:
     Editor,
     Update,
     Plugins,
+    Misc,
     Terminal
   };
 

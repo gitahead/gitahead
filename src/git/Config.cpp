@@ -8,7 +8,7 @@
 //
 
 #include "Config.h"
-#include "conf/Settings.h"
+#include <QStandardPaths>
 
 namespace git {
 
@@ -127,6 +127,38 @@ bool Config::remove(const QString &key)
   return !git_config_delete_entry(d.data(), key.toUtf8());
 }
 
+QStringList Config::value(const QString &key, const QString &regexp, const QStringList &defaultValue) const
+{
+
+    git_config_iterator *iter;
+    git_config_entry *entry;
+
+    QStringList list;
+
+    int error = git_config_multivar_iterator_new(&iter, d.data(), key.toUtf8(), regexp.toUtf8());
+    if (error >= 0) {
+        while (git_config_next(&entry, iter) == 0) {
+          list.append(entry->value);
+        }
+        git_config_iterator_free(iter);
+        return list;
+    } else {
+        // TODO: do I have to free?
+    }
+
+    return QStringList();
+}
+
+void Config::setValue(const QString &key, const QString regexp, const QString& value)
+{
+    git_config_set_multivar(d.data(), key.toUtf8(), regexp.toUtf8(), value.toUtf8());
+}
+
+bool Config::remove(const QString &key, const QString regexp)
+{
+    return git_config_delete_multivar(d.data(), key.toUtf8(), regexp.toUtf8()) >= 0;
+}
+
 Config::Iterator Config::glob(const QString &pattern) const
 {
   git_config_iterator *iterator = nullptr;
@@ -165,7 +197,13 @@ Config Config::appGlobal()
   if (git_config_new(&config))
     return Config();
 
-  QDir dir = Settings::userDir();
+  QDir dir =
+    QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
+
+  // Create missing path.
+  if (!dir.exists())
+    dir.mkpath(dir.path());
+
   QByteArray path = dir.filePath(kConfigFile).toUtf8();
   if (git_config_add_file_ondisk(
         config, path, GIT_CONFIG_LEVEL_GLOBAL, nullptr, 0)) {

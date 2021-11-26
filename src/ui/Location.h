@@ -43,7 +43,7 @@ public:
   bool operator==(const Location &rhs) const;
 
 private:
-  RepoView::ViewMode mMode = RepoView::Diff;
+  RepoView::ViewMode mMode = RepoView::DoubleTree;
   QString mRef;
   QString mId;
   QString mFile;

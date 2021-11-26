@@ -1,4 +1,4 @@
-set(LPEG_DIR lpeg-1.0.1)
+set(LPEG_DIR lpeg-1.0.2)
 
 add_library(lpeg
   ${LPEG_DIR}/lpcap.c

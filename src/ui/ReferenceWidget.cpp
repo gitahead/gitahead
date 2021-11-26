@@ -168,16 +168,7 @@ ReferenceWidget::ReferenceWidget(
       mView->setFocus();
   });
 
-  connect(selection, &QItemSelectionModel::selectionChanged, [this] {
-    if (!mSpontaneous)
-      return;
-
-    QItemSelectionModel *selection = mView->selectionModel();
-    QModelIndexList indexes = selection->selectedIndexes();
-    if (indexes.isEmpty())
-      return;
-
-    QModelIndex index = indexes.first();
+  connect(mView, &ReferenceView::clicked, [this](const QModelIndex &index) {
     emit referenceSelected(index.data(Qt::UserRole).value<git::Reference>());
   });
 

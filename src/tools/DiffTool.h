@@ -15,6 +15,8 @@
 
 class DiffTool : public ExternalTool
 {
+  Q_OBJECT
+
 public:
   DiffTool(
     const QString &file,

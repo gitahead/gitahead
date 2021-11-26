@@ -51,7 +51,10 @@ public:
   Signature author() const;
   Signature committer() const;
 
-  Diff diff(const Commit &commit = git::Commit(), int contextLines = -1) const;
+  Diff diff(
+    const Commit &commit = git::Commit(),
+    int contextLines = -1,
+    bool ignoreWhitespace = false) const;
   Tree tree() const;
   QList<Commit> parents() const;
 
@@ -80,14 +83,16 @@ public:
   // Get the annotated commit for merging this commit.
   AnnotatedCommit annotatedCommit() const;
 
+  // Set path to emoji description file. This should be set before
+  // any commits are created and is not expected to change.
+  static void setEmojiFile(const QString &file);
+
 private:
   Commit(git_commit *commit);
   operator git_commit *() const;
 
   QString decodeMessage(const char *msg) const;
   QString substituteEmoji(const QString &text) const;
-
-  static QMap<QString,QString> sEmojiCache;
 
   friend class Blame;
   friend class AnnotatedCommit;

@@ -12,8 +12,12 @@
 #include "conf/Settings.h"
 #include <QFocusEvent>
 #include <QMainWindow>
+#include <QScrollBar>
 #include <QStyle>
 #include <QWindow>
+#include <QMenu>
+
+#include "PlatQt.h"
 
 using namespace Scintilla;
 
@@ -34,6 +38,7 @@ TextEditor::TextEditor(QWidget *parent)
   mNoteIcon = style->standardIcon(QStyle::SP_MessageBoxInformation);
   mWarningIcon = style->standardIcon(QStyle::SP_MessageBoxWarning);
   mErrorIcon = style->standardIcon(QStyle::SP_MessageBoxCritical);
+  mStagedIcon = style->standardIcon(QStyle::SP_ArrowUp);
 
   // Register the LPeg lexer.
   static bool initialized = false;
@@ -47,6 +52,7 @@ TextEditor::TextEditor(QWidget *parent)
   setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
 
   setMarginLeft(4);
+  setMarginTypeN(Staged, SC_MARGIN_SYMBOL);
   setMarginTypeN(LineNumber, SC_MARGIN_NUMBER);
   setMarginTypeN(LineNumbers, SC_MARGIN_TEXT);
   setMarginTypeN(ErrorMargin, SC_MARGIN_SYMBOL);
@@ -54,6 +60,10 @@ TextEditor::TextEditor(QWidget *parent)
     setMarginWidthN(i, 0);
     setMarginMaskN(i, 0);
   }
+
+
+  setMarginMaskN(Staged, 1 << StagedMarker);
+  setStatusDiff(mStatusDiff); // to apply margin width
 
   int mask = 0;
   for (int i = NoteMarker; i <= ErrorMarker; ++i)
@@ -112,7 +122,7 @@ TextEditor::TextEditor(QWidget *parent)
   bool dark = (text.lightnessF() > base.lightnessF());
 
   setLexerLanguage("lpeg");
-  setProperty("lexer.lpeg.lexers", Settings::lexerDir().path());
+  setProperty("lexer.lpeg.home", Settings::lexerDir().path());
   setProperty("lexer.lpeg.themes", theme->dir().path());
   setProperty("lexer.lpeg.theme", theme->name());
   setProperty("lexer.lpeg.theme.mode", dark ? "dark" : "light");
@@ -122,6 +132,19 @@ TextEditor::TextEditor(QWidget *parent)
   applySettings();
   connect(Settings::instance(), &Settings::settingsChanged,
           this, &TextEditor::applySettings);
+
+  // Update geometry when the scroll bar becomes visible.
+  connect(horizontalScrollBar(), &QScrollBar::rangeChanged,
+          this, &TextEditor::updateGeometry);
+}
+
+void TextEditor::contextMenuEvent(QContextMenuEvent *event)
+{
+  Point pos = PointFromQPoint(event->globalPos());
+  Point pt = PointFromQPoint(event->pos());
+  if (!PointInSelection(pt))
+    SetEmptySelection(PositionFromLocation(pt));
+  ContextMenu(pos);
 }
 
 void TextEditor::applySettings()
@@ -143,11 +166,14 @@ void TextEditor::applySettings()
   settings->endGroup(); // editor
 
   // Initialize markers.
+  // used to colorize the background of the text
   markerDefine(Context, SC_MARK_EMPTY);
   markerDefine(Ours, SC_MARK_BACKGROUND);
   markerDefine(Theirs, SC_MARK_BACKGROUND);
   markerDefine(Addition, SC_MARK_BACKGROUND);
   markerDefine(Deletion, SC_MARK_BACKGROUND);
+  markerDefine(StagedMarker, SC_MARK_RGBAIMAGE);
+  markerDefine(DiscardMarker, SC_MARK_EMPTY);
 
   markerSetBack(Ours, mOursColor);
   markerSetBack(Theirs, mTheirsColor);
@@ -158,6 +184,9 @@ void TextEditor::applySettings()
   loadMarkerIcon(NoteMarker, mNoteIcon);
   loadMarkerIcon(WarningMarker, mWarningIcon);
   loadMarkerIcon(ErrorMarker, mErrorIcon);
+
+
+  loadMarkerIcon(StagedMarker, mStagedIcon);
 
   // Set LPeg lexer language.
   QByteArray lexer = this->lexer().toUtf8();
@@ -227,6 +256,19 @@ void TextEditor::load(const QString &path, const QString &text)
   updateGeometry();
 }
 
+void TextEditor::setStatusDiff(bool statusDiff)
+{
+    mStatusDiff = statusDiff;
+    if (mStatusDiff) {
+        // fixed width, because it indicates only if staged or not
+        setMarginWidthN(Staged, 30);
+        setMarginSensitiveN(Staged, true); // to change by mouseclick staged/unstaged
+    } else {
+        setMarginWidthN(Staged, 0);
+        setMarginSensitiveN(Staged, false);
+    }
+}
+
 void TextEditor::clearHighlights()
 {
   setIndicatorCurrent(FindAll);
@@ -243,6 +285,8 @@ void TextEditor::clearHighlights()
 
 int TextEditor::highlightAll(const QString &text)
 {
+
+
   clearHighlights();
   if (text.isEmpty())
     return 0;
@@ -346,6 +390,112 @@ void TextEditor::addDiagnostic(int line, const Diagnostic &diag)
   emit diagnosticAdded(line, diag);
 }
 
+/*!
+ * reimplemented from ScintillaBase to support more actions
+ * \brief TextEditor::ContextMenu
+ * \param pt
+ */
+void TextEditor::ContextMenu(Scintilla::Point pt) {
+
+
+    int startLine = lineFromPosition(selectionStart());
+    int end = lineFromPosition(selectionEnd()) + 1;
+    int staged = 0;
+    int diffLines = 0;
+    for (int i = startLine; i < end; i ++) {
+        int mask = markers(i);
+        if (mask & (1 << TextEditor::Marker::Addition | 1 << TextEditor::Marker::Deletion)) {
+            diffLines++;
+            if (mask & 1 << TextEditor::Marker::StagedMarker)
+                staged++;
+        }
+    }
+
+    if (displayPopupMenu) {
+        const bool writable = !WndProc(SCI_GETREADONLY, 0, 0);
+        popup.CreatePopUp();
+        AddToPopUp("Undo", idcmdUndo, writable && pdoc->CanUndo());
+        AddToPopUp("Redo", idcmdRedo, writable && pdoc->CanRedo());
+        AddToPopUp("");
+        AddToPopUp("Cut", idcmdCut, writable && !sel.Empty());
+        AddToPopUp("Copy", idcmdCopy, !sel.Empty());
+        AddToPopUp("Paste", idcmdPaste, writable && WndProc(SCI_CANPASTE, 0, 0));
+        AddToPopUp("Delete", idcmdDelete, writable && !sel.Empty());
+        if (mStatusDiff) {
+            AddToPopUp("");
+            AddToPopUp("Stage selected\tS", stageSelected, diffLines - staged > 0);
+            AddToPopUp("Unstage selected\tU", unstageSelected, staged > 0);
+            AddToPopUp("Discard selected\tR", discardSelected, diffLines > 0);
+        }
+        AddToPopUp("");
+        AddToPopUp("Select All", idcmdSelectAll);
+        popup.Show(pt, wMain);
+    }
+}
+
+sptr_t TextEditor::WndProc(unsigned int message, uptr_t wParam, sptr_t lParam)
+{
+  switch (message) {
+
+    case stageSelected:
+      // determine selected lines
+
+    case unstageSelected:
+      break;
+
+    default:
+      return ScintillaQt::WndProc(message, wParam, lParam);
+  }
+
+  return 0;
+}
+
+void TextEditor::AddToPopUp(const char *label, int cmd, bool enabled)
+{
+  QMenu *menu = static_cast<QMenu *>(popup.GetID());
+
+  if (!qstrlen(label)) {
+    menu->addSeparator();
+  } else {
+    QAction *action = menu->addAction(label);
+    action->setData(cmd);
+    action->setEnabled(enabled);
+  }
+
+  // Make sure the menu's signal is connected only once.
+  menu->disconnect();
+  connect(menu, &QMenu::triggered, this, [this](QAction *action) {
+    Command(action->data().toInt());
+  });
+}
+
+void TextEditor::Command(int cmdId) {
+
+    switch (cmdId) {
+    case stageSelected: {
+        int startLine = lineFromPosition(selectionStart());
+        int end = lineFromPosition(selectionEnd()) + 1;
+        emit stageSelectedSignal(startLine, end);
+        break;
+
+    } case unstageSelected: {
+        int startLine = lineFromPosition(selectionStart());
+        int end = lineFromPosition(selectionEnd()) + 1;
+        emit unstageSelectedSignal(startLine, end);
+        break;
+
+    } case discardSelected: {
+        int startLine = lineFromPosition(selectionStart());
+        int end = lineFromPosition(selectionEnd()) + 1;
+        emit discardSelectedSignal(startLine, end);
+        break;
+
+    } default:
+        ScintillaBase::Command(cmdId);
+        break;
+    }
+}
+
 QSize TextEditor::viewportSizeHint() const
 {
   // Return placeholder size if the content isn't loaded.
@@ -362,7 +512,12 @@ QSize TextEditor::viewportSizeHint() const
   int lines = annotationLines(line) + 1;
   int height = const_cast<TextEditor *>(this)->textHeight(line);
   int y = const_cast<TextEditor *>(this)->pointFromPosition(length()).y();
-  return QSize(size.width(), y + (lines * height));
+
+  int scrollBarHeight = 0;
+  if (Editor::scrollWidth > width())
+    scrollBarHeight = horizontalScrollBar()->height();
+
+  return QSize(size.width(), y + (lines * height) + scrollBarHeight);
 }
 
 int TextEditor::diagnosticMarker(int line)
@@ -396,4 +551,35 @@ void TextEditor::loadMarkerIcon(Marker marker, const QIcon &icon)
   QPixmap scaledPixmap = pixmap.scaled(
     scaled, scaled, Qt::KeepAspectRatio, Qt::SmoothTransformation);
   markerDefineImage(marker, scaledPixmap.toImage());
+}
+
+void TextEditor::keyPressEvent(QKeyEvent * ke) {
+    if (ke->key() == Qt::Key_S || ke->key() == Qt::Key_U || ke->key() == Qt::Key_R) {
+        if (!mStatusDiff)
+            return;
+
+        int startLine = lineFromPosition(selectionStart());
+        int end = lineFromPosition(selectionEnd()) + 1;
+        int staged = 0;
+        int diffLines = 0;
+        for (int i = startLine; i < end; i ++) {
+            int mask = markers(i);
+            if (mask & (1 << TextEditor::Marker::Addition | 1 << TextEditor::Marker::Deletion)) {
+                diffLines++;
+                if (mask & 1 << TextEditor::Marker::StagedMarker)
+                    staged++;
+            }
+        }
+
+        if (ke->key() == Qt::Key_S && diffLines - staged > 0) {
+            Command(stageSelected);
+            return;
+        } else if (ke->key() == Qt::Key_U && staged > 0) {
+            Command(unstageSelected);
+            return;
+        } else if (ke->key() == Qt::Key_R && diffLines > 0) {
+            Command(discardSelected);
+            return;
+        }
+    }
 }

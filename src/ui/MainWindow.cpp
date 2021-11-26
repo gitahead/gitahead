@@ -22,6 +22,8 @@
 #include "git/Submodule.h"
 #include <QApplication>
 #include <QCloseEvent>
+#include <QGuiApplication>
+#include <QScreen>
 #include <QCryptographicHash>
 #include <QDesktopWidget>
 #include <QMessageBox>
@@ -67,7 +69,6 @@ private:
 
 } // anon. namespace
 
-bool MainWindow::sExiting = false;
 bool MainWindow::sSaveWindowSettings = false;
 
 MainWindow::MainWindow(
@@ -81,7 +82,7 @@ MainWindow::MainWindow(
   setAcceptDrops(true);
 
   // Create new menu bar for this window if there isn't a shared one.
-  MenuBar *menuBar = MenuBar::instance(this);
+  mMenuBar = MenuBar::instance(this);
 
   // Create tool bar.
   mToolBar = new ToolBar(this);
@@ -90,9 +91,9 @@ MainWindow::MainWindow(
   // Initialize search.
   SearchField *searchField = mToolBar->searchField();
   connect(searchField, &QLineEdit::textEdited,
-          menuBar, &MenuBar::updateUndoRedo);
+          mMenuBar, &MenuBar::updateUndoRedo);
   connect(searchField, &QLineEdit::selectionChanged,
-          menuBar, &MenuBar::updateCutCopyPaste);
+          mMenuBar, &MenuBar::updateCutCopyPaste);
 
   // Hook up advanced search.
   AdvancedSearchWidget *advancedSearch = new AdvancedSearchWidget(this);
@@ -155,7 +156,7 @@ MainWindow::MainWindow(
   // Set default size and position.
   resize(kDefaultWidth, kDefaultHeight);
 
-  QRect desktop = QApplication::desktop()->availableGeometry();
+  QRect desktop = QGuiApplication::primaryScreen()->availableGeometry();
   int x = (desktop.width() / 2) - (kDefaultWidth / 2);
   int y = (desktop.height() / 2) - (kDefaultHeight / 2);
   move(x, y);
@@ -167,7 +168,7 @@ MainWindow::MainWindow(
   // Restore sidebar.
   setSideBarVisible(QSettings().value(kSidebarKey, true).toBool());
 
-  // Set inital state of interface.
+  // Set initial state of interface.
   updateInterface();
 }
 
@@ -253,6 +254,7 @@ RepoView *MainWindow::addTab(const git::Repository &repo)
   }
 
   RepoView *view = new RepoView(repo, this);
+  view->detailSplitterMaximize(mMenuBar->isMaximized());
   git::RepositoryNotifier *notifier = repo.notifier();
   connect(notifier, &git::RepositoryNotifier::referenceUpdated,
           this, &MainWindow::updateInterface);
@@ -401,11 +403,6 @@ MainWindow *MainWindow::open(const git::Repository &repo)
   return window;
 }
 
-void MainWindow::setExiting(bool exiting)
-{
-  sExiting = exiting;
-}
-
 void MainWindow::setSaveWindowSettings(bool enabled)
 {
   sSaveWindowSettings = enabled;
@@ -450,6 +447,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
   }
 
+  mClosing = true;
   QMainWindow::closeEvent(event);
 }
 
@@ -511,8 +509,8 @@ void MainWindow::updateTabNames()
 
 void MainWindow::updateInterface()
 {
-  // Avoid updating during exit.
-  if (sExiting)
+  // Avoid updating during close.
+  if (mClosing)
     return;
 
   int ahead = 0;

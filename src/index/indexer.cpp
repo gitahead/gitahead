@@ -57,13 +57,13 @@ static LONG WINAPI exceptionFilter(PEXCEPTION_POINTERS info)
   GetTempPath(MAX_PATH, temp);
 
   char dir[MAX_PATH];
-  StringCchPrintf(dir, MAX_PATH, "%sGitAhead", temp);
+  StringCchPrintf(dir, MAX_PATH, "%sGittyup", temp);
   CreateDirectory(dir, NULL);
 
   char fileName[MAX_PATH];
   StringCchPrintf(fileName, MAX_PATH,
     "%s\\%s-%s-%04d%02d%02d-%02d%02d%02d-%ld-%ld.dmp",
-    dir, "indexer", GITAHEAD_VERSION,
+    dir, "indexer", GITTYUP_VERSION,
     localTime.wYear, localTime.wMonth, localTime.wDay,
     localTime.wHour, localTime.wMinute, localTime.wSecond,
     GetCurrentProcessId(), GetCurrentThreadId());
@@ -247,7 +247,7 @@ public:
     QByteArray date = time.date().toString(Index::dateFormat()).toUtf8();
     result.fields[Index::Date][date].append(0);
 
-    // Index author name ane email.
+    // Index author name and email.
     git::Signature author = commit.author();
     QByteArray email = author.email().toUtf8().toLower();
     result.fields[Index::Email][email].append(0);
@@ -267,7 +267,7 @@ public:
 
     // Index diff.
     quint32 diffPos = 0;
-    git::Diff diff = commit.diff(git::Commit(), mContextLines);
+    git::Diff diff = commit.diff(git::Commit(), mContextLines, true);
     int patches = diff.count();
     for (int pidx = 0; pidx < patches; ++pidx) {
       // Truncate commits after term limit.

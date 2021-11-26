@@ -8,6 +8,7 @@
 //
 
 #include "RemoteDialog.h"
+#include "conf/Settings.h"
 #include "git/Config.h"
 #include "git/Remote.h"
 #include "git/Repository.h"
@@ -58,6 +59,8 @@ RemoteDialog::RemoteDialog(Kind kind, RepoView *parent)
 
   QWidget *advanced = nullptr;
   ExpandButton *expand = nullptr;
+  QCheckBox *prune = nullptr;
+
   if (kind == Push) {
     auto kinds = ReferenceView::LocalBranches | ReferenceView::Tags;
     mRefs = new ReferenceList(repo, kinds, this);
@@ -85,12 +88,23 @@ RemoteDialog::RemoteDialog(Kind kind, RepoView *parent)
 
     connect(mRefs, &ReferenceList::referenceSelected,
     [this](const git::Reference &ref) {
-      QString key = QString("branch.%1.merge").arg(ref.name());
-      git::Config config = RepoView::parentView(this)->repo().config();
-      mRemoteRef->setText(config.value<QString>(key));
+      QString value = QString();
+      if (ref.isValid()) {
+        QString key = QString("branch.%1.merge").arg(ref.name());
+        git::Config config = RepoView::parentView(this)->repo().config();
+        value = config.value<QString>(key);
+      }
+      mRemoteRef->setText(value);
     });
 
     mRefs->select(repo.head());
+
+  } else {
+    bool autoPrune = Settings::instance()->value("global/autoprune/enable").toBool();
+    git::Config config = repo.appConfig();
+
+    prune = new QCheckBox(tr("Prune references"), this);
+    prune->setChecked(config.value<bool>("autoprune.enable", autoPrune));
   }
 
   QString button;
@@ -116,6 +130,8 @@ RemoteDialog::RemoteDialog(Kind kind, RepoView *parent)
   if (mAction)
     form->addRow(tr("Action:"), mAction);
   form->addRow(QString(), mTags);
+  if (prune)
+    form->addRow(QString(), prune);
   if (mSetUpstream)
     form->addRow(QString(), mSetUpstream);
   if (mForce)
@@ -127,7 +143,7 @@ RemoteDialog::RemoteDialog(Kind kind, RepoView *parent)
     new QDialogButtonBox(QDialogButtonBox::Cancel, this);
   connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
   connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
-  buttons->addButton(button, QDialogButtonBox::AcceptRole)->setFocus();
+  buttons->addButton(button, QDialogButtonBox::AcceptRole);
 
   QVBoxLayout *layout = new QVBoxLayout(this);
   layout->addLayout(form);
@@ -135,7 +151,7 @@ RemoteDialog::RemoteDialog(Kind kind, RepoView *parent)
     layout->addWidget(advanced);
   layout->addWidget(buttons);
 
-  connect(this, &RemoteDialog::accepted, [this, kind] {
+  connect(this, &RemoteDialog::accepted, [this, kind, prune] {
     RepoView *view = RepoView::parentView(this);
     QString remoteName = mRemotes->currentText();
     git::Remote tmp = mRemotes->currentData().value<git::Remote>();
@@ -145,12 +161,13 @@ RemoteDialog::RemoteDialog(Kind kind, RepoView *parent)
 
     switch (kind) {
       case Fetch:
-        view->fetch(remote, tags);
+        view->fetch(remote, tags, true, nullptr, nullptr,
+          prune->isChecked());
         break;
 
       case Pull: {
         RepoView::MergeFlags flags(mAction->currentData().toInt());
-        view->pull(flags, remote, tags);
+        view->pull(flags, remote, tags, prune->isChecked());
         break;
       }
 

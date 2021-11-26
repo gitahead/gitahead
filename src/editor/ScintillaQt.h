@@ -24,38 +24,38 @@
 #include <algorithm>
 #include <memory>
 
-#include "Scintilla.h"
-#include "Platform.h"
-#include "ILexer.h"
-#include "Position.h"
-#include "SplitVector.h"
-#include "Partitioning.h"
-#include "RunStyles.h"
-#include "ContractionState.h"
-#include "CellBuffer.h"
-#include "CallTip.h"
-#include "KeyMap.h"
-#include "Indicator.h"
-#include "XPM.h"
-#include "LineMarker.h"
-#include "Style.h"
-#include "AutoComplete.h"
-#include "UniqueString.h"
-#include "ViewStyle.h"
-#include "CharClassify.h"
-#include "Decoration.h"
-#include "CaseFolder.h"
-#include "ILoader.h"
-#include "CharacterCategory.h"
-#include "Document.h"
-#include "Selection.h"
-#include "PositionCache.h"
-#include "EditModel.h"
-#include "MarginView.h"
-#include "EditView.h"
-#include "Editor.h"
-#include "ScintillaBase.h"
-#include "CaseConvert.h"
+#include <Scintilla.h>
+#include <Platform.h>
+#include <ILexer.h>
+#include <Position.h>
+#include <SplitVector.h>
+#include <Partitioning.h>
+#include <RunStyles.h>
+#include <ContractionState.h>
+#include <CellBuffer.h>
+#include <CallTip.h>
+#include <KeyMap.h>
+#include <Indicator.h>
+#include <XPM.h>
+#include <LineMarker.h>
+#include <Style.h>
+#include <AutoComplete.h>
+#include <UniqueString.h>
+#include <ViewStyle.h>
+#include <CharClassify.h>
+#include <Decoration.h>
+#include <CaseFolder.h>
+#include <ILoader.h>
+#include <CharacterCategory.h>
+#include <Document.h>
+#include <Selection.h>
+#include <PositionCache.h>
+#include <EditModel.h>
+#include <MarginView.h>
+#include <EditView.h>
+#include <Editor.h>
+#include <ScintillaBase.h>
+#include <CaseConvert.h>
 
 #ifdef SCI_LEXER
 #include "SciLexer.h"
@@ -65,12 +65,10 @@
 #include <QAbstractScrollArea>
 #include <QAction>
 #include <QClipboard>
+#include <QElapsedTimer>
 #include <QPaintEvent>
-#include <QTime>
 
-#ifdef SCI_NAMESPACE
 namespace Scintilla {
-#endif
 
 class ScintillaQt : public QAbstractScrollArea, public ScintillaBase
 {
@@ -139,6 +137,9 @@ protected:
   void inputMethodEvent(QInputMethodEvent *event) override;
   QVariant inputMethodQuery(Qt::InputMethodQuery query) const override;
   void scrollContentsBy(int dx, int dy) override {}
+  static sptr_t DirectFunction(
+    sptr_t ptr, unsigned int iMessage, uptr_t wParam, sptr_t lParam);
+  sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;
 
 private:
   void PasteFromMode(QClipboard::Mode);
@@ -173,14 +174,10 @@ private:
   std::string CaseMapString(const std::string &s, int caseMapping) override;
   void CreateCallTipWindow(PRectangle rc) override;
   void AddToPopUp(const char *label, int cmd = 0, bool enabled = true) override;
-  sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;
   sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;
 
-  static sptr_t DirectFunction(
-    sptr_t ptr, unsigned int iMessage, uptr_t wParam, sptr_t lParam);
-
 private:
-  QTime time;
+  QElapsedTimer timer;
 
   int preeditPos = -1;
   QString preeditString;
@@ -191,12 +188,8 @@ private:
   int vPage = 0, hPage = 0; // Scroll bar page sizes.
 
   bool haveMouseCapture = false;
-
-  friend class ScintillaEditBase;
 };
 
-#ifdef SCI_NAMESPACE
-}
-#endif
+} // namespace Scintilla
 
-#endif // SCINTILLAQT_H
+#endif

@@ -44,7 +44,7 @@ NSImage *image(const QString &path, int badge = -1)
     QFontMetrics fm = painter.fontMetrics();
 
     QString text = (badge > 999) ? "999+" : QString::number(badge);
-    int width = fm.width(text) + 8;
+    int width = fm.horizontalAdvance(text) + 8;
     QRect rect(kMaxIconSize - width, 4, width, fm.lineSpacing() + 2);
 
     Theme *theme = Application::theme();
@@ -195,7 +195,7 @@ void MainWindow::installTouchBar()
 void MainWindow::updateTouchBar(int ahead, int behind)
 {
   NSView *view = reinterpret_cast<NSView *>(winId());
-  if ([view.window.delegate isKindOfClass:[TouchBarProvider class]]) {
+  if (view && [view.window.delegate isKindOfClass:[TouchBarProvider class]]) {
     TouchBarProvider *provider = (TouchBarProvider *) view.window.delegate;
     [provider updateRemoteAhead:ahead behind:behind];
   }

@@ -26,7 +26,6 @@
 #include "Submodule.h"
 #include "TagRef.h"
 #include "Tree.h"
-#include "conf/Settings.h"
 #include "git2/buffer.h"
 #include "git2/branch.h"
 #include "git2/checkout.h"
@@ -62,7 +61,7 @@ namespace git {
 
 namespace {
 
-const QString kConfigDir = "gitahead";
+const QString kConfigDir = "gittyup";
 const QString kConfigFile = "config";
 const QString kStarFile = "starred";
 
@@ -280,7 +279,8 @@ void Repository::setIndex(const Index &index)
 
 Diff Repository::status(
   const Index &index,
-  Diff::Callbacks *callbacks) const
+  Diff::Callbacks *callbacks,
+  bool ignoreWhitespace) const
 {
   Tree tree;
   if (Reference ref = head()) {
@@ -288,13 +288,12 @@ Diff Repository::status(
       tree = commit.tree();
   }
 
-  Diff diff = diffTreeToIndex(tree, index);
-  Diff workdir = diffIndexToWorkdir(index, callbacks);
+  Diff diff = diffTreeToIndex(tree, index, ignoreWhitespace);
+  Diff workdir = diffIndexToWorkdir(index, callbacks, ignoreWhitespace);
   if (!diff.isValid() || !workdir.isValid())
     return Diff();
 
   diff.merge(workdir);
-  diff.findSimilar();
   diff.setIndex(index);
 
   return diff.count() ? diff : Diff();
@@ -302,11 +301,12 @@ Diff Repository::status(
 
 Diff Repository::diffTreeToIndex(
   const Tree &tree,
-  const Index &index) const
+  const Index &index,
+  bool ignoreWhitespace) const
 {
   git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
-  opts.flags |= GIT_DIFF_INCLUDE_UNTRACKED;
-  if (Settings::instance()->isWhitespaceIgnored())
+  opts.flags |= GIT_DIFF_INCLUDE_UNTRACKED | GIT_DIFF_RECURSE_UNTRACKED_DIRS;
+  if (ignoreWhitespace)
     opts.flags |= GIT_DIFF_IGNORE_WHITESPACE;
 
   git_diff *diff = nullptr;
@@ -316,11 +316,12 @@ Diff Repository::diffTreeToIndex(
 
 Diff Repository::diffIndexToWorkdir(
   const Index &index,
-  Diff::Callbacks *callbacks) const
+  Diff::Callbacks *callbacks,
+  bool ignoreWhitespace) const
 {
   git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
-  opts.flags |= (GIT_DIFF_INCLUDE_UNTRACKED | GIT_DIFF_DISABLE_MMAP);
-  if (Settings::instance()->isWhitespaceIgnored())
+  opts.flags |= (GIT_DIFF_INCLUDE_UNTRACKED | GIT_DIFF_RECURSE_UNTRACKED_DIRS | GIT_DIFF_DISABLE_MMAP);
+  if (ignoreWhitespace)
     opts.flags |= GIT_DIFF_IGNORE_WHITESPACE;
 
   if (callbacks) {
@@ -483,6 +484,21 @@ TagRef Repository::lookupTag(const QString &name) const
   return lookupRef(QString("refs/tags/%1").arg(name));
 }
 
+QStringList Repository::existingTags() const {
+
+    git_strarray array;
+    git_tag_list(&array, operator git_repository *());
+
+    QStringList list;
+
+    for (int i=0; i < array.count; i++) {
+        list.append(array.strings[i]);
+    }
+
+    git_strarray_dispose(&array);
+    return list;
+}
+
 TagRef Repository::createTag(
   const Commit &target,
   const QString &name,
@@ -589,6 +605,19 @@ Commit Repository::commit(
         &id, d->repo, "HEAD", signature, signature, 0,
         message.toUtf8(), tree, parents.size(), parents.data()))
     return Commit();
+
+  // Cleanup merge state.
+  switch (state()) {
+    case GIT_REPOSITORY_STATE_NONE:
+    case GIT_REPOSITORY_STATE_MERGE:
+    case GIT_REPOSITORY_STATE_REVERT:
+    case GIT_REPOSITORY_STATE_CHERRYPICK:
+      cleanupState();
+      break;
+
+    default:
+      break;
+  }
 
   git_commit *commit = nullptr;
   git_commit_lookup(&commit, d->repo, &id);
@@ -718,7 +747,7 @@ QList<Remote> Repository::remotes() const
       remotes.append(remote);
   }
 
-  git_strarray_free(&names);
+  git_strarray_dispose(&names);
 
   return remotes;
 }

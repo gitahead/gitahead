@@ -30,14 +30,16 @@ class Reference;
 class Remote
 {
 public:
-  struct PushUpdate {
+  struct PushUpdate
+  {
     QByteArray srcName;
     QByteArray dstName;
     Id srcId;
     Id dstId;
   };
 
-  class Callbacks {
+  class Callbacks
+  {
   public:
     enum State {
       Transfer,
@@ -119,19 +121,35 @@ public:
       return true;
     }
 
+    // url resolution hook
     virtual bool url(QString &url)
     {
       return true;
     }
 
+    // user setting hooks
+    virtual QString keyFilePath() const { return QString(); }
+    virtual QString configFilePath() const { return QString(); }
+
+    // agent availability hook
+    virtual bool connectToAgent() const { return false; }
+
     // static callback wrappers
+    static int connect(
+      git_remote *remote,
+      void *payload);
+
+    static int disconnect(
+      git_remote *remote,
+      void *payload);
+
     static int sideband(
       const char *str,
       int len,
       void *payload);
 
     static int credentials(
-      git_cred **out,
+      git_credential **out,
       const char *url,
       const char *name,
       unsigned int types,
@@ -160,10 +178,14 @@ public:
       void *payload);
 
   protected:
+    // Try to stop the current remote.
+    void stop();
+
     QString mUrl;
     Repository mRepo;
     State mState = Transfer;
     QSet<QString> mAgentNames;
+    git_remote *mRemote = nullptr;
   };
 
   Remote();
@@ -177,7 +199,7 @@ public:
   QString url() const;
   void setUrl(const QString &url);
 
-  Result fetch(Callbacks *callbacks, bool tags = false);
+  Result fetch(Callbacks *callbacks, bool tags = false, bool prune = false);
   Result push(Callbacks *callbacks, const QStringList &refspecs);
   Result push(
     Callbacks *callbacks,
@@ -185,9 +207,6 @@ public:
     const QString &dst = QString(),
     bool force = false,
     bool tags = false);
-
-  // Cancel the current operation.
-  void stop();
 
   static Result clone(
     Callbacks *callbacks,

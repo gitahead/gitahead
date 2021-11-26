@@ -194,6 +194,8 @@ private:
 
 class RemoteButton : public Button
 {
+  Q_OBJECT
+
 public:
   enum Kind
   {
@@ -281,7 +283,7 @@ public:
       QString text = (mBadge > 999) ? tr("999+") : QString::number(mBadge);
       QFontMetrics fm = painter.fontMetrics();
 
-      int w = fm.width(text) + 8;
+      int w = fm.horizontalAdvance(text) + 8;
       QRect rect(width() - w - 2, 2, w, fm.lineSpacing() + 2);
 
       Theme *theme = Application::theme();
@@ -388,6 +390,8 @@ public:
 
 class RefreshButton : public Button
 {
+  Q_OBJECT
+
 public:
   RefreshButton(QWidget *parent = nullptr)
     : Button(parent)
@@ -443,6 +447,8 @@ public:
 
 class PullRequestButton : public Button
 {
+  Q_OBJECT
+
 public:
   PullRequestButton(QWidget *parent = nullptr)
     : Button(parent)
@@ -535,7 +541,7 @@ public:
     qreal x = width() / 2.0;
     qreal y = height() / 2.0;
 
-    if (mMode == RepoView::Diff) {
+    if (mMode == RepoView::DoubleTree) {
       // Subtract a diagonal rectangle from the clip area.
       QPainterPath clip;
       clip.addRect(rect());
@@ -748,7 +754,7 @@ public:
 
     qreal x = width() / 2.0;
     qreal y = height() / 2.0;
-
+    
     painter.drawRect(QRectF(x - 8, y - 7, 16, 13));
 
     painter.setPen(QPen(light, 1.0));
@@ -756,6 +762,42 @@ public:
     painter.drawLine(QLineF(x - 6, y - 1, x - 4, y - 3));
 
     painter.drawLine(QLineF(x - 2, y - 1, x, y - 1));
+  }
+};
+
+class FileManagerButton : public Button
+{
+public:
+  FileManagerButton(QWidget *parent = nullptr)
+    : Button(parent)
+  {}
+
+  void paintEvent(QPaintEvent *event)
+  {
+    Button::paintEvent(event);
+
+    QStyleOptionToolButton opt;
+    initStyleOption(&opt);
+
+    QColor color = opt.palette.buttonText().color();
+    QColor light = (isEnabled() && isActiveWindow()) ? color.lighter() : color;
+
+    QPainter painter(this);
+    painter.setPen(QPen(color, 1.0));
+    if (window()->windowHandle()->devicePixelRatio() > 1.0)
+      painter.setRenderHint(QPainter::Antialiasing);
+
+    qreal x = width() / 2.0;
+    qreal y = height() / 2.0;
+
+    painter.drawPolygon(QPolygonF({
+      QPointF(16, 13),
+      QPointF(0, 13),
+      QPointF(0, 0),
+      QPointF(7, 0),
+      QPointF(7, 2),
+      QPointF(16, 2)
+    }).translated(x - 8, y - 7));
   }
 };
 
@@ -832,12 +874,12 @@ ToolBar::ToolBar(MainWindow *parent)
   QMenu *pullMenu = new QMenu(mPullButton);
   mPullButton->setMenu(pullMenu);
 
-  QAction *mergeAction = pullMenu->addAction("Merge");
+  QAction *mergeAction = pullMenu->addAction(tr("Merge"));
   connect(mergeAction, &QAction::triggered, [this] {
     currentView()->pull(RepoView::Merge);
   });
 
-  QAction *rebaseAction = pullMenu->addAction("Rebase");
+  QAction *rebaseAction = pullMenu->addAction(tr("Rebase"));
   connect(rebaseAction, &QAction::triggered, [this] {
     currentView()->pull(RepoView::Rebase);
   });
@@ -887,7 +929,7 @@ ToolBar::ToolBar(MainWindow *parent)
     currentView()->refresh();
   });
 
-  if (!qgetenv("GITAHEAD_OAUTH").isEmpty()) {
+  if (!qgetenv("GITTYUP_OAUTH").isEmpty()) {
     addWidget(new Spacer(4, this));
 
     mPullRequestButton = new PullRequestButton(this);
@@ -905,6 +947,13 @@ ToolBar::ToolBar(MainWindow *parent)
   addWidget(mTerminalButton);
   connect(mTerminalButton, &Button::clicked, [this] {
     currentView()->openTerminal();
+  });
+    
+  mFileManagerButton = new FileManagerButton(this);
+  mFileManagerButton->setToolTip(tr("Open file manager"));
+  addWidget(mFileManagerButton);
+  connect(mFileManagerButton, &Button::clicked, [this] {
+    currentView()->openFileManager();
   });
 
   addWidget(new Spacer(4, this));
@@ -931,10 +980,18 @@ ToolBar::ToolBar(MainWindow *parent)
   SegmentedButton *mode = new SegmentedButton(this);
   mModeGroup = mode->buttonGroup();
 
-  ModeButton *diff = new ModeButton(RepoView::Diff, mode);
-  mode->addButton(diff, tr("Diff View"), true);
-  diff->setChecked(true);
+//  ModeButton *diff = new ModeButton(RepoView::Diff, mode);
+//  mode->addButton(diff, tr("Diff View"), true);
+//  diff->setEnabled(false);
+//  diff->setToolTip("Forever Disabled View");
 
+  // The order must match with the Index in RepoView::ViewMode!
+  // Index 0
+  ModeButton *alternativeTree = new ModeButton(RepoView::DoubleTree, mode);
+  mode->addButton(alternativeTree, tr("Double Tree View"), true);
+  alternativeTree->setChecked(true);
+
+  // Index 1
   ModeButton *tree = new ModeButton(RepoView::Tree, mode);
   mode->addButton(tree, tr("Tree View"), true);
 
@@ -1038,10 +1095,12 @@ void ToolBar::updateView()
 {
   RepoView *view = currentView();
   mTerminalButton->setEnabled(view);
+  mFileManagerButton->setEnabled(view);
   mConfigButton->setEnabled(view);
   mLogButton->setEnabled(view);
-  mModeGroup->button(RepoView::Diff)->setEnabled(view);
+  //mModeGroup->button(RepoView::Diff)->setEnabled(view);
   mModeGroup->button(RepoView::Tree)->setEnabled(view);
+  mModeGroup->button(RepoView::DoubleTree)->setEnabled(view);
 
   if (view) {
     bool visible = view->isLogVisible();
@@ -1061,3 +1120,5 @@ RepoView *ToolBar::currentView() const
 {
   return static_cast<MainWindow *>(parent())->currentView();
 }
+
+#include "ToolBar.moc"

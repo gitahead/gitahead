@@ -13,9 +13,9 @@
 #include "git/Remote.h"
 #include "git/Repository.h"
 #include "host/Account.h"
+#include <QElapsedTimer>
 #include <QObject>
 #include <QSet>
-#include <QTime>
 
 class LogEntry;
 
@@ -59,6 +59,13 @@ public:
   // pre-push hook
   bool negotiation(const QList<git::Remote::PushUpdate> &updates) override;
 
+  // user setting hooks
+  QString keyFilePath() const override;
+  QString configFilePath() const override;
+
+  // agent availability hook
+  bool connectToAgent() const override;
+
 signals:
   void referenceUpdated(const QString &name);
 
@@ -94,7 +101,7 @@ private:
   LogEntry *mLog;
   QString mName;
 
-  QTime mTime;
+  QElapsedTimer mTimer;
   QString mSideband;
   int mBytesReceived = 0;
   bool mCanceled = false;

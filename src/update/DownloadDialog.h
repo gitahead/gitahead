@@ -12,6 +12,8 @@
 
 class DownloadDialog : public QDialog
 {
+  Q_OBJECT
+
 public:
   DownloadDialog(
     const Updater::DownloadRef &download,

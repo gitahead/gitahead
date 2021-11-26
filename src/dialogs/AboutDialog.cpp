@@ -29,20 +29,21 @@
 
 namespace {
 
-const QString kEmail = "support@gitahead.com";
+const QString kEmail = "TODO";
 
 const QString kUrl =
-  "https://stackoverflow.com/questions/tagged/gitahead?sort=frequent";
+  "https://stackoverflow.com/questions/tagged/gittyup?sort=frequent";
 
 const QString kSubtitleFmt =
   "<h4 style='margin-top: 0px; color: gray'>%2</h4>";
 
 const QString kTextFmt =
   "<p style='white-space: nowrap'><b style='font-size: large'>%1 v%2</b> "
-  "- %3 - %4<br>Copyright © 2016-2019 Scientific Toolworks, Inc. and "
+  "- %3 - %4<br>Copyright © 2021 Gittyup contributors"
+  "<br>Copyright © 2016-2020 Scientific Toolworks, Inc. and "
   "contributors</p><p> If you have a question that might benefit the "
   "community, consider asking it on <a href='%5'>Stack Overflow</a> by "
-  "including 'gitahead' in the tags. Otherwise, contact us at "
+  "including 'gittyup' in the tags. Otherwise, contact us at "
   "<a href='mailto:%6'>%6</a>";
 
 const QString kStyleSheet =
@@ -67,10 +68,10 @@ AboutDialog::AboutDialog(QWidget *parent)
   setAttribute(Qt::WA_DeleteOnClose);
   setWindowTitle(tr("About %1").arg(name));
 
-  QIcon icon(":/GitAhead.iconset/icon_128x128.png");
+  QIcon icon(":/Gittyup.iconset/icon_128x128.png");
   IconLabel *iconLabel = new IconLabel(icon, 128, 128, this);
 
-  QIcon title(":/logo-type.png");
+  QIcon title(":/logo-type_light@2x.png");
   IconLabel *titleLabel = new IconLabel(title, 163, 38, this);
 
   QString subtitleText = kSubtitleFmt.arg(tr("Understand your history!"));
@@ -83,8 +84,8 @@ AboutDialog::AboutDialog(QWidget *parent)
   left->addWidget(subtitle);
   left->addStretch();
 
-  QString revision = GITAHEAD_BUILD_REVISION;
-  QDateTime dateTime = QDateTime::fromString(GITAHEAD_BUILD_DATE, Qt::ISODate);
+  QString revision = GITTYUP_BUILD_REVISION;
+  QDateTime dateTime = QDateTime::fromString(GITTYUP_BUILD_DATE, Qt::ISODate);
   QString date = dateTime.date().toString(Qt::DefaultLocaleLongDate);
   QString text = kTextFmt.arg(name, version, date, revision, kUrl, kEmail);
   QLabel *label = new QLabel(text, this);

@@ -11,6 +11,21 @@
 #include "Patch.h"
 #include "git2/patch.h"
 #include <algorithm>
+#include <QDebug>
+
+bool containsPath(QString &str, QString &occurence, Qt::CaseSensitivity cs)
+{
+    if (str.contains(occurence, cs)) {
+        if (str.count() == occurence.count()) {
+            // file/folder matches exactly
+            return true;
+        }else if (str.count() >= occurence.length() + 1 && str[occurence.length()] == "/") {
+            // file or folder in occurence
+            return true;
+        }
+    }
+    return false;
+}
 
 namespace git {
 
@@ -57,6 +72,78 @@ Diff::Diff(git_diff *diff)
 Diff::operator git_diff *() const
 {
   return d->diff;
+}
+
+typedef struct {
+    QString header;
+    QList<QString> lines;
+} _Hunk;
+
+typedef struct {
+    QList<_Hunk> hunks;
+} _File;
+
+typedef struct {
+    QList<_File> files;
+} diff_data;
+
+int each_file_cb(const git_diff_delta *delta,
+                 float progress,
+                 void *payload)
+{
+  diff_data *d = (diff_data*)payload;
+  _File file;
+  d->files.append(file);
+  return 0;
+}
+
+int each_hunk_cb(const git_diff_delta *delta,
+                 const git_diff_hunk *hunk,
+                 void *payload)
+{
+  diff_data *d = (diff_data*)payload;
+  _Hunk _hunk;
+  _hunk.header = hunk->header;
+  d->files.last().hunks.append(_hunk);
+  return 0;
+}
+
+int each_line_cb(const git_diff_delta *delta,
+                 const git_diff_hunk *hunk,
+                 const git_diff_line *line,
+                 void *payload)
+{
+  diff_data *d = (diff_data*)payload;
+  const char* chr = line->content;
+  const char origin = line->origin;
+
+
+  QByteArray ba(chr, line->content_len);
+  QString pld(origin);
+  pld.append(ba);
+
+  d->files.last().hunks.last().lines.append(pld);
+
+  return 0;
+}
+
+QByteArray Diff::print()
+{
+    diff_data data;
+    git_diff_foreach(d->diff, each_file_cb, nullptr, each_hunk_cb, each_line_cb, &data);
+
+    QByteArray diff;
+    for (auto file : data.files) {
+        for (auto hunk : file.hunks) {
+            diff.append(hunk.header);
+
+            for (auto line: hunk.lines)
+                diff.append(line);
+        }
+
+    }
+    qDebug() << QString(diff);
+    return diff;
 }
 
 bool Diff::isConflicted() const
@@ -130,9 +217,13 @@ void Diff::merge(const Diff &diff)
   d->resetMap();
 }
 
-void Diff::findSimilar()
+void Diff::findSimilar(bool untracked)
 {
-  git_diff_find_similar(d->diff, nullptr);
+  git_diff_find_options opts = GIT_DIFF_FIND_OPTIONS_INIT;
+  if (untracked)
+    opts.flags = GIT_DIFF_FIND_FOR_UNTRACKED;
+
+  git_diff_find_similar(d->diff, &opts);
   d->resetMap();
 }
 

@@ -27,11 +27,11 @@ target_link_libraries(index_test index Qt5::Widgets)
 add_executable(indexer indexer.cpp)
 target_link_libraries(indexer index)
 target_compile_definitions(indexer PRIVATE
-  GITAHEAD_VERSION="${GITAHEAD_VERSION}"
+  GITTYUP_VERSION="${GITTYUP_VERSION}"
 )
 
 set_target_properties(indexer PROPERTIES
-  RUNTIME_OUTPUT_DIRECTORY $<TARGET_FILE_DIR:gitahead>
+  RUNTIME_OUTPUT_DIRECTORY $<TARGET_FILE_DIR:gittyup>
 )
 
 if(APPLE)
@@ -49,6 +49,6 @@ else()
 
   install(TARGETS indexer
     DESTINATION .
-    COMPONENT ${GITAHEAD_NAME}
+    COMPONENT ${GITTYUP_NAME}
   )
 endif()

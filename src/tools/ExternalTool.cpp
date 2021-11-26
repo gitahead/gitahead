@@ -16,6 +16,7 @@
 #include "git/Index.h"
 #include "git/Repository.h"
 #include <QStandardPaths>
+#include <QProcess>
 
 namespace {
 
@@ -88,7 +89,16 @@ QList<ExternalTool::Info> ExternalTool::readBuiltInTools(const QString &key)
     QString program, args;
     QString name = entry.name().section(".", 1, 1);
     splitCommand(entry.value<QString>(), program, args);
+
+#define TESTING_PROCESS 0
+#if defined(FLATPAK) || TESTING_PROCESS
+	QProcess process;
+	process.start("flatpak-spawn", {"--host", "which", program});
+	process.waitForFinished(-1); // will wait forever until finished
+	QString path  = process.readAllStandardOutput();
+#else
     QString path = QStandardPaths::findExecutable(program);
+#endif
     tools.append({name, program, args, !path.isEmpty()});
   }
 

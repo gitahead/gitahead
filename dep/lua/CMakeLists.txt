@@ -1,10 +1,9 @@
-set(LUA_DIR lua-5.3.4)
+set(LUA_DIR lua-5.4.0)
 
 add_library(lua
   ${LUA_DIR}/src/lapi.c
   ${LUA_DIR}/src/lauxlib.c
   ${LUA_DIR}/src/lbaselib.c
-  ${LUA_DIR}/src/lbitlib.c
   ${LUA_DIR}/src/lcode.c
   ${LUA_DIR}/src/lcorolib.c
   ${LUA_DIR}/src/lctype.c

@@ -8,6 +8,7 @@
 //
 
 #include "ShowTool.h"
+#include "conf/Settings.h"
 #include "git/Repository.h"
 #include <QDesktopServices>
 #include <QDir>
@@ -16,12 +17,39 @@
 #include <QUrl>
 
 #if defined(Q_OS_MAC)
-#define NAME "Finder"
+#define NAME QT_TRANSLATE_NOOP("ShowTool", "Finder")
 #elif defined(Q_OS_WIN)
-#define NAME "Explorer"
+#define NAME QT_TRANSLATE_NOOP("ShowTool", "Explorer")
 #else
-#define NAME "Default File Browser"
+#define NAME QT_TRANSLATE_NOOP("ShowTool", "Default File Browser")
 #endif
+
+bool ShowTool::openFileManager(QString path)
+{
+  QString fileManagerCmd = Settings::instance()->value("filemanager/command").toString();
+
+  if (fileManagerCmd.isEmpty()) {
+#if defined(Q_OS_WIN)
+    fileManagerCmd = "explorer \"%1\"";
+
+#elif defined(Q_OS_MACOS)
+    fileManagerCmd = "open \"%1\"";
+
+#elif defined(Q_OS_UNIX)
+    fileManagerCmd = "xdg-open \"%1\"";
+#endif
+  }
+
+  QStringList cmdParts = QProcess::splitCommand(fileManagerCmd);
+
+  path = QDir::toNativeSeparators(path);
+
+  for(QString &part : cmdParts)
+    part = part.arg(path);
+
+  QString program = cmdParts.takeFirst();
+  return QProcess::startDetached(program, cmdParts);
+}
 
 ShowTool::ShowTool(const QString &file, QObject *parent)
   : ExternalTool(file, parent)
@@ -34,7 +62,7 @@ ExternalTool::Kind ShowTool::kind() const
 
 QString ShowTool::name() const
 {
-  return tr("Show in %1").arg(NAME);
+  return tr("Show in %1").arg(tr(NAME));
 }
 
 bool ShowTool::start()
@@ -52,7 +80,6 @@ bool ShowTool::start()
   });
 #else
   QFileInfo info(mFile);
-  QString path = info.isDir() ? info.filePath() : info.path();
-  return QDesktopServices::openUrl(QUrl::fromLocalFile(path));
+  return openFileManager(info.isDir() ? info.filePath() : info.path());
 #endif
 }
