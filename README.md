@@ -103,17 +103,20 @@ where `<path-to-qt>` points to the Qt install directory that contains
 
 How to Install
 -----------------
-**Linux**
-The easies way to install Gittyup is by using [Flatpak](https://www.flatpak.org/)
+### Linux
 
-Ubuntu: 
+The easiest way to install Gittyup is by using [Flatpak](https://flathub.org/apps/details/com.github.Murmele.Gittyup).
 
-    sudo apt-get install flatpak && flatpak install flathub com.github.Murmele.Gittyup
-Arch: 
+**Arch Linux**
 
-    sudo pacman -S flatpak && flatpak install flathub com.github.Murmele.Gittyup
+Install the `gittyup` package from the Arch User Repository.
 
+	git clone https://aur.archlinux.org/gittyup.git
+	cd gittyup
+	makepkg -si
 
+Or use an AUR helper.
+Install `gittyup-git` for the VCS build.
 
 How to Contribute
 -----------------
