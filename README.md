@@ -106,14 +106,20 @@ How to Install
 **Linux**
 The easies way to install Gittyup is by using [Flatpak](https://www.flatpak.org/)
 
-Ubuntu: 
+Ubuntu:
 
     sudo apt-get install flatpak && flatpak install flathub com.github.Murmele.Gittyup
-Arch: 
 
-    sudo pacman -S flatpak && flatpak install flathub com.github.Murmele.Gittyup
+Arch:
 
+Install the `gittyup` package from the Arch User Repository.
 
+	git clone https://aur.archlinux.org/gittyup.git
+	cd gittyup
+	makepkg -si
+
+Or use an AUR helper.
+Install `gittyup-git` for the VCS build.
 
 How to Contribute
 -----------------
