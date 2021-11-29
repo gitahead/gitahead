@@ -26,6 +26,10 @@ public:
   void onCustomContextMenu(const QPointF& point);
   bool eventFilter(QObject *obj, QEvent *event) override;
   void deselectAll();
+  /*!
+   * Get the rectangle occupied by the item's checkboy.
+   * Used in the UI tests
+   */
   QRect checkRect(const QModelIndex &index);
   /*!
    * \brief countCollapsed
