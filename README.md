@@ -1,25 +1,30 @@
-GitAhead - Understand Your History
+[![Actions Status](https://github.com/Murmele/gitahead/workflows/GitAhead%20%28master%29/badge.svg)](https://github.com/Murmele/gitahead/actions) [![Actions Status](https://github.com/Murmele/gitahead/workflows/GitAhead%20%28stage%29/badge.svg)](https://github.com/Murmele/gitahead/actions)
+
+
+Gittyup
 ==================================
 
-GitAhead is a graphical Git client designed to help you understand
-and manage your source code history. It's available as a pre-built
-binary for Windows, Linux, and macOS, or can be built from source by
+Gittyup is a graphical Git client designed to help you understand
+and manage your source code history. It's available as a [pre-built
+binary for Windows, Linux, and macOS](https://gitahead.github.io/gitahead.com/), or can be built from source by
 following the directions below.
+
+Gittyup is a continuation of the [GitAhead](https://github.com/gitahead/gitahead) client.
 
 How to Get Help
 ---------------
 
-Ask questions about building or using GitAhead on
-[Stack Overflow](http://stackoverflow.com/questions/tagged/gitahead) by
-including the `gitahead` tag. Remember to search for existing questions
+Ask questions about building or using Gittyup on
+[Stack Overflow](http://stackoverflow.com/questions/tagged/gittyup) by
+including the `gittyup` tag. Remember to search for existing questions
 before creating a new one.
 
-Report bugs in GitAhead by opening an issue in the
-[issue tracker](https://github.com/gitahead/gitahead/issues).
+Report bugs in Gittyup by opening an issue in the
+[issue tracker](https://github.com/Murmele/gitahead/issues).
 Remember to search for existing issues before creating a new one.
 
-If you still need help, email us at
-[support@gitahead.com](mailto:support@gitahead.com).
+If you still need help, check out our Matrix channel
+[Gittyup:martix.org](https://matrix.to/#/#Gittyup:matrix.org).
 
 Build Environment
 -----------------
@@ -40,7 +45,7 @@ submodules are optional or may also be satisfied by system libraries.
 
 **External Dependencies**
 
-* Qt (required >= 5.9)
+* Qt (required >= 5.15)
 
 **Included Dependencies**
 
@@ -62,7 +67,7 @@ How to Build
 
 **Build OpenSSL**
 
-    # Start from root of gitahead repo.
+    # Start from root of gittyup repo.
     cd dep/openssl/openssl
 
 Win:
@@ -82,7 +87,7 @@ Linux:
 
 **Configure Build**
 
-    # Start from root of gitahead repo.
+    # Start from root of gittyup repo.
     mkdir -p build/release
     cd build/release
     cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ../..
@@ -95,6 +100,20 @@ where `<path-to-qt>` points to the Qt install directory that contains
 **Build**
 
     ninja
+
+How to Install
+-----------------
+**Linux**
+The easies way to install Gittyup is by using [Flatpak](https://www.flatpak.org/)
+
+Ubuntu: 
+
+    sudo apt-get install flatpak && flatpak install flathub com.github.Murmele.Gittyup
+Arch: 
+
+    sudo pacman -S flatpak && flatpak install flathub com.github.Murmele.Gittyup
+
+
 
 How to Contribute
 -----------------
@@ -113,4 +132,4 @@ great commit message.
 License
 -------
 
-GitAhead is licensed under the MIT license. See LICENSE.md for details.
+Gittyup and its predecessor GitAhead are licensed under the MIT license. See LICENSE.md for details.

@@ -13,3 +13,6 @@
 [submodule "dep/cmark/cmark"]
 	path = dep/cmark/cmark
 	url = https://github.com/commonmark/cmark.git
+[submodule "dep/hunspell/hunspell"]
+	path = dep/hunspell/hunspell
+	url = https://github.com/hunspell/hunspell

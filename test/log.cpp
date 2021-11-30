@@ -41,11 +41,11 @@ void TestLog::initTestCase()
 {
   //Create LogView
   LogEntry *rootEntry = new LogEntry;
-  rootEntry->addEntry(tr("Entry"), tr("Title"));
+  rootEntry->addEntry("Entry", "Title");
   for (LogEntry::Kind kind : {LogEntry::File, LogEntry::Hint, LogEntry::Warning, LogEntry::Error})
-    rootEntry->addEntry(kind, tr("Entry"));
-  LogEntry *nestedEntry = rootEntry->addEntry(tr("Entry"), tr("Nested 1"));
-  nestedEntry->addEntry(LogEntry::Entry, tr("Nested 2"))->addEntry(LogEntry::File, tr("Nested 3"))->addEntry(LogEntry::File, tr("Message"));
+    rootEntry->addEntry(kind, "Entry");
+  LogEntry *nestedEntry = rootEntry->addEntry("Entry", "Nested 1");
+  nestedEntry->addEntry(LogEntry::Entry, "Nested 2")->addEntry(LogEntry::File, "Nested 3")->addEntry(LogEntry::File, "Message");
   
   LogView *logView = new LogView(rootEntry);
   logView->expandAll();

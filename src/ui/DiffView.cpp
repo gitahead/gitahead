@@ -74,7 +74,7 @@ const QString kStyleSheet =
   "  padding-left: -4;"
   "  padding-top: -4"
   "}"
-  "DiffView HunkWidget, DiffView .QFrame {"
+  "DiffView FileWidget {"
   "  background-clip: content;"
   "  border-image: url(:/shadow.png) 8 8 8 8;"
   "  border-width: 8;"
@@ -168,7 +168,7 @@ public:
     cursor.insertText(date.toString(Qt::DefaultLocaleLongDate));
 
     QTextBlockFormat indent;
-    indent.setLeftMargin(fontMetrics().width(' ') * kIndent);
+    indent.setLeftMargin(fontMetrics().horizontalAdvance(' ') * kIndent);
     cursor.insertBlock(indent);
 
     QTextCharFormat body;
@@ -266,6 +266,8 @@ protected:
 
 class EditButton : public Button
 {
+  Q_OBJECT
+
 public:
   EditButton(
     const git::Patch &patch,
@@ -292,7 +294,7 @@ public:
     }
 
     if (view->repo().workdir().exists(name)) {
-      QAction *action = menu->addAction("Edit Working Copy");
+      QAction *action = menu->addAction(tr("Edit Working Copy"));
       connect(action, &QAction::triggered, [this, view, name, newLine] {
         view->edit(name, newLine);
       });
@@ -303,7 +305,7 @@ public:
     git::Commit commit = !commits.isEmpty() ? commits.first() : git::Commit();
     git::Blob newBlob = patch.blob(git::Diff::NewFile);
     if (newBlob.isValid()) {
-      QAction *action = menu->addAction("Edit New Revision");
+      QAction *action = menu->addAction(tr("Edit New Revision"));
       connect(action, &QAction::triggered,
       [this, view, name, newLine, newBlob, commit] {
         view->openEditor(name, newLine, newBlob, commit);
@@ -318,18 +320,15 @@ public:
           commit = parents.first();
       }
 
-      QAction *action = menu->addAction("Edit Old Revision");
+      QAction *action = menu->addAction(tr("Edit Old Revision"));
       connect(action, &QAction::triggered,
       [this, view, name, oldLine, oldBlob, commit] {
         view->openEditor(name, oldLine, oldBlob, commit);
       });
     }
 
-    // Connect button click to the first menu action.
     setEnabled(!menu->isEmpty() && !binary && !lfs);
-    connect(this, &EditButton::clicked, [menu] {
-      menu->actions().first()->trigger();
-    });
+    setPopupMode(ToolButtonPopupMode::InstantPopup);
 
     setMenu(menu);
   }
@@ -356,6 +355,13 @@ protected:
     painter.setPen(QPen(painter.pen().color(), 1, Qt::SolidLine, Qt::FlatCap));
     painter.drawLine(x - r + 1, y + r - 5, x - r + 5, y + r - 1);
     painter.drawLine(x + r - 6, y - r + 2, x + r - 2, y - r + 6);
+
+    // Draw menu indicator.
+    QPainterPath indicator;
+    indicator.moveTo(x + 3, y + 4.5);
+    indicator.lineTo(x + 5.5, y + 7);
+    indicator.lineTo(x + 8, y + 4.5);
+    painter.drawPath(indicator);
   }
 };
 
@@ -440,6 +446,8 @@ protected:
 
 class Images : public QWidget
 {
+  Q_OBJECT
+
 public:
   Images(
     const git::Patch patch,
@@ -602,7 +610,7 @@ class HunkWidget : public QFrame
   Q_OBJECT
 
 public:
-  class Header : public QWidget
+  class Header : public QFrame
   {
   public:
     Header(
@@ -612,7 +620,7 @@ public:
       bool lfs,
       bool submodule,
       QWidget *parent = nullptr)
-      : QWidget(parent)
+      : QFrame(parent)
     {
       setObjectName("HunkHeader");
       mCheck = new QCheckBox(this);
@@ -624,11 +632,11 @@ public:
       if (patch.isConflicted()) {
         mSave = new QToolButton(this);
         mSave->setObjectName("ConflictSave");
-        mSave->setText(tr("Save"));
+        mSave->setText(HunkWidget::tr("Save"));
 
         mUndo = new QToolButton(this);
         mUndo->setObjectName("ConflictUndo");
-        mUndo->setText(tr("Undo"));
+        mUndo->setText(HunkWidget::tr("Undo"));
         connect(mUndo, &QToolButton::clicked, [this] {
           mSave->setVisible(false);
           mUndo->setVisible(false);
@@ -639,7 +647,7 @@ public:
         mOurs = new QToolButton(this);
         mOurs->setObjectName("ConflictOurs");
         mOurs->setStyleSheet(buttonStyle(Theme::Diff::Ours));
-        mOurs->setText(tr("Use Ours"));
+        mOurs->setText(HunkWidget::tr("Use Ours"));
         connect(mOurs, &QToolButton::clicked, [this] {
           mSave->setVisible(true);
           mUndo->setVisible(true);
@@ -650,7 +658,7 @@ public:
         mTheirs = new QToolButton(this);
         mTheirs->setObjectName("ConflictTheirs");
         mTheirs->setStyleSheet(buttonStyle(Theme::Diff::Theirs));
-        mTheirs->setText(tr("Use Theirs"));
+        mTheirs->setText(HunkWidget::tr("Use Theirs"));
         connect(mTheirs, &QToolButton::clicked, [this] {
           mSave->setVisible(true);
           mUndo->setVisible(true);
@@ -660,30 +668,30 @@ public:
       }
 
       EditButton *edit = new EditButton(patch, index, false, lfs, this);
-      edit->setToolTip(tr("Edit Hunk"));
+      edit->setToolTip(HunkWidget::tr("Edit Hunk"));
 
       // Add discard button.
       DiscardButton *discard = nullptr;
       if (diff.isStatusDiff() && !submodule && !patch.isConflicted()) {
         discard = new DiscardButton(this);
-        discard->setToolTip(tr("Discard Hunk"));
+        discard->setToolTip(HunkWidget::tr("Discard Hunk"));
         connect(discard, &DiscardButton::clicked, [this, patch, index] {
           QString name = patch.name();
           int line = patch.lineNumber(index, 0, git::Diff::NewFile);
 
-          QString title = tr("Discard Hunk?");
+          QString title = HunkWidget::tr("Discard Hunk?");
           QString text = patch.isUntracked() ?
-            tr("Are you sure you want to remove '%1'?").arg(name) :
-            tr("Are you sure you want to discard the "
+            HunkWidget::tr("Are you sure you want to remove '%1'?").arg(name) :
+            HunkWidget::tr("Are you sure you want to discard the "
                "hunk starting at line %1 in '%2'?").arg(line).arg(name);
 
           QMessageBox *dialog = new QMessageBox(
             QMessageBox::Warning, title, text, QMessageBox::Cancel, this);
           dialog->setAttribute(Qt::WA_DeleteOnClose);
-          dialog->setInformativeText(tr("This action cannot be undone."));
+          dialog->setInformativeText(HunkWidget::tr("This action cannot be undone."));
 
           QPushButton *discard =
-            dialog->addButton(tr("Discard Hunk"), QMessageBox::AcceptRole);
+            dialog->addButton(HunkWidget::tr("Discard Hunk"), QMessageBox::AcceptRole);
           connect(discard, &QPushButton::clicked, [this, patch, index] {
             git::Repository repo = patch.repo();
             if (patch.isUntracked()) {
@@ -716,10 +724,10 @@ public:
 
       mButton = new DisclosureButton(this);
       mButton->setToolTip(
-        mButton->isChecked() ? tr("Collapse Hunk") : tr("Expand Hunk"));
+        mButton->isChecked() ? HunkWidget::tr("Collapse Hunk") : HunkWidget::tr("Expand Hunk"));
       connect(mButton, &DisclosureButton::toggled, [this] {
         mButton->setToolTip(
-          mButton->isChecked() ? tr("Collapse Hunk") : tr("Expand Hunk"));
+          mButton->isChecked() ? HunkWidget::tr("Collapse Hunk") : HunkWidget::tr("Expand Hunk"));
       });
 
       QHBoxLayout *buttons = new QHBoxLayout;
@@ -791,7 +799,7 @@ public:
     setObjectName("HunkWidget");
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0,0,0,0);
-    layout->setSpacing(4);
+    layout->setSpacing(0);
 
     mHeader = new Header(diff, patch, index, lfs, submodule, this);
     layout->addWidget(mHeader);
@@ -1202,7 +1210,7 @@ private:
       if (it != comments.constEnd()) {
         QString whitespace(kIndent, ' ');
         QFont font = mEditor->styleFont(TextEditor::CommentBody);
-        int margin = QFontMetrics(font).width(' ') * kIndent * 2;
+        int margin = QFontMetrics(font).horizontalAdvance(' ') * kIndent * 2;
         int width = mEditor->textRectangle().width() - margin - 50;
 
         foreach (const QDateTime &key, it->keys()) {
@@ -1442,7 +1450,7 @@ public:
   void paintEvent(QPaintEvent *event) override
   {
     // Drawing the outline of the shapes with a narrow pen approximates
-    // a slight drop shadow. Minus has to be drawn slighly smaller than
+    // a slight drop shadow. Minus has to be drawn slightly smaller than
     // plus or it creates an optical illusion that makes it look to big.
 
     QPainter painter(this);
@@ -1576,7 +1584,7 @@ private:
   QString mOldName;
 };
 
-class FileWidget : public QWidget
+class FileWidget : public QFrame
 {
   Q_OBJECT
 
@@ -1628,12 +1636,12 @@ public:
 
       // Add LFS buttons.
       if (lfs) {
-        Badge *lfsBadge = new Badge({Badge::Label(tr("LFS"), true)}, this);
+        Badge *lfsBadge = new Badge({Badge::Label(FileWidget::tr("LFS"), true)}, this);
         buttons->addWidget(lfsBadge);
 
         QToolButton *lfsLockButton = new QToolButton(this);
         bool locked = patch.repo().lfsIsLocked(patch.name());
-        lfsLockButton->setText(locked ? tr("Unlock") : tr("Lock"));
+        lfsLockButton->setText(locked ? FileWidget::tr("Unlock") : FileWidget::tr("Lock"));
         buttons->addWidget(lfsLockButton);
 
         connect(lfsLockButton, &QToolButton::clicked, [this, patch] {
@@ -1645,11 +1653,11 @@ public:
         connect(notifier, &git::RepositoryNotifier::lfsLocksChanged, this,
         [this, patch, lfsLockButton] {
           bool locked = patch.repo().lfsIsLocked(patch.name());
-          lfsLockButton->setText(locked ? tr("Unlock") : tr("Lock"));
+          lfsLockButton->setText(locked ? FileWidget::tr("Unlock") : FileWidget::tr("Lock"));
         });
 
         mLfsButton = new QToolButton(this);
-        mLfsButton->setText(tr("Show Object"));
+        mLfsButton->setText(FileWidget::tr("Show Object"));
         mLfsButton->setCheckable(true);
 
         buttons->addWidget(mLfsButton);
@@ -1658,33 +1666,33 @@ public:
 
       // Add edit button.
       mEdit = new EditButton(patch, -1, binary, lfs, this);
-      mEdit->setToolTip(tr("Edit File"));
+      mEdit->setToolTip(FileWidget::tr("Edit File"));
       buttons->addWidget(mEdit);
 
       // Add discard button.
       if (diff.isStatusDiff() && !submodule && !patch.isConflicted()) {
         DiscardButton *discard = new DiscardButton(this);
-        discard->setToolTip(tr("Discard File"));
+        discard->setToolTip(FileWidget::tr("Discard File"));
         buttons->addWidget(discard);
 
         connect(discard, &QToolButton::clicked, [this] {
           QString name = mPatch.name();
           bool untracked = mPatch.isUntracked();
           QString path = mPatch.repo().workdir().filePath(name);
-          QString arg = QFileInfo(path).isDir() ? tr("Directory") : tr("File");
+          QString arg = QFileInfo(path).isDir() ? FileWidget::tr("Directory") : FileWidget::tr("File");
           QString title =
-            untracked ? tr("Remove %1?").arg(arg) : tr("Discard Changes?");
+            untracked ? FileWidget::tr("Remove %1?").arg(arg) : FileWidget::tr("Discard Changes?");
           QString text = untracked ?
-            tr("Are you sure you want to remove '%1'?") :
-            tr("Are you sure you want to discard all changes in '%1'?");
+            FileWidget::tr("Are you sure you want to remove '%1'?") :
+            FileWidget::tr("Are you sure you want to discard all changes in '%1'?");
           QMessageBox *dialog = new QMessageBox(
             QMessageBox::Warning, title, text.arg(name),
             QMessageBox::Cancel, this);
           dialog->setAttribute(Qt::WA_DeleteOnClose);
-          dialog->setInformativeText(tr("This action cannot be undone."));
+          dialog->setInformativeText(FileWidget::tr("This action cannot be undone."));
 
           QString button =
-            untracked ? tr("Remove %1").arg(arg) : tr("Discard Changes");
+            untracked ? FileWidget::tr("Remove %1").arg(arg) : FileWidget::tr("Discard Changes");
           QPushButton *discard =
             dialog->addButton(button, QMessageBox::AcceptRole);
           connect(discard, &QPushButton::clicked, [this, untracked] {
@@ -1701,8 +1709,8 @@ public:
                 dir.remove(name);
               }
             } else if (!repo.checkout(git::Commit(), nullptr, {name}, strategy)) {
-              LogEntry *parent = view->addLogEntry(mPatch.name(), tr("Discard"));
-              view->error(parent, tr("discard"), mPatch.name());
+              LogEntry *parent = view->addLogEntry(mPatch.name(), FileWidget::tr("Discard"));
+              view->error(parent, FileWidget::tr("discard"), mPatch.name());
             }
 
             // FIXME: Work dir changed?
@@ -1715,10 +1723,10 @@ public:
 
       mDisclosureButton = new DisclosureButton(this);
       mDisclosureButton->setToolTip(
-        mDisclosureButton->isChecked() ? tr("Collapse File") : tr("Expand File"));
+        mDisclosureButton->isChecked() ? FileWidget::tr("Collapse File") : FileWidget::tr("Expand File"));
       connect(mDisclosureButton, &DisclosureButton::toggled, [this] {
         mDisclosureButton->setToolTip(
-          mDisclosureButton->isChecked() ? tr("Collapse File") : tr("Expand File"));
+          mDisclosureButton->isChecked() ? FileWidget::tr("Collapse File") : FileWidget::tr("Expand File"));
       });
       buttons->addWidget(mDisclosureButton);
 
@@ -1808,10 +1816,12 @@ public:
     const git::Patch &patch,
     const git::Patch &staged,
     QWidget *parent = nullptr)
-    : QWidget(parent), mView(view), mDiff(diff), mPatch(patch)
+    : QFrame(parent), mView(view), mDiff(diff), mPatch(patch)
   {
     setObjectName("FileWidget");
     QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0,0,0,0);
+    layout->setSpacing(0);
 
     git::Repository repo = RepoView::parentView(this)->repo();
 
@@ -2142,7 +2152,9 @@ void DiffView::setDiff(const git::Diff &diff)
   if (diff.isStatusDiff()) {
     if (git::Reference head = repo.head()) {
       if (git::Commit commit = head.target()) {
-        git::Diff stagedDiff = repo.diffTreeToIndex(commit.tree());
+        bool ignoreWhitespace = Settings::instance()->isWhitespaceIgnored();
+        git::Diff stagedDiff =
+          repo.diffTreeToIndex(commit.tree(), git::Index(), ignoreWhitespace);
         for (int i = 0; i < stagedDiff.count(); ++i)
           mStagedPatches[stagedDiff.name(i)] = stagedDiff.patch(i);
       }

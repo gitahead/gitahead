@@ -52,8 +52,9 @@ class RepoView : public QSplitter
 public:
   enum ViewMode
   {
-    Diff,
-    Tree
+    DoubleTree,
+    //Diff,
+	Tree,
   };
 
   enum MergeFlag
@@ -61,9 +62,10 @@ public:
     Default       = 0x0,
     Merge         = 0x1,
     Rebase        = 0x2,
-    FastForward   = 0x4, // equivalent to --ff-only
-    NoFastForward = 0x8, // equivalent to --no-ff
-    NoCommit      = 0x10 // equivalent to --no-commit
+    FastForward   = 0x4,  // equivalent to --ff-only
+    NoFastForward = 0x8,  // equivalent to --no-ff
+    NoCommit      = 0x10, // equivalent to --no-commit
+    Squash        = 0x20
   };
 
   Q_DECLARE_FLAGS(MergeFlags, MergeFlag);
@@ -160,12 +162,20 @@ public:
     bool interactive = true,
     LogEntry *parent = nullptr,
     QStringList *submodules = nullptr);
+  QFuture<git::Result> fetch(
+    const git::Remote &remote,
+    bool tags,
+    bool interactive,
+    LogEntry *parent,
+    QStringList *submodules,
+    bool prune);
 
   // pull
   void pull(
     MergeFlags flags = Default,
     const git::Remote &remote = git::Remote(),
-    bool tags = false);
+    bool tags = false,
+    bool prune = false);
   void merge(
     MergeFlags flags,
     const git::Reference &ref = git::Reference(),
@@ -194,6 +204,11 @@ public:
     LogEntry *parent,
     const std::function<void()> &callback = std::function<void()>());
 
+  // squash
+  void squash(
+    const git::AnnotatedCommit &upstream,
+    LogEntry *parent);
+
   // revert
   void revert(const git::Commit &commit);
 
@@ -201,7 +216,10 @@ public:
   void cherryPick(const git::Commit &commit);
 
   // push
-  void promptToForcePush();
+  void promptToForcePush(
+    const git::Remote &remote = git::Remote(),
+    const git::Reference &src = git::Reference());
+
   void push(
     const git::Remote &remote = git::Remote(),
     const git::Reference &src = git::Reference(),
@@ -235,6 +253,7 @@ public:
     const git::Branch &upstream = git::Branch(),
     bool checkout = false,
     bool force = false);
+  void promptToDeleteBranch(const git::Reference &ref);
 
   // stash
   void promptToStash();
@@ -244,7 +263,8 @@ public:
   void popStash(int index = 0);
 
   // tag
-  void promptToTag(const git::Commit &commit);
+  void promptToAddTag(const git::Commit &commit);
+  void promptToDeleteTag(const git::Reference &ref);
 
   // reset
   void promptToReset(
@@ -257,19 +277,24 @@ public:
     const git::Commit &commitToAmend = git::Commit());
 
   // submodule
-  void updateSubmodules(
-    const QList<git::Submodule> &submodules = QList<git::Submodule>(),
-    bool recursive = true,
-    bool init = false,
-    LogEntry *parent = nullptr);
+  void resetSubmodules(const QList<git::Submodule> &submodules,
+          bool recursive, git_reset_t type,
+          LogEntry *parent);
+  void updateSubmodules(const QList<git::Submodule> &submodules = QList<git::Submodule>(),
+	bool recursive = true,
+	bool init = false,
+	bool checkout_force = false,
+	LogEntry *parent = nullptr);
   bool openSubmodule(const git::Submodule &submodule);
 
   // config
   ConfigDialog *configureSettings(
     ConfigDialog::Index index = ConfigDialog::General);
-
+  
   // terminal
   void openTerminal();
+  // file manager
+  void openFileManager();
 
   // ignore
   void ignore(const QString &name);
@@ -296,6 +321,36 @@ public:
 
   static RepoView *parentView(const QWidget *widget);
 
+  enum class DetailSplitterWidgets {
+     NotDefined,
+     SideBar, // commit list, header, ...
+     DetailView, // DiffView, TreeView
+  };
+  /*!
+   * \brief match
+   * Check recursively if the searched object \p search is one of the childs of \p parent
+   * The \p parent is not checked. This must be done manually
+   * \param search Object which should match
+   * \param parent Parent of the childs which should be checked
+   * \return true if one of the childs is the searched one, else false
+   */
+  static bool match(QObject* search, QObject* parent);
+  /*!
+   * \brief detailsMaximized
+   * Returns if the details are maximized or not
+   * \return
+   */
+  bool detailsMaximized();
+  /*!
+   * \brief detailSplitterMaximize
+   *
+   * \param maximized
+   */
+  DetailSplitterWidgets detailSplitterMaximize(bool maximized, DetailSplitterWidgets maximizeWidget = DetailSplitterWidgets::NotDefined);
+
+public slots:
+  void diffSelected(const git::Diff diff, const QString &file, bool spontaneous);
+
 signals:
   void statusChanged(bool dirty);
 
@@ -320,15 +375,20 @@ private:
   bool suspendLogTimer();
   void resumeLogTimer(bool suspended = true);
 
-  QList<SubmoduleInfo> submoduleInfoList(
-    const git::Repository &repo,
+  QList<SubmoduleInfo> submoduleUpdateInfoList(const git::Repository &repo,
+	const QList<git::Submodule> &submodules,
+	bool init, bool checkout_force,
+	LogEntry *parent);
+  void updateSubmodulesAsync(const QList<SubmoduleInfo> &submodules,
+	bool recursive = true,
+	bool init = false, bool checkout_force = false);
+
+  QList<SubmoduleInfo> submoduleResetInfoList(const git::Repository &repo,
     const QList<git::Submodule> &submodules,
-    bool init,
     LogEntry *parent);
-  void updateSubmodulesAsync(
-    const QList<SubmoduleInfo> &submodules,
-    bool recursive = true,
-    bool init = false);
+  void resetSubmodulesAsync(const QList<SubmoduleInfo> &submodules,
+    bool recursive,
+    git_reset_t type);
 
   bool checkForConflicts(LogEntry *parent, const QString &action);
 
@@ -347,6 +407,7 @@ private:
   PathspecWidget *mPathspec;
   CommitList *mCommits;
   DetailView *mDetails;
+  QWidget* mSideBar;
 
   LogEntry *mLogRoot;
   LogView *mLogView;
@@ -362,6 +423,19 @@ private:
   bool mShown = false;
 
   friend class MenuBar;
+
+  /*!
+   * \brief mDetailSplitter
+   * Splits the history list and the detailview (diffView, TreeView)
+   */
+  QSplitter* mDetailSplitter;
+  /*!
+   * \brief mMaximized
+   * Maximizes the widgets in the mDetailSplitter
+   * true: single widget is visible and the others are invisible
+   * false: all widgets are sized normaly and visible
+   */
+  bool mMaximized{false};
 };
 
 #endif

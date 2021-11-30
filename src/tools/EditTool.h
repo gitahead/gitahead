@@ -14,6 +14,8 @@
 
 class EditTool : public ExternalTool
 {
+  Q_OBJECT
+
 public:
   EditTool(const QString &file, QObject *parent = nullptr);
 

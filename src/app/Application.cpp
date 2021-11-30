@@ -27,8 +27,8 @@
 #include <QNetworkReply>
 #include <QOperatingSystemVersion>
 #include <QSettings>
-#include <QSysInfo>
 #include <QTimer>
+#include <QTranslator>
 #include <QUrlQuery>
 #include <QUuid>
 
@@ -58,13 +58,13 @@ static LONG WINAPI exceptionFilter(PEXCEPTION_POINTERS info)
   GetTempPath(MAX_PATH, temp);
 
   char dir[MAX_PATH];
-  StringCchPrintf(dir, MAX_PATH, "%sGitAhead", temp);
+  StringCchPrintf(dir, MAX_PATH, "%sGittyup", temp);
   CreateDirectory(dir, NULL);
 
   char fileName[MAX_PATH];
   StringCchPrintf(fileName, MAX_PATH,
     "%s\\%s-%s-%04d%02d%02d-%02d%02d%02d-%ld-%ld.dmp",
-    dir, GITAHEAD_NAME, GITAHEAD_VERSION,
+    dir, GITTYUP_NAME, GITTYUP_VERSION,
     localTime.wYear, localTime.wMonth, localTime.wDay,
     localTime.wHour, localTime.wMinute, localTime.wSecond,
     GetCurrentProcessId(), GetCurrentThreadId());
@@ -113,9 +113,9 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
 {
   Q_INIT_RESOURCE(resources);
 
-  setApplicationName(GITAHEAD_NAME);
-  setApplicationVersion(GITAHEAD_VERSION);
-  setOrganizationDomain("gitahead.com");
+  setApplicationName(GITTYUP_NAME);
+  setApplicationVersion(GITTYUP_VERSION);
+  setOrganizationDomain("gittyup.github.com");
 
   // Register types that are queued at runtime.
   qRegisterMetaType<git::Id>();
@@ -126,7 +126,7 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
 
   // Parse command line arguments.
   QCommandLineParser parser;
-  parser.setApplicationDescription("GitAhead: Understand your history!");
+  parser.setApplicationDescription("Gittyup");
   parser.addHelpOption();
   parser.addVersionOption();
   parser.addPositionalArgument(
@@ -135,6 +135,7 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   parser.addOption({{"d", "debug-menu"}, "Show debug menu."});
   parser.addOption({{"t", "theme"}, "Choose theme.", "name"});
   parser.addOption({{"f", "filter"}, "Set the pathspec filter.", "pathspec"});
+  parser.addOption({"no-translation", "Disable translation."});
 
   if (haltOnParseError) {
     parser.process(arguments());
@@ -156,6 +157,35 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   setStyle(mTheme->style());
   setStyleSheet(mTheme->styleSheet());
 
+  // Read translation settings
+  QSettings settings;
+  if ((!settings.value("translation/disable", false).toBool()) &&
+      (!parser.isSet("no-translation"))) {
+    // Load translation files.
+    QLocale locale;
+    QDir l10n = Settings::l10nDir();
+    QString name = QString(GITTYUP_NAME).toLower();
+    QTranslator *translator = new QTranslator(this);
+    if (translator->load(locale, name, "_", l10n.absolutePath())) {
+      installTranslator(translator);
+    } else {
+      delete translator;
+    }
+
+    // Load Qt translation file.
+    QTranslator *qt = new QTranslator(this);
+    if (qt->load(locale, "qtbase", "_", l10n.absolutePath())) {
+      installTranslator(qt);
+    } else {
+      QDir dir(QT_TRANSLATIONS_DIR);
+      if (dir.exists() && qt->load(locale, "qtbase", "_", dir.absolutePath())) {
+        installTranslator(qt);
+      } else {
+        delete qt;
+      }
+    }
+  }
+
   // Enable system proxy auto-detection.
   QNetworkProxyFactory::setUseSystemConfiguration(true);
 
@@ -167,13 +197,10 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   // Load SF Mono font from Terminal.app.
   QDir dir("/System/Applications");
   if (!dir.exists())
-    dir = "/Applications";
+    dir.setPath("/Applications");
   dir.cd("Utilities/Terminal.app/Contents/Resources/Fonts");
-  foreach (const QString &name, dir.entryList({"SFMono-*.otf"}, QDir::Files))
+  foreach (const QString &name, dir.entryList({"SF*Mono-*.otf"}, QDir::Files))
     QFontDatabase::addApplicationFont(dir.filePath(name));
-
-  // Don't quit on close.
-  setQuitOnLastWindowClosed(false);
 
   // Create shared menu bar on Mac.
   (void) MenuBar::instance(nullptr);
@@ -184,20 +211,20 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
 
 #elif defined(Q_OS_LINUX)
   QIcon icon;
-  icon.addPixmap(QPixmap(":/GitAhead.iconset/icon_16x16.png"));
-  icon.addPixmap(QPixmap(":/GitAhead.iconset/icon_32x32.png"));
-  icon.addPixmap(QPixmap(":/GitAhead.iconset/icon_64x64.png"));
-  icon.addPixmap(QPixmap(":/GitAhead.iconset/icon_128x128.png"));
+  icon.addPixmap(QPixmap(":/Gittyup.iconset/icon_16x16.png"));
+  icon.addPixmap(QPixmap(":/Gittyup.iconset/icon_32x32.png"));
+  icon.addPixmap(QPixmap(":/Gittyup.iconset/icon_64x64.png"));
+  icon.addPixmap(QPixmap(":/Gittyup.iconset/icon_128x128.png"));
   setWindowIcon(icon);
 #endif
+
+  // Set path to emoji description file.
+  git::Commit::setEmojiFile(Settings::confDir().filePath("emoji.json"));
 
   // Initialize git library.
   git::Repository::init();
 
   connect(this, &Application::aboutToQuit, [this] {
-    // Avoid updating interface during exit.
-    MainWindow::setExiting(true);
-
     // Clean up git library.
     // Make sure windows are really deleted.
     sendPostedEvents(nullptr, QEvent::DeferredDelete);
@@ -205,9 +232,8 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   });
 
   // Read tracking settings.
-  QSettings settings;
   settings.beginGroup("tracking");
-  QByteArray tid(GITAHEAD_TRACKING_ID);
+  QByteArray tid(GITTYUP_TRACKING_ID);
   if (!tid.isEmpty() && settings.value("enabled", true).toBool()) {
     // Get or create persistent client ID.
     mClientId = settings.value("id").toString();
@@ -333,23 +359,24 @@ void Application::track(const QUrlQuery &query)
     return;
 
   QString sys = userAgentSystem();
-  QString userAgent = kUserAgentFmt.arg(GITAHEAD_NAME, GITAHEAD_VERSION, sys);
+  QString language = QLocale().uiLanguages().first();
+  QString userAgent = kUserAgentFmt.arg(GITTYUP_NAME, GITTYUP_VERSION, sys);
 
   QUrlQuery tmp = query;
   tmp.addQueryItem("v", "1");
   tmp.addQueryItem("ds", "app");
-  tmp.addQueryItem("ul", "en-us");
+  tmp.addQueryItem("ul", language);
   tmp.addQueryItem("ua", userAgent);
-  tmp.addQueryItem("an", GITAHEAD_NAME);
-  tmp.addQueryItem("av", GITAHEAD_VERSION);
-  tmp.addQueryItem("tid", GITAHEAD_TRACKING_ID);
+  tmp.addQueryItem("an", GITTYUP_NAME);
+  tmp.addQueryItem("av", GITTYUP_VERSION);
+  tmp.addQueryItem("tid", GITTYUP_TRACKING_ID);
   tmp.addQueryItem("cid", mClientId);
 
-  QString header = "application/x-www-form-urlencoded";
-  QNetworkRequest request(QUrl("http://google-analytics.com/collect"));
-  request.setHeader(QNetworkRequest::ContentTypeHeader, header);
+//  QString header = "application/x-www-form-urlencoded";
+//  QNetworkRequest request(QUrl("http://google-analytics.com/collect"));
+//  request.setHeader(QNetworkRequest::ContentTypeHeader, header);
 
-  mTrackingMgr->post(request, tmp.query().toUtf8());
+//  mTrackingMgr->post(request, tmp.query().toUtf8());
 }
 
 void Application::handleSslErrors(

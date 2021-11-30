@@ -1,5 +1,0 @@
-repo: bdf8c3ef2fb01ea24578e726337888e706d10b92
-node: ff65f37949a5b59e8893843549dba045639d361a
-branch: LongTerm3
-latesttag: rel-3-10-6
-latesttagdistance: 1

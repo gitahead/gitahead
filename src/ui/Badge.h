@@ -14,6 +14,10 @@
 
 class QStyleOption;
 
+/*!
+ * \brief The Badge class
+ * Blue widget (M -> Modified, ? -> New added)
+ */
 class Badge : public QWidget
 {
 public:
@@ -39,16 +43,24 @@ public:
   static QSize size(const QFont &font, const QList<Label> &labels);
   static QSize size(const QFont &font, const Label &label = Label());
 
-  static void paint(
+  static int paint(
     QPainter *painter,
     const QList<Label> &labels,
     const QRect &rect,
-    QStyleOption *opt = nullptr);
+    QStyleOption *opt = nullptr,
+    Qt::Alignment alignment = Qt::AlignRight);
 
 protected:
   void paintEvent(QPaintEvent *event) override;
 
 private:
+  static void paint(
+    QPainter *painter,
+    const Label &label,
+    const QRect &rect,
+    bool selected,
+    bool active);
+
   QList<Label> mLabels;
 };
 

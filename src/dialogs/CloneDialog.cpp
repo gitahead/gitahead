@@ -43,7 +43,8 @@ public:
     setTitle(tr("Remote Repository URL"));
     setSubTitle(repo ?
       tr("Choose protocol to authenticate with the remote.") :
-      tr("Enter the URL of the remote repository."));
+      tr("Enter the URL of the remote repository or browse for a local "
+         "directory"));
 
     if (repo) {
       mProtocol = new QComboBox(this);
@@ -59,15 +60,37 @@ public:
       });
     }
 
-    mUrl = new QLineEdit(this);
+    QFrame *url = new QFrame(this);
+    mUrl = new QLineEdit(url);
     mUrl->setMinimumWidth(mUrl->sizeHint().width() * 2);
     connect(mUrl, &QLineEdit::textChanged,
             this, &RemotePage::completeChanged);
 
+    QPushButton *browse = nullptr;
     if (repo) {
       mUrl->setReadOnly(true);
       mUrl->setText(repo->url(Repository::Https));
+    } else {
+      browse = new QPushButton(tr("..."), url);
+      connect(browse, &QPushButton::clicked, [this]() {
+        QString title = tr("Choose Directory");
+        QFileDialog *dialog = new QFileDialog(this, title, mUrl->text(), QString());
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+        dialog->setFileMode(QFileDialog::Directory);
+        dialog->setOption(QFileDialog::ShowDirsOnly);
+        connect(dialog, &QFileDialog::fileSelected, [this](const QString &file) {
+          mUrl->setText(file);
+        });
+
+        dialog->open();
+      });
     }
+
+    QHBoxLayout *urlLayout = new QHBoxLayout(url);
+    urlLayout->setContentsMargins(0,0,0,0);
+    urlLayout->addWidget(mUrl);
+    if (browse)
+      urlLayout->addWidget(browse);
 
     QLabel *label = nullptr;
     if (!repo) {
@@ -86,7 +109,7 @@ public:
     QFormLayout *form = new QFormLayout(this);
     if (mProtocol)
       form->addRow(tr("Protocol:"), mProtocol);
-    form->addRow(tr("URL:"), mUrl);
+    form->addRow(tr("URL:"), url);
     if (label)
       form->addRow(label);
 

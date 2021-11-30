@@ -29,7 +29,7 @@ add_executable(relauncher relauncher.cpp)
 target_link_libraries(relauncher Qt5::Core)
 
 set_target_properties(relauncher PROPERTIES
-  RUNTIME_OUTPUT_DIRECTORY $<TARGET_FILE_DIR:gitahead>
+  RUNTIME_OUTPUT_DIRECTORY $<TARGET_FILE_DIR:gittyup>
 )
 
 if(APPLE)
@@ -43,6 +43,6 @@ elseif(UNIX)
 
   install(TARGETS relauncher
     DESTINATION .
-    COMPONENT ${GITAHEAD_NAME}
+    COMPONENT ${GITTYUP_NAME}
   )
 endif()

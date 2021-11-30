@@ -26,11 +26,13 @@
 namespace {
 
 const QString kLinkFmt = "<a href='%1'>%2</a>";
-const QString kSupportLink = "mailto:support@gitahead.com";
-const QString kVideoLink = "https://gitahead.com/#tutorials";
+const QString kSupportLink = "<TODO: replace mail. mailto:support@gitahead.com";
+const QString kVideoLink = "TODO";
 
 class DefaultWidget : public QFrame
 {
+  Q_OBJECT
+
 public:
   DefaultWidget(QWidget *parent = nullptr)
     : QFrame(parent)
@@ -187,3 +189,5 @@ void TabWidget::tabRemoved(int index)
 
   mDefaultWidget->setVisible(!count());
 }
+
+#include "TabWidget.moc"

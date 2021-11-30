@@ -63,6 +63,8 @@ enum Role
 
 class RepoModel : public QAbstractListModel
 {
+  Q_OBJECT
+
 public:
   enum Row
   {
@@ -151,6 +153,8 @@ private:
 
 class HostModel : public QAbstractItemModel
 {
+  Q_OBJECT
+
 public:
   HostModel(QStyle *style, QObject *parent = nullptr)
     : QAbstractItemModel(parent),
@@ -390,10 +394,10 @@ StartDialog::StartDialog(QWidget *parent)
   setAttribute(Qt::WA_DeleteOnClose);
   setWindowTitle(tr("Choose Repository"));
 
-  QIcon icon(":/GitAhead.iconset/icon_128x128.png");
+  QIcon icon(":/Gittyup.iconset/icon_128x128.png");
   IconLabel *iconLabel = new IconLabel(icon, 128, 128, this);
 
-  QIcon title(":/logo-type.png");
+  QIcon title(":/logo-type_light@2x.png");
   IconLabel *titleLabel = new IconLabel(title, 163, 38, this);
 
   QString subtitleText = kSubtitleFmt.arg(tr("Understand your history!"));
@@ -850,3 +854,5 @@ MainWindow *StartDialog::openWindow(const QString &repo)
 
   return nullptr;
 }
+
+#include "StartDialog.moc"

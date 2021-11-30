@@ -112,7 +112,7 @@ private:
 ThemeDialog::ThemeDialog(QWidget *parent)
   : QDialog(parent)
 {
-  setWindowTitle("Pick a theme for GitAhead");
+  setWindowTitle("Pick a theme for Gittyup");
   
   ThemeButton *native = new ThemeButton(
     tr("Native Theme"),

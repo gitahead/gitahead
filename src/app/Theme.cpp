@@ -96,7 +96,7 @@ QString Theme::styleSheet() const
       "  background: palette(base)"
       "}"
       "DetailView #separator {"
-      "  border-top: 1px solid palette(light)"
+      "  border-top: 1px solid palette(midlight)"
       "}"
       "CommitEditor {"
       "  background: palette(window)"
@@ -105,18 +105,18 @@ QString Theme::styleSheet() const
       "DiffView {"
       "  background: palette(mid)"
       "}"
-      "DiffView .QFrame {"
-      "  background: palette(midlight)"
+      "DiffView FileWidget {"
+      "  background: palette(window)"
       "}"
       "DiffView HunkWidget {"
-      "  background: palette(base)"
+      "  border-top: 1px solid palette(mid)"
       "}"
       "DiffView HunkWidget QLabel {"
       "  color: palette(bright-text)"
       "}"
 
       "FileList {"
-      "  border-top: 1px solid palette(light)"
+      "  border-top: 1px solid palette(midlight)"
       "}"
       "FileList QToolButton:pressed {"
       "  background: #6C6C6C"
@@ -249,11 +249,12 @@ QString Theme::styleSheet() const
     "DiffView {"
     "  background: palette(dark)"
     "}"
-    "DiffView .QFrame {"
+    "DiffView FileWidget {"
     "  background: #E4E8EE"
     "}"
     "DiffView HunkWidget {"
-    "  background: #FFFFFF"
+    "  background: palette(midlight);"
+    "  border-top: 1px solid palette(dark)"
     "}"
     "DiffView HunkWidget QLabel {"
     "  color: #4F4F4F"
@@ -522,6 +523,22 @@ QPalette Theme::commitList()
 #endif
 
   return palette;
+}
+
+QColor Theme::commitEditor(CommitEditor color)
+{
+  if (mDark) {
+    switch (color) {
+      case CommitEditor::SpellError:    return "#BC0009";
+      case CommitEditor::SpellIgnore:   return "#E1E5F2";
+      case CommitEditor::LengthWarning: return "#464614";
+    }
+  }
+  switch (color) {
+    case CommitEditor::SpellError:    return Qt::red;
+    case CommitEditor::SpellIgnore:   return Qt::gray;
+    case CommitEditor::LengthWarning: return "#EFF0F1";
+  }
 }
 
 QColor Theme::diff(Diff color)

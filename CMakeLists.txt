@@ -1,35 +1,37 @@
-cmake_minimum_required(VERSION 3.3.1)
-project(GitAhead)
+cmake_minimum_required(VERSION 3.6.2)
+project(Gittyup)
 
 # Set name and version.
-set(GITAHEAD_NAME "GitAhead")
-set(GITAHEAD_VERSION_MAJOR 2)
-set(GITAHEAD_VERSION_MINOR 5)
-set(GITAHEAD_VERSION_PATCH 11)
-set(GITAHEAD_VERSION
-  "${GITAHEAD_VERSION_MAJOR}.${GITAHEAD_VERSION_MINOR}.${GITAHEAD_VERSION_PATCH}"
+set(GITTYUP_NAME "Gittyup")
+set(GITTYUP_VERSION_MAJOR 1)
+set(GITTYUP_VERSION_MINOR 0)
+set(GITTYUP_VERSION_PATCH 0)
+set(GITTYUP_VERSION
+  "${GITTYUP_VERSION_MAJOR}.${GITTYUP_VERSION_MINOR}.${GITTYUP_VERSION_PATCH}"
 )
 
 # Generate build date.
-string(TIMESTAMP GITAHEAD_BUILD_DATE)
+string(TIMESTAMP GITTYUP_BUILD_DATE)
 
 # Lookup git revision.
 find_package(Git)
 if(GIT_FOUND)
   execute_process(
-    COMMAND ${GIT_EXECUTABLE} show -s --format=%h HEAD
-    OUTPUT_VARIABLE GITAHEAD_BUILD_REVISION
+    COMMAND ${GIT_EXECUTABLE} --git-dir=${CMAKE_SOURCE_DIR}/.git show -s --format=%h HEAD
+    OUTPUT_VARIABLE GITTYUP_BUILD_REVISION
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
 else()
-  set(GITAHEAD_BUILD_REVISION "unknown")
+  set(GITTYUP_BUILD_REVISION "unknown")
 endif()
 
 # Explicitly disable shared libraries.
 set(BUILD_SHARED_LIBS OFF)
 
-# Require C++11.
-set(CMAKE_CXX_STANDARD 11)
+option(FLATPAK "Building for flatpak" OFF)
+
+# Require C++17.
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 # Disable exceptions and RTTI.
@@ -37,7 +39,7 @@ if(WIN32)
   string(REPLACE "/EHsc" "/EHs-c-" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
   string(REPLACE "/GR" "/GR-" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
 else()
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -fno-rtti")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 endif()
 
 if(UNIX AND NOT APPLE)
@@ -59,7 +61,13 @@ if(APPLE)
   set(QT_MODULES ${QT_MODULES} DBus)
 endif()
 
-find_package(Qt5 5.9 COMPONENTS ${QT_MODULES} REQUIRED)
+find_package(Qt5 5.15 COMPONENTS ${QT_MODULES} LinguistTools REQUIRED)
+if (FLATPAK)
+    find_package(Qt5 5.15 COMPONENTS XcbQpa REQUIRED)
+endif()
+
+set(QT_TRANSLATIONS_DIR "${Qt5_DIR}/../../../translations")
+set(QT_TRANSLATIONS_DIR "/usr/share/qt/translations")
 
 if(APPLE)
   foreach(QT_MODULE ${QT_MODULES})
@@ -77,5 +85,6 @@ endif()
 
 add_subdirectory(dep)
 add_subdirectory(src)
+add_subdirectory(l10n)
 add_subdirectory(test)
 add_subdirectory(pack)

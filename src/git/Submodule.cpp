@@ -14,7 +14,7 @@
 
 namespace git {
 
-const QString kUrl = "https://gitahead.com";
+const QString kUrl = "https://github.com/Murmele/Gittyup";
 
 Submodule::Submodule() {}
 
@@ -121,9 +121,11 @@ int Submodule::status() const
   return status;
 }
 
-Result Submodule::update(Remote::Callbacks *callbacks, bool init)
+Result Submodule::update(Remote::Callbacks *callbacks, bool init, bool checkout_force)
 {
   git_submodule_update_options opts = GIT_SUBMODULE_UPDATE_OPTIONS_INIT;
+  opts.fetch_opts.callbacks.connect = &Remote::Callbacks::connect;
+  opts.fetch_opts.callbacks.disconnect = &Remote::Callbacks::disconnect;
   opts.fetch_opts.callbacks.sideband_progress = &Remote::Callbacks::sideband;
   opts.fetch_opts.callbacks.credentials = &Remote::Callbacks::credentials;
   opts.fetch_opts.callbacks.certificate_check = &Remote::Callbacks::certificate;
@@ -132,6 +134,8 @@ Result Submodule::update(Remote::Callbacks *callbacks, bool init)
   opts.fetch_opts.callbacks.resolve_url = &Remote::Callbacks::url;
   opts.fetch_opts.callbacks.payload = callbacks;
 
+  if (checkout_force)
+	  opts.checkout_opts.checkout_strategy |= GIT_CHECKOUT_FORCE;
   // Use a fake URL. Submodule update doesn't have a way to
   // query a different proxy for each submodule remote.
   QByteArray proxy = Remote::proxyUrl(kUrl, opts.fetch_opts.proxy_opts.type);

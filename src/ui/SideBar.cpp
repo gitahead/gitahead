@@ -101,6 +101,8 @@ protected:
 
 class RepoModel : public QAbstractItemModel
 {
+  Q_OBJECT
+
 public:
   enum RootRow
   {
@@ -501,6 +503,33 @@ public:
         }
       }
 
+      case Qt::ToolTipRole: {
+        if (!parent.isValid() || mShowFullPath) // makes no sense to show tooltip when path is already shown completely
+            return "";
+
+        switch (parent.row()) {
+          case Repo:
+            if (mTabs->count()) {
+              RepoView *view = static_cast<RepoView *>(mTabs->widget(row));
+              return view->repo().workdir().path();
+            }
+
+            return "";
+
+          case Recent: {
+            RecentRepositories *recent = RecentRepositories::instance();
+            if (recent->count()) {
+              RecentRepository *repo = repos->repository(row);
+              return repo->path();
+            }
+
+            return "";
+          }
+
+          default:
+            return QVariant();
+        }
+      }
       default:
         return QVariant();
     }
@@ -612,13 +641,11 @@ SideBar::SideBar(TabWidget *tabs, QWidget *parent)
   RepoModel *model = new RepoModel(tabs, view);
   view->setModel(model);
 
-  // Try really hard to make sure all pending events are
-  // processed before resetting selection and expansion.
+  // Restore selection and expansion state after model reset.
   connect(model, &RepoModel::modelReset, view, [view, model] {
-    QCoreApplication::processEvents();
     view->setCurrentIndex(model->currentIndex());
     restoreExpansionState(view);
-  }, Qt::QueuedConnection);
+  });
 
   connect(tabs, &TabWidget::currentChanged, view, [view, model] {
     view->setCurrentIndex(model->currentIndex());
@@ -894,3 +921,5 @@ void SideBar::promptToRemoveAccount(Account *account)
 
   dialog->open();
 }
+
+#include "SideBar.moc"

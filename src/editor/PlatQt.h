@@ -19,9 +19,7 @@
 class QPaintDevice;
 class QPainter;
 
-#ifdef SCI_NAMESPACE
 namespace Scintilla {
-#endif
 
 inline QColor QColorFromCA(ColourDesired ca)
 {
@@ -94,15 +92,17 @@ public:
   void Ellipse(PRectangle rc, ColourDesired fore, ColourDesired back) override;
   void Copy(PRectangle rc, Point from, Surface &surfaceSource) override;
 
+  virtual std::unique_ptr<IScreenLineLayout> Layout(const IScreenLine *screenLine) override { /* TODO: implement */ return nullptr;}
+
   void DrawTextNoClip(PRectangle rc, Font &font, XYPOSITION ybase,
-    const char *s, int len, ColourDesired fore, ColourDesired back) override;
+    std::string_view text, ColourDesired fore, ColourDesired back) override;
   void DrawTextClipped(PRectangle rc, Font &font, XYPOSITION ybase,
-    const char *s, int len, ColourDesired fore, ColourDesired back) override;
+    std::string_view text, ColourDesired fore, ColourDesired back) override;
   void DrawTextTransparent(PRectangle rc, Font &font, XYPOSITION ybase,
-    const char *s, int len, ColourDesired fore) override;
-  void MeasureWidths(Font &font, const char *s, int len,
+    std::string_view text, ColourDesired fore) override;
+  void MeasureWidths(Font &font, std::string_view s,
     XYPOSITION *positions) override;
-  XYPOSITION WidthText(Font &font, const char *s, int len) override;
+  XYPOSITION WidthText(Font &font, std::string_view s) override;
   XYPOSITION Ascent(Font &font) override;
   XYPOSITION Descent(Font &font) override;
   XYPOSITION InternalLeading(Font &font) override;
@@ -114,12 +114,11 @@ public:
 
   void SetUnicodeMode(bool unicodeMode) override {}
   void SetDBCSMode(int codePage) override {}
+  void SetBidiR2L(bool bidiR2L_) override {/* TODO: implement */};
 
   QPainter *GetPainter();
 };
 
-#ifdef SCI_NAMESPACE
-}
-#endif
+} // namespace Scintilla
 
 #endif

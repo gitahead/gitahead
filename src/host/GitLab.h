@@ -14,6 +14,8 @@
 
 class GitLab : public Account
 {
+  Q_OBJECT
+
 public:
   GitLab(const QString &username);
 

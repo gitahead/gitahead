@@ -16,6 +16,21 @@
 #include <QFlags>
 #include <QSharedPointer>
 
+/*!
+ * \brief containsPath
+ * Checks if \p str contains \p occurence from start (if it is a subfile/subfolder of \p occurence)
+ * Testcases:
+ * /src/testfile.txt, /src/testfile.txt1 - path: /src/testfile.txt --> only /src/testfile.txt1 is shown
+ * /src/testfile.txt, /src/testfile.txt1 - path: /src --> testfile.txt and testfile.txt is shown
+ * /src/test/test.txt11, /src/testfile.txt, /src/testfile.txt1 - path: /src/test --> only /src/test/testtest.txt11 is shown
+ * \param str String in which should be searched
+ * \param occurence Search this string in \p str
+ * \param cs Case sensitive or not
+ * \return True when contains, otherwise false
+ */
+bool containsPath(QString &str, QString &occurence, Qt::CaseSensitivity cs = Qt::CaseSensitive);
+
+
 namespace git {
 
 class Patch;
@@ -52,7 +67,13 @@ public:
   };
 
   Diff();
-
+  /*!
+   * Writes the complete diff into an array.
+   * Usefull for testing and checking
+   * \brief print
+   * \return
+   */
+  QByteArray print();
   bool isValid() const { return d; }
   explicit operator bool() const { return isValid(); }
 
@@ -73,7 +94,7 @@ public:
   void merge(const Diff &diff);
 
   // Detect renames, copies, etc. This is expensive.
-  void findSimilar();
+  void findSimilar(bool untracked = false);
 
   void sort(SortRole role, Qt::SortOrder order = Qt::AscendingOrder);
 

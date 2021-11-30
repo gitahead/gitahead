@@ -16,6 +16,7 @@
 #include "git/Repository.h"
 #include "git/RevWalk.h"
 #include "git/Signature.h"
+#include <QDateTime>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QScrollBar>
@@ -239,7 +240,7 @@ void BlameMargin::paintEvent(QPaintEvent *event)
       time = dateTime.toTime_t();
     }
 
-    // Draw backround.
+    // Draw background.
     if (id == mSelection) {
       painter.fillRect(rect, palette().highlight());
     } else if (time >= 0 && mMinTime >= 0 && mMaxTime >= 0 &&

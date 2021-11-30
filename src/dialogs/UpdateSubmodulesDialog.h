@@ -22,6 +22,8 @@ class Submodule;
 
 class UpdateSubmodulesDialog : public QDialog
 {
+  Q_OBJECT
+
 public:
   UpdateSubmodulesDialog(const git::Repository &repo, QWidget *parent = nullptr);
 

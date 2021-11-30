@@ -40,6 +40,11 @@ CommitDialog::CommitDialog(
     case Settings::PromptCherryPick:
       title = tr("Cherry-pick commit message");
       break;
+
+    case Settings::PromptDirectories:
+    case Settings::PromptLargeFiles:
+      Q_ASSERT(false);
+      break;
   }
 
   setWindowTitle(title);
@@ -60,8 +65,7 @@ CommitDialog::CommitDialog(
   QDialogButtonBox *buttons = new QDialogButtonBox(this);
   connect(buttons, &QDialogButtonBox::accepted, this, &QDialog::accept);
   connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
-  
-  
+
   switch (kind) {
     case Settings::PromptMerge:
       buttons->addButton(tr("Merge"), QDialogButtonBox::AcceptRole);
@@ -81,6 +85,11 @@ CommitDialog::CommitDialog(
     case Settings::PromptCherryPick:
       buttons->addButton(tr("Cherry-pick"), QDialogButtonBox::AcceptRole);
       buttons->addButton(tr("Abort"), QDialogButtonBox::RejectRole);
+      break;
+
+    case Settings::PromptDirectories:
+    case Settings::PromptLargeFiles:
+      Q_ASSERT(false);
       break;
   }
 

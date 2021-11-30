@@ -18,8 +18,10 @@ class Branch;
 
 class DeleteBranchDialog : public QMessageBox
 {
+  Q_OBJECT
+
 public:
   DeleteBranchDialog(const git::Branch &branch, QWidget *parent = nullptr);
 };
 
-#endif 
+#endif

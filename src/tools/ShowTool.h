@@ -14,7 +14,11 @@
 
 class ShowTool : public ExternalTool
 {
+  Q_OBJECT
+
 public:
+  static bool openFileManager(QString path);
+
   ShowTool(const QString &file, QObject *parent = nullptr);
 
   Kind kind() const override;
