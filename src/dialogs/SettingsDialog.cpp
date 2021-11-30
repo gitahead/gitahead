@@ -267,6 +267,14 @@ public:
     layout->addRow(tr("External diff:"), diffTool);
     layout->addRow(tr("External merge:"), mergeTool);
     layout->addRow(tr("Backup files:"), backup);
+
+    QLineEdit *mFileManagerCommand = new QLineEdit(this);
+    layout->addRow(tr("File manager command:"), mFileManagerCommand);
+
+    connect(mFileManagerCommand, &QLineEdit::textChanged, [](const QString &text) {
+      Settings::instance()->setValue("filemanager/command", text);
+    });
+    mFileManagerCommand->setText(Settings::instance()->value("filemanager/command").toString());
   }
 
 private:
@@ -736,7 +744,6 @@ private:
 SettingsDialog::SettingsDialog(Index index, QWidget *parent)
   : QMainWindow(parent, Qt::Dialog)
 {
-  setMinimumWidth(500);
   setAttribute(Qt::WA_DeleteOnClose);
   setUnifiedTitleAndToolBarOnMac(true);
   setContextMenuPolicy(Qt::NoContextMenu);
@@ -889,6 +896,8 @@ SettingsDialog::SettingsDialog(Index index, QWidget *parent)
 
   // Select the requested index.
   actions->actions().at(index)->trigger();
+
+  setMinimumWidth(toolbar->sizeHint().width());
 }
 
 void SettingsDialog::openSharedInstance(Index index)

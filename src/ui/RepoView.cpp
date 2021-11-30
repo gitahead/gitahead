@@ -43,6 +43,7 @@
 #include "index/Index.h"
 #include "log/LogEntry.h"
 #include "log/LogView.h"
+#include "tools/ShowTool.h"
 #include "watcher/RepositoryWatcher.h"
 #include <QCheckBox>
 #include <QCloseEvent>
@@ -2200,7 +2201,20 @@ void RepoView::promptToReset(
   }
 
   QString id = commitToAmend ? commitToAmend.shortId() : commit.shortId();
-  QString title = commitToAmend ? tr("Amend?") : tr("Reset?");
+  QString title = commitToAmend ? tr("Amend") : tr("Reset");
+  switch (type) {
+	case GIT_RESET_SOFT:
+	  title += " Soft";
+	  break;
+	case GIT_RESET_MIXED:
+	  title += " Mixed";
+	  break;
+	case GIT_RESET_HARD:
+	  title += " Hard";
+	  break;
+  }
+  title += "?";
+
   QString text = commitToAmend ?
     tr("Are you sure you want to amend '%1'?").arg(id) :
     tr("Are you sure you want to reset '%1' to '%2'?").arg(head.name(), id);
@@ -2544,6 +2558,11 @@ ConfigDialog *RepoView::configureSettings(ConfigDialog::Index index)
   ConfigDialog *dialog = new ConfigDialog(this, index);
   dialog->open();
   return dialog;
+}
+
+void RepoView::openFileManager()
+{
+  ShowTool::openFileManager(mRepo.workdir().absolutePath());
 }
 
 void RepoView::ignore(const QString &name)
