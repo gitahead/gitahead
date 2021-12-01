@@ -858,7 +858,16 @@ void RepoView::startIndexing()
     args.prepend("--log");
 
   QDir dir(QCoreApplication::applicationDirPath());
-  mIndexer.start(dir.filePath("indexer"), args);
+#ifdef WIN32
+  auto indexer_cmd = dir.filePath("indexer.exe");
+#else
+  auto indexer_cmd = dir.filePath("indexer");
+#endif
+  QFileInfo check_file(indexer_cmd);
+  if (!check_file.isFile()) {
+	  qDebug() << "No indexer found: " << indexer_cmd;
+  }
+  mIndexer.start(indexer_cmd, args);
 }
 
 void RepoView::cancelIndexing()
