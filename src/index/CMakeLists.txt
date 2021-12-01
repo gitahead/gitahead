@@ -41,14 +41,22 @@ if(APPLE)
 else()
   if(WIN32)
     target_link_libraries(indexer Dbghelp.lib)
-  else()
+  elseif (NOT FLATAPK)
     set_target_properties(indexer PROPERTIES
       INSTALL_RPATH "$ORIGIN"
     )
   endif()
 
-  install(TARGETS indexer
-    DESTINATION .
-    COMPONENT ${GITTYUP_NAME}
-  )
+  if (FLATPAK)
+      # Install application.
+      install(TARGETS indexer
+	DESTINATION ./bin # otherwise the executable will not be found by flatpak
+	COMPONENT ${GITTYUP_NAME}
+      )
+    else()
+      install(TARGETS indexer
+	DESTINATION .
+	COMPONENT ${GITTYUP_NAME}
+      )
+    endif()
 endif()
