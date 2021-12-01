@@ -121,8 +121,7 @@ git_delta_t Patch::status() const
   if (!d) {
       // can occur, when nothing is staged
       // so the staged patch is empty
-      git_delta_t delta;
-      return delta;
+      return GIT_DELTA_UNMODIFIED;
   }
   return git_patch_get_delta(d.data())->status;
 }
