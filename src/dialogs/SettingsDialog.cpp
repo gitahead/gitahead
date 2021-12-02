@@ -269,7 +269,10 @@ public:
     layout->addRow(tr("Backup files:"), backup);
 
     QLineEdit *mFileManagerCommand = new QLineEdit(this);
-    layout->addRow(tr("File manager command:"), mFileManagerCommand);
+	QHBoxLayout* fileManagerLayout = new QHBoxLayout();
+	fileManagerLayout->addWidget(mFileManagerCommand);
+	fileManagerLayout->addWidget(new QLabel("\"%1\" = Repo Path", this));
+	layout->addRow(tr("File manager command:"), fileManagerLayout);
 
     connect(mFileManagerCommand, &QLineEdit::textChanged, [](const QString &text) {
       Settings::instance()->setValue("filemanager/command", text);
