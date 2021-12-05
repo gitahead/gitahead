@@ -120,7 +120,7 @@ int push_negotiation(
   void *payload)
 {
   QList<Remote::PushUpdate> list;
-  for (int i = 0; i < len; ++i) {
+  for (size_t i = 0; i < len; ++i) {
     const git_push_update *update = updates[i];
     list.append({
       update->src_refname,
@@ -222,6 +222,8 @@ int Remote::Callbacks::disconnect(
   git_remote *remote,
   void *payload)
 {
+  Q_UNUSED(remote)
+
   Remote::Callbacks *cbs = reinterpret_cast<Remote::Callbacks *>(payload);
   cbs->mRemote = nullptr;
   return 0;
@@ -248,7 +250,7 @@ int Remote::Callbacks::credentials(
   const git_error *error = git_error_last();
   if (error && error->klass == GIT_ERROR_SSH &&
       QByteArray(error->message).endsWith("combination invalid"))
-    return -1;
+    return -GIT_ERROR_SSH;
 
   Remote::Callbacks *cbs = reinterpret_cast<Remote::Callbacks *>(payload);
   if (types & GIT_CREDENTIAL_SSH_KEY) {
@@ -292,11 +294,11 @@ int Remote::Callbacks::credentials(
       if (!QFile::exists(key)) {
         QString err = QString("identity file not found: %1").arg(key);
         git_error_set_str(GIT_ERROR_NET, err.toUtf8());
-        return -1;
+        return -GIT_ERROR_NET;
       }
     } else if (!keyFile(key, cbs->keyFilePath())) {
       git_error_set_str(GIT_ERROR_NET, "failed to find SSH identity file");
-      return -1;
+      return -GIT_ERROR_NET;
     }
 
     QString pub = QString("%1.pub").arg(key);
@@ -307,7 +309,7 @@ int Remote::Callbacks::credentials(
     QFile file(key);
     if (!file.open(QFile::ReadOnly)) {
       git_error_set_str(GIT_ERROR_NET, "failed to open SSH identity file");
-      return -1;
+      return -GIT_ERROR_NET;
     }
 
     QTextStream in(&file);
@@ -350,6 +352,8 @@ int Remote::Callbacks::certificate(
   const char *host,
   void *payload)
 {
+  Q_UNUSED(host)
+
   if (valid || cert->cert_type == GIT_CERT_HOSTKEY_LIBSSH2)
     return 0;
 
@@ -364,7 +368,7 @@ int Remote::Callbacks::certificate(
     return 0;
 
   git_error_set_str(GIT_ERROR_SSL, "invalid certificate");
-  return -1;
+  return -GIT_ERROR_SSL;
 }
 
 int Remote::Callbacks::transfer(
@@ -401,6 +405,8 @@ int Remote::Callbacks::url(
   int direction,
   void *payload)
 {
+  Q_UNUSED(direction)
+
   Remote::Callbacks *cbs = reinterpret_cast<Remote::Callbacks *>(payload);
   QString resolved(url);
   if (!cbs->url(resolved))
