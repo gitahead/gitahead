@@ -103,6 +103,8 @@ public:
 
   void progress(const QString &path, int current, int total) override
   {
+    Q_UNUSED(path)
+
     // Add entries all at once.
     if (current == total && !mEntries.isEmpty())
       mLog->addEntries(mEntries);
@@ -182,6 +184,8 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   auto signal = static_cast<Signal>(&QProcess::finished);
   connect(&mIndexer, signal,
   [this, searchField](int code, QProcess::ExitStatus status) {
+    Q_UNUSED(code)
+
     searchField->setPlaceholderText(tr("Search"));
     if (status == QProcess::CrashExit) {
       QString text =
@@ -287,6 +291,8 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   // Respond to diff/tree mode change.
   connect(mDetails, &DetailView::viewModeChanged,
   [this](ViewMode mode, bool spontaneous) {
+    Q_UNUSED(mode)
+
     // Update interface.
     this->toolBar()->updateView();
     MenuBar::instance(this)->updateView();
@@ -732,6 +738,40 @@ void RepoView::visitLink(const QString &link)
     mergeAbort();
     return;
   }
+
+  if (action == "sslverifyrepo") {
+    if (mRepo.isValid()) {
+      git::Config config = mRepo.config();
+      config.setValue<bool>("http.sslVerify", false);
+      QMessageBox msg(QMessageBox::Icon::Information,
+                      tr("Certificate Error"),
+                      tr("SSL verification disabled for this repository"),
+                      QMessageBox::Button::Ok);
+      msg.setDetailedText(
+        tr("[http]\n"
+           "  sslVerify = false\n\n"
+           "was added to %1/config").arg(mRepo.dir().path()));
+      msg.exec();
+    }
+    return;
+  }
+
+  if (action == "sslverifygit") {
+    git::Config config = git::Config::global();
+    if (config.isValid()) {
+      config.setValue<bool>("http.sslVerify", false);
+      QMessageBox msg(QMessageBox::Icon::Information,
+                      tr("Certificate Error"),
+                      tr("SSL verification disabled for all git repositories"),
+                      QMessageBox::Button::Ok);
+      msg.setDetailedText(
+        tr("[http]\n"
+           "  sslVerify = false\n\n"
+           "was added to %1").arg(config.globalPath()));
+      msg.exec();
+    }
+    return;
+  }
 }
 
 Repository *RepoView::remoteRepo()
@@ -1046,6 +1086,16 @@ QFuture<git::Result> RepoView::fetch(
       entry->addEntry(LogEntry::Error, tr("Fetch canceled."));
     } else if (!result) {
       error(entry, tr("fetch from"), remote.name(), result.errorString());
+      // Add ssl hint.
+      if (result.error() == -GIT_ERROR_SSL) {
+        git::Config config = mRepo.isValid() ? mRepo.config() : git::Config::global();
+        if (config.value<bool>("http.sslVerify", true)) {
+          QString ssl =
+            tr("You may disable ssl verification <a href='action:sslverifyrepo'>for this repository</a> "
+               "or overall disable ssl verification <a href='action:sslverifygit'>for all repositories</a>.");
+          entry->addEntry(LogEntry::Hint, ssl);
+        }
+      }
     } else {
       mCallbacks->storeDeferredCredentials();
       if (entry->entries().isEmpty()) {
