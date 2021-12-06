@@ -2680,8 +2680,14 @@ void RepoView::openTerminal()
 #endif
   }
 
-  if (terminalCmd.isEmpty())
+  if (terminalCmd.isEmpty()) {
+    auto messagebox = QMessageBox(this);
+    messagebox.setWindowTitle(tr("No terminal executable found"));
+    messagebox.setText(tr("No terminal executable was found. Please configure a terminal in the configuration."));
+    messagebox.setStandardButtons(QMessageBox::Ok);
+    messagebox.exec();
     return;
+  }
 
 #if defined(Q_OS_WIN)
   // No direct method of QProcess can take a raw command line and a working directory
