@@ -34,6 +34,7 @@ theme['widget']    = {
   text             = { default = '#E1E5F2', disabled = '#555B65' },
   bright_text      = '#AAB2BE',
   background       = '#212226',
+  alternate        = '#2D2E34', -- an alternate background color for list rows
   highlight        = { active = '#2A82DA', inactive = '#1B5B9B' },
   highlighted_text = { active = '#E1E5F2', inactive = '#E1E5F2' },
 }
@@ -58,6 +59,7 @@ theme['commits']   = {
   text             = '#E1E5F2',
   bright_text      = '#AAB2BE',
   background       = '#2D2E34',
+  alternate        = '#2D2E34', -- an alternate background color for list rows
   highlight        = { active = '#2A82DA', inactive = '#1B5B9B' },
   highlighted_text = { active = '#E1E5F2', inactive = '#E1E5F2' },
   highlighted_bright_text = { active = '#A6CBF0', inactive = '#9090A5' }

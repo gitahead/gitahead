@@ -246,7 +246,8 @@ QString CustomTheme::styleSheet() const
     "  border-bottom: 1px solid palette(window)"
     "}"
 
-    "CommitDetail QToolButton, HunkWidget QToolButton {"
+    "CommitDetail QToolButton,"
+    "HunkWidget QToolButton {"
     "  border: 1px solid palette(shadow);"
     "  border-radius: 4px"
     "}"
@@ -400,11 +401,10 @@ QPalette CustomTheme::commitList()
   QVariantMap commitList = mMap.value("commits").toMap();
 
   QPalette palette;
-  setPaletteColors(palette, QPalette::Base, commitList.value("background"));
-
   setPaletteColors(palette, QPalette::Text, commitList.value("text"));
   setPaletteColors(palette, QPalette::BrightText, commitList.value("bright_text"));
-
+  setPaletteColors(palette, QPalette::Base, commitList.value("background"));
+  setPaletteColors(palette, QPalette::AlternateBase, commitList.value("alternate"));
   setPaletteColors(palette, QPalette::Highlight, commitList.value("highlight"));
   setPaletteColors(palette, QPalette::HighlightedText, commitList.value("highlighted_text"));
   setPaletteColors(palette, QPalette::WindowText, commitList.value("highlighted_bright_text"));
@@ -446,9 +446,9 @@ QPalette CustomTheme::fileList()
   QVariantMap fileList = mMap.value("files").toMap();
 
   QPalette palette;
+  setPaletteColors(palette, QPalette::Text, fileList.value("text"));
   setPaletteColors(palette, QPalette::Base, fileList.value("background"));
   setPaletteColors(palette, QPalette::AlternateBase, fileList.value("alternate"));
-  setPaletteColors(palette, QPalette::Text, fileList.value("text"));
   setPaletteColors(palette, QPalette::Highlight, fileList.value("highlight"));
   setPaletteColors(palette, QPalette::HighlightedText,
                    fileList.value("highlighted_text"));
@@ -489,6 +489,8 @@ QColor CustomTheme::star()
 #ifndef Q_OS_MAC
 void CustomTheme::polishWindow(QWindow *window) const
 {
+  Q_UNUSED(window)
+
   // FIXME: Change title bar color?
 }
 #endif
