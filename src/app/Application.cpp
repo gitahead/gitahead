@@ -27,6 +27,7 @@
 #include <QNetworkReply>
 #include <QOperatingSystemVersion>
 #include <QSettings>
+#include <QStyle>
 #include <QTimer>
 #include <QTranslator>
 #include <QUrlQuery>
@@ -152,12 +153,17 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   // Set pathspec filter.
   mPathspec = parser.value("filter");
 
+#if defined(Q_OS_WIN)
+  // Load default palette.
+  QApplication::setPalette(QApplication::style()->standardPalette());
+#endif
+
   // Initialize theme.
   mTheme.reset(Theme::create(parser.value("theme")));
   setStyle(mTheme->style());
   setStyleSheet(mTheme->styleSheet());
 
-  // Read translation settings
+  // Read translation settings.
   QSettings settings;
   if ((!settings.value("translation/disable", false).toBool()) &&
       (!parser.isSet("no-translation"))) {
