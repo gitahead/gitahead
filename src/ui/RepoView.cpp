@@ -154,8 +154,6 @@ private:
 RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   : QSplitter(Qt::Vertical, parent), mRepo(repo)
 {
-  Application::track("RepoView");
-
   setHandleWidth(0);
   setAttribute(Qt::WA_DeleteOnClose);
 
@@ -177,12 +175,12 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   // Initialize index.
   mIndex = new Index(repo, this);
   SearchField *searchField = toolBar->searchField();
-  connect(&mIndexer, &QProcess::started, [searchField] {
+  connect(&mIndexer, &QProcess::started, this, [searchField] {
     searchField->setPlaceholderText(tr("Indexing..."));
   });
   using Signal = void (QProcess::*)(int,QProcess::ExitStatus);
   auto signal = static_cast<Signal>(&QProcess::finished);
-  connect(&mIndexer, signal,
+  connect(&mIndexer, signal, this,
   [this, searchField](int code, QProcess::ExitStatus status) {
     Q_UNUSED(code)
 
@@ -202,7 +200,7 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
 
   // Forward indexer stderr. Read from stdout.
   mIndexer.setProcessChannelMode(QProcess::ForwardedErrorChannel);
-  connect(&mIndexer, &QProcess::readyReadStandardOutput, [this] {
+  connect(&mIndexer, &QProcess::readyReadStandardOutput, this, [this] {
     mIndexer.readAllStandardOutput();
     mIndex->reset();
   });
@@ -245,7 +243,7 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
           menuBar, &MenuBar::updateBranch);
 
   // Select HEAD branch when it changes.
-  connect(notifier, &git::RepositoryNotifier::referenceUpdated,
+  connect(notifier, &git::RepositoryNotifier::referenceUpdated, this,
   [this](const git::Reference &ref) {
     if (ref.isValid() && ref.isHead()) {
       mRefs->select(ref);
@@ -273,7 +271,7 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
           this, &RepoView::statusChanged);
 
   // Respond to pathspec change.
-  connect(mPathspec, &PathspecWidget::pathspecChanged,
+  connect(mPathspec, &PathspecWidget::pathspecChanged, this,
   [this](const QString &pathspec) {
     git::Config config = mRepo.appConfig();
     mCommits->setPathspec(pathspec, config.value<bool>("index.enable", true));
@@ -282,14 +280,14 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   // Respond to search query change.
   connect(searchField, &SearchField::textChanged,
           mCommits, &CommitList::setFilter);
-  connect(mIndex, &Index::indexReset, [this, searchField] {
+  connect(mIndex, &Index::indexReset, this, [this, searchField] {
     mCommits->setFilter(searchField->text());
   });
 
   mDetails = new DetailView(repo, this);
 
   // Respond to diff/tree mode change.
-  connect(mDetails, &DetailView::viewModeChanged,
+  connect(mDetails, &DetailView::viewModeChanged, this,
   [this](ViewMode mode, bool spontaneous) {
     Q_UNUSED(mode)
 
@@ -308,7 +306,7 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   // FIXME: This is a workaround.
   connect(notifier, &git::RepositoryNotifier::directoryStaged,
           this, &RepoView::refresh, Qt::QueuedConnection);
-  connect(notifier, &git::RepositoryNotifier::directoryAboutToBeStaged,
+  connect(notifier, &git::RepositoryNotifier::directoryAboutToBeStaged, this,
   [this](const QString &dir, int count, bool &allow) {
     if (!Settings::instance()->prompt(Settings::PromptDirectories))
       return;
@@ -334,7 +332,7 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   });
 
   // large file size warning
-  connect(notifier, &git::RepositoryNotifier::largeFileAboutToBeStaged,
+  connect(notifier, &git::RepositoryNotifier::largeFileAboutToBeStaged, this,
   [this](const QString &file, int size, bool &allow) {
     if (!Settings::instance()->prompt(Settings::PromptLargeFiles))
       return;
@@ -381,7 +379,7 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   mDetailSplitter->addWidget(mDetails);
   mDetailSplitter->setStretchFactor(0, 1);
   mDetailSplitter->setStretchFactor(1, 3);
-  connect(mDetailSplitter, &QSplitter::splitterMoved, [this] {
+  connect(mDetailSplitter, &QSplitter::splitterMoved, this, [this] {
     QSettings().setValue(kSplitterKey, mDetailSplitter->saveState());
   });
 
@@ -397,7 +395,7 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
           this, &RepoView::cancelRemoteTransfer);
 
   mLogTimer.setSingleShot(true);
-  connect(&mLogTimer, &QTimer::timeout, [this] {
+  connect(&mLogTimer, &QTimer::timeout, this, [this] {
     setLogVisible(false);
   });
 
@@ -442,7 +440,7 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   mDetailSplitter->restoreState(QSettings().value(kSplitterKey).toByteArray());
 
   // Connect automatic fetch timer.
-  connect(&mFetchTimer, &QTimer::timeout, [this] {
+  connect(&mFetchTimer, &QTimer::timeout, this, [this] {
     fetch(git::Remote(), false, false);
   });
 }
@@ -785,13 +783,13 @@ Repository *RepoView::remoteRepo()
   mRemoteRepoCached = true;
 
   if (mRemoteRepo) {
-    auto err = connect(mRemoteRepo->account(), &Account::pullRequestError,
+    auto err = connect(mRemoteRepo->account(), &Account::pullRequestError, this,
     [this](const QString &name, const QString &message) {
       LogEntry *parent = addLogEntry(tr("Pull Request"), tr("Create"));
       error(parent, tr("create pull request"), name, message);
     });
 
-    connect(mRemoteRepo, &Repository::destroyed, [this, err] {
+    connect(mRemoteRepo, &Repository::destroyed, this, [this, err] {
       disconnect(err);
       mRemoteRepo = nullptr;
       mRemoteRepoCached = false;
@@ -949,7 +947,7 @@ void RepoView::setLogVisible(bool visible)
   timeline->setCurveShape(QTimeLine::LinearCurve);
   timeline->setUpdateInterval(20);
 
-  connect(timeline, &QTimeLine::valueChanged, [this, pos](qreal value) {
+  connect(timeline, &QTimeLine::valueChanged, this, [this, pos](qreal value) {
     setSizes({1, static_cast<int>(pos * value)});
   });
 
@@ -1700,7 +1698,7 @@ void RepoView::promptToForcePush(
 
   QPushButton *accept =
     dialog->addButton(tr("Force Push"), QMessageBox::AcceptRole);
-  connect(accept, &QPushButton::clicked, [this, remote, src] {
+  connect(accept, &QPushButton::clicked, this, [this, remote, src] {
     push(remote, src, QString(), false, true);
   });
 
@@ -1888,7 +1886,7 @@ bool RepoView::commit(
 
     QPushButton *accept =
       dialog->addButton(tr("Commit"), QMessageBox::AcceptRole);
-    connect(accept, &QPushButton::clicked, [this, message, upstream, parent] {
+    connect(accept, &QPushButton::clicked, this, [this, message, upstream, parent] {
       this->commit(message, upstream, parent, true);
     });
 
@@ -1970,7 +1968,7 @@ void RepoView::promptToCheckout()
 {
   git::Reference ref = reference();
   CheckoutDialog *dialog = new CheckoutDialog(mRepo, ref, this);
-  connect(dialog, &QDialog::accepted, [this, dialog] {
+  connect(dialog, &QDialog::accepted, this, [this, dialog] {
     checkout(dialog->reference(), dialog->detach());
   });
 
@@ -2011,7 +2009,7 @@ void RepoView::checkout(
 
   QPushButton *checkoutButton =
     dialog->addButton(tr("Checkout Detached HEAD"), QMessageBox::DestructiveRole);
-  connect(checkoutButton, &QPushButton::clicked, [this, ref, detach] {
+  connect(checkoutButton, &QPushButton::clicked, this, [this, ref, detach] {
     checkout(ref.target(), ref, detach);
   });
 
@@ -2025,7 +2023,7 @@ void RepoView::checkout(
 
     QPushButton *resetButton =
       dialog->addButton(tr("Reset Local Branch"), QMessageBox::AcceptRole);
-    connect(resetButton, &QPushButton::clicked, [this, ref, local] {
+    connect(resetButton, &QPushButton::clicked, this, [this, ref, local] {
       createBranch(local, ref.target(), ref, true, true);
     });
   } else {
@@ -2040,7 +2038,7 @@ void RepoView::checkout(
 
     QPushButton *createButton =
       dialog->addButton(tr("Create Local Branch"), QMessageBox::AcceptRole);
-    connect(createButton, &QPushButton::clicked, [this, ref, local] {
+    connect(createButton, &QPushButton::clicked, this, [this, ref, local] {
       createBranch(local, ref.target(), ref, true);
     });
   }
@@ -2095,7 +2093,7 @@ void RepoView::checkout(
 void RepoView::promptToCreateBranch(const git::Commit &commit)
 {
   NewBranchDialog *dialog = new NewBranchDialog(mRepo, commit, this);
-  connect(dialog, &QDialog::accepted, [this, dialog] {
+  connect(dialog, &QDialog::accepted, this, [this, dialog] {
     createBranch(
       dialog->name(), dialog->target(),
       dialog->upstream(), dialog->checkout());
@@ -2303,7 +2301,7 @@ void RepoView::promptToReset(
 
   QString buttonText = commitToAmend ? tr("Amend") : tr("Reset");
   QPushButton *accept = dialog->addButton(buttonText, QMessageBox::AcceptRole);
-  connect(accept, &QPushButton::clicked, [this, commit, type, commitToAmend] {
+  connect(accept, &QPushButton::clicked, this, [this, commit, type, commitToAmend] {
     reset(commit, type, commitToAmend);
 
     // Pre-populate the commit message editor.
@@ -2630,7 +2628,7 @@ void RepoView::ignore(const QString &name)
   if (!file.open(QFile::Append | QFile::Text))
     return;
 
-  QTextStream(&file) << name << endl;
+  QTextStream(&file) << name << "\n";
   file.close();
 
   refresh();
@@ -2667,14 +2665,14 @@ EditorWindow *RepoView::openEditor(
   }
 
   connect(widget, &BlameEditor::linkActivated, this, &RepoView::visitLink);
-  connect(widget, &BlameEditor::saved, [this] {
+  connect(widget, &BlameEditor::saved, this, [this] {
     // Notify window that the head branch is changed.
     emit mRepo.notifier()->referenceUpdated(mRepo.head());
   });
 
   // Track this window.
   mTrackedWindows.append(window);
-  connect(window, &QObject::destroyed, [this, window] {
+  connect(window, &QObject::destroyed, this, [this, window] {
     mTrackedWindows.removeAll(window);
   });
 
@@ -2869,65 +2867,66 @@ bool RepoView::checkForConflicts(LogEntry *parent, const QString &action)
 
 bool RepoView::match(QObject* search, QObject* parent)
 {
-    QObjectList children = parent->children();
-    for (auto child : children) {
-        if (child == search)
-            return true;
+  QObjectList children = parent->children();
+  for (auto child : children) {
+    if (child == search)
+      return true;
 
-        if (match(search, child))
-            return true;
-    }
-    return false;
+    if (match(search, child))
+      return true;
+  }
+  return false;
 }
 
 RepoView::DetailSplitterWidgets RepoView::detailSplitterMaximize(bool maximized, DetailSplitterWidgets maximizeWidget)
 {
-    QWidget* widget = mDetailSplitter->focusWidget();
+  QWidget* widget = mDetailSplitter->focusWidget();
 
-    DetailSplitterWidgets newMaximized = DetailSplitterWidgets::NotDefined;
+  DetailSplitterWidgets newMaximized = DetailSplitterWidgets::NotDefined;
 
-    if (maximizeWidget != DetailSplitterWidgets::NotDefined)
-        newMaximized = maximizeWidget;
+  if (maximizeWidget != DetailSplitterWidgets::NotDefined)
+    newMaximized = maximizeWidget;
 
-    mMaximized = maximized;
+  mMaximized = maximized;
 
-    if (mMaximized) {
-        bool found = false;
-        for (int i=0; i < mDetailSplitter->count(); i++) {
-            QWidget* w = mDetailSplitter->widget(i);
-            if (maximizeWidget == DetailSplitterWidgets::SideBar) {
-                if (w == mSideBar) {
-                    mSideBar->setVisible(true);
-                    found = true;
-                    continue;
-                }
-            } else if(maximizeWidget == DetailSplitterWidgets::DetailView) {
-                if (w == mDetails) {
-                    mDetails->setVisible(true);
-                    found = true;
-                    continue;
-                }
-            } else if (!widget)
-                return DetailSplitterWidgets::NotDefined;
-            else if (w == widget || match(widget, w)) {
-                w->setVisible(true);
-                found = true;
-                if (w == mSideBar)
-                    newMaximized = DetailSplitterWidgets::SideBar;
-                else if (w == mDetails)
-                    newMaximized = DetailSplitterWidgets::DetailView;
-                continue;
-            }
-            w->setVisible(false);
+  if (mMaximized) {
+    bool found = false;
+    for (int i=0; i < mDetailSplitter->count(); i++) {
+      QWidget* w = mDetailSplitter->widget(i);
+      if (maximizeWidget == DetailSplitterWidgets::SideBar) {
+        if (w == mSideBar) {
+          mSideBar->setVisible(true);
+          found = true;
+          continue;
         }
-
-        assert(found);
-    } else {
-        for (int i=0; i < mDetailSplitter->count(); i++)
-           mDetailSplitter->widget(i)->setVisible(true);
+      } else if(maximizeWidget == DetailSplitterWidgets::DetailView) {
+        if (w == mDetails) {
+          mDetails->setVisible(true);
+          found = true;
+          continue;
+        }
+      } else if (!widget)
+        return DetailSplitterWidgets::NotDefined;
+      else if (w == widget || match(widget, w)) {
+        w->setVisible(true);
+        found = true;
+        if (w == mSideBar)
+          newMaximized = DetailSplitterWidgets::SideBar;
+        else if (w == mDetails)
+          newMaximized = DetailSplitterWidgets::DetailView;
+        continue;
+      }
+      w->setVisible(false);
     }
 
-    return newMaximized;
+    assert(found);
+    Q_UNUSED(found)
+  } else {
+    for (int i=0; i < mDetailSplitter->count(); i++)
+      mDetailSplitter->widget(i)->setVisible(true);
+  }
+
+  return newMaximized;
 }
 
 #include "RepoView.moc"

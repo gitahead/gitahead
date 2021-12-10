@@ -120,13 +120,10 @@ public:
     mStoreCredentials = new QCheckBox(
       tr("Store credentials in secure storage"), this);
 
-    mUsageReporting = new QCheckBox(
-      tr("Allow collection of usage data"), this);
     QLabel *privacy = new QLabel(tr("<a href='view'>View privacy policy</a>"));
     connect(privacy, &QLabel::linkActivated, [] {
       AboutDialog::openSharedInstance(AboutDialog::Privacy);
     });
-	mUsageReporting->setEnabled(false);
 
     QFormLayout *form = new QFormLayout;
     form->addRow(tr("User name:"), mName);
@@ -137,7 +134,6 @@ public:
     form->addRow(QString(), mAutoPrune);
     form->addRow(tr("Language:"), mNoTranslation);
     form->addRow(tr("Credentials:"), mStoreCredentials);
-    form->addRow(tr("Usage reporting:"), mUsageReporting);
     form->addRow(QString(), privacy);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
@@ -148,14 +144,16 @@ public:
 
     // Connect signals after initializing fields.
     connect(mName, &QLineEdit::textChanged, [](const QString &text) {
-      git::Config::global().setValue("user.name", text);
+      git::Config config = git::Config::global();
+      config.setValue("user.name", text);
     });
 
     connect(mEmail, &QLineEdit::textChanged, [](const QString &text) {
-      git::Config::global().setValue("user.email", text);
+      git::Config config = git::Config::global();
+      config.setValue("user.email", text);
     });
 
-    connect(mFetch, &QCheckBox::toggled, [](bool checked) {
+    connect(mFetch, &QCheckBox::toggled, this, [](bool checked) {
       Settings::instance()->setValue("global/autofetch/enable", checked);
       foreach (MainWindow *window, MainWindow::windows()) {
         for (int i = 0; i < window->count(); ++i)
@@ -188,10 +186,6 @@ public:
       Settings::instance()->setValue("credential/store", checked);
       delete CredentialHelper::instance();
     });
-
-    connect(mUsageReporting, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setValue("tracking/enabled", checked);
-    });
   }
 
   void init()
@@ -214,7 +208,6 @@ public:
 
     mNoTranslation->setChecked(settings->value("translation/disable").toBool());
     mStoreCredentials->setChecked(settings->value("credential/store").toBool());
-    mUsageReporting->setChecked(settings->value("tracking/enabled").toBool());
   }
 
 private:
@@ -228,7 +221,6 @@ private:
   QCheckBox *mAutoPrune;
   QCheckBox *mNoTranslation;
   QCheckBox *mStoreCredentials;
-  QCheckBox *mUsageReporting;
 };
 
 class ToolsPanel : public QWidget
@@ -242,7 +234,7 @@ public:
     // external editor
     QLineEdit *editTool = new QLineEdit(this);
     editTool->setText(mConfig.value<QString>("gui.editor"));
-    connect(editTool, &QLineEdit::textChanged, [this](const QString &text) {
+    connect(editTool, &QLineEdit::textChanged, this, [this](const QString &text) {
       if (text.isEmpty()) {
         mConfig.remove("gui.editor");
       } else {
@@ -258,7 +250,7 @@ public:
     QCheckBox *backup =
       new QCheckBox(tr("Keep backup of merge files (.orig)"), this);
     backup->setChecked(mConfig.value<bool>("mergetool.keepBackup"));
-    connect(backup, &QCheckBox::toggled, [this](bool checked) {
+    connect(backup, &QCheckBox::toggled, this, [this](bool checked) {
       mConfig.setValue("mergetool.keepBackup", checked);
     });
 
@@ -291,16 +283,16 @@ private:
 
     // React to combo box selections.
     auto signal = QOverload<int>::of(&QComboBox::currentIndexChanged);
-    connect(comboBox, signal, [this, key, comboBox](int index) {
+    connect(comboBox, signal, this, [this, key, comboBox](int index) {
       mConfig.setValue(key, comboBox->currentText());
     });
 
     QPushButton *configure = new QPushButton(tr("Configure"), this);
-    connect(configure, &QPushButton::clicked, [this, comboBox, type] {
+    connect(configure, &QPushButton::clicked, this, [this, comboBox, type] {
       ExternalToolsDialog *dialog = new ExternalToolsDialog(type, this);
 
       // Update combo box when external tools dialog closes.
-      connect(dialog, &QDialog::finished, [dialog, comboBox, type] {
+      connect(dialog, &QDialog::finished, this, [comboBox, type] {
         QString name = comboBox->currentText();
         populateExternalTools(comboBox, type);
         comboBox->setCurrentIndex(comboBox->findText(name));
@@ -380,8 +372,7 @@ public:
       model->item(comboBox->count() - 1)->setEnabled(false);
 
     auto signal = QOverload<int>::of(&QComboBox::currentIndexChanged);
-    connect(comboBox, signal, [this, parent, comboBox] {
-
+    connect(comboBox, signal, this, [this, parent, comboBox] {
       //Add new theme
       if (comboBox->currentIndex() == comboBox->count() - 2) {
         QDialog dialog;
@@ -396,7 +387,7 @@ public:
         create->setEnabled(false);
 
         QLineEdit *nameField = new QLineEdit(&dialog);
-        connect(nameField, &QLineEdit::textChanged, [this, create, nameField] {
+        connect(nameField, &QLineEdit::textChanged, this, [create, nameField] {
           create->setEnabled(!nameField->text().isEmpty());
         });
 
@@ -444,7 +435,7 @@ public:
 
       if (mb.clickedButton() == restart) {
         QWidget *dialog = window();
-        QTimer::singleShot(0, [dialog] {
+        QTimer::singleShot(0, this, [dialog] {
           // Close the dialog.
           dialog->close();
 
@@ -800,7 +791,7 @@ SettingsDialog::SettingsDialog(Index index, QWidget *parent)
 
   // Track actions in a group.
   QActionGroup *actions = new QActionGroup(this);
-  connect(actions, &QActionGroup::triggered,
+  connect(actions, &QActionGroup::triggered, this,
   [this, stack, description, edit](QAction *action) {
     int index = action->data().toInt();
     bool config = (index < Window);
@@ -902,8 +893,6 @@ SettingsDialog::SettingsDialog(Index index, QWidget *parent)
 
 void SettingsDialog::openSharedInstance(Index index)
 {
-  Application::track("SettingsDialog");
-
   static QPointer<SettingsDialog> dialog;
   if (dialog) {
     dialog->show();
