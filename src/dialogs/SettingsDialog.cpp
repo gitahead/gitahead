@@ -11,6 +11,7 @@
 #include "AboutDialog.h"
 #include "DiffPanel.h"
 #include "ExternalToolsDialog.h"
+#include "HotkeysPanel.h"
 #include "PluginsPanel.h"
 #include "app/Application.h"
 #include "app/CustomTheme.h"
@@ -866,6 +867,14 @@ SettingsDialog::SettingsDialog(Index index, QWidget *parent)
   misc->setCheckable(true);
 
   stack->addWidget(new MiscPanel(this));
+
+  // Add hotkeys panel.
+  QAction *hotkeys = toolbar->addAction(QIcon(":/hotkeys.png"), tr("Hotkeys"));
+  hotkeys->setData(Hotkeys);
+  hotkeys->setActionGroup(actions);
+  hotkeys->setCheckable(true);
+
+  stack->addWidget(new HotkeysPanel(this));
 
 #ifdef Q_OS_UNIX
   // Add terminal panel.

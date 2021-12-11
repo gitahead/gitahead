@@ -29,6 +29,7 @@ add_library(ui
   Footer.cpp
   History.cpp
   IgnoreDialog.cpp
+  HotkeyManager.cpp
   IndexCompleter.cpp
   Location.cpp
   MainWindow.cpp
