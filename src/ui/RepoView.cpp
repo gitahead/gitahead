@@ -2681,11 +2681,19 @@ void RepoView::openTerminal()
   }
 
   if (terminalCmd.isEmpty()) {
-    auto messagebox = QMessageBox(this);
-    messagebox.setWindowTitle(tr("No terminal executable found"));
-    messagebox.setText(tr("No terminal executable was found. Please configure a terminal in the configuration."));
-    messagebox.setStandardButtons(QMessageBox::Ok);
-    messagebox.exec();
+    auto messagebox = new QMessageBox(this);
+    messagebox->setWindowTitle(tr("No terminal executable found"));
+    messagebox->setText(tr("No terminal executable was found. Please configure a terminal in the configuration."));
+    messagebox->setStandardButtons(QMessageBox::Ok);
+    messagebox->addButton(tr("Open Configuration"), QMessageBox::ApplyRole);
+    messagebox->setAttribute(Qt::WA_DeleteOnClose);
+
+    connect(messagebox, &QMessageBox::buttonClicked, this, [=](QAbstractButton *button) {
+      if (messagebox->buttonRole(button) == QMessageBox::ApplyRole) {
+        SettingsDialog::openSharedInstance();
+      }
+    }, Qt::QueuedConnection);
+    messagebox->open();
     return;
   }
 
