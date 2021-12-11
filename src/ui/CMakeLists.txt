@@ -59,6 +59,10 @@ add_library(ui
   ${IMPL_FILES}
 )
 
+if (FLATPAK)
+    target_compile_definitions(ui PRIVATE FLATPAK)
+endif()
+
 target_include_directories(ui PRIVATE
   ${CMAKE_CURRENT_BINARY_DIR}
 )

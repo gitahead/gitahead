@@ -125,6 +125,7 @@ public:
       AboutDialog::openSharedInstance(AboutDialog::Privacy);
     });
 
+
     QFormLayout *form = new QFormLayout;
     form->addRow(tr("User name:"), mName);
     form->addRow(tr("User email:"), mEmail);
@@ -135,6 +136,7 @@ public:
     form->addRow(tr("Language:"), mNoTranslation);
     form->addRow(tr("Credentials:"), mStoreCredentials);
     form->addRow(QString(), privacy);
+    form->addRow(QString(), new QLabel(tr("%1 will be replaced with the repository's directory")));
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(16,12,16,12);
@@ -260,6 +262,14 @@ public:
     layout->addRow(tr("External merge:"), mergeTool);
     layout->addRow(tr("Backup files:"), backup);
 
+    QLineEdit *mTerminalCommand = new QLineEdit(this);
+    layout->addRow(tr("Terminal emulator command:"), mTerminalCommand);
+    mTerminalCommand->setText(Settings::instance()->value("terminal/command").toString());
+
+    connect(mTerminalCommand, &QLineEdit::textChanged, [](const QString &text) {
+      Settings::instance()->setValue("terminal/command", text);
+    });
+    
     QLineEdit *mFileManagerCommand = new QLineEdit(this);
     layout->addRow(tr("File manager command:"), mFileManagerCommand);
 
