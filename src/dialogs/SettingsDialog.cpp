@@ -125,6 +125,9 @@ public:
       AboutDialog::openSharedInstance(AboutDialog::Privacy);
     });
 
+    mSingleInstance = new QCheckBox(
+      tr("Only allow a single running instance"), this);
+
     QFormLayout *form = new QFormLayout;
     form->addRow(tr("User name:"), mName);
     form->addRow(tr("User email:"), mEmail);
@@ -135,6 +138,10 @@ public:
     form->addRow(tr("Language:"), mNoTranslation);
     form->addRow(tr("Credentials:"), mStoreCredentials);
     form->addRow(QString(), privacy);
+
+#if defined(Q_OS_LINUX) || defined(Q_OS_WIN)
+    form->addRow(tr("Single instance:"), mSingleInstance);
+#endif
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(16,12,16,12);
@@ -186,6 +193,10 @@ public:
       Settings::instance()->setValue("credential/store", checked);
       delete CredentialHelper::instance();
     });
+
+    connect(mSingleInstance, &QCheckBox::toggled, [](bool checked) {
+      Settings::instance()->setValue("singleInstance", checked);
+    });
   }
 
   void init()
@@ -208,6 +219,8 @@ public:
 
     mNoTranslation->setChecked(settings->value("translation/disable").toBool());
     mStoreCredentials->setChecked(settings->value("credential/store").toBool());
+
+    mSingleInstance->setChecked(settings->value("singleInstance").toBool());
   }
 
 private:
@@ -221,6 +234,7 @@ private:
   QCheckBox *mAutoPrune;
   QCheckBox *mNoTranslation;
   QCheckBox *mStoreCredentials;
+  QCheckBox *mSingleInstance;
 };
 
 class ToolsPanel : public QWidget
