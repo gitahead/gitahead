@@ -388,16 +388,18 @@ int Remote::Callbacks::credentials(
         key.toLocal8Bit(), passphrase.toUtf8());
     }
 
-  } else if (types & GIT_CREDENTIAL_USERPASS_PLAINTEXT) {
+  }
+
+  if (types & GIT_CREDENTIAL_USERPASS_PLAINTEXT) {
     QString password;
     QString username = QUrl::fromPercentEncoding(name);
-    if (!cbs->credentials(url, username, password))
-      return -1;
+    if (cbs->credentials(url, username, password)) {
+      return git_credential_userpass_plaintext_new(
+        out, username.toUtf8(), password.toUtf8());
+    }
+  }
 
-    return git_credential_userpass_plaintext_new(
-      out, username.toUtf8(), password.toUtf8());
-
-  } else if (types & GIT_CREDENTIAL_SSH_INTERACTIVE) {
+  if (types & GIT_CREDENTIAL_SSH_INTERACTIVE) {
     return git_credential_ssh_interactive_new(
       out,
       name,
