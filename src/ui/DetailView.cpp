@@ -18,6 +18,7 @@
 #include "DoubleTreeWidget.h"
 #include "SpellChecker.h"
 #include "TreeWidget.h"
+#include "TemplateButton.h"
 #include "app/Application.h"
 #include "conf/Settings.h"
 #include "git/Branch.h"
@@ -1015,9 +1016,17 @@ public:
   }
 
 public slots:
-  void applyTemplate(const QString templ)
+  void applyTemplate(QString& templ)
   {
+	auto index = templ.indexOf(TemplateButton::cursorPositionString);
+	if (index < 0)
+		index = templ.length();
+
+	templ.replace("%|", "");
     mMessage->setText(templ);
+	auto cursor = mMessage->textCursor();
+	cursor.setPosition(index);
+	mMessage->setTextCursor(cursor);
   }
 
 private:
