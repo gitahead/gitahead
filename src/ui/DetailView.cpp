@@ -1345,6 +1345,11 @@ void DetailView::authorLinkActivated(const QString &href)
     QDialog *dialog = new QDialog(this);
     QFormLayout *layout = new QFormLayout(dialog);
 
+    layout->addRow(new QLabel(tr(
+      "Here you can set the author used for committing\n"
+      "These settings will not be saved permanently"
+    )));
+
     QLineEdit *userEdit = new QLineEdit(mOverrideUser, dialog);
     layout->addRow(tr("Author:"), userEdit);
 
