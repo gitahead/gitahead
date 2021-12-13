@@ -280,7 +280,9 @@ static void interactiveCallback(
       responses[i].length = 0;
 
     } else {
-      QByteArray bytes = responsesVector[i].toUtf8();
+      // The newline is also sent by OpenSSH and needed for some
+      // keyboard-interactive prompts
+      QByteArray bytes = (responsesVector[i] + "\n").toUtf8();
 
       // Use malloc and copy the response data to it
       // libssh2 free()s this memory by itself
