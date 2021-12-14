@@ -35,6 +35,7 @@ jobs:
         bundle: com.github.Murmele.Gittyup.flatpak
         manifest-path: com.github.Murmele.Gittyup/com.github.Murmele.Gittyup.yml
         cache: false
+        branch: development
     - name: Upload Flatpak package
       uses: actions/upload-artifact@v2
       with:
