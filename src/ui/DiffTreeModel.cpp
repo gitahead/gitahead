@@ -56,6 +56,14 @@ void DiffTreeModel::setDiff(const git::Diff &diff)
   endResetModel();
 }
 
+void DiffTreeModel::refresh(const QStringList &paths)
+{
+  for (auto path: paths) {
+    auto index = this->index(path);
+    emit dataChanged(index, index, {Qt::CheckStateRole});
+  }
+}
+
 int DiffTreeModel::rowCount(const QModelIndex &parent) const
 {
   return mDiff ? node(parent)->children().size() : 0;
