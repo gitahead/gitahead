@@ -282,10 +282,10 @@ bool DiffTreeModel::discard(const QModelIndex &index)
 				submodule.update(nullptr, false, true); // In Repo view it is done asynchron. Maybe changing here too!
 				break;
 			}
-			if (!is_submodule)
-				filePatches.append(trackedPatch);
-
 		}
+
+		if (!is_submodule)
+			filePatches.append(trackedPatch);
 	}
 
 	if (filePatches.length() > 0) {
