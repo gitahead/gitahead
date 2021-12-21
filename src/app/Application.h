@@ -44,12 +44,12 @@ private:
 };
 
 #ifdef Q_OS_LINUX
-class DBusGitAhead: public QObject
+class DBusGittyup public QObject
 {
   Q_OBJECT
 
 public:
-  DBusGitAhead(QObject *parent = nullptr);
+  DBusGittyup(QObject *parent = nullptr);
 
 public slots:
   Q_SCRIPTABLE void openRepository(const QString &repo);
