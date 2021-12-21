@@ -189,6 +189,12 @@ static Hotkey toggleLogHotkey = HotkeyManager::registerHotkey(
   "View/Toggle Log"
 );
 
+static Hotkey toggleMaximizeHotkey = HotkeyManager::registerHotkey(
+  nullptr,
+  "view/toggleMaximize",
+  "View/Toggle Maximize"
+);
+
 static Hotkey toggleViewHotkey = HotkeyManager::registerHotkey(
   nullptr,
   "view/toggleView",
@@ -662,6 +668,7 @@ MenuBar::MenuBar(QWidget *parent)
 
   mToggleMaximize = new StateAction(tr("Normal"), tr("Maximize"), viewMenu);
   viewMenu->addAction(mToggleMaximize);
+  toggleMaximizeHotkey.use(mToggleMaximize);
   mToggleMaximize->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_M));
   connect(mToggleMaximize, &QAction::triggered, [this] {
     bool maximize = mToggleMaximize->isActive();
