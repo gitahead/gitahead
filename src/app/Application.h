@@ -44,7 +44,7 @@ private:
 };
 
 #ifdef Q_OS_LINUX
-class DBusGittyup public QObject
+class DBusGittyup: public QObject
 {
   Q_OBJECT
 
