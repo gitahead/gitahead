@@ -171,6 +171,10 @@ public:
     return size;
   }
 
+  /*!
+   * Get the rectangle occupied by the item's checkboy.
+   * Used in the UI tests
+   */
   QRect checkRect(
     const QStyleOptionViewItem &option,
     const QModelIndex &index) const
