@@ -15,6 +15,7 @@
 #include <QAction>
 #include <QObject>
 #include <QKeySequence>
+#include <QShortcut>
 #include <QString>
 #include <QVector>
 
@@ -41,6 +42,7 @@ public:
 
   HotkeyHandle *use(std::function<void(const QKeySequence&)> changeHandler, HotkeyManager *manager = nullptr) const;
   HotkeyHandle *use(QAction *action, HotkeyManager *manager = nullptr) const;
+  HotkeyHandle *use(QShortcut *shortcut, HotkeyManager *manager = nullptr) const;
 
   QString label() const;
   QKeySequence currentKeys(const HotkeyManager *manager = nullptr) const;

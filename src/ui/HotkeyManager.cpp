@@ -63,6 +63,20 @@ HotkeyHandle *Hotkey::use(QAction *action, HotkeyManager *manager) const
   return res;
 }
 
+HotkeyHandle *Hotkey::use(QShortcut *shortcut, HotkeyManager *manager) const
+{
+  HotkeyHandle *res = use(
+    [shortcut](const QKeySequence &keys) {
+      shortcut->setKey(keys);
+    },
+    manager
+  );
+
+  res->setParent(shortcut);
+
+  return res;
+}
+
 QString Hotkey::label() const
 {
   return mHandle->label;

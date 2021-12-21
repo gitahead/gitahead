@@ -16,6 +16,7 @@
 #include "dialogs/PullRequestDialog.h"
 #include "git/Branch.h"
 #include "git/Commit.h"
+#include "ui/HotkeyManager.h"
 #include <QAction>
 #include <QButtonGroup>
 #include <QHBoxLayout>
@@ -801,6 +802,18 @@ public:
   }
 };
 
+static Hotkey terminalHotkey = HotkeyManager::registerHotkey(
+  nullptr,
+  "tools/terminal",
+  "Tools/Open Terminal"
+);
+
+static Hotkey fileManagerHotkey = HotkeyManager::registerHotkey(
+  nullptr,
+  "tools/fileManager",
+  "Tools/Open File Manager"
+);
+
 } // anon. namespace
 
 ToolBar::ToolBar(MainWindow *parent)
@@ -948,13 +961,23 @@ ToolBar::ToolBar(MainWindow *parent)
   connect(mTerminalButton, &Button::clicked, [this] {
     currentView()->openTerminal();
   });
-    
+
+  QShortcut *shortcut = new QShortcut(this);
+  terminalHotkey.use(shortcut);
+  connect(shortcut, &QShortcut::activated, mTerminalButton, &Button::click);
+
+  addWidget(new Spacer(4, this));
+
   mFileManagerButton = new FileManagerButton(this);
   mFileManagerButton->setToolTip(tr("Open file manager"));
   addWidget(mFileManagerButton);
   connect(mFileManagerButton, &Button::clicked, [this] {
     currentView()->openFileManager();
   });
+
+  shortcut = new QShortcut(this);
+  fileManagerHotkey.use(shortcut);
+  connect(shortcut, &QShortcut::activated, mFileManagerButton, &Button::click);
 
   addWidget(new Spacer(4, this));
 
