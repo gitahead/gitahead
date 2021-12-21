@@ -34,7 +34,10 @@ public:
 
   QSize sizeHint() const override;
 
-  // This is public as a testing artifact.
+  /*!
+   * Get the rectangle occupied by the item's checkboy.
+   * Used in the UI tests
+   */
   QRect checkRect(const QModelIndex &index);
 
   static void setFileRows(int rows);

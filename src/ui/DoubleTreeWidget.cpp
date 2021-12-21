@@ -191,7 +191,6 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 #endif
 
   connect(mDiffTreeModel, &DiffTreeModel::checkStateChanged, this, &DoubleTreeWidget::treeModelStateChanged);
-  connect(mDiffView, &DiffView::fileStageStateChanged, this, &DoubleTreeWidget::updateTreeModel);
 
   connect(stagedFiles, &TreeView::fileSelected, this, &DoubleTreeWidget::fileSelected);
   connect(stagedFiles, &TreeView::collapseCountChanged, this, &DoubleTreeWidget::collapseCountChanged);
@@ -201,6 +200,10 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 
   connect(collapseButtonStagedFiles, &StatePushButton::clicked, this, &DoubleTreeWidget::toggleCollapseStagedFiles);
   connect(collapseButtonUnstagedFiles, &StatePushButton::clicked, this, &DoubleTreeWidget::toggleCollapseUnstagedFiles);
+
+  connect(repo.notifier(), &git::RepositoryNotifier::indexChanged, this, [this] (const QStringList &paths) {
+    mDiffTreeModel->refresh(paths);
+  });
 }
 
 QModelIndex DoubleTreeWidget::selectedIndex() const
@@ -281,22 +284,6 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff,
 
   // Restore selection.
   loadSelection();
-}
-
-void DoubleTreeWidget::updateTreeModel(git::Index::StagedState state)
-{
-//  // the selected index must be the file which is visible in the diffView!
-//  QModelIndexList indexes = stagedFiles->selectionModel()->selectedIndexes();
-//  if (!indexes.isEmpty()) {
-//    static_cast<TreeProxy*>(stagedFiles->model())->setData(indexes.first(), state, Qt::CheckStateRole, true);
-//    return;
-//  }
-
-//  indexes = unstagedFiles->selectionModel()->selectedIndexes();
-//  if (!indexes.isEmpty()) {
-//    static_cast<TreeProxy*>(unstagedFiles->model())->setData(indexes.first(), state, Qt::CheckStateRole, true);
-//    return;
-//  }
 }
 
 void DoubleTreeWidget::storeSelection()
