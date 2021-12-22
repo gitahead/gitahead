@@ -190,7 +190,7 @@ static Hotkey toggleLogHotkey = HotkeyManager::registerHotkey(
 );
 
 static Hotkey toggleMaximizeHotkey = HotkeyManager::registerHotkey(
-  nullptr,
+  "Ctrl+M",
   "view/toggleMaximize",
   "View/Toggle Maximize"
 );
