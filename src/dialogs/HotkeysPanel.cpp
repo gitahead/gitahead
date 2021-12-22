@@ -47,12 +47,19 @@ public:
     return mLabel;
   }
 
+  QString fullLabel() const;
+
   HotkeyGroupData *group() const
   {
     return mGroup;
   }
 
   virtual ObjectType type() const = 0;
+  virtual void findConflicts(
+    const QKeySequence &keys,
+    QStringList &conflicts,
+    Hotkey target
+  ) const = 0;
 
 private:
   HotkeyGroupData *mGroup;
@@ -73,6 +80,17 @@ public:
   virtual ObjectType type() const override
   {
     return ObjectType::Group;
+  }
+
+  virtual void findConflicts(
+    const QKeySequence &keys,
+    QStringList &conflicts,
+    Hotkey target
+  ) const override
+  {
+    for (auto child: mChildren) {
+      child->findConflicts(keys, conflicts, target);
+    }
   }
 
   QVector<HotkeyData*> childrenData() const
@@ -103,6 +121,30 @@ public:
     return ObjectType::Key;
   }
 
+  virtual void findConflicts(
+    const QKeySequence &keys,
+    QStringList &conflicts,
+    Hotkey target
+  ) const override
+  {
+    if (mHotkey != target && !mKeys.isEmpty()) {
+      auto leftMatch = mKeys.matches(keys);
+      auto rightMatch = keys.matches(mKeys);
+
+      if (
+        leftMatch == QKeySequence::ExactMatch
+
+        // Recognize conflicts of partial matches on key sequences
+        // We have to do it this way since NoMatch also gets returned
+        // if one sequence is shorter than the other
+        || (leftMatch == QKeySequence::PartialMatch && rightMatch == QKeySequence::NoMatch)
+        || (leftMatch == QKeySequence::NoMatch && rightMatch == QKeySequence::PartialMatch)
+      ) {
+        conflicts.push_back(fullLabel());
+      }
+    }
+  }
+
   QKeySequence keys() const
   {
     return mKeys;
@@ -114,11 +156,30 @@ public:
     mKeys = keys;
   }
 
+  Hotkey hotkey() const
+  {
+    return mHotkey;
+  }
+
 private:
   Hotkey mHotkey;
   HotkeyManager *mManager;
   QKeySequence mKeys;
 };
+
+QString HotkeyData::fullLabel() const
+{
+  QString res = label();
+
+  if (
+    mGroup
+    && mGroup->mGroup // Don't use the root's label
+  ) {
+    res = mGroup->fullLabel() + " -> " + res;
+  }
+
+  return res;
+}
 
 class HotkeyModel : public QAbstractItemModel
 {
@@ -198,6 +259,8 @@ public:
           return QVariant(((HotkeyKeyData*)data)->keys().toString(QKeySequence::NativeText));
         else if(role == Qt::UserRole)
           return QVariant::fromValue(((HotkeyKeyData*)data)->keys());
+        else if(role == Qt::UserRole + 1)
+          return QVariant::fromValue(((HotkeyKeyData*)data)->hotkey());
         else
           return QVariant();
     }
@@ -278,6 +341,15 @@ public:
     return QVariant();
   }
 
+  void findConflicts(
+    const QKeySequence &keys,
+    QStringList &conflicts,
+    Hotkey target
+  ) const
+  {
+    mRoot->findConflicts(keys, conflicts, target);
+  }
+
 private:
   HotkeyGroupData *mRoot;
 };
@@ -315,14 +387,43 @@ protected:
 class KeybindDialog : public QDialog
 {
 public:
-  KeybindDialog(QWidget *parent): QDialog(parent)
+  KeybindDialog(
+    QWidget *parent,
+    HotkeyModel *hotkeys,
+    Hotkey hotkey
+  ): QDialog(parent)
   {
     QVBoxLayout *layout = new QVBoxLayout(this);
 
+    auto conflicts = new QLabel(this);
+
     mKeys = new SimpleKeyEdit(this);
+    connect(
+      mKeys,
+      &SimpleKeyEdit::keySequenceChanged,
+      [conflicts, hotkey, hotkeys](const QKeySequence &keys) {
+        if (keys.isEmpty()) {
+          conflicts->setText("");
+          return;
+        }
+
+        auto conflictLabels = QStringList();
+        hotkeys->findConflicts(keys, conflictLabels, hotkey);
+
+        if (conflictLabels.isEmpty()) {
+          conflicts->setText("");
+        } else {
+          conflicts->setText(
+            tr("The selected key is the same for the following actions:\n%1")
+              .arg(" - " + conflictLabels.join("\n - "))
+          );
+        }
+      }
+    );
 
     layout->addWidget(new QLabel(tr("Please press the desired hotkey"), this));
     layout->addWidget(mKeys);
+    layout->addWidget(conflicts);
 
     QDialogButtonBox *buttons = new QDialogButtonBox(this);
     buttons->addButton(QDialogButtonBox::Ok);
@@ -423,7 +524,11 @@ bool HotkeysPanel::edit(const QModelIndex &index, QAbstractItemView::EditTrigger
   if(!data.isValid())
     return false;
 
-  KeybindDialog *dialog = new KeybindDialog(this);
+  KeybindDialog *dialog = new KeybindDialog(
+    this,
+    (HotkeyModel*) model(),
+    keyIndex.data(Qt::UserRole + 1).value<Hotkey>()
+  );
 
   dialog->setKeys(data.value<QKeySequence>());
 

@@ -35,6 +35,7 @@ private:
 class Hotkey
 {
   friend class HotkeyManager;
+
 public:
   inline Hotkey(): mHandle(nullptr)
   {
@@ -54,11 +55,23 @@ public:
     return mHandle != nullptr;
   }
 
+  inline bool operator ==(const Hotkey &op) const
+  {
+    return mHandle == op.mHandle;
+  }
+
+  inline bool operator !=(const Hotkey &op) const
+  {
+    return mHandle != op.mHandle;
+  }
+
 private:
   const HotkeyManagerHandle *mHandle;
 
   Hotkey(const HotkeyManagerHandle *handle);
 };
+
+Q_DECLARE_METATYPE(Hotkey)
 
 class HotkeyManager : public QObject
 {
