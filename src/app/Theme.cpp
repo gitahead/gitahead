@@ -242,11 +242,6 @@ QColor Theme::diff(Diff color)
   }
 }
 
-QPalette Theme::fileList()
-{
-  return QPalette();
-}
-
 QColor Theme::heatMap(HeatMap color)
 {
   if (mDark) {

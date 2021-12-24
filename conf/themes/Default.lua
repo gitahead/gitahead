@@ -65,16 +65,6 @@ theme['commits']   = {
   highlighted_bright_text = { active = '#FFFFFF', inactive = '#FFFFFF' }
 }
 
--- file list colors
--- { default, active, inactive, disabled }
-theme['files']     = {
-  text             = '#232627',
-  background       = '#FCFCFC',
-  alternate        = '#EFF0F1', -- an alternate background color for list rows
-  highlight        = { active = '#3DAEE9', inactive = '#C2E0F5' },
-  highlighted_text = { active = '#FCFCFC', inactive = '#232627' },
-}
-
 -- status badge colors
 -- { normal, selected, conflicted, head, notification }
 theme['badge']     = {
