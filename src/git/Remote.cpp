@@ -16,9 +16,8 @@
 #include "git2/clone.h"
 #include "git2/remote.h"
 #include "git2/signature.h"
+#include "libssh2.h"
 #include <QCoreApplication>
-#include <cstdlib>
-#include <libssh2.h>
 #include <QDir>
 #include <QFile>
 #include <QNetworkProxyFactory>
@@ -50,7 +49,7 @@ QString keyFile(const QString &path = QString())
   }
 
   if (!dir.cd(".ssh"))
-    return "";
+    return QString();
 
   foreach (const QString &kind, kKeyKinds) {
     QString name = QString("id_%1").arg(kind);
@@ -58,7 +57,7 @@ QString keyFile(const QString &path = QString())
       return dir.absoluteFilePath(name);
   }
 
-  return "";
+  return QString();
 }
 
 QString hostName(const QString &url)
@@ -341,8 +340,7 @@ int Remote::Callbacks::credentials(
     }
 
     if (key.isEmpty()) {
-      key = keyFile();
-
+      key = keyFile(cbs->keyFilePath());
       if (cbs->mKeyFiles.contains(key))
         key = "";
     }
@@ -359,13 +357,13 @@ int Remote::Callbacks::credentials(
 
       QString pub = QString("%1.pub").arg(key);
       if (!QFile::exists(pub))
-        pub = QString();
+        pub = "";
 
       // Check if the private key is encrypted.
       QFile file(key);
       if (!file.open(QFile::ReadOnly)) {
         git_error_set_str(GIT_ERROR_NET, "failed to open SSH identity file");
-        return -1;
+        return -GIT_ERROR_NET;
       }
 
       QTextStream in(&file);
@@ -389,7 +387,6 @@ int Remote::Callbacks::credentials(
         !pub.isEmpty() ? pub.toLocal8Bit().constData() : nullptr,
         key.toLocal8Bit(), passphrase.toUtf8());
     }
-
   }
 
   if (types & GIT_CREDENTIAL_USERPASS_PLAINTEXT) {
