@@ -10,27 +10,27 @@
 #include "DoubleTreeWidget.h"
 #include "BlameEditor.h"
 #include "DiffTreeModel.h"
+#include "StatePushButton.h"
 #include "TreeProxy.h"
 #include "TreeView.h"
 #include "ViewDelegate.h"
-#include "StatePushButton.h"
 #include "DiffView/DiffView.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QSettings>
 #include <QSpacerItem>
 #include <QStackedWidget>
 #include <QButtonGroup>
 
 namespace {
 
-const QString kNameFmt = "<p style='font-size: large'>%1</p>";
-const QString kLabelFmt = "<p style='color: gray; font-weight: bold'>%1</p>";
-QString kExpandAll = QString(QObject::tr("Expand all"));
-QString kCollapseAll = QString(QObject::tr("Collapse all"));
-QString kUnstagedFiles = QString(QObject::tr("Unstaged Files"));
+const QString kSplitterKey = QString("diffsplitter");
+const QString kExpandAll = QString(QObject::tr("Expand all"));
+const QString kCollapseAll = QString(QObject::tr("Collapse all"));
+const QString kUnstagedFiles = QString(QObject::tr("Unstaged Files"));
 
 class SegmentedButton : public QWidget
 {
@@ -163,6 +163,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
   treeViewSplitter->setHandleWidth(10);
   treeViewSplitter->addWidget(mStagedWidget);
   treeViewSplitter->addWidget(unstagedWidget);
+  treeViewSplitter->setStretchFactor(0, 0);
   treeViewSplitter->setStretchFactor(1, 1);
 
   // splitter between editor/diffview and TreeViews
@@ -170,7 +171,14 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
   splitter->setHandleWidth(0);
   splitter->addWidget(fileView);
   splitter->addWidget(treeViewSplitter);
+  splitter->setStretchFactor(0, 3);
   splitter->setStretchFactor(1, 1);
+  connect(splitter, &QSplitter::splitterMoved, this, [splitter] {
+    QSettings().setValue(kSplitterKey, splitter->saveState());
+  });
+
+  // Restore splitter state.
+  splitter->restoreState(QSettings().value(kSplitterKey).toByteArray());
 
   QVBoxLayout* layout = new QVBoxLayout(this);
   layout->setContentsMargins(0,0,0,0);
@@ -246,7 +254,9 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff,
                                const QString &file,
                                const QString &pathspec)
 {
-  Q_UNUSED(pathspec);
+  Q_UNUSED(file)
+  Q_UNUSED(pathspec)
+
   // Remember selection.
   storeSelection();
 
@@ -328,8 +338,9 @@ void DoubleTreeWidget::loadSelection()
 
 void DoubleTreeWidget::treeModelStateChanged(const QModelIndex& index, int checkState)
 {
-  Q_UNUSED(index);
-  Q_UNUSED(checkState);
+  Q_UNUSED(index)
+  Q_UNUSED(checkState)
+
   // clear editor and disable diffView when no item is selected
   QModelIndexList stagedSelections = stagedFiles->selectionModel()->selectedIndexes();
   if (stagedSelections.count())

@@ -66,7 +66,7 @@
 
 namespace {
 
-const QString kSplitterKey = "splitter";
+const QString kSplitterKey = "reposplitter";
 const QString kMsgFmt = "%1 - <span style='color: gray'>%2</span>";
 
 QString msg(const git::Commit &commit)
