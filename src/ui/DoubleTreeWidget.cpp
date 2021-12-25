@@ -10,6 +10,7 @@
 #include "DoubleTreeWidget.h"
 #include "BlameEditor.h"
 #include "DiffTreeModel.h"
+#include "FileContextMenu.h"
 #include "TreeProxy.h"
 #include "TreeView.h"
 #include "ViewDelegate.h"
@@ -204,6 +205,9 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
   connect(repo.notifier(), &git::RepositoryNotifier::indexChanged, this, [this] (const QStringList &paths) {
     mDiffTreeModel->refresh(paths);
   });
+
+  RepoView *view = RepoView::parentView(this);
+  connect(mEditor, &BlameEditor::linkActivated, view, &RepoView::visitLink);
 }
 
 QModelIndex DoubleTreeWidget::selectedIndex() const
@@ -247,6 +251,9 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff,
                                const QString &pathspec)
 {
   Q_UNUSED(pathspec);
+
+  mDiff = diff;
+
   // Remember selection.
   storeSelection();
 
@@ -284,6 +291,45 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff,
 
   // Restore selection.
   loadSelection();
+}
+
+void DoubleTreeWidget::find()
+{
+  mEditor->find();
+}
+
+void DoubleTreeWidget::findNext()
+{
+  mEditor->findNext();
+}
+
+void DoubleTreeWidget::findPrevious()
+{
+  mEditor->findPrevious();
+}
+
+void DoubleTreeWidget::contextMenuEvent(QContextMenuEvent *event)
+{
+  QStringList files;
+  QModelIndexList indexes = unstagedFiles->selectionModel()->selectedIndexes();
+  foreach (const QModelIndex &index, indexes)
+    files.append(index.data(Qt::EditRole).toString());
+
+  indexes = stagedFiles->selectionModel()->selectedIndexes();
+    foreach (const QModelIndex &index, indexes)
+      files.append(index.data(Qt::EditRole).toString());
+
+  if (files.isEmpty())
+    return;
+
+  RepoView *view = RepoView::parentView(this);
+  FileContextMenu menu(view, files);
+  menu.exec(event->globalPos());
+}
+
+void DoubleTreeWidget::cancelBackgroundTasks()
+{
+  mEditor->cancelBlame();
 }
 
 void DoubleTreeWidget::storeSelection()
@@ -377,32 +423,15 @@ void DoubleTreeWidget::loadEditorContent(const QModelIndex &index)
   QString name = index.data(Qt::EditRole).toString();
   QList<git::Commit> commits = RepoView::parentView(this)->commits();
   git::Commit commit = !commits.isEmpty() ? commits.first() : git::Commit();
-  git::Tree tree = commit.tree();
+  RepoView *view = RepoView::parentView(this);
+  git::Blob blob = mDiff.isValid() ? view->repo().lookupBlob(mDiff.id(mDiff.indexOf(name), git::Diff::NewFile)) :
+                                     git::Blob();
 
-  // searching for the correct blob
-  auto list = name.split("/");
-  bool found = false;
-  git::Blob blob;
-  for (int path_depth = 0; path_depth < list.count(); path_depth++) {
-    auto element = list[path_depth];
-    found = false;
-    for (int i = 0; i < tree.count(); ++i) {
-      auto n = tree.name(i);
-      if (n == element) {
-        if (path_depth >= list.count() -1)
-          blob = tree.object(i);
-        else
-          tree = tree.object(i);
-        found = true;
-        break;
-      }
-    }
-    if (!found)
-      break;
-  }
+  mEditor->load(name, blob, commit);
 
-  if (found)
-    mEditor->load(name, blob, commit);
+  // Disable blame editor when an uncommitted file is displayed
+  if (mDiff.isValid())
+    mEditor->editor()->setEnabled(!mDiff.isStatusDiff());
 
   mDiffView->enable(true);
   mDiffView->updateFiles();
