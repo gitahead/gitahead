@@ -424,8 +424,9 @@ void DoubleTreeWidget::loadEditorContent(const QModelIndex &index)
   QList<git::Commit> commits = RepoView::parentView(this)->commits();
   git::Commit commit = !commits.isEmpty() ? commits.first() : git::Commit();
   RepoView *view = RepoView::parentView(this);
-  git::Blob blob = mDiff.isValid() ? view->repo().lookupBlob(mDiff.id(mDiff.indexOf(name), git::Diff::NewFile)) :
-                                     git::Blob();
+  int idx = mDiff.isValid() ? mDiff.indexOf(name) : -1;
+  git::Blob blob = idx < 0 ? git::Blob() :
+                             view->repo().lookupBlob(mDiff.id(idx, git::Diff::NewFile));
 
   mEditor->load(name, blob, commit);
 
