@@ -430,9 +430,6 @@ void DoubleTreeWidget::loadEditorContent(const QModelIndex &index)
 
   mEditor->load(name, blob, commit);
 
-  // Disable blame editor when an uncommitted file is displayed
-  if (mDiff.isValid())
-    mEditor->editor()->setEnabled(!mDiff.isStatusDiff());
 
   mDiffView->enable(true);
   mDiffView->updateFiles();
