@@ -21,7 +21,6 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QSettings>
-#include <QSpacerItem>
 #include <QStackedWidget>
 #include <QButtonGroup>
 
@@ -30,7 +29,9 @@ namespace {
 const QString kSplitterKey = QString("diffsplitter");
 const QString kExpandAll = QString(QObject::tr("Expand all"));
 const QString kCollapseAll = QString(QObject::tr("Collapse all"));
+const QString kStagedFiles = QString(QObject::tr("Staged Files"));
 const QString kUnstagedFiles = QString(QObject::tr("Unstaged Files"));
+const QString kCommitedFiles = QString(QObject::tr("Committed Files"));
 
 class SegmentedButton : public QWidget
 {
@@ -53,14 +54,6 @@ public:
 
     mLayout->addWidget(button);
     mButtons.addButton(button, mButtons.buttons().size());
-
-    if (mButtons.buttons().size() > 1) {
-      mButtons.buttons().first()->setObjectName("first");
-      mButtons.buttons().last()->setObjectName("last");
-    }
-
-    for (int i = 1; i < mButtons.buttons().size() - 1; ++i)
-      mButtons.buttons().at(i)->setObjectName("middle");
   }
 
   const QButtonGroup *buttonGroup() const
@@ -81,32 +74,27 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
   // first column
   // top (Buttons to switch between Blame editor and DiffView)
   SegmentedButton* segmentedButton = new SegmentedButton(this);
-  QPushButton* blameView = new QPushButton("Blame", this);
-  segmentedButton->addButton(blameView, "Blame", true);
-  QPushButton* diffView = new QPushButton("Diff", this);
-  segmentedButton->addButton(diffView, "Diff", true);
-  diffView->setChecked(true);
+  QPushButton* blameView = new QPushButton(tr("Blame"), this);
+  segmentedButton->addButton(blameView, tr("Show Blame Editor"), true);
+  QPushButton* diffView = new QPushButton(tr("Diff"), this);
+  segmentedButton->addButton(diffView, tr("Show Diff View"), true);
+
+  QHBoxLayout *buttonLayout = new QHBoxLayout();
+  buttonLayout->addStretch();
+  buttonLayout->addWidget(segmentedButton);
+  buttonLayout->addStretch();
+
   // bottom (Stacked widget with Blame editor and DiffView)
   QVBoxLayout* fileViewLayout = new QVBoxLayout();
   mFileView = new QStackedWidget(this);
   mEditor = new BlameEditor(repo, this);
   mDiffView = new DiffView(repo, this);
-  int index = mFileView->addWidget(mEditor);
-  assert(index == DoubleTreeWidget::Blame);
-  index = mFileView->addWidget(mDiffView);
-  assert(index == DoubleTreeWidget::Diff);
-  mEditor->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-  mDiffView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-  const QButtonGroup* viewGroup = segmentedButton->buttonGroup();
-  QHBoxLayout* buttonLayout = new QHBoxLayout();
-  buttonLayout->addItem(new QSpacerItem(279, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
-  buttonLayout->addWidget(segmentedButton);
-  buttonLayout->addItem(new QSpacerItem(279, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
+  mFileView->addWidget(mEditor);
+  mFileView->addWidget(mDiffView);
 
   fileViewLayout->addLayout(buttonLayout);
   fileViewLayout->addWidget(mFileView);
-  mFileView->setCurrentIndex(1);
+  mFileView->setCurrentIndex(DoubleTreeWidget::Diff);
   mFileView->show();
   QWidget* fileView = new QWidget(this);
   fileView->setLayout(fileViewLayout);
@@ -114,7 +102,6 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
   // second column
   // staged files
   QVBoxLayout* vBoxLayout = new QVBoxLayout();
-  QLabel* label = new QLabel(tr("Staged Files"));
   stagedFiles = new TreeView(this, "Staged");
   stagedFiles->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
   mDiffTreeModel = new DiffTreeModel(repo, this);
@@ -126,11 +113,12 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
   stagedFiles->setItemDelegateForColumn(0, new ViewDelegate());
 
   QHBoxLayout* hBoxLayout = new QHBoxLayout();
+  QLabel* label = new QLabel(kStagedFiles);
+  hBoxLayout->addWidget(label);
+  hBoxLayout->addStretch();
   collapseButtonStagedFiles = new StatePushButton(kCollapseAll, kExpandAll, this);
   hBoxLayout->addWidget(collapseButtonStagedFiles);
-  hBoxLayout->addItem(new QSpacerItem(40,20, QSizePolicy::Expanding, QSizePolicy::Minimum));
 
-  vBoxLayout->addWidget(label);
   vBoxLayout->addLayout(hBoxLayout);
   vBoxLayout->addWidget(stagedFiles);
   mStagedWidget = new QWidget();
@@ -138,7 +126,6 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 
   // unstaged files
   vBoxLayout = new QVBoxLayout();
-  mUnstagedCommitedFiles = new QLabel(kUnstagedFiles);
   unstagedFiles = new TreeView(this, "Unstaged");
   unstagedFiles->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
   TreeProxy* treewrapperUnstaged = new TreeProxy(false, this);
@@ -148,11 +135,12 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
   unstagedFiles->setItemDelegateForColumn(0, new ViewDelegate());
 
   hBoxLayout = new QHBoxLayout();
+  mUnstagedCommitedFiles = new QLabel(kUnstagedFiles);
+  hBoxLayout->addWidget(mUnstagedCommitedFiles);
+  hBoxLayout->addStretch();
   collapseButtonUnstagedFiles = new StatePushButton(kCollapseAll, kExpandAll, this);
   hBoxLayout->addWidget(collapseButtonUnstagedFiles);
-  hBoxLayout->addItem(new QSpacerItem(40,20, QSizePolicy::Expanding, QSizePolicy::Minimum));
 
-  vBoxLayout->addWidget(mUnstagedCommitedFiles);
   vBoxLayout->addLayout(hBoxLayout);
   vBoxLayout->addWidget(unstagedFiles);
   QWidget* unstagedWidget = new QWidget();
@@ -186,8 +174,9 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
 
   setLayout(layout);
 
+  const QButtonGroup* viewGroup = segmentedButton->buttonGroup();
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 15, 0))
-  connect(viewGroup, QOverload<int>::of(&QButtonGroup::idClicked), [this] (int id) {
+  connect(viewGroup, QOverload<int>::of(&QButtonGroup::idClicked), this, [this] (int id) {
     mFileView->setCurrentIndex(id);
   });
 #else
@@ -283,7 +272,7 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff,
 
     mStagedWidget->setVisible(true);
   } else {
-    mUnstagedCommitedFiles->setText(tr("Committed Files"));
+    mUnstagedCommitedFiles->setText(kCommitedFiles);
     mStagedWidget->setVisible(false);
   }
 
