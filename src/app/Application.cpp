@@ -139,6 +139,14 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   setStyle(mTheme->style());
   setStyleSheet(mTheme->styleSheet());
 
+#if defined(Q_OS_WIN)
+  // Set default font style and hinting.
+  QFont font = QApplication::font();
+  font.setStyleStrategy(QFont::PreferDefault);
+  font.setHintingPreference(QFont::PreferDefaultHinting);
+  QApplication::setFont(font);
+#endif
+
   // Read translation settings.
   QSettings settings;
   if ((!settings.value("translation/disable", false).toBool()) &&
