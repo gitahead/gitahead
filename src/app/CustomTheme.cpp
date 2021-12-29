@@ -169,13 +169,6 @@ QString CustomTheme::styleSheet() const
     "  color: palette(bright-text)"
     "}"
 
-    "FileList {"
-    "  border-top: 1px solid palette(dark)"
-    "}"
-    "FileList QToolButton {"
-    "  background: none"
-    "}"
-
     "FindWidget {"
     "  background: palette(highlight)"
     "}"
@@ -440,20 +433,6 @@ QColor CustomTheme::diff(Diff color)
     case Diff::Warning:      return diff.value("warning").value<QColor>();
     case Diff::Error:        return diff.value("error").value<QColor>();
   }
-}
-
-QPalette CustomTheme::fileList()
-{
-  QVariantMap fileList = mMap.value("files").toMap();
-
-  QPalette palette;
-  setPaletteColors(palette, QPalette::Text, fileList.value("text"));
-  setPaletteColors(palette, QPalette::Base, fileList.value("background"));
-  setPaletteColors(palette, QPalette::AlternateBase, fileList.value("alternate"));
-  setPaletteColors(palette, QPalette::Highlight, fileList.value("highlight"));
-  setPaletteColors(palette, QPalette::HighlightedText,
-                   fileList.value("highlighted_text"));
-  return palette;
 }
 
 QColor CustomTheme::heatMap(HeatMap color)

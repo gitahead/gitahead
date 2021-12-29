@@ -9,7 +9,6 @@
 
 #include "Test.h"
 #include "ui/DoubleTreeWidget.h"
-#include "ui/FileList.h"
 #include "ui/MainWindow.h"
 #include "ui/RepoView.h"
 #include "ui/TreeView.h"
