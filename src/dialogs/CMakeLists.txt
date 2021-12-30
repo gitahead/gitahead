@@ -13,6 +13,7 @@ add_library(dialogs
   DiffPanel.cpp
   ExternalToolsDialog.cpp
   ExternalToolsModel.cpp
+  HotkeysPanel.cpp
   IconLabel.cpp
   MergeDialog.cpp
   NewBranchDialog.cpp
