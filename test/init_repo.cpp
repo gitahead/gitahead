@@ -14,7 +14,6 @@
 #include "ui/DetailView.h"
 #include "ui/DiffView/DiffView.h"
 #include "ui/DoubleTreeWidget.h"
-#include "ui/FileList.h"
 #include "ui/Footer.h"
 #include "ui/MainWindow.h"
 #include "ui/RepoView.h"

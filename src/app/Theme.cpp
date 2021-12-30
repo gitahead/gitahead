@@ -9,9 +9,9 @@
 
 #include "Theme.h"
 #include "CustomTheme.h"
+#include "conf/ConfFile.h"
 #include "conf/Settings.h"
 #include "dialogs/ThemeDialog.h"
-#include <QPainter>
 #include <QProxyStyle>
 #include <QStyleOption>
 #include <QWidget>
@@ -22,25 +22,8 @@ class Style : public QProxyStyle
 {
 public:
   Style(const Theme *theme)
-    : QProxyStyle("fusion"), mTheme(theme)
+    : mTheme(theme)
   {}
-
-  void drawPrimitive(
-    PrimitiveElement elem,
-    const QStyleOption *option,
-    QPainter *painter,
-    const QWidget *widget) const override
-  {
-    switch (elem) {
-      case PE_IndicatorTabClose:
-        Theme::drawCloseButton(option, painter);
-        break;
-
-      default:
-        baseStyle()->drawPrimitive(elem, option, painter, widget);
-        break;
-    }
-  }
 
   void polish(QPalette &palette) override
   {
@@ -56,6 +39,34 @@ private:
 
 Theme::Theme()
 {
+  mDir = Settings::themesDir();
+  mName = QString("System");
+
+  // Create Qt theme.
+  QFile themeFile(mDir.filePath(QString("%1.lua").arg(mName)).toUtf8());
+  if (themeFile.open(QIODevice::ReadOnly)) {
+    QDir tempDir = QDir::temp();
+    QFile tempFile(tempDir.filePath(QString("%1.lua").arg(mName)).toUtf8());
+    if (tempFile.open(QIODevice::ReadWrite | QIODevice::Truncate)) {
+      mDir = tempDir;
+
+      // Copy template.
+      tempFile.write(themeFile.readAll());
+
+      // Add theme colors for scintilla editor.
+      tempFile.write(QString("theme.property['style.default']      = 'fore:%1,back:%2'\n")
+                             .arg(QPalette().color(QPalette::Text).name(QColor::HexRgb),
+                                  QPalette().color(QPalette::Base).name(QColor::HexRgb))
+                             .toUtf8());
+      tempFile.close();
+    }
+    themeFile.close();
+  }
+
+  // Load Qt theme.
+  QByteArray file = mDir.filePath(QString("%1.lua").arg(mName)).toUtf8();
+  mMap = ConfFile(file).parse("theme");
+
   QPalette palette;
   QColor base = palette.color(QPalette::Base);
   QColor text = palette.color(QPalette::Text);
@@ -64,14 +75,12 @@ Theme::Theme()
 
 QDir Theme::dir() const
 {
-  QDir dir = Settings::confDir();
-  dir.cd("themes");
-  return dir;
+  return mDir;
 }
 
 QString Theme::name() const
 {
-  return "Default";
+  return mName;
 }
 
 QStyle *Theme::style() const
@@ -86,126 +95,78 @@ QString Theme::styleSheet() const
 
 void Theme::polish(QPalette &palette) const
 {
-  palette.setColor(QPalette::BrightText, mDark ? "#9C9C9C" : "#646464");
-  palette.setColor(QPalette::Light, mDark ? "#121212" : "#E6E6E6");
+  palette.setColor(QPalette::BrightText, palette.color(QPalette::Text));
+  palette.setColor(QPalette::Light, palette.color(QPalette::Dark));
   palette.setColor(QPalette::Shadow, palette.color(QPalette::Mid));
-
-  if (mDark)
-    palette.setColor(QPalette::Link, "#2A82DA");
 }
 
 QColor Theme::badge(BadgeRole role, BadgeState state)
 {
-  if (mDark) {
-    switch (role) {
-      case BadgeRole::Foreground:
-        switch (state) {
-          case BadgeState::Selected:
-            return "#2A82DA";
-
-          default:
-            return "#E1E5F2";
-        }
-
-      case BadgeRole::Background:
-        switch (state) {
-          case BadgeState::Normal:
-            return "#2A82DA";
-
-          case BadgeState::Selected:
-            return "#E1E5F2";
-
-          case BadgeState::Conflicted:
-            return "#DA2ADA";
-
-          case BadgeState::Head:
-            return "#52A500";
-
-          case BadgeState::Notification:
-            return "#8C2026";
-        }
-    }
-  }
-
   switch (role) {
     case BadgeRole::Foreground:
       switch (state) {
         case BadgeState::Selected:
-          return "#6C6C6C";
+          return QPalette().color(QPalette::Text);
+
+        case BadgeState::Head:
+          return QPalette().color(QPalette::HighlightedText);
 
         default:
-          return Qt::white;
+          return QPalette().color(QPalette::WindowText);
       }
 
     case BadgeRole::Background:
       switch (state) {
         case BadgeState::Normal:
-          return "#A6ACB6";
+          return mDark ? QPalette().color(QPalette::Inactive, QPalette::Highlight) :
+                         QPalette().color(QPalette::Mid);
 
         case BadgeState::Selected:
-          return Qt::white;
+          return QPalette().color(QPalette::Base);
 
         case BadgeState::Conflicted:
-          return "#D22222";
+          return mDark ? "#DA2ADA" :
+                         "#D22222";
 
         case BadgeState::Head:
-          return "#6F7379";
+          return QPalette().color(QPalette::Highlight);
 
         case BadgeState::Notification:
-          return Qt::red;
+          return mDark ? "#8C2026" :
+                         "#FF0000";
       }
   }
 }
 
 QList<QColor> Theme::branchTopologyEdges()
 {
-  return {
-    "steelblue",
-    "crimson",
-    "forestgreen",
-    "goldenrod",
-    "darkviolet",
-    "darkcyan",
-    "orange",
-    "cornflowerblue",
-    "tomato",
-    "darkturquoise",
-    "palevioletred",
-    "sandybrown"
-  };
+  QVariantMap edge = mMap.value("graph").toMap();
+
+  QList<QColor> colors;
+  for (int i = 0; i < 15; i++) {
+    QString name = QString("edge%1").arg(i + 1);
+    colors.append(edge.value(name).toString());
+  }
+
+  return colors;
 }
 
 QColor Theme::buttonChecked()
 {
-  return mDark ? "#19B4FB" : "#0086F3";
+  return QPalette().color(QPalette::Highlight);
 }
 
 QPalette Theme::commitList()
 {
-  QPalette palette;
-  QColor bright = palette.color(QPalette::BrightText);
-  QColor inactive = mDark ? Qt::white : Qt::black;
-
-  palette.setColor(QPalette::Active, QPalette::HighlightedText, Qt::white);
-  palette.setColor(QPalette::Inactive, QPalette::HighlightedText, inactive);
-  palette.setColor(QPalette::Active, QPalette::WindowText, "#C0C0C0");
-  palette.setColor(QPalette::Inactive, QPalette::WindowText, bright);
-  return palette;
+  return QPalette();
 }
 
 QColor Theme::commitEditor(CommitEditor color)
 {
-  if (mDark) {
-    switch (color) {
-      case CommitEditor::SpellError:    return "#BC0009";
-      case CommitEditor::SpellIgnore:   return "#E1E5F2";
-      case CommitEditor::LengthWarning: return "#464614";
-    }
-  }
   switch (color) {
     case CommitEditor::SpellError:    return Qt::red;
     case CommitEditor::SpellIgnore:   return Qt::gray;
-    case CommitEditor::LengthWarning: return "#EFF0F1";
+    case CommitEditor::LengthWarning: return Qt::yellow;
   }
 }
 
@@ -236,29 +197,18 @@ QColor Theme::diff(Diff color)
     case Diff::WordDeletion: return "#F2B0B0";
     case Diff::Plus:         return "#45CC45";
     case Diff::Minus:        return "#F28080";
-    case Diff::Note:         return Qt::black;
-    case Diff::Warning:      return Qt::yellow;
-    case Diff::Error:        return Qt::red;
+    case Diff::Note:         return "#000000";
+    case Diff::Warning:      return "#FFFF00";
+    case Diff::Error:        return "#FF0000";
   }
-}
-
-QPalette Theme::fileList()
-{
-  return QPalette();
 }
 
 QColor Theme::heatMap(HeatMap color)
 {
-  if (mDark) {
-    switch (color) {
-      case HeatMap::Hot:  return "#5E3638";
-      case HeatMap::Cold: return "#282940";
-    }
-  }
-
   switch (color) {
-    case HeatMap::Hot:  return "#FFC0C0";
-    case HeatMap::Cold: return "#C0C0FF";
+    case HeatMap::Hot:  return QPalette().color(QPalette::Highlight);
+    case HeatMap::Cold: return mDark ? QPalette().color(QPalette::Inactive, QPalette::Highlight) :
+                                       QPalette().color(QPalette::Mid);
   }
 }
 
@@ -266,47 +216,15 @@ QColor Theme::remoteComment(Comment color)
 {
   switch (color) {
     case Comment::Background: return QPalette().color(QPalette::Base);
-    case Comment::Body:       return "#383838";
-    case Comment::Author:     return "#1A76F4";
-    case Comment::Timestamp:  return "#6C6C6C";
+    case Comment::Body:       return QPalette().color(QPalette::Window);
+    case Comment::Author:     return QPalette().color(QPalette::WindowText);
+    case Comment::Timestamp:  return QPalette().color(QPalette::WindowText);
   }
 }
 
 QColor Theme::star()
 {
-  return "#FFCE6D";
-}
-
-void Theme::drawCloseButton(
-  const QStyleOption *option,
-  QPainter *painter)
-{
-  qreal in = 3.5;
-  qreal out = 8.0;
-  QRect rect = option->rect;
-  qreal x = rect.x() + (rect.width() / 2);
-  qreal y = rect.y() + (rect.height() / 2);
-
-  painter->save();
-  painter->setRenderHints(QPainter::Antialiasing);
-
-  // Draw background.
-  if (option->state & QStyle::State_MouseOver) {
-    painter->save();
-    painter->setPen(Qt::NoPen);
-    bool selected = (option->state & QStyle::State_Selected);
-    painter->setBrush(QColor(selected ? QPalette().color(QPalette::Highlight) :
-                                        QPalette().color(QPalette::Base)));
-    QRectF background(x - out, y - out, 2 * out, 2 * out);
-    painter->drawRoundedRect(background, 2.0, 2.0);
-    painter->restore();
-  }
-
-  // Draw x.
-  painter->setPen(QPen(QPalette().color(QPalette::WindowText), 1.5));
-  painter->drawLine(QPointF(x - in, y - in), QPointF(x + in, y + in));
-  painter->drawLine(QPointF(x - in, y + in), QPointF(x + in, y - in));
-  painter->restore();
+  return QPalette().color(QPalette::Highlight);
 }
 
 Theme *Theme::create(const QString &defaultName)
@@ -314,7 +232,7 @@ Theme *Theme::create(const QString &defaultName)
   // Upgrade theme key to capital case.
   Settings *settings = Settings::instance();
   QString key = settings->value("window/theme").toString();
-  if (key == "default" || key == "dark") {
+  if (key == "default" || key == "dark" || key == "system") {
     key[0] = key.at(0).toUpper();
     settings->setValue("window/theme", key);
   }
@@ -327,9 +245,9 @@ Theme *Theme::create(const QString &defaultName)
   }
 
   // Load custom theme.
-  if (CustomTheme::isValid(name))
+  if (CustomTheme::isValid(name) && !name.contains("System"))
     return new CustomTheme(name);
 
   // Use Qt theme.
-  return new Theme;
+  return new Theme();
 }
