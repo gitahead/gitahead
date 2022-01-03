@@ -52,6 +52,10 @@ add_library(app
   ${THEME_IMPL_FILE}
 )
 
+if(UNIX AND NOT APPLE)
+  set_target_properties(app PROPERTIES AUTOMOC ON)
+endif()
+
 target_compile_definitions(app
   PUBLIC
     GITTYUP_NAME="${GITTYUP_NAME}"
@@ -71,6 +75,12 @@ target_link_libraries(app
 set_target_properties(app PROPERTIES
   AUTOMOC ON
 )
+
+if(UNIX AND NOT APPLE)
+  target_link_libraries(app
+    Qt5::DBus
+  )
+endif()
 
 # Add main executable.
 add_executable(gittyup WIN32 MACOSX_BUNDLE

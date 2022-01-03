@@ -27,6 +27,7 @@ public:
 
   void autoUpdate();
   bool restoreWindows();
+  bool runSingleInstance();
 
   static Theme *theme();
 
@@ -41,5 +42,20 @@ private:
   QScopedPointer<Theme> mTheme;
   QStringList mPositionalArguments;
 };
+
+#ifdef Q_OS_LINUX
+class DBusGittyup: public QObject
+{
+  Q_OBJECT
+
+public:
+  DBusGittyup(QObject *parent = nullptr);
+
+public slots:
+  Q_SCRIPTABLE void openRepository(const QString &repo);
+  Q_SCRIPTABLE void openAndFocusRepository(const QString &repo);
+  Q_SCRIPTABLE void setFocus();
+};
+#endif
 
 #endif
