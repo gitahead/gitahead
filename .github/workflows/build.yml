@@ -199,9 +199,11 @@ jobs:
           path: build/release/pack/Gittyup-*
           name: Gittyup ${{ matrix.env.name }}
 
-      # - name: Test
-      #   continue-on-error: true
-      #   run: |
-      #     cd build/release
-      #     ninja check
+      - name: Test
+        # TODO: Re-Enable this when https://github.com/actions/runner/issues/1206 gets resolved
+        if: matrix.env.ninja_platform != 'win'
+        continue-on-error: true
+        run: |
+          cd build/release
+          ninja check
 ...
