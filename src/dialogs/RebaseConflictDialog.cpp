@@ -41,7 +41,7 @@ RebaseConflictDialog::RebaseConflictDialog(QWidget *parent)
   QFormLayout *layout = new QFormLayout(this);
   layout->addRow(new QLabel(tr(
     "The rebase caused a merge conflict. \n"
-    "As GitAhead currently doesn't support working on rebase conflicts, \n"
+    "As Gittyup currently doesn't support working on rebase conflicts, \n"
     "you have the option to continue solving the conflict using the command line"
   ), this));
   layout->addRow(buttons);
