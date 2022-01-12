@@ -62,6 +62,7 @@ target_compile_definitions(app
     GITTYUP_VERSION="${GITTYUP_VERSION}"
   PRIVATE
     QT_TRANSLATIONS_DIR="${QT_TRANSLATIONS_DIR}"
+    BUILD_DESCRIPTION="${BUILD_DESCRIPTION}"
 )
 
 target_link_libraries(app

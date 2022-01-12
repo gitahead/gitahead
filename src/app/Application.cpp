@@ -108,7 +108,7 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
 
   // Parse command line arguments.
   QCommandLineParser parser;
-  parser.setApplicationDescription("Gittyup");
+  parser.setApplicationDescription("Gittyup" BUILD_DESCRIPTION);
   parser.addHelpOption();
   parser.addVersionOption();
   parser.addPositionalArgument(

@@ -10,6 +10,14 @@ set(GITTYUP_VERSION
   "${GITTYUP_VERSION_MAJOR}.${GITTYUP_VERSION_MINOR}.${GITTYUP_VERSION_PATCH}"
 )
 
+set(DEV_BUILD "" CACHE STRING "Mark this build as a development build with the given description")
+
+if (DEV_BUILD)
+  set(BUILD_DESCRIPTION " (development build: ${DEV_BUILD})")
+else()
+  set(BUILD_DESCRIPTION "")
+endif()
+
 # Generate build date.
 string(TIMESTAMP GITTYUP_BUILD_DATE)
 
