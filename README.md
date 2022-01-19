@@ -11,6 +11,8 @@ following the directions below.
 
 Gittyup is a continuation of the [GitAhead](https://github.com/gitahead/gitahead) client.
 
+![Gittyup](https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/dark.png)
+
 How to Get Help
 ---------------
 
