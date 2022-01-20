@@ -28,6 +28,7 @@
 #include "dialogs/DeleteBranchDialog.h"
 #include "dialogs/DeleteTagDialog.h"
 #include "dialogs/NewBranchDialog.h"
+#include "dialogs/RebaseConflictDialog.h"
 #include "dialogs/RemoteDialog.h"
 #include "dialogs/SettingsDialog.h"
 #include "dialogs/TagDialog.h"
@@ -1549,9 +1550,33 @@ void RepoView::rebase(
     git::Commit after = rebase.commit();
     if (!after.isValid()) {
       // Rebase conflicted.
-      entry->addEntry(LogEntry::Error,
-        tr("There was a merge conflict. The rebase has been aborted"));
-      rebase.abort();
+      RebaseConflictDialog *dialog = new RebaseConflictDialog(this);
+
+      connect(
+        dialog,
+        &QDialog::finished,
+        [this, dialog, rebase, entry](int code) {
+          switch (dialog->userChoice()) {
+            case RebaseConflictDialog::ChosenAction::Leave:
+              entry->addEntry(LogEntry::Error,
+                tr("There was a merge conflict. The rebase has been left open"));
+              refresh();
+              break;
+
+            case RebaseConflictDialog::ChosenAction::Abort:
+            default:
+              entry->addEntry(LogEntry::Error,
+                tr("There was a merge conflict. The rebase has been aborted"));
+              git::Rebase(rebase).abort(); // de-const the capture
+              break;
+          }
+        }
+      );
+
+      dialog->setModal(true);
+      dialog->setAttribute(Qt::WA_DeleteOnClose);
+      dialog->open();
+
       return;
     }
 
