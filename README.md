@@ -127,7 +127,7 @@ documentation and translations. By contributing, you agree to release
 your contributions under the terms of the license.
 
 Contribute by following the typical
-[GitHub workflow](https://guides.github.com/introduction/flow/index.html)
+[GitHub workflow](https://docs.github.com/en/get-started/quickstart/github-flow)
 for pull requests. Fork the repository and make changes on a new named
 branch. Create pull requests against the `master` branch. Follow the
 [seven guidelines](https://chris.beams.io/posts/git-commit/) to writing a
