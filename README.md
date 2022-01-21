@@ -1,5 +1,4 @@
-[![Actions Status](https://github.com/Murmele/gitahead/workflows/GitAhead%20%28master%29/badge.svg)](https://github.com/Murmele/gitahead/actions) [![Actions Status](https://github.com/Murmele/gitahead/workflows/GitAhead%20%28stage%29/badge.svg)](https://github.com/Murmele/gitahead/actions)
-
+[![Actions Status](https://github.com/Murmele/Gittyup/actions/workflows/build.yml/badge.svg)](https://github.com/Murmele/Gittyup/actions/workflows/build.yml)
 
 Gittyup
 ==================================
