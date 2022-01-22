@@ -16,10 +16,21 @@
 #include <QStyle>
 #include <QWindow>
 #include <QMenu>
+#include <QCheckBox>
 
 #include "PlatQt.h"
 
 using namespace Scintilla;
+
+namespace {
+const QString kIconFmt = ":/%1.png";
+const QString kThemeIconFmt = ":/%1_%2.png";
+QPixmap getStagedUnstagedIcon(bool staged) {
+    QCheckBox cb;
+    cb.setChecked(staged);
+    return cb.grab();
+}
+}
 
 extern LexerModule lmLPeg;
 
@@ -38,7 +49,8 @@ TextEditor::TextEditor(QWidget *parent)
   mNoteIcon = style->standardIcon(QStyle::SP_MessageBoxInformation);
   mWarningIcon = style->standardIcon(QStyle::SP_MessageBoxWarning);
   mErrorIcon = style->standardIcon(QStyle::SP_MessageBoxCritical);
-  mStagedIcon = style->standardIcon(QStyle::SP_ArrowUp);
+  mStagedIcon = getStagedUnstagedIcon(true);
+  mUnStagedIcon = getStagedUnstagedIcon(false);
 
   // Register the LPeg lexer.
   static bool initialized = false;
@@ -62,7 +74,7 @@ TextEditor::TextEditor(QWidget *parent)
   }
 
 
-  setMarginMaskN(Staged, 1 << StagedMarker);
+  setMarginMaskN(Margin::Staged, (1 << StagedMarker) | (1 << UnstagedMarker));
   setStatusDiff(mStatusDiff); // to apply margin width
 
   int mask = 0;
@@ -173,6 +185,7 @@ void TextEditor::applySettings()
   markerDefine(Addition, SC_MARK_BACKGROUND);
   markerDefine(Deletion, SC_MARK_BACKGROUND);
   markerDefine(StagedMarker, SC_MARK_RGBAIMAGE);
+  markerDefine(UnstagedMarker, SC_MARK_RGBAIMAGE);
   markerDefine(DiscardMarker, SC_MARK_EMPTY);
 
   markerSetBack(Ours, mOursColor);
@@ -186,7 +199,8 @@ void TextEditor::applySettings()
   loadMarkerIcon(ErrorMarker, mErrorIcon);
 
 
-  loadMarkerIcon(StagedMarker, mStagedIcon);
+  loadMarkerPixmap(StagedMarker, mStagedIcon);
+  loadMarkerPixmap(UnstagedMarker, mUnStagedIcon);
 
   // Set LPeg lexer language.
   QByteArray lexer = this->lexer().toUtf8();
@@ -261,7 +275,7 @@ void TextEditor::setStatusDiff(bool statusDiff)
     mStatusDiff = statusDiff;
     if (mStatusDiff) {
         // fixed width, because it indicates only if staged or not
-        setMarginWidthN(Staged, 30);
+        setMarginWidthN(Staged, 100);
         setMarginSensitiveN(Staged, true); // to change by mouseclick staged/unstaged
     } else {
         setMarginWidthN(Staged, 0);
@@ -533,6 +547,27 @@ int TextEditor::diagnosticMarker(int line)
     return ErrorMarker;
 
   return -1;
+}
+
+void TextEditor::loadMarkerPixmap(Marker marker, const QPixmap &icon)
+{
+    qreal dpr = 1.0;
+    if (QWidget *window = this->window()) {
+      if (QWindow *handle = window->windowHandle())
+        dpr = handle->devicePixelRatio();
+    }
+
+    qreal height = textHeight(0);
+    qreal scaled = height * dpr;
+    QPixmap scaledPixmap;
+    if (icon.height() > height) {
+        // scale
+        scaledPixmap = icon.scaled(
+          scaled, scaled, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    } else
+        scaledPixmap = icon;
+
+  markerDefineImage(marker, icon.toImage());
 }
 
 void TextEditor::loadMarkerIcon(Marker marker, const QIcon &icon)
