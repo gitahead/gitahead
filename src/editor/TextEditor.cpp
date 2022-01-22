@@ -23,8 +23,6 @@
 using namespace Scintilla;
 
 namespace {
-const QString kIconFmt = ":/%1.png";
-const QString kThemeIconFmt = ":/%1_%2.png";
 QPixmap getStagedUnstagedIcon(bool staged) {
     QCheckBox cb;
     cb.setChecked(staged);
