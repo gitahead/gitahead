@@ -26,7 +26,10 @@ namespace {
 QPixmap getStagedUnstagedIcon(bool staged) {
     QCheckBox cb;
     cb.setChecked(staged);
-    return cb.grab();
+    // size must be restricted, otherwise the last row contains 2
+    // pixels of the background color and the others have only
+    // one which looks ugly
+    return cb.grab(QRect(QPoint(0,0), QSize(14, 14)));
 }
 }
 
