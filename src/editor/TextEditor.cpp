@@ -273,7 +273,7 @@ void TextEditor::setStatusDiff(bool statusDiff)
     mStatusDiff = statusDiff;
     if (mStatusDiff) {
         // fixed width, because it indicates only if staged or not
-        setMarginWidthN(Staged, 100);
+        setMarginWidthN(Staged, 15);
         setMarginSensitiveN(Staged, true); // to change by mouseclick staged/unstaged
     } else {
         setMarginWidthN(Staged, 0);
