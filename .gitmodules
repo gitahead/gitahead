@@ -19,3 +19,6 @@
 [submodule "test/dep/zip"]
 	path = test/dep/zip
 	url = https://github.com/kuba--/zip.git
+[submodule "dep/scintilla/lexilla"]
+	path = dep/scintilla/lexilla
+	url = git@github.com:ScintillaOrg/lexilla.git

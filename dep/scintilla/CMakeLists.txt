@@ -1,4 +1,4 @@
-set(SCINTILLA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/scintilla445/scintilla)
+set(SCINTILLA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lexilla)
 
 add_library(
   scintilla
