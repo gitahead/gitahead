@@ -14,6 +14,7 @@
 #include <QMainWindow>
 #include <QScrollBar>
 #include <QStyle>
+#include <QStyleFactory>
 #include <QWindow>
 #include <QMenu>
 #include <QCheckBox>
@@ -23,15 +24,32 @@
 using namespace Scintilla;
 
 namespace {
-QPixmap getStagedUnstagedIcon(bool staged) {
-    QCheckBox cb;
-    cb.setChecked(staged);
-    // size must be restricted, otherwise the last row contains 2
-    // pixels of the background color and the others have only
-    // one which looks ugly
-    return cb.grab(QRect(QPoint(0,0), QSize(14, 14)));
+
+QPixmap stagedUnstagedIcon(
+  const bool &checked,
+  const QColor &background,
+  const int &fontHeight)
+{
+  // Set background color and checkbox size.
+  QString checkBoxStyle =
+    "QCheckBox {"
+    "  background: %1;"
+    "}"
+    "QCheckBox::indicator {"
+    "  height: %2;"
+    "  width: %2;"
+    "}";
+
+  QCheckBox checkBox;
+  checkBox.setChecked(checked);
+#if defined(Q_OS_WIN)
+  checkBox.setStyle(QStyleFactory::create("windows"));
+#endif
+  checkBox.setStyleSheet(checkBoxStyle.arg(background.name()).arg(fontHeight - 2));
+  return checkBox.grab(QRect(QPoint(0,0), QSize(fontHeight, fontHeight)));
 }
-}
+
+} // anon. namespace
 
 extern LexerModule lmLPeg;
 
@@ -50,8 +68,6 @@ TextEditor::TextEditor(QWidget *parent)
   mNoteIcon = style->standardIcon(QStyle::SP_MessageBoxInformation);
   mWarningIcon = style->standardIcon(QStyle::SP_MessageBoxWarning);
   mErrorIcon = style->standardIcon(QStyle::SP_MessageBoxCritical);
-  mStagedIcon = getStagedUnstagedIcon(true);
-  mUnStagedIcon = getStagedUnstagedIcon(false);
 
   // Register the LPeg lexer.
   static bool initialized = false;
@@ -179,6 +195,15 @@ void TextEditor::applySettings()
   settings->endGroup(); // editor
 
   // Initialize markers.
+  QColor background = palette().color(QPalette::Base);
+  int fontHeight = textHeight(0);
+  mStagedIcon = stagedUnstagedIcon(
+    true, background, fontHeight);
+  mUnStagedIcon = stagedUnstagedIcon(
+    false, background, fontHeight);
+  if (mStatusDiff)
+    setMarginWidthN(Staged, fontHeight);
+
   // used to colorize the background of the text
   markerDefine(Context, SC_MARK_EMPTY);
   markerDefine(Ours, SC_MARK_BACKGROUND);
@@ -275,8 +300,7 @@ void TextEditor::setStatusDiff(bool statusDiff)
 {
     mStatusDiff = statusDiff;
     if (mStatusDiff) {
-        // fixed width, because it indicates only if staged or not
-        setMarginWidthN(Staged, 15);
+        setMarginWidthN(Staged, textHeight(0));
         setMarginSensitiveN(Staged, true); // to change by mouseclick staged/unstaged
     } else {
         setMarginWidthN(Staged, 0);
@@ -550,7 +574,7 @@ int TextEditor::diagnosticMarker(int line)
   return -1;
 }
 
-void TextEditor::loadMarkerPixmap(Marker marker, const QPixmap &icon)
+void TextEditor::loadMarkerPixmap(Marker marker, const QPixmap &pixmap)
 {
     qreal dpr = 1.0;
     if (QWidget *window = this->window()) {
@@ -560,15 +584,14 @@ void TextEditor::loadMarkerPixmap(Marker marker, const QPixmap &icon)
 
     qreal height = textHeight(0);
     qreal scaled = height * dpr;
-    QPixmap scaledPixmap;
-    if (icon.height() > height) {
+    QPixmap scaledPixmap(pixmap);
+    if (pixmap.height() > height) {
         // scale
-        scaledPixmap = icon.scaled(
+        scaledPixmap = pixmap.scaled(
           scaled, scaled, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    } else
-        scaledPixmap = icon;
+    }
 
-  markerDefineImage(marker, icon.toImage());
+  markerDefineImage(marker, scaledPixmap.toImage());
 }
 
 void TextEditor::loadMarkerIcon(Marker marker, const QIcon &icon)
