@@ -67,6 +67,4 @@ target_link_libraries(scintilla
 
 set_target_properties(scintilla PROPERTIES AUTOMOC ON)
 
-set(SCINTILLUA_LEXERS_DIR
-    ${SCINTILLA_DIR}/lexlua
-    CACHE INTERNAL "")
+set(SCINTILLUA_LEXERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/scintillua/lexers CACHE INTERNAL "")

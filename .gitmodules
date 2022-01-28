@@ -22,3 +22,6 @@
 [submodule "dep/scintilla/lexilla"]
 	path = dep/scintilla/lexilla
 	url = git@github.com:ScintillaOrg/lexilla.git
+[submodule "dep/scintilla/scintillua"]
+	path = dep/scintilla/scintillua
+	url = https://github.com/orbitalquark/scintillua.git
