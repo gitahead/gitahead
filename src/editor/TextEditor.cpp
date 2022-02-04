@@ -46,7 +46,7 @@ QPixmap stagedUnstagedIcon(
   checkBox.setStyle(QStyleFactory::create("windows"));
 #endif
   checkBox.setStyleSheet(checkBoxStyle.arg(background.name()).arg(fontHeight - 2));
-  return checkBox.grab(QRect(QPoint(0,0), QSize(fontHeight, fontHeight)));
+  return checkBox.grab(QRect(QPoint(0,0), QSize(fontHeight - 2, fontHeight - 2)));
 }
 
 } // anon. namespace
