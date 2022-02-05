@@ -158,12 +158,12 @@ void TreeView::handleSelectionChange(
   const QItemSelection &selected,
   const QItemSelection &deselected)
 {
+  Q_UNUSED(selected)
+
   // FIXME: The argument sent by Qt doesn't contain the whole selection.
   QModelIndexList indexes = selectionModel()->selectedIndexes();
-  if (indexes.length() > 0) {
-	  QModelIndex index = (indexes.size() == 1) ? indexes.first() : QModelIndex();
-	  emit fileSelected(index);
-  }
+  if (indexes.count() > 0)
+    emit filesSelected(indexes);
 
   // ignore deselection handling, because when selecting an item in the second
   // TreeView (staged/unstaged files), the root should not be set selected. Anything

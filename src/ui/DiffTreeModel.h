@@ -36,7 +36,11 @@ public:
   Node *parent() const;
   bool hasChildren() const;
   QList<Node *> children();
-  void addChild(const QStringList& pathPart, int patchIndex, int indexFirstDifferent);
+  void addChild(
+    const QStringList& pathPart,
+    int patchIndex,
+    int indexFirstDifferent,
+    bool listView);
   git::Index::StagedState stageState(const git::Index& idx, ParentStageState searchingState);
   void childFiles(QStringList &files);
   /*!
@@ -154,6 +158,8 @@ public:
 
   Qt::ItemFlags flags(const QModelIndex &index) const override;
 
+  void enableListView(bool enable) { mListView = enable; }
+
 signals:
   void checkStateChanged(const QModelIndex& index, int state);
 
@@ -165,6 +171,8 @@ private:
   git::Diff mDiff;
   Node *mRoot{nullptr};
   git::Repository mRepo;
+
+  bool mListView = false;
 };
 
 #endif /* DIFFTREEMODEL */

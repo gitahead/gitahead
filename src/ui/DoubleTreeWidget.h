@@ -10,10 +10,11 @@
 #ifndef DOUBLETREEWIDGET_H
 #define DOUBLETREEWIDGET_H
 
-#include "DetailView.h" // ContentWidget
+#include "DiffTreeModel.h"
+#include "DetailView.h"
+#include <QModelIndexList>
 
 class QTreeView;
-class DiffTreeModel;
 class TreeView;
 class BlameEditor;
 class StatePushButton;
@@ -33,6 +34,7 @@ class DoubleTreeWidget : public ContentWidget
 public:
   DoubleTreeWidget(const git::Repository &repo, QWidget *parent = nullptr);
   QModelIndex selectedIndex() const override;
+  QList<QModelIndex> selectedIndices() const;
   QString selectedFile() const override;
 
   void setDiff(
@@ -61,8 +63,8 @@ private:
   void treeModelStateChanged(const QModelIndex& index, int checkState);
   void storeSelection();
   void loadSelection();
-  void fileSelected(const QModelIndex &index);
-  void loadEditorContent(const QModelIndex &index);
+  void filesSelected(const QModelIndexList &indexes);
+  void loadEditorContent(const QModelIndexList &indexes);
   void toggleCollapseStagedFiles();
   void toggleCollapseUnstagedFiles();
 

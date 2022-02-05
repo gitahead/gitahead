@@ -48,6 +48,9 @@ bool TreeProxy::filterAcceptsRow(int source_row, const QModelIndex &source_paren
 	if (!index.isValid())
 		return false;
 
+  if (!mFilter)
+    return true;
+
     // This is anymore needed, because only the diff tree is checked and so every file is modified or was added
 //    QString status = sourceModel()->data(index, DiffTreeModel::StatusRole).toString();
 //	QRegExp regexp(".*[AM?].*");
