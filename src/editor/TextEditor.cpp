@@ -14,7 +14,6 @@
 #include <QMainWindow>
 #include <QScrollBar>
 #include <QStyle>
-#include <QStyleFactory>
 #include <QWindow>
 #include <QMenu>
 #include <QCheckBox>
