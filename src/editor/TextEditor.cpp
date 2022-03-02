@@ -45,6 +45,8 @@ QPixmap stagedUnstagedIcon(
   return checkBox.grab(QRect(QPoint(0,0), QSize(fontHeight - 2, fontHeight - 2)));
 }
 
+const float textHeightFactorCheckBoxSize = 2.0;
+
 } // anon. namespace
 
 extern LexerModule lmLPeg;
@@ -192,7 +194,8 @@ void TextEditor::applySettings()
 
   // Initialize markers.
   QColor background = palette().color(QPalette::Base);
-  int fontHeight = textHeight(0);
+  int fontHeight = pointSize * textHeightFactorCheckBoxSize;
+  setStatusDiff(mStatusDiff); // to apply margin width
   mStagedIcon = stagedUnstagedIcon(
     true, background, fontHeight);
   mUnStagedIcon = stagedUnstagedIcon(
@@ -296,7 +299,7 @@ void TextEditor::setStatusDiff(bool statusDiff)
 {
     mStatusDiff = statusDiff;
     if (mStatusDiff) {
-        setMarginWidthN(Staged, textHeight(0));
+		setMarginWidthN(Staged, fontPointSize(0) * textHeightFactorCheckBoxSize);
         setMarginSensitiveN(Staged, true); // to change by mouseclick staged/unstaged
     } else {
         setMarginWidthN(Staged, 0);
