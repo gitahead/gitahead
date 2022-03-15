@@ -194,7 +194,14 @@ void TextEditor::applySettings()
 
   // Initialize markers.
   QColor background = palette().color(QPalette::Base);
-  int fontHeight = pointSize * textHeightFactorCheckBoxSize;
+  int fontHeight;
+  // On windows it looks ugly when using pointSize, but on
+  // linux with flatpak textHeight looks strange
+#if defined(FLATPAK)
+	fontHeight = pointSize * textHeightFactorCheckBoxSize;
+#else
+	fontHeight = textHeight(0);
+#endif
   setStatusDiff(mStatusDiff); // to apply margin width
   mStagedIcon = stagedUnstagedIcon(
     true, background, fontHeight);
@@ -299,7 +306,12 @@ void TextEditor::setStatusDiff(bool statusDiff)
 {
     mStatusDiff = statusDiff;
     if (mStatusDiff) {
-		setMarginWidthN(Staged, fontPointSize(0) * textHeightFactorCheckBoxSize);
+#if defined(FLATPAK)
+	setMarginWidthN(Staged, fontPointSize(0) * textHeightFactorCheckBoxSize);
+#else
+	setMarginWidthN(Staged, textHeight(0));
+#endif
+
         setMarginSensitiveN(Staged, true); // to change by mouseclick staged/unstaged
     } else {
         setMarginWidthN(Staged, 0);
