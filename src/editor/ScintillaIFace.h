@@ -1306,6 +1306,10 @@ public:
      * Retrieve the height of a particular line of text in pixels.
      */
     int textHeight(int line);
+	/**
+	 * Retrieve the point size of a particular line of text in pixels.
+	 */
+	int fontPointSize(int line);
     /**
      * Show or hide the vertical scroll bar.
      */

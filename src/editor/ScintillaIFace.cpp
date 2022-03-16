@@ -1626,6 +1626,11 @@ int ScintillaIFace::textHeight(int line)
   return (int)send(SCI_TEXTHEIGHT, (uptr_t)line, 0);
 }
 
+int ScintillaIFace::fontPointSize(int line)
+{
+  return (int)send(SCI_STYLEGETSIZE, (uptr_t)line, 0);
+}
+
 void ScintillaIFace::setVScrollBar(bool show)
 {
   send(SCI_SETVSCROLLBAR, (uptr_t)show, 0);

@@ -162,6 +162,7 @@ protected:
 private:
   int diagnosticMarker(int line);
   void loadMarkerIcon(Marker marker, const QIcon &icon);
+  void loadMarkerPixmap(Marker marker, const QPixmap &pixmap);
   void AddToPopUp(const char *label, int cmd = 0, bool enabled = true);
   void ContextMenu(Scintilla::Point pt);
 
@@ -183,7 +184,8 @@ private:
   QIcon mNoteIcon;
   QIcon mWarningIcon;
   QIcon mErrorIcon;
-  QIcon mStagedIcon;
+  QPixmap mStagedIcon;
+  QPixmap mUnStagedIcon;
 
   QMap<int,QList<Diagnostic>> mDiagnostics;
 };

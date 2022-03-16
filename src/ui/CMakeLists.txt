@@ -60,10 +60,6 @@ add_library(ui
 
 target_compile_definitions(ui PRIVATE BUILD_DESCRIPTION="${BUILD_DESCRIPTION}")
 
-if (FLATPAK)
-    target_compile_definitions(ui PRIVATE FLATPAK)
-endif()
-
 target_include_directories(ui PRIVATE
   ${CMAKE_CURRENT_BINARY_DIR}
 )

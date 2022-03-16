@@ -6,10 +6,6 @@ add_library(tools
   ShowTool.cpp
 )
 
-if (FLATPAK)
-    target_compile_definitions(tools PRIVATE FLATPAK)
-endif()
-
 target_link_libraries(tools
   conf
   git
