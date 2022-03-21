@@ -253,6 +253,10 @@ QString CustomTheme::styleSheet() const
     "QTableView QPushButton {"
     "  margin: 2px;"
     "  padding: 6px"
+    "}"
+
+    "QWidget {"
+    "  %8"
     "}";
 
   QVariantMap button = mMap.value("button").toMap();
@@ -271,6 +275,32 @@ QString CustomTheme::styleSheet() const
   if (tabbarSelected.isEmpty())
     tabbarSelected = "palette(window)";
 
+  QString font;
+  QVariantMap fontMap = mMap.value("font").toMap();
+
+  QString fontValue = fontMap.value("family").toString();
+  if (!fontValue.isEmpty())
+    font += QString("font-family: \"%1\";").arg(fontValue);
+
+  QVariant fontVariantValue = fontMap.value("size");
+  bool ok;
+  double fontNumValue = fontVariantValue.toDouble(&ok);
+  if (ok) {
+    font += QString("font-size: %1px;").arg(fontNumValue);
+  } else {
+    fontValue = fontVariantValue.toString();
+    if (!fontValue.isEmpty())
+      font += QString("font-size: %1;").arg(fontValue);
+  }
+
+  fontValue = fontMap.value("weight").toString();
+  if (!fontValue.isEmpty())
+    font += QString("font-weight: %1;").arg(fontValue);
+
+  fontValue = fontMap.value("style").toString();
+  if (!fontValue.isEmpty())
+    font += QString("font-style: %1;").arg(fontValue);
+
   return text.arg(
     button.value("background").toMap().value("pressed").toString(),
     menubar.value("background").toString(),
@@ -278,7 +308,8 @@ QString CustomTheme::styleSheet() const
     button.value("background").toMap().value("checked").toString(),
     tabbarBase,
     tabbarText,
-    tabbarSelected);
+    tabbarSelected,
+    font);
 }
 
 void CustomTheme::polish(QPalette &palette) const
