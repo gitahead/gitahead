@@ -38,7 +38,7 @@ void DiffTreeModel::createDiffTree()
     for (int patchNum = 0; patchNum < mDiff.count(); ++patchNum) {
         QString path = mDiff.name(patchNum);
         auto pathParts = path.split("/");
-        mRoot->addChild(pathParts, patchNum, 0);
+        mRoot->addChild(pathParts, patchNum, 0, mListView);
     }
 }
 
@@ -409,23 +409,33 @@ QList<Node *> Node::children()
   return mChildren;
 }
 
-void Node::addChild(const QStringList& pathPart, int patchIndex, int indexFirstDifferent)
+void Node::addChild(
+  const QStringList& pathPart,
+  int patchIndex,
+  int indexFirstDifferent,
+  bool listView)
 {
-    for (auto c: mChildren) {
-        if (c->name() == pathPart[indexFirstDifferent]) {
-            c->addChild(pathPart, patchIndex, indexFirstDifferent + 1);
-            return;
-        }
+  Node* node;
+
+  if (listView) {
+    // Add child with full path in list view.
+    node = new Node(pathPart.join("/"), patchIndex, this);
+  } else {
+    for (auto child : mChildren) {
+      if (child->name() == pathPart[indexFirstDifferent]) {
+        child->addChild(pathPart, patchIndex, indexFirstDifferent + 1, false);
+        return;
+      }
     }
 
-    Node* n;
     if (indexFirstDifferent + 1 < pathPart.length()) {
-        // folders cannot have a patch Index!
-        n = new Node(pathPart[indexFirstDifferent], -1, this);
-        n->addChild(pathPart, patchIndex, indexFirstDifferent + 1);
+      // Folders cannot have a patch Index!
+      node = new Node(pathPart[indexFirstDifferent], -1, this);
+      node->addChild(pathPart, patchIndex, indexFirstDifferent + 1, false);
     } else
-        n = new Node(pathPart[indexFirstDifferent], patchIndex, this);
-    mChildren.append(n);
+      node = new Node(pathPart[indexFirstDifferent], patchIndex, this);
+  }
+  mChildren.append(node);
 }
 
 git::Index::StagedState Node::stageState(const git::Index& idx, ParentStageState searchingState)

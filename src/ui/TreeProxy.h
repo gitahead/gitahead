@@ -27,9 +27,12 @@ public:
   virtual ~TreeProxy();
   bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole, bool ignoreIndexChanges = false);
   bool staged() {return mStaged;}
+
+  void enableFilter(bool enable) { mFilter = enable; }
 private:
   bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const override;
   bool mStaged{true}; // indicates, if only staged or only unstages files should be shown
+  bool mFilter = true;
 };
 
 #endif // TREEPROXY_H

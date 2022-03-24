@@ -378,7 +378,15 @@ void DiffView::fetchMore()
 
   auto dtw = dynamic_cast<DoubleTreeWidget*>(mParent);
   //QList<int> patchIndices = mDiffTreeModel->patchIndices(dtw->selectedIndex());
-  QList<QModelIndex> indices = mDiffTreeModel->modelIndices(dtw->selectedIndex());
+  QList<QModelIndex> indexList = dtw->selectedIndices();
+  QList<QModelIndex> indices;
+  for (auto index : indexList) {
+    QList<QModelIndex> addList = mDiffTreeModel->modelIndices(index);
+    for (auto add : addList) {
+      if (!indices.contains(add))
+        indices.append(add);
+    }
+  }
   int count = indices.count();
 
   for (int i = mFiles.count(); i < count && addedFiles < maxNewFiles; ++i) {

@@ -67,7 +67,7 @@ public slots:
 
 signals:
   void linkActivated(const QString &link);
-  void fileSelected(const QModelIndex &index);
+  void filesSelected(const QModelIndexList &indexes);
   void collapseCountChanged(int count);
 
 private:
