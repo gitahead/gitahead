@@ -36,7 +36,7 @@ jobs:
 
     - name: Replace source url
       run: >
-        sed -i "s@url: .*.git@url: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY@" com.github.Murmele.Gittyup/com.github.Murmele.Gittyup.yml
+        sed -i "s@url: .*Gittyup.git@url: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY@" com.github.Murmele.Gittyup/com.github.Murmele.Gittyup.yml
 
     - name: Add dev build marker to cmake options
       if: github.ref_type != 'tag'
