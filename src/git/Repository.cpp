@@ -1051,18 +1051,29 @@ QStringList Repository::lfsEnvironment()
   return QString(lfsExecute({"env"})).split('\n');
 }
 
-QStringList Repository::lfsTracked()
+Repository::LfsTracking Repository::lfsTracked()
 {
   QString output = lfsExecute({"track"});
   QStringList lines = output.split('\n', QString::SkipEmptyParts);
   if (!lines.isEmpty())
     lines.removeFirst();
 
-  QStringList tracked;
-  foreach (const QString &line, lines)
-    tracked.append(line.trimmed().section(' ', 0, 0));
+  QStringList tracked, excluded;
+  bool excluding = false;
+  foreach (const QString &line, lines) {
+    if (line == "Listing excluded patterns") {
+      excluding = true;
+    } else if (excluding) {
+      excluded.append(line.trimmed().section(' ', 0, 0));
+    } else {
+      tracked.append(line.trimmed().section(' ', 0, 0));
+    }
+  }
 
-  return tracked;
+  return LfsTracking {
+    tracked,
+    excluded
+  };
 }
 
 bool Repository::lfsSetTracked(const QString &pattern, bool tracked)

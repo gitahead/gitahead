@@ -65,6 +65,11 @@ public:
     virtual void progress(const QString &path, int current, int total) {}
   };
 
+  struct LfsTracking {
+    QStringList included;
+    QStringList excluded;
+  };
+
   Repository();
 
   bool isValid() const { return !d.isNull(); }
@@ -235,7 +240,7 @@ public:
   QByteArray lfsSmudge(const QByteArray &lfsPointerText, const QString &file);
 
   QStringList lfsEnvironment();
-  QStringList lfsTracked();
+  LfsTracking lfsTracked();
   bool lfsSetTracked(const QString &pattern, bool tracked);
 
   QSet<QString> lfsLocks();

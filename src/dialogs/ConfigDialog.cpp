@@ -509,24 +509,33 @@ public:
 
     git::Repository repo = view->repo();
 
-    QListView *list = new QListView(this);
-    list->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    list->setSelectionBehavior(QAbstractItemView::SelectRows);
-    list->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    QListView *includedList = new QListView(this);
+    includedList->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    includedList->setSelectionBehavior(QAbstractItemView::SelectRows);
+    includedList->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-    QStringListModel *model = new QStringListModel(QStringList(), this);
-    list->setModel(model);
+    QStringListModel *includedModel = new QStringListModel(QStringList(), this);
+    includedList->setModel(includedModel);
 
-    QFutureWatcher<QStringList> *watcher = new QFutureWatcher<QStringList>(this);
-    connect(watcher, &QFutureWatcher<QStringList>::finished, this, [model, watcher] {
-      model->setStringList(watcher->result());
+    QListView *excludedList = new QListView(this);
+    excludedList->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    excludedList->setSelectionBehavior(QAbstractItemView::SelectRows);
+    excludedList->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+    QStringListModel *excludedModel = new QStringListModel(QStringList(), this);
+    excludedList->setModel(excludedModel);
+
+    QFutureWatcher<git::Repository::LfsTracking> *watcher = new QFutureWatcher<git::Repository::LfsTracking>(this);
+    connect(watcher, &QFutureWatcher<QStringList>::finished, this, [includedModel, excludedModel, watcher] {
+      includedModel->setStringList(watcher->result().included);
+      excludedModel->setStringList(watcher->result().excluded);
       watcher->deleteLater();
     });
 
     watcher->setFuture(QtConcurrent::run(repo, &git::Repository::lfsTracked));
 
-    Footer *footer = new Footer(list);
-    connect(footer, &Footer::plusClicked, this, [this, repo, model] {
+    Footer *footer = new Footer(includedList);
+    connect(footer, &Footer::plusClicked, this, [this, repo, includedModel, excludedModel] {
       QDialog *dialog = new QDialog(this);
       dialog->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -564,38 +573,42 @@ public:
         track->setEnabled(!text.isEmpty());
       });
 
-      connect(dialog, &QDialog::accepted, this, [pattern, repo, model] {
+      connect(dialog, &QDialog::accepted, this, [pattern, repo, includedModel, excludedModel] {
         git::Repository tmp(repo);
         tmp.lfsSetTracked(pattern->text(), true);
-        model->setStringList(tmp.lfsTracked());
+        auto tracking = tmp.lfsTracked();
+        includedModel->setStringList(tracking.included);
+        excludedModel->setStringList(tracking.excluded);
       });
 
       dialog->open();
     });
 
-    connect(footer, &Footer::minusClicked, this, [list, repo, model] {
+    connect(footer, &Footer::minusClicked, this, [includedList, repo, includedModel, excludedModel] {
       git::Repository tmp(repo);
-      QModelIndexList indexes = list->selectionModel()->selectedRows();
+      QModelIndexList indexes = includedList->selectionModel()->selectedRows();
       foreach (const QModelIndex &index, indexes) {
         QString text = index.data(Qt::DisplayRole).toString();
         tmp.lfsSetTracked(text, false);
       }
 
-      model->setStringList(tmp.lfsTracked());
+      auto tracking = tmp.lfsTracked();
+      includedModel->setStringList(tracking.included);
+      excludedModel->setStringList(tracking.excluded);
     });
 
     // enable minus button
-    auto updateMinusButton = [list, footer] {
-      footer->setMinusEnabled(list->selectionModel()->hasSelection());
+    auto updateMinusButton = [includedList, footer] {
+      footer->setMinusEnabled(includedList->selectionModel()->hasSelection());
     };
-    connect(list->selectionModel(), &QItemSelectionModel::selectionChanged,
+    connect(includedList->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, updateMinusButton);
-    connect(list->model(), &QAbstractItemModel::modelReset,
+    connect(includedList->model(), &QAbstractItemModel::modelReset,
             this, updateMinusButton);
 
     QVBoxLayout *tableLayout = new QVBoxLayout;
     tableLayout->setSpacing(0);
-    tableLayout->addWidget(list);
+    tableLayout->addWidget(includedList);
     tableLayout->addWidget(footer);
 
     QMap<QString,QString> map;
@@ -729,6 +742,8 @@ public:
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addLayout(tableLayout);
+    layout->addWidget(new QLabel(tr("Excluded patterns:")));
+    layout->addWidget(excludedList);
     layout->addLayout(form);
   }
 };
