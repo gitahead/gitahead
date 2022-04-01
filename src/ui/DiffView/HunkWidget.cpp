@@ -466,7 +466,7 @@ _HunkWidget::Header* HunkWidget::header() const
 TextEditor* HunkWidget::editor(bool ensureLoaded)
 {
   if (ensureLoaded)
-    load(mPatch);
+	load(mStaged);
   return mEditor;
 }
 
