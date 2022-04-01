@@ -81,13 +81,16 @@ class FileWidget : public QWidget
 public:
 
   FileWidget(DiffView *view,
-    const git::Diff &diff,
-    const git::Patch &patch,
-    const git::Patch &staged,
-    const QModelIndex modelIndex,
-    QWidget *parent = nullptr);
+	const git::Diff &diff,
+	const git::Patch &patch,
+	const git::Patch &staged,
+	const QModelIndex modelIndex,
+	const QString &name,
+	const QString &path,
+	bool submodule,
+	QWidget *parent = nullptr);
   bool isEmpty();
-  void updatePatch(const git::Patch &patch, const git::Patch &staged);
+  void updatePatch(const git::Patch &patch, const git::Patch& staged, const QString& name, const QString& path, bool submodule);
   /*!
    * Update hunks after index change and emits the current stage state of the hunks
    * \brief updateHunks

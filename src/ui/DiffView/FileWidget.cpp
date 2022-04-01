@@ -226,7 +226,7 @@ void _FileWidget::Header::updateCheckState()
 FileWidget::FileWidget(DiffView *view,
   const git::Diff &diff,
   const git::Patch &patch,
-  const git::Patch &staged, const QModelIndex modelIndex,
+  const git::Patch &staged, const QModelIndex modelIndex, const QString& name, const QString& path, bool submodule,
   QWidget *parent)
   : QWidget(parent), mView(view), mDiff(diff), mPatch(patch), mModelIndex(modelIndex)
 {
@@ -235,12 +235,6 @@ FileWidget::FileWidget(DiffView *view,
   QVBoxLayout *layout = new QVBoxLayout(this);
   layout->setContentsMargins(0,0,0,0);
   layout->setSpacing(0);
-
-  git::Repository repo = RepoView::parentView(this)->repo();
-
-  QString name = patch.name();
-  QString path = repo.workdir().filePath(name);
-  bool submodule = repo.lookupSubmodule(name).isValid();
 
   bool binary = patch.isBinary();
   if (patch.isUntracked()) {
@@ -301,7 +295,7 @@ FileWidget::FileWidget(DiffView *view,
   layout->addLayout(mHunkLayout);
   layout->addSpacerItem(new QSpacerItem(0,0, QSizePolicy::Expanding, QSizePolicy::Expanding)); // so the hunkwidget is always starting from top and is not distributed over the hole filewidget
 
-  updatePatch(patch, staged);
+  updatePatch(patch, staged, name, path, submodule);
 
   // LFS
   if (QToolButton *lfsButton = mHeader->lfsButton()) {
@@ -359,14 +353,9 @@ QModelIndex FileWidget::modelIndex()
     return mModelIndex;
 }
 
-void FileWidget::updatePatch(const git::Patch &patch, const git::Patch &staged) {
+void FileWidget::updatePatch(const git::Patch &patch, const git::Patch &staged, const QString& name, const QString& path, bool submodule) {
   mHeader->updatePatch(patch);
 
-  git::Repository repo = RepoView::parentView(this)->repo();
-
-  QString name = patch.name();
-  QString path = repo.workdir().filePath(name);
-  bool submodule = repo.lookupSubmodule(name).isValid();
   bool lfs = patch.isLfsPointer();
 
   // remove all hunks
