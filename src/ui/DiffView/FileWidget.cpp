@@ -499,9 +499,8 @@ void FileWidget::stageHunks(const HunkWidget* hunk, git::Index::StagedState stag
 
   QByteArray buffer;
   QList<QList<QByteArray>> image;
-  for (int i = 0; i < mHunks.size(); ++i) {
   git::Patch::populatePreimage(image, fileContent);
-
+  for (int i = 0; i < mHunks.size(); ++i) {
     QByteArray hunk_content;
       hunk_content = mHunks[i]->apply();
       mPatch.apply(image, i, hunk_content);
