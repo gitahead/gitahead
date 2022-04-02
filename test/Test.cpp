@@ -92,14 +92,26 @@ QString extractRepository(const QString& filename, bool useTempDir) {
 
    const char * filename_c = f.absoluteFilePath().toLatin1().data();
 
-    if (!QDir(exportFolder).exists()) {
-        int arg = 2;
-        auto res = zip_extract(filename_c, path_c, on_extract_entry, &arg);
-        if (res < 0) {
-            qDebug() << "Error opening zip file: " << zipReturnValueToString(res);
-            return "";
-        }
-    }
+   auto folder = QDir(exportFolder);
+   if (folder.exists()) {
+	   // Delete folder, because if the testrepo is used by multiple tests
+	   // there should be a clean environment
+	   folder.removeRecursively();
+
+	   // for some reason path_c and filename_c changed. Don't understand why
+	   if (useTempDir)
+		   path_c = tempDir.path().toLatin1().data();
+	   else
+		   path_c = repoPath.path().toLatin1().data();
+	   filename_c = f.absoluteFilePath().toLatin1().data();
+   }
+
+	int arg = 2;
+	auto res = zip_extract(filename_c, path_c, on_extract_entry, &arg);
+	if (res < 0) {
+		qDebug() << "Error opening zip file: " << zipReturnValueToString(res);
+		return "";
+	}
     return exportFolder; // successfully extracted
 }
 
