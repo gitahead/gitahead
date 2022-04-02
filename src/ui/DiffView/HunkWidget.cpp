@@ -36,6 +36,8 @@ namespace {
     }
 
     bool disclosure = false;
+
+	const QString noNewLineAtEndOfFile = HunkWidget::tr("No newline at end of file");
 }
 
 _HunkWidget::Header::Header(
@@ -1066,7 +1068,7 @@ void HunkWidget::createMarkersAndLineNumbers(const Line& line, int lidx, Account
     // Build annotations.
     QList<Annotation> annotations;
     if (!line.newline()) {
-      QString text = tr("No newline at end of file");
+	  QString text = noNewLineAtEndOfFile;
       QByteArray styles =
         QByteArray(text.toUtf8().size(), TextEditor::EofNewline);
       annotations.append({text, styles});
@@ -1141,37 +1143,60 @@ void HunkWidget::createMarkersAndLineNumbers(const Line& line, int lidx, Account
 QByteArray HunkWidget::hunk() const {
     QByteArray ar;
     int lineCount = mEditor->lineCount();
+	bool appended = false;
     for (int i = 0; i < lineCount; i++) {
         int mask = mEditor->markers(i);
         if (mask & 1 << TextEditor::Marker::Addition) {
-            if (!(mask & 1 << TextEditor::Marker::DiscardMarker))
+			if (!(mask & 1 << TextEditor::Marker::DiscardMarker)) {
                 ar.append(mEditor->line(i));
+				appended = true;
+			}
         } else if (mask & 1 << TextEditor::Marker::Deletion) {
             if (mask & 1 << TextEditor::Marker::DiscardMarker) {
                 // with a discard, a deletion becomes reverted
                 // and the line is still present
                 ar.append(mEditor->line(i));
+				appended = true;
             }
-        } else
+		} else {
           ar.append(mEditor->line(i));
+		  appended = true;
+		}
+
+		if (appended && mEditor->annotationLines(i) > 0 && mEditor->annotationText(i) == noNewLineAtEndOfFile) {
+			ar.remove(ar.length() - 1, 1); // remove new line
+		}
     }
+
   return ar;
 }
 
 QByteArray HunkWidget::apply() const {
     QByteArray ar;
     int lineCount = mEditor->lineCount();
-    for (int i = 0; i < lineCount; i++) {
+	for (int i = 0; i < lineCount; i++) {
+		bool appended = false;
         int mask = mEditor->markers(i);
         if (mask & 1 << TextEditor::Marker::Addition) {
-            if (mask & 1 << TextEditor::Marker::StagedMarker)
+			if (mask & 1 << TextEditor::Marker::StagedMarker) {
                 ar.append(mEditor->line(i));
+				appended = true;
+			}
         } else if (mask & 1 << TextEditor::Marker::Deletion) {
-            if (!(mask & 1 << TextEditor::Marker::StagedMarker))
+			if (!(mask & 1 << TextEditor::Marker::StagedMarker)) {
                 ar.append(mEditor->line(i));
-        } else
+				appended = true;
+			}
+		} else {
           ar.append(mEditor->line(i));
+		  appended = true;
+		}
+
+		if (appended && mEditor->annotationLines(i) > 0 && mEditor->annotationText(i) == noNewLineAtEndOfFile) {
+			ar.remove(ar.length() - 1, 1); // remove new line
+		}
     }
+
   return ar;
 }
 
