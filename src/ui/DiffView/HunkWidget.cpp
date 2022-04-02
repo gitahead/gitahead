@@ -748,23 +748,20 @@ void HunkWidget::load(git::Patch &staged, bool force)
   // Create content for the editor
   int patchCount = mPatch.lineCount(mIndex);
   for (int lidx = 0; lidx < patchCount; ++lidx) {
+	qDebug() << "LineContent: " << mPatch.lineContent(mIndex, lidx);
     char origin = mPatch.lineOrigin(mIndex, lidx);
-    bool EOL = false;
     if (origin == GIT_DIFF_LINE_CONTEXT_EOFNL ||
         origin == GIT_DIFF_LINE_ADD_EOFNL ||
         origin == GIT_DIFF_LINE_DEL_EOFNL) {
       Q_ASSERT(!lines.isEmpty());
       lines.last().setNewline(false);
       content += '\n';
-      EOL = true;
-    }
+	} else
+		content += mPatch.lineContent(mIndex, lidx);
 
-    if (!EOL) {
-        int oldLine = mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile);
-        int newLine = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile);
-        lines << Line(origin, oldLine, newLine);
-        content += mPatch.lineContent(mIndex, lidx);
-    }
+	int oldLine = mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile);
+	int newLine = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile);
+	lines << Line(origin, oldLine, newLine);
   }
 
   // Trim final line end.
@@ -849,7 +846,7 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 			int oldLineStaged = mStaged.lineNumber(i, lidx, git::Diff::OldFile);
 			int newLineStaged = mStaged.lineNumber(i, lidx, git::Diff::NewFile);
 			auto line = Line(origin, oldLineStaged, newLineStaged);
-			qDebug() << lidx << ") " << line.print();
+			qDebug() << lidx << ") " << line.print() << mStaged.lineContent(i, lidx);
 		}
 	}
 
@@ -898,13 +895,16 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 	// Set all editor markers, like green background for adding, red background for deletion
 	// Blue background for OURS or magenta background for Theirs
 	// Setting also the staged symbol
+	int skipPatchLines = 0;
 	bool first_staged_patch_match = false;
 	 for (int lidx = 0; lidx < count; ++lidx) {
+		const Line& line = lines.at(lidx);
+		qDebug() << "Line Content: " << mPatch.lineContent(mIndex, lidx);
+		const auto lineOrigin = line.origin();
 		marker = -1;
 		staged = false;
-
-		const Line& line = lines.at(lidx);
-		createMarkersAndLineNumbers(line, lidx, comments, width);
+		if (lineOrigin != GIT_DIFF_LINE_CONTEXT_EOFNL && lineOrigin != GIT_DIFF_LINE_ADD_EOFNL && lineOrigin !=  GIT_DIFF_LINE_DEL_EOFNL)
+			createMarkersAndLineNumbers(line, lidx - skipPatchLines, comments, width);
 
         // Switch to next staged patch if the line number is higher than the current
         // staged patch contains
@@ -925,7 +925,7 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 			}
 		}
 
-        switch (lines[lidx].origin()) {
+		switch (lineOrigin) {
           case GIT_DIFF_LINE_CONTEXT:
             marker = TextEditor::Context;
             additions = 0;
@@ -933,7 +933,7 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 			current_staged_line_idx++;
             break;
 
-          case GIT_DIFF_LINE_ADDITION: {
+		  case GIT_DIFF_LINE_ADDITION: {
             marker = TextEditor::Addition;
             additions++;
             // Find matching lines
@@ -960,17 +960,25 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 				auto line_origin = mStaged.lineOrigin(current_staged_index, current_staged_line_idx);
 				auto staged_file = mStaged.lineNumber(current_staged_index, current_staged_line_idx, git::Diff::NewFile) - diff_staged_patch_old_new_file;
 				auto patch_file = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile) - (additions_tot - stagedAdditions) + (deletions_tot - stagedDeletions) - diff_patch_old_new_file; // - offset_patch_old_new;
-                // TODO: try to avoid comparing strings!!!
+				auto stagedContent = mStaged.lineContent(current_staged_index, current_staged_line_idx);
+				auto patchContent = mPatch.lineContent(mIndex, lidx);
+
+				// TODO: try to avoid comparing strings!!!
                 if (line_origin == '+' && mStaged.lineContent(current_staged_index, current_staged_line_idx) == mPatch.lineContent(mIndex, lidx)) {
 				  stagedAdditions++;
 				  current_staged_line_idx++;
+//				  if (!lines.at(lidx).newline()) {
+//					  // in the lines the no newline at end of file is missing
+//					  // sot it must be skipped in the staged patch
+//					  current_staged_line_idx++;
+//				  }
 				  staged = true;
 				}
 			}
 			additions_tot++;
             break;
 
-          } case GIT_DIFF_LINE_DELETION: {
+		  } case GIT_DIFF_LINE_DELETION: {
             marker = TextEditor::Deletion;
             deletions++;
 			deletions_tot++;
@@ -980,6 +988,8 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 				auto line_origin = mStaged.lineOrigin(current_staged_index, current_staged_line_idx);
 				auto staged_old_file = mStaged.lineNumber(current_staged_index, current_staged_line_idx, git::Diff::OldFile);
 				auto patch_old_file = mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile);
+				auto stagedContent = mStaged.lineContent(current_staged_index, current_staged_line_idx);
+				auto patchContent = mPatch.lineContent(mIndex, lidx);
 				if (line_origin == '-' && staged_old_file == patch_old_file) {
 				  assert(mStaged.lineContent(current_staged_index, current_staged_line_idx) == mPatch.lineContent(mIndex, lidx));
 				  stagedDeletions++;
@@ -987,21 +997,33 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 				}
 			}
 			current_staged_line_idx++; // must be in staged and in the unstaged case
+//			if (!lines.at(lidx).newline()) {
+//				// in the lines the no newline at end of file is missing
+//				// sot it must be skipped in the staged patch
+//				current_staged_line_idx++;
+//			}
             break;
 
-          } case 'O':
+		  } case 'O':
             marker = TextEditor::Ours;
             break;
 
           case 'T':
             marker = TextEditor::Theirs;
             break;
+		  case GIT_DIFF_LINE_CONTEXT_EOFNL:
+		  case GIT_DIFF_LINE_ADD_EOFNL:
+		  case GIT_DIFF_LINE_DEL_EOFNL: {
+			skipPatchLines ++;
+			current_staged_line_idx ++;
+			continue; // skip setting marker, because for this patchline no editorline exists
+		  }
         }
 
         // Add marker.
         if (marker >= 0)
-            mEditor->markerAdd(lidx, marker);
-		 setStaged(lidx, staged);
+			mEditor->markerAdd(lidx - skipPatchLines, marker);
+		 setStaged(lidx - skipPatchLines, staged);
     }
 
 
@@ -1175,6 +1197,8 @@ QByteArray HunkWidget::apply() const {
     QByteArray ar;
     int lineCount = mEditor->lineCount();
 	for (int i = 0; i < lineCount; i++) {
+		qDebug() << "Text: " << mEditor->line(i);
+		qDebug() << "Annotation: " << mEditor->annotationText(i);
 		bool appended = false;
         int mask = mEditor->markers(i);
         if (mask & 1 << TextEditor::Marker::Addition) {
