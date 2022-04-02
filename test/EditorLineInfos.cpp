@@ -79,7 +79,7 @@
  * git diff --cached: to get the staged diff
  */
 
-#define EXECUTE_ONLY_LAST_TEST 0
+#define EXECUTE_ONLY_LAST_TEST 1
 
 using namespace QTest;
 
@@ -105,8 +105,9 @@ private slots:
   void multipleHunks_misc1();
   void singleHunk_additionsOnly_secondStagedPatch();
   void singleHunk_deletionsOnly_secondStagedPatch();
-#endif
   void multipleHunks_StageSingleLines();
+  #endif
+  void multipleHunks_StageSingleLines2();
 
 private:
   int closeDelay = 0;
@@ -604,8 +605,6 @@ void TestEditorLineInfo::multipleHunks_misc1() {
 ////    hw.load(stagedPatch, true);
 //}
 
-#endif
-
 void TestEditorLineInfo::multipleHunks_StageSingleLines() {
 	INIT_REPO("13_singleHunkNoStaged.zip", true)
 	QVERIFY(diff.count() > 0);
@@ -627,6 +626,7 @@ void TestEditorLineInfo::multipleHunks_StageSingleLines() {
 		hunk->load();
 
 	checkEditorMarkers(hunks.at(0)->editor(), QVector<int>({0, 1, 2, 3, 4, 5, 11}), QVector<int>(), QVector<int>(), QVector<int>());
+	checkEditorMarkers(hunks.at(1)->editor(), QVector<int>({3, 4, 5, 6, 7, 8, 9, 10, 15, 16, 20, 21, 22, 23, 30}), QVector<int>({}), QVector<int>({14, 19, 29}), QVector<int>());
 
 	// Stage single lines
 	hunks.at(0)->stageSelected(5, 6);
@@ -649,6 +649,7 @@ void TestEditorLineInfo::multipleHunks_StageSingleLines() {
 		hunk->load();
 
 	checkEditorMarkers(hunks.at(0)->editor(), QVector<int>({0, 1, 2, 3, 4, 11}), QVector<int>({5}), QVector<int>(), QVector<int>());
+	checkEditorMarkers(hunks.at(1)->editor(), QVector<int>({3, 4, 5, 6, 7, 8, 9, 10, 15, 16, 20, 21, 22, 23, 30}), QVector<int>({}), QVector<int>({14, 19, 29}), QVector<int>());
 
 	hunks.at(0)->stageSelected(4, 5);
 
@@ -670,6 +671,83 @@ void TestEditorLineInfo::multipleHunks_StageSingleLines() {
 	QVERIFY(hunks.count() == 2);
 
 	checkEditorMarkers(hunks.at(0)->editor(), QVector<int>({0, 1, 2, 3, 11}), QVector<int>({4, 5}), QVector<int>(), QVector<int>());
+	checkEditorMarkers(hunks.at(1)->editor(), QVector<int>({3, 4, 5, 6, 7, 8, 9, 10, 15, 16, 20, 21, 22, 23, 30}), QVector<int>({}), QVector<int>({14, 19, 29}), QVector<int>());
+}
+
+#endif
+
+void TestEditorLineInfo::multipleHunks_StageSingleLines2() {
+	/*
+	 * Staging the last line, first only the deleted one
+	 * and then the added line
+	 */
+
+	INIT_REPO("13_singleHunkNoStaged.zip", true)
+	QVERIFY(diff.count() > 0);
+	git::Patch patch = diff.patch(0);
+	// no staged lines yet, so no staged patch
+	QVERIFY(mRepo.diffTreeToIndex(commit.tree()).count() == 0);
+	git::Patch stagedPatch = git::Patch();
+
+	QString name = patch.name();
+	QString path_ = mRepo.workdir().filePath(name);
+	bool submodule = mRepo.lookupSubmodule(name).isValid();
+
+	auto* fw = new FileWidget(&diffView, diff, patch, stagedPatch, QModelIndex(), name, path_, submodule);
+	fw->setStageState(git::Index::StagedState::Unstaged);
+
+	auto hunks = fw->hunks();
+	QVERIFY(hunks.count() == 2);
+	for (auto* hunk: hunks)
+		hunk->load();
+
+	checkEditorMarkers(hunks.at(0)->editor(), QVector<int>({0, 1, 2, 3, 4, 5, 11}), QVector<int>(), QVector<int>(), QVector<int>());
+	checkEditorMarkers(hunks.at(1)->editor(), QVector<int>({3, 4, 5, 6, 7, 8, 9, 10, 15, 16, 20, 21, 22, 23, 30}), QVector<int>({}), QVector<int>({14, 19, 29}), QVector<int>());
+
+	// Stage single lines
+	hunks.at(1)->stageSelected(29, 30);
+
+	Test::refresh(repoView);
+	stagedDiff = mRepo.diffTreeToIndex(commit.tree()); /* correct */
+	diff = mRepo.status(mRepo.index(), nullptr, false);
+	QVERIFY(stagedDiff.count() > 0);
+	QVERIFY(diff.count() > 0);
+	stagedPatch = stagedDiff.patch(0);
+
+	delete fw;
+	fw = new FileWidget(&diffView, diff, patch, stagedPatch, QModelIndex(), name, path, submodule);
+
+	// TODO: release fw
+	// It is important that all hunks are loaded!!!!
+	hunks = fw->hunks();
+	QVERIFY(hunks.count() == 2);
+	for (auto* hunk: hunks)
+		hunk->load();
+
+	checkEditorMarkers(hunks.at(0)->editor(), QVector<int>({0, 1, 2, 3, 4, 5, 11}), QVector<int>(), QVector<int>(), QVector<int>());
+	checkEditorMarkers(hunks.at(1)->editor(), QVector<int>({3, 4, 5, 6, 7, 8, 9, 10, 15, 16, 20, 21, 22, 23, 30}), QVector<int>({}), QVector<int>({14, 19}), QVector<int>({29}));
+
+	hunks.at(0)->stageSelected(30, 31);
+
+	Test::refresh(repoView);
+	stagedDiff = mRepo.diffTreeToIndex(commit.tree()); /* correct */
+	diff = mRepo.status(mRepo.index(), nullptr, false);
+	QVERIFY(stagedDiff.count() > 0);
+	QVERIFY(diff.count() > 0);
+	stagedPatch = stagedDiff.patch(0);
+
+	delete fw;
+	fw = new FileWidget(&diffView, diff, patch, stagedPatch, QModelIndex(), name, path, submodule);
+
+	hunks = fw->hunks();
+	QVERIFY(hunks.count() == 2);
+	for (auto* hunk: hunks)
+		hunk->load();
+	// TODO: release fw
+	QVERIFY(hunks.count() == 2);
+
+	checkEditorMarkers(hunks.at(0)->editor(), QVector<int>({0, 1, 2, 3, 4, 5, 11}), QVector<int>(), QVector<int>(), QVector<int>());
+	checkEditorMarkers(hunks.at(1)->editor(), QVector<int>({3, 4, 5, 6, 7, 8, 9, 10, 15, 16, 20, 21, 22, 23}), QVector<int>({30}), QVector<int>({14, 19}), QVector<int>({29}));
 }
 
 void TestEditorLineInfo::cleanupTestCase()
