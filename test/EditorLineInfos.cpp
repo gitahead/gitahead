@@ -112,15 +112,10 @@ private slots:
 private:
   int closeDelay = 0;
   git::Repository mRepo;
-  //HunkWidget* mHunk{nullptr};
 };
 
 void TestEditorLineInfo::initTestCase()
 {
-  bool lfs = false;
-  bool submodule = false;
-
-  //mHunk = new HunkWidget(nullptr, diff, patch, staged, index, lfs, submodule, nullptr);
 }
 
 #if EXECUTE_ONLY_LAST_TEST == 0
@@ -751,11 +746,8 @@ void TestEditorLineInfo::multipleHunks_StageSingleLines2() {
 
 void TestEditorLineInfo::cleanupTestCase()
 {
-//  delete mHunk;
-//  mHunk = nullptr;
   qWait(closeDelay);
 }
 
 TEST_MAIN(TestEditorLineInfo)
-//#include "HunkWidget.moc"
 #include "EditorLineInfos.moc"
