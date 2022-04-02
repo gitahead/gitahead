@@ -748,7 +748,6 @@ void HunkWidget::load(git::Patch &staged, bool force)
   // Create content for the editor
   int patchCount = mPatch.lineCount(mIndex);
   for (int lidx = 0; lidx < patchCount; ++lidx) {
-	qDebug() << "LineContent: " << mPatch.lineContent(mIndex, lidx);
     char origin = mPatch.lineOrigin(mIndex, lidx);
     if (origin == GIT_DIFF_LINE_CONTEXT_EOFNL ||
         origin == GIT_DIFF_LINE_ADD_EOFNL ||
@@ -868,7 +867,7 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 //	| unstaged deletion | +            | / |
 //	| staged deletion   | +            | + |
 
-    int count = lines.size();
+	const int count = lines.size();
     int marker = -1;
     int additions = 0, deletions = 0;
 	int additions_tot = 0, deletions_tot = 0;
@@ -876,8 +875,8 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
     bool staged = false;
 	int current_staged_index = -1;
 	int current_staged_line_idx = 0;
-    int diff_patch_old_new_file = 0; //-1;
-    int diff_staged_patch_old_new_file = 0; //-1;
+//	int diff_patch_old_new_file = 0;
+//	int diff_staged_patch_old_new_file = 0;
 
 	// Find the first staged hunk which is within this patch
 	if (!mPatch.isConflicted()) {
@@ -913,8 +912,8 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 			if (!first_staged_patch_match) {
 				if (mPatch.lineContent(mIndex, lidx) == mStaged.lineContent(current_staged_index, 0)) {
 					first_staged_patch_match = true;
-                    diff_patch_old_new_file = 0; //mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile) - mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile);
-                    diff_staged_patch_old_new_file = 0; //mStaged.lineNumber(current_staged_index, 0, git::Diff::NewFile) - mStaged.lineNumber(current_staged_index, 0, git::Diff::OldFile);
+//                    diff_patch_old_new_file = 0; //mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile) - mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile);
+//                    diff_staged_patch_old_new_file = 0; //mStaged.lineNumber(current_staged_index, 0, git::Diff::NewFile) - mStaged.lineNumber(current_staged_index, 0, git::Diff::OldFile);
 				}
 				current_staged_line_idx = 0;
 			} else if(staged_header_struct_next && mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile) == staged_header_struct_next->old_start) {
@@ -955,23 +954,15 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
               deletions = 0;
             }
             // Check if staged
-
 			if (!mPatch.isConflicted() && mStaged.count() > 0 && current_staged_index >= 0 && current_staged_line_idx < mStaged.lineCount(current_staged_index)) {
 				auto line_origin = mStaged.lineOrigin(current_staged_index, current_staged_line_idx);
-				auto staged_file = mStaged.lineNumber(current_staged_index, current_staged_line_idx, git::Diff::NewFile) - diff_staged_patch_old_new_file;
-				auto patch_file = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile) - (additions_tot - stagedAdditions) + (deletions_tot - stagedDeletions) - diff_patch_old_new_file; // - offset_patch_old_new;
-				auto stagedContent = mStaged.lineContent(current_staged_index, current_staged_line_idx);
-				auto patchContent = mPatch.lineContent(mIndex, lidx);
+//				auto staged_file = mStaged.lineNumber(current_staged_index, current_staged_line_idx, git::Diff::NewFile) - diff_staged_patch_old_new_file;
+//				auto patch_file = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile) - (additions_tot - stagedAdditions) + (deletions_tot - stagedDeletions) - diff_patch_old_new_file; // - offset_patch_old_new;
 
 				// TODO: try to avoid comparing strings!!!
                 if (line_origin == '+' && mStaged.lineContent(current_staged_index, current_staged_line_idx) == mPatch.lineContent(mIndex, lidx)) {
 				  stagedAdditions++;
 				  current_staged_line_idx++;
-//				  if (!lines.at(lidx).newline()) {
-//					  // in the lines the no newline at end of file is missing
-//					  // sot it must be skipped in the staged patch
-//					  current_staged_line_idx++;
-//				  }
 				  staged = true;
 				}
 			}
@@ -997,11 +988,6 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 				}
 			}
 			current_staged_line_idx++; // must be in staged and in the unstaged case
-//			if (!lines.at(lidx).newline()) {
-//				// in the lines the no newline at end of file is missing
-//				// sot it must be skipped in the staged patch
-//				current_staged_line_idx++;
-//			}
             break;
 
 		  } case 'O':
