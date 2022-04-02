@@ -625,12 +625,11 @@ void TestEditorLineInfo::multipleHunks_StageSingleLines() {
 	QVERIFY(hunks.count() == 2);
 	for (auto* hunk: hunks)
 		hunk->load();
-	auto hw = hunks.at(0);
 
-	checkEditorMarkers(hw->editor(), QVector<int>({0, 1, 2, 3, 4, 5, 11}), QVector<int>(), QVector<int>(), QVector<int>());
+	checkEditorMarkers(hunks.at(0)->editor(), QVector<int>({0, 1, 2, 3, 4, 5, 11}), QVector<int>(), QVector<int>(), QVector<int>());
 
 	// Stage single lines
-	hw->stageSelected(5, 6);
+	hunks.at(0)->stageSelected(5, 6);
 
 	Test::refresh(repoView);
 	stagedDiff = mRepo.diffTreeToIndex(commit.tree()); /* correct */
@@ -648,11 +647,10 @@ void TestEditorLineInfo::multipleHunks_StageSingleLines() {
 	QVERIFY(hunks.count() == 2);
 	for (auto* hunk: hunks)
 		hunk->load();
-	hw = hunks.at(0);
 
-	checkEditorMarkers(hw->editor(), QVector<int>({0, 1, 2, 3, 4, 11}), QVector<int>({5}), QVector<int>(), QVector<int>());
+	checkEditorMarkers(hunks.at(0)->editor(), QVector<int>({0, 1, 2, 3, 4, 11}), QVector<int>({5}), QVector<int>(), QVector<int>());
 
-	hw->stageSelected(4, 5);
+	hunks.at(0)->stageSelected(4, 5);
 
 	Test::refresh(repoView);
 	stagedDiff = mRepo.diffTreeToIndex(commit.tree()); /* correct */
@@ -671,9 +669,7 @@ void TestEditorLineInfo::multipleHunks_StageSingleLines() {
 	// TODO: release fw
 	QVERIFY(hunks.count() == 2);
 
-	hw = hunks.at(0);
-
-	checkEditorMarkers(hw->editor(), QVector<int>({0, 1, 2, 3, 11}), QVector<int>({4, 5}), QVector<int>(), QVector<int>());
+	checkEditorMarkers(hunks.at(0)->editor(), QVector<int>({0, 1, 2, 3, 11}), QVector<int>({4, 5}), QVector<int>(), QVector<int>());
 }
 
 void TestEditorLineInfo::cleanupTestCase()
