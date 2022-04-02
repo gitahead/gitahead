@@ -1054,14 +1054,14 @@ QStringList Repository::lfsEnvironment()
 Repository::LfsTracking Repository::lfsTracked()
 {
   QString output = lfsExecute({"track"});
-  QStringList lines = output.split('\n', QString::SkipEmptyParts);
+  QStringList lines = output.split('\n', Qt::SkipEmptyParts);
   if (!lines.isEmpty())
     lines.removeFirst();
 
   QStringList tracked, excluded;
   bool excluding = false;
   foreach (const QString &line, lines) {
-    if (line == "Listing excluded patterns") {
+    if (line[0] != ' ') {
       excluding = true;
     } else if (excluding) {
       excluded.append(line.trimmed().section(' ', 0, 0));

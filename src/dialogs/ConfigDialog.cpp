@@ -741,6 +741,7 @@ public:
 
 
     QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->addWidget(new QLabel(tr("Included patterns:")));
     layout->addLayout(tableLayout);
     layout->addWidget(new QLabel(tr("Excluded patterns:")));
     layout->addWidget(excludedList);
