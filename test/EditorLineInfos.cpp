@@ -467,7 +467,7 @@ void TestEditorLineInfo::multipleHunks_multipleAdditions() {
 void TestEditorLineInfo::singleHunk_additionsOnly_secondStagedPatch() {
     // Testing the finding of the staged patch index
 
-    INIT_REPO("11_singleHunk_additionsOnly_secondStagedPatch.zip", false)
+	INIT_REPO("11_singleHunk_additionsOnly_secondStagedPatch.zip", true)
     QVERIFY(stagedDiff.count() > 0);
     QVERIFY(diff.count() > 0);
     git::Patch patch = diff.patch(0);
