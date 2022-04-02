@@ -636,7 +636,6 @@ void TestEditorLineInfo::multipleHunks_StageSingleLines() {
 	delete fw;
 	fw = new FileWidget(&diffView, diff, patch, stagedPatch, QModelIndex(), name, path, submodule);
 
-	// TODO: release fw
 	// It is important that all hunks are loaded!!!!
 	hunks = fw->hunks();
 	QVERIFY(hunks.count() == 2);

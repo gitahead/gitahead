@@ -826,8 +826,6 @@ void HunkWidget::load(git::Patch &staged, bool force)
   mEditor->updateGeometry();
 
   mLoading = false;
-  // update stageState after everything is loaded
-  //stageStateChanged(stageState());
     mHeader->setCheckState(stageState());
 }
 
@@ -875,8 +873,6 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
     bool staged = false;
 	int current_staged_index = -1;
 	int current_staged_line_idx = 0;
-//	int diff_patch_old_new_file = 0;
-//	int diff_staged_patch_old_new_file = 0;
 
 	// Find the first staged hunk which is within this patch
 	if (!mPatch.isConflicted()) {
@@ -910,11 +906,8 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 		if (!mPatch.isConflicted() && current_staged_index >= 0) {
 			auto staged_header_struct_next = mStaged.header_struct(current_staged_index + 1);
 			if (!first_staged_patch_match) {
-				if (mPatch.lineContent(mIndex, lidx) == mStaged.lineContent(current_staged_index, 0)) {
+				if (mPatch.lineContent(mIndex, lidx) == mStaged.lineContent(current_staged_index, 0))
 					first_staged_patch_match = true;
-//                    diff_patch_old_new_file = 0; //mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile) - mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile);
-//                    diff_staged_patch_old_new_file = 0; //mStaged.lineNumber(current_staged_index, 0, git::Diff::NewFile) - mStaged.lineNumber(current_staged_index, 0, git::Diff::OldFile);
-				}
 				current_staged_line_idx = 0;
 			} else if(staged_header_struct_next && mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile) == staged_header_struct_next->old_start) {
 				// Align staged patch with total patch
@@ -956,10 +949,7 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
             // Check if staged
 			if (!mPatch.isConflicted() && mStaged.count() > 0 && current_staged_index >= 0 && current_staged_line_idx < mStaged.lineCount(current_staged_index)) {
 				auto line_origin = mStaged.lineOrigin(current_staged_index, current_staged_line_idx);
-//				auto staged_file = mStaged.lineNumber(current_staged_index, current_staged_line_idx, git::Diff::NewFile) - diff_staged_patch_old_new_file;
-//				auto patch_file = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile) - (additions_tot - stagedAdditions) + (deletions_tot - stagedDeletions) - diff_patch_old_new_file; // - offset_patch_old_new;
-
-				// TODO: try to avoid comparing strings!!!
+				// TODO: try to avoid comparing strings and use line number comparsion like for deletion
                 if (line_origin == '+' && mStaged.lineContent(current_staged_index, current_staged_line_idx) == mPatch.lineContent(mIndex, lidx)) {
 				  stagedAdditions++;
 				  current_staged_line_idx++;
