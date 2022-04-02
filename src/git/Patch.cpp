@@ -328,7 +328,7 @@ void Patch::populatePreimage(QList<QList<QByteArray>>& image) const{
     populatePreimage(image, source);
 }
 
-void Patch::populatePreimage(QList<QList<QByteArray> > &image, QByteArray fileContent) const {
+void Patch::populatePreimage(QList<QList<QByteArray> > &image, QByteArray fileContent) {
     int index = 0;
     int newline = fileContent.indexOf('\n');
     while (newline >= 0) {
