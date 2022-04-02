@@ -1,7 +1,11 @@
 #include "Test.h"
 #include "dialogs/ExternalToolsDialog.h"
 
+#define private public
 #include "ui/DiffView/HunkWidget.h"
+#include "ui/DiffView/FileWidget.h"
+#undef private
+
 #include "ui/MainWindow.h"
 #include "ui/DiffView/DiffView.h"
 #include "ui/RepoView.h"
@@ -24,17 +28,58 @@
     git::Diff stagedDiff = mRepo.diffTreeToIndex(commit.tree()); /* correct */ \
  \
     RepoView *repoView = window->currentView(); \
-    /*Test::refresh(repoView); */  \
+	Test::refresh(repoView);  \
     DiffView diffView = DiffView(mRepo, repoView); \
     auto diff = mRepo.status(mRepo.index(), nullptr, false);
 
 #define BITSET(value, bit) ((value & (1 << bit)) == (1 << bit))
+
+#define checkEditorMarkers(editor, unstagedAddition, stagedAddition, unstagedDeletion, stagedDeletion) \
+	for (int i=0; i < editor->lineCount(); i++) { \
+		QString line = editor->line(i); \
+		int markers = editor->markers(i); \
+\
+		QString state = ""; \
+		if (BITSET(markers, TextEditor::Marker::Addition)) \
+			state = "Addition"; \
+		else if (BITSET(markers, TextEditor::Marker::Deletion)) \
+			state = "Deletion";\
+		else if (BITSET(markers, TextEditor::Marker::Context)) \
+			state = "Unchanged"; \
+		else \
+			state = QString::number(markers); \
+\
+		qDebug() << "Index: " << i << ", State: " << state << ", Staged: " << BITSET(markers, TextEditor::Marker::StagedMarker) << line; \
+		if (unstagedAddition.indexOf(i) != -1) { \
+			/* unstaged addition */ \
+			QVERIFY(BITSET(markers, TextEditor::Marker::Addition)); \
+			QVERIFY(!BITSET(markers, TextEditor::Marker::StagedMarker)); \
+		} else if (stagedAddition.indexOf(i) != -1) { \
+			/* staged addition */ \
+			QVERIFY(BITSET(markers, TextEditor::Marker::Addition)); \
+			QVERIFY(BITSET(markers, TextEditor::Marker::StagedMarker)); \
+		} else if (unstagedDeletion.indexOf(i) != -1){ \
+			/* unstaged deletion */ \
+			QVERIFY(BITSET(markers, TextEditor::Marker::Deletion)); \
+			QVERIFY(!BITSET(markers, TextEditor::Marker::StagedMarker)); \
+		} else if (stagedDeletion.indexOf(i) != -1) { \
+			/* staged deletion */ \
+			QVERIFY(BITSET(markers, TextEditor::Marker::Deletion)); \
+			QVERIFY(BITSET(markers, TextEditor::Marker::StagedMarker)); \
+		} else { \
+			QVERIFY(!BITSET(markers, TextEditor::Marker::Deletion)); \
+			QVERIFY(!BITSET(markers, TextEditor::Marker::Addition)); \
+			QVERIFY(!BITSET(markers, TextEditor::Marker::StagedMarker)); \
+		} \
+	}
 
 /*
  * For DEBUGGING PURPOSE:
  * git diff HEAD: to get the diff shown in the editor
  * git diff --cached: to get the staged diff
  */
+
+#define EXECUTE_ONLY_LAST_TEST 0
 
 using namespace QTest;
 
@@ -47,6 +92,7 @@ private slots:
   void cleanupTestCase();
 
   //void editorLineMarkers1();
+#if EXECUTE_ONLY_LAST_TEST == 0
   void editorLineSingleHunkAdditionStaged();
   void editorLineSingleHunkDeletionStaged();
   void editorLineSingleHunkChangeStaged();
@@ -59,6 +105,8 @@ private slots:
   void multipleHunks_misc1();
   void singleHunk_additionsOnly_secondStagedPatch();
   void singleHunk_deletionsOnly_secondStagedPatch();
+#endif
+  void multipleHunks_StageSingleLines();
 
 private:
   int closeDelay = 0;
@@ -74,6 +122,7 @@ void TestEditorLineInfo::initTestCase()
   //mHunk = new HunkWidget(nullptr, diff, patch, staged, index, lfs, submodule, nullptr);
 }
 
+#if EXECUTE_ONLY_LAST_TEST == 0
 void TestEditorLineInfo::editorLineSingleHunkAdditionStaged() {
     INIT_REPO("01_singleHunkAdditionStaged.zip", true)
     QVERIFY(stagedDiff.count() > 0);
@@ -554,6 +603,78 @@ void TestEditorLineInfo::multipleHunks_misc1() {
 ////    auto hw = HunkWidget(&diffView, diff, patch, stagedPatch, 0, false, false, view);
 ////    hw.load(stagedPatch, true);
 //}
+
+#endif
+
+void TestEditorLineInfo::multipleHunks_StageSingleLines() {
+	INIT_REPO("13_singleHunkNoStaged.zip", true)
+	QVERIFY(diff.count() > 0);
+	git::Patch patch = diff.patch(0);
+	// no staged lines yet, so no staged patch
+	QVERIFY(mRepo.diffTreeToIndex(commit.tree()).count() == 0);
+	git::Patch stagedPatch = git::Patch();
+
+	QString name = patch.name();
+	QString path_ = mRepo.workdir().filePath(name);
+	bool submodule = mRepo.lookupSubmodule(name).isValid();
+
+	auto* fw = new FileWidget(&diffView, diff, patch, stagedPatch, QModelIndex(), name, path_, submodule);
+	fw->setStageState(git::Index::StagedState::Unstaged);
+
+	auto hunks = fw->hunks();
+	QVERIFY(hunks.count() == 2);
+	for (auto* hunk: hunks)
+		hunk->load();
+	auto hw = hunks.at(0);
+
+	checkEditorMarkers(hw->editor(), QVector<int>({0, 1, 2, 3, 4, 5, 11}), QVector<int>(), QVector<int>(), QVector<int>());
+
+	// Stage single lines
+	hw->stageSelected(5, 6);
+
+	Test::refresh(repoView);
+	stagedDiff = mRepo.diffTreeToIndex(commit.tree()); /* correct */
+	diff = mRepo.status(mRepo.index(), nullptr, false);
+	QVERIFY(stagedDiff.count() > 0);
+	QVERIFY(diff.count() > 0);
+	stagedPatch = stagedDiff.patch(0);
+
+	delete fw;
+	fw = new FileWidget(&diffView, diff, patch, stagedPatch, QModelIndex(), name, path, submodule);
+
+	// TODO: release fw
+	// It is important that all hunks are loaded!!!!
+	hunks = fw->hunks();
+	QVERIFY(hunks.count() == 2);
+	for (auto* hunk: hunks)
+		hunk->load();
+	hw = hunks.at(0);
+
+	checkEditorMarkers(hw->editor(), QVector<int>({0, 1, 2, 3, 4, 11}), QVector<int>({5}), QVector<int>(), QVector<int>());
+
+	hw->stageSelected(4, 5);
+
+	Test::refresh(repoView);
+	stagedDiff = mRepo.diffTreeToIndex(commit.tree()); /* correct */
+	diff = mRepo.status(mRepo.index(), nullptr, false);
+	QVERIFY(stagedDiff.count() > 0);
+	QVERIFY(diff.count() > 0);
+	stagedPatch = stagedDiff.patch(0);
+
+	delete fw;
+	fw = new FileWidget(&diffView, diff, patch, stagedPatch, QModelIndex(), name, path, submodule);
+
+	hunks = fw->hunks();
+	QVERIFY(hunks.count() == 2);
+	for (auto* hunk: hunks)
+		hunk->load();
+	// TODO: release fw
+	QVERIFY(hunks.count() == 2);
+
+	hw = hunks.at(0);
+
+	checkEditorMarkers(hw->editor(), QVector<int>({0, 1, 2, 3, 11}), QVector<int>({4, 5}), QVector<int>(), QVector<int>());
+}
 
 void TestEditorLineInfo::cleanupTestCase()
 {

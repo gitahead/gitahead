@@ -909,7 +909,7 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 		if (!mPatch.isConflicted() && current_staged_index >= 0) {
 			auto staged_header_struct_next = mStaged.header_struct(current_staged_index + 1);
 			if (!first_staged_patch_match) {
-				if (mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile) == mStaged.header_struct(current_staged_index)->old_start) {
+				if (mPatch.lineContent(mIndex, lidx) == mStaged.lineContent(current_staged_index, 0)) {
 					first_staged_patch_match = true;
                     diff_patch_old_new_file = 0; //mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile) - mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile);
                     diff_staged_patch_old_new_file = 0; //mStaged.lineNumber(current_staged_index, 0, git::Diff::NewFile) - mStaged.lineNumber(current_staged_index, 0, git::Diff::OldFile);
