@@ -36,6 +36,8 @@ namespace {
     }
 
     bool disclosure = false;
+
+	const QString noNewLineAtEndOfFile = HunkWidget::tr("No newline at end of file");
 }
 
 _HunkWidget::Header::Header(
@@ -466,7 +468,7 @@ _HunkWidget::Header* HunkWidget::header() const
 TextEditor* HunkWidget::editor(bool ensureLoaded)
 {
   if (ensureLoaded)
-    load(mPatch);
+	load(mStaged);
   return mEditor;
 }
 
@@ -747,22 +749,18 @@ void HunkWidget::load(git::Patch &staged, bool force)
   int patchCount = mPatch.lineCount(mIndex);
   for (int lidx = 0; lidx < patchCount; ++lidx) {
     char origin = mPatch.lineOrigin(mIndex, lidx);
-    bool EOL = false;
     if (origin == GIT_DIFF_LINE_CONTEXT_EOFNL ||
         origin == GIT_DIFF_LINE_ADD_EOFNL ||
         origin == GIT_DIFF_LINE_DEL_EOFNL) {
       Q_ASSERT(!lines.isEmpty());
       lines.last().setNewline(false);
       content += '\n';
-      EOL = true;
-    }
+	} else
+		content += mPatch.lineContent(mIndex, lidx);
 
-    if (!EOL) {
-        int oldLine = mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile);
-        int newLine = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile);
-        lines << Line(origin, oldLine, newLine);
-        content += mPatch.lineContent(mIndex, lidx);
-    }
+	int oldLine = mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile);
+	int newLine = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile);
+	lines << Line(origin, oldLine, newLine);
   }
 
   // Trim final line end.
@@ -828,8 +826,6 @@ void HunkWidget::load(git::Patch &staged, bool force)
   mEditor->updateGeometry();
 
   mLoading = false;
-  // update stageState after everything is loaded
-  //stageStateChanged(stageState());
     mHeader->setCheckState(stageState());
 }
 
@@ -847,7 +843,7 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 			int oldLineStaged = mStaged.lineNumber(i, lidx, git::Diff::OldFile);
 			int newLineStaged = mStaged.lineNumber(i, lidx, git::Diff::NewFile);
 			auto line = Line(origin, oldLineStaged, newLineStaged);
-			qDebug() << lidx << ") " << line.print();
+			qDebug() << lidx << ") " << line.print() << mStaged.lineContent(i, lidx);
 		}
 	}
 
@@ -869,7 +865,7 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 //	| unstaged deletion | +            | / |
 //	| staged deletion   | +            | + |
 
-    int count = lines.size();
+	const int count = lines.size();
     int marker = -1;
     int additions = 0, deletions = 0;
 	int additions_tot = 0, deletions_tot = 0;
@@ -877,8 +873,6 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
     bool staged = false;
 	int current_staged_index = -1;
 	int current_staged_line_idx = 0;
-    int diff_patch_old_new_file = 0; //-1;
-    int diff_staged_patch_old_new_file = 0; //-1;
 
 	// Find the first staged hunk which is within this patch
 	if (!mPatch.isConflicted()) {
@@ -896,24 +890,24 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 	// Set all editor markers, like green background for adding, red background for deletion
 	// Blue background for OURS or magenta background for Theirs
 	// Setting also the staged symbol
+	int skipPatchLines = 0;
 	bool first_staged_patch_match = false;
 	 for (int lidx = 0; lidx < count; ++lidx) {
+		const Line& line = lines.at(lidx);
+		qDebug() << "Line Content: " << mPatch.lineContent(mIndex, lidx);
+		const auto lineOrigin = line.origin();
 		marker = -1;
 		staged = false;
-
-		const Line& line = lines.at(lidx);
-		createMarkersAndLineNumbers(line, lidx, comments, width);
+		if (lineOrigin != GIT_DIFF_LINE_CONTEXT_EOFNL && lineOrigin != GIT_DIFF_LINE_ADD_EOFNL && lineOrigin !=  GIT_DIFF_LINE_DEL_EOFNL)
+			createMarkersAndLineNumbers(line, lidx - skipPatchLines, comments, width);
 
         // Switch to next staged patch if the line number is higher than the current
         // staged patch contains
 		if (!mPatch.isConflicted() && current_staged_index >= 0) {
 			auto staged_header_struct_next = mStaged.header_struct(current_staged_index + 1);
 			if (!first_staged_patch_match) {
-				if (mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile) == mStaged.header_struct(current_staged_index)->old_start) {
+				if (mPatch.lineContent(mIndex, lidx) == mStaged.lineContent(current_staged_index, 0))
 					first_staged_patch_match = true;
-                    diff_patch_old_new_file = 0; //mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile) - mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile);
-                    diff_staged_patch_old_new_file = 0; //mStaged.lineNumber(current_staged_index, 0, git::Diff::NewFile) - mStaged.lineNumber(current_staged_index, 0, git::Diff::OldFile);
-				}
 				current_staged_line_idx = 0;
 			} else if(staged_header_struct_next && mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile) == staged_header_struct_next->old_start) {
 				// Align staged patch with total patch
@@ -923,7 +917,7 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 			}
 		}
 
-        switch (lines[lidx].origin()) {
+		switch (lineOrigin) {
           case GIT_DIFF_LINE_CONTEXT:
             marker = TextEditor::Context;
             additions = 0;
@@ -931,7 +925,7 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 			current_staged_line_idx++;
             break;
 
-          case GIT_DIFF_LINE_ADDITION: {
+		  case GIT_DIFF_LINE_ADDITION: {
             marker = TextEditor::Addition;
             additions++;
             // Find matching lines
@@ -953,12 +947,9 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
               deletions = 0;
             }
             // Check if staged
-
 			if (!mPatch.isConflicted() && mStaged.count() > 0 && current_staged_index >= 0 && current_staged_line_idx < mStaged.lineCount(current_staged_index)) {
 				auto line_origin = mStaged.lineOrigin(current_staged_index, current_staged_line_idx);
-				auto staged_file = mStaged.lineNumber(current_staged_index, current_staged_line_idx, git::Diff::NewFile) - diff_staged_patch_old_new_file;
-				auto patch_file = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile) - (additions_tot - stagedAdditions) + (deletions_tot - stagedDeletions) - diff_patch_old_new_file; // - offset_patch_old_new;
-                // TODO: try to avoid comparing strings!!!
+				// TODO: try to avoid comparing strings and use line number comparsion like for deletion
                 if (line_origin == '+' && mStaged.lineContent(current_staged_index, current_staged_line_idx) == mPatch.lineContent(mIndex, lidx)) {
 				  stagedAdditions++;
 				  current_staged_line_idx++;
@@ -968,7 +959,7 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 			additions_tot++;
             break;
 
-          } case GIT_DIFF_LINE_DELETION: {
+		  } case GIT_DIFF_LINE_DELETION: {
             marker = TextEditor::Deletion;
             deletions++;
 			deletions_tot++;
@@ -978,6 +969,8 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 				auto line_origin = mStaged.lineOrigin(current_staged_index, current_staged_line_idx);
 				auto staged_old_file = mStaged.lineNumber(current_staged_index, current_staged_line_idx, git::Diff::OldFile);
 				auto patch_old_file = mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile);
+				auto stagedContent = mStaged.lineContent(current_staged_index, current_staged_line_idx);
+				auto patchContent = mPatch.lineContent(mIndex, lidx);
 				if (line_origin == '-' && staged_old_file == patch_old_file) {
 				  assert(mStaged.lineContent(current_staged_index, current_staged_line_idx) == mPatch.lineContent(mIndex, lidx));
 				  stagedDeletions++;
@@ -987,19 +980,26 @@ void HunkWidget::setEditorLineInfos(QList<Line>& lines, Account::FileComments& c
 			current_staged_line_idx++; // must be in staged and in the unstaged case
             break;
 
-          } case 'O':
+		  } case 'O':
             marker = TextEditor::Ours;
             break;
 
           case 'T':
             marker = TextEditor::Theirs;
             break;
+		  case GIT_DIFF_LINE_CONTEXT_EOFNL:
+		  case GIT_DIFF_LINE_ADD_EOFNL:
+		  case GIT_DIFF_LINE_DEL_EOFNL: {
+			skipPatchLines ++;
+			current_staged_line_idx ++;
+			continue; // skip setting marker, because for this patchline no editorline exists
+		  }
         }
 
         // Add marker.
         if (marker >= 0)
-            mEditor->markerAdd(lidx, marker);
-		 setStaged(lidx, staged);
+			mEditor->markerAdd(lidx - skipPatchLines, marker);
+		 setStaged(lidx - skipPatchLines, staged);
     }
 
 
@@ -1066,7 +1066,7 @@ void HunkWidget::createMarkersAndLineNumbers(const Line& line, int lidx, Account
     // Build annotations.
     QList<Annotation> annotations;
     if (!line.newline()) {
-      QString text = tr("No newline at end of file");
+	  QString text = noNewLineAtEndOfFile;
       QByteArray styles =
         QByteArray(text.toUtf8().size(), TextEditor::EofNewline);
       annotations.append({text, styles});
@@ -1141,37 +1141,60 @@ void HunkWidget::createMarkersAndLineNumbers(const Line& line, int lidx, Account
 QByteArray HunkWidget::hunk() const {
     QByteArray ar;
     int lineCount = mEditor->lineCount();
+	bool appended = false;
     for (int i = 0; i < lineCount; i++) {
         int mask = mEditor->markers(i);
         if (mask & 1 << TextEditor::Marker::Addition) {
-            if (!(mask & 1 << TextEditor::Marker::DiscardMarker))
+			if (!(mask & 1 << TextEditor::Marker::DiscardMarker)) {
                 ar.append(mEditor->line(i));
+				appended = true;
+			}
         } else if (mask & 1 << TextEditor::Marker::Deletion) {
             if (mask & 1 << TextEditor::Marker::DiscardMarker) {
                 // with a discard, a deletion becomes reverted
                 // and the line is still present
                 ar.append(mEditor->line(i));
+				appended = true;
             }
-        } else
+		} else {
           ar.append(mEditor->line(i));
+		  appended = true;
+		}
+
+		if (appended && mEditor->annotationLines(i) > 0 && mEditor->annotationText(i) == noNewLineAtEndOfFile) {
+			ar.remove(ar.length() - 1, 1); // remove new line
+		}
     }
+
   return ar;
 }
 
 QByteArray HunkWidget::apply() const {
     QByteArray ar;
     int lineCount = mEditor->lineCount();
-    for (int i = 0; i < lineCount; i++) {
+	for (int i = 0; i < lineCount; i++) {
+		bool appended = false;
         int mask = mEditor->markers(i);
         if (mask & 1 << TextEditor::Marker::Addition) {
-            if (mask & 1 << TextEditor::Marker::StagedMarker)
+			if (mask & 1 << TextEditor::Marker::StagedMarker) {
                 ar.append(mEditor->line(i));
+				appended = true;
+			}
         } else if (mask & 1 << TextEditor::Marker::Deletion) {
-            if (!(mask & 1 << TextEditor::Marker::StagedMarker))
+			if (!(mask & 1 << TextEditor::Marker::StagedMarker)) {
                 ar.append(mEditor->line(i));
-        } else
+				appended = true;
+			}
+		} else {
           ar.append(mEditor->line(i));
+		  appended = true;
+		}
+
+		if (appended && mEditor->annotationLines(i) > 0 && mEditor->annotationText(i) == noNewLineAtEndOfFile) {
+			ar.remove(ar.length() - 1, 1); // remove new line
+		}
     }
+
   return ar;
 }
 

@@ -47,7 +47,7 @@ void EditButton::updatePatch(const git::Patch &patch, int index, bool init)
 
   // Working copy action.
   mEditWorkingCopyAction->disconnect();
-  if (view->repo().workdir().exists(name)) {
+  if (patch.repo().workdir().exists(name)) {
     mEditWorkingCopyAction->setVisible(true);
     connect(mEditWorkingCopyAction, &QAction::triggered, this,
       [view, name, newLine] {
@@ -57,7 +57,7 @@ void EditButton::updatePatch(const git::Patch &patch, int index, bool init)
     mEditWorkingCopyAction->setVisible(false);
 
   // Revision edit actions.
-  QList<git::Commit> commits = view->commits();
+  QList<git::Commit> commits = view ? view->commits() : QList<git::Commit>();
   git::Commit commit = !commits.isEmpty() ? commits.first() : git::Commit();
   git::Blob newBlob = patch.blob(git::Diff::NewFile);
   git::Blob oldBlob = patch.blob(git::Diff::OldFile);

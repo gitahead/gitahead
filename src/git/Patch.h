@@ -119,7 +119,7 @@ public:
    * \param image Populated preimage
    * \param fileContent Content of a file in which changes should occur
    */
-  void populatePreimage(QList<QList<QByteArray> > &image, QByteArray fileContent) const;
+  static void populatePreimage(QList<QList<QByteArray> > &image, QByteArray fileContent);
   // Apply the given hunk indexes to the old buffer.
 
    /*!

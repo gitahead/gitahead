@@ -111,6 +111,9 @@ public:
    */
   void setStaged(bool staged);
   void setStageState(git::Index::StagedState state);
+  void stageSelected(int startLine, int end, bool emitSignal=true);
+  void unstageSelected(int startLine, int end, bool emitSignal=true);
+  void discardSelected(int startLine, int end);
   /*!
    * Called by the hunk header
    * \brief discard
@@ -139,9 +142,6 @@ protected:
   void paintEvent(QPaintEvent *event);
 
 private slots:
-  void stageSelected(int startLine, int end, bool emitSignal=true);
-  void unstageSelected(int startLine, int end, bool emitSignal=true);
-  void discardSelected(int startLine, int end);
   /*!
    * Shows dialog if the changes should be discarded
    * \brief discardDialog

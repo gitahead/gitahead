@@ -403,7 +403,12 @@ void DiffView::fetchMore()
     auto state = static_cast<git::Index::StagedState>(indices[i].data(Qt::CheckStateRole).toInt());
 
     git::Patch staged = mStagedPatches.value(patch.name());
-    FileWidget *file = new FileWidget(this, mDiff, patch, staged, indices[i], widget());
+
+	git::Repository repo = view->repo();
+	QString name = patch.name();
+	QString path = repo.workdir().filePath(name);
+	bool submodule = repo.lookupSubmodule(name).isValid();
+	FileWidget *file = new FileWidget(this, mDiff, patch, staged, indices[i], name, path, submodule, widget());
     file->setStageState(state);
     mFileWidgetLayout->addWidget(file);
 

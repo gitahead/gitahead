@@ -328,7 +328,7 @@ void Patch::populatePreimage(QList<QList<QByteArray>>& image) const{
     populatePreimage(image, source);
 }
 
-void Patch::populatePreimage(QList<QList<QByteArray> > &image, QByteArray fileContent) const {
+void Patch::populatePreimage(QList<QList<QByteArray> > &image, QByteArray fileContent) {
     int index = 0;
     int newline = fileContent.indexOf('\n');
     while (newline >= 0) {
@@ -423,11 +423,11 @@ void Patch::apply(QList<QList<QByteArray>> &image, int hidx, QByteArray& hunkDat
     if (git_patch_get_hunk(&hunk, &lines, d.data(), hidx)) // returns hunk_idx hunk
       return;
 
-    assert(hunk->new_start - 1 + hunk->new_lines < image.length());
+	assert(hunk->new_start - 1 + hunk->new_lines <= image.length());
 
 
     // delete old data
-    for (int i = hunk->new_start - 1; i < hunk->new_start - 1 + hunk->new_lines; i++) {
+	for (int i = hunk->new_start - 1; i < qMin(hunk->new_start - 1 + hunk->new_lines, image.length()); i++) {
         image[i].clear();
     }
     // the length of image is not changed, so the function can be applied for multiple hunks
