@@ -45,7 +45,7 @@ submodules are optional or may also be satisfied by system libraries.
 
 **External Dependencies**
 
-* Qt (required >= 5.15)
+* Qt (required >= 5.12; for Flatpak >= 5.15)
 
 **Included Dependencies**
 
