@@ -95,8 +95,9 @@ jobs:
             openssl_arch: VC-WIN64A
             msvc_arch: x64
             cmake_env:
-              CC: cl
-              CXX: cl
+              CMAKE_RC_FLAGS: "/C 1252"
+              CC: clang
+              CXX: clang++
             pack: 1
 
           - name: win32
@@ -106,9 +107,13 @@ jobs:
             qt_arch: win32_msvc2019
             openssl_arch: VC-WIN32
             msvc_arch: x86
+            cmake_flags: "-DUSE_BUNDLED_ZLIB=1"
             cmake_env:
-              CC: cl
-              CXX: cl
+              CMAKE_RC_FLAGS: "/C 1252"
+              CC: clang
+              CXX: clang++
+              CMAKE_C_FLAGS: -m32
+              CMAKE_CXX_FLAGS: -m32
             pack: 1
 
     steps:
@@ -184,7 +189,7 @@ jobs:
         run: |
           mkdir -p build/release
           cd build/release
-          cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ${{ env.CMAKE_FLAGS }} ../..
+          cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ${{ env.CMAKE_FLAGS }} ${{ matrix.env.cmake_flags }} ../..
 
       - name: Build Information
         run: |
