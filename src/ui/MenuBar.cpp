@@ -63,9 +63,9 @@ void openCloneDialog(CloneDialog::Kind kind)
   dialog->open();
 }
 
-const QString donationUrlLiberapay = QStringLiteral("https://liberapay.com/Gittyup/donate");
-
 } // anon. namespace
+
+const QString MenuBar::donationUrlLiberapay = QStringLiteral("https://liberapay.com/Gittyup/donate");
 
 bool MenuBar::sDebugMenuVisible = false;
 

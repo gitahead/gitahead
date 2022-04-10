@@ -10,6 +10,7 @@
 #include "UpdateDialog.h"
 #include "DownloadDialog.h"
 #include "Updater.h"
+#include "ui/MenuBar.h"
 #include "conf/Settings.h"
 #include "dialogs/IconLabel.h"
 #include <QCheckBox>
@@ -21,6 +22,7 @@
 #include <QPushButton>
 #include <QTextBrowser>
 #include <QVBoxLayout>
+#include <QDesktopServices>
 
 namespace {
 
@@ -87,10 +89,20 @@ UpdateDialog::UpdateDialog(
     reject();
   });
 
+  QHBoxLayout* l = new QHBoxLayout();
+  QPushButton* supportButton = new QPushButton(QIcon(":/liberapay_icon_130890.png"), tr("Donate"), this);
+  QSpacerItem* spacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum);
+  l->addWidget(download);
+  l->addItem(spacer);
+  l->addWidget(supportButton);
+  connect(supportButton, &QPushButton::pressed, [] () {
+	  QDesktopServices::openUrl(QUrl(MenuBar::donationUrlLiberapay));
+  });
+
   QVBoxLayout *content = new QVBoxLayout;
   content->addWidget(new QLabel(label, this));
   content->addWidget(browser);
-  content->addWidget(download);
+  content->addLayout(l);
   content->addWidget(buttons);
 
   QHBoxLayout *layout = new QHBoxLayout(this);
