@@ -30,7 +30,7 @@
 
 namespace {
 
-const QString kEmail = QStringLiteral("TODO");
+const QString kEmail = QStringLiteral("https://github.com/Murmele/Gittyup/issues");
 
 const QString kUrl =
   "https://stackoverflow.com/questions/tagged/gittyup?sort=frequent";
