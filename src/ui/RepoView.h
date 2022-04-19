@@ -141,10 +141,29 @@ public:
   bool isLogVisible() const;
   void setLogVisible(bool visible);
 
+  /*!
+   * \brief addLogEntry
+   * \param text The text which is shown after the title
+   * \param title The text which is shown in bold
+   * \param parent
+   * \return
+   */
   LogEntry *addLogEntry(
     const QString &text,
     const QString &title,
     LogEntry *parent = nullptr);
+
+  /*!
+   * \brief error
+   * \param parent
+   * \param action The Action text
+   * \param name
+   * \param defaultError
+   *
+   * Example:
+   * Unable to Action 'Name' - the path
+   * \return
+   */
   LogEntry *error(
     LogEntry *parent,
     const QString &action,

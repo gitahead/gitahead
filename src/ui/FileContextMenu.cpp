@@ -21,6 +21,8 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QFileDialog>
+#include <QDesktopServices>
 
 namespace {
 
@@ -234,8 +236,66 @@ FileContextMenu::FileContextMenu(
       view->setViewMode(RepoView::DoubleTree);
     });
 
-    checkout->setEnabled(!view->repo().isBare());
+    // Checkout to ...
+	QAction *checkoutTo = addAction(tr("Save Selected Version as ..."), [this, view, files] {
+      QFileDialog d(this);
+      d.setFileMode(QFileDialog::FileMode::Directory);
+      d.setOption(QFileDialog::ShowDirsOnly);
+	  d.setWindowTitle(tr("Select new file directory"));
+      if (d.exec()) {
+		  const auto folder = d.selectedFiles().first();
+		  const auto save = view->addLogEntry(tr("Saving files"), tr("Saving files of selected version to disk"));
+			for (const auto& file: files) {
+				const auto saveFile = view->addLogEntry(tr("Save file ") + file, "Save file", save);
+				// assumption. file is a file not a folder!
+				if (!exportFile(view, folder, file))
+					view->error(saveFile, "save file", file, tr("Invalid Blob"));
+			}
+          view->setViewMode(RepoView::DoubleTree);
+      }
+	  return true;
+      });
 
+	QAction *open = addAction(tr("Open this version"), [this, view, files] {
+	  QString folder = QDir::tempPath();
+	  const auto& file = files.first();
+	  auto filename = file.split("/").last();
+
+	  auto logentry = view->addLogEntry(tr("Opening file"), tr("Open ") + filename);
+
+	  if (exportFile(view, folder, file))
+		QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(folder + "/" + filename).absoluteFilePath()));
+	  else
+		  view->error(logentry, tr("open file"), filename, tr("Blob is invalid."));
+	});
+
+	// should show a dialog to select an application
+	// Don't forgett to uncomment "openWith->setEnabled(!isBare);" below
+//	QAction *openWith = addAction(tr("Open this Version with ..."), [this, view, files] {
+//	  QString folder = QDir::tempPath();
+//	  const auto& file = files.first();
+//	  auto filename = file.split("/").last();
+
+//	  auto logentry = view->addLogEntry(tr("Opening file with ..."), tr("Open ") + filename);
+
+//	  if (exportFile(view, folder, file))
+//		QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(folder + "/" + filename).absoluteFilePath()));
+//	  else
+//		view->error(logentry, tr("open file"), filename, tr("Blob is invalid."));
+//	});
+
+    auto isBare = view->repo().isBare();
+    const auto blob = view->commits().first().blob(files.first());
+    checkout->setEnabled(!isBare);
+	checkout->setToolTip(!isBare ? "" : tr("Unable to checkout bare repositories"));
+    checkoutTo->setEnabled(!isBare && blob.isValid());
+	checkoutTo->setToolTip(!isBare ? "" : tr("Unable to checkout bare repositories"));
+	open->setEnabled(!isBare && blob.isValid());
+	open->setToolTip(!isBare ? "" : tr("Unable to open files from bare repository"));
+	//openWith->setEnabled(!isBare && blob.isValid());
+
+	/* disable checkout if the file is already
+	 * in the current working directory */
     git::Commit commit = commits.first();
     foreach (const QString &file, files) {
       if (commit.tree().id(file) == repo.workdirId(file)) {
@@ -346,6 +406,21 @@ void FileContextMenu::ignoreFile()
     if (!ignore.isEmpty())
         mView->ignore(ignore);
  }
+}
+
+bool FileContextMenu::exportFile(const RepoView* view, const QString& folder, const QString& file) {
+	const auto blob = view->commits().first().blob(file);
+	if (!blob.isValid())
+		return false;
+
+	auto filename = file.split("/").last();
+	QFile f(folder + "/" + filename);
+	if (!f.open(QFile::ReadWrite))
+	  return false;
+
+	f.write(blob.content());
+	f.close();
+	return true;
 }
 
 void FileContextMenu::addExternalToolsAction(
