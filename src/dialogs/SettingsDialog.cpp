@@ -139,7 +139,6 @@ public:
     form->addRow(tr("Language:"), mNoTranslation);
     form->addRow(tr("Credentials:"), mStoreCredentials);
     form->addRow(QString(), privacy);
-    form->addRow(QString(), new QLabel(tr("%1 will be replaced with the repository's directory")));
 
 #if defined(Q_OS_LINUX) || defined(Q_OS_WIN)
     form->addRow(tr("Single instance:"), mSingleInstance);
