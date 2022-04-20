@@ -30,7 +30,7 @@
 
 namespace {
 
-const QString kEmail = QStringLiteral("https://github.com/Murmele/Gittyup/issues");
+const QString kIssueTracker = QStringLiteral("https://github.com/Murmele/Gittyup/issues");
 
 const QString kUrl =
   "https://stackoverflow.com/questions/tagged/gittyup?sort=frequent";
@@ -88,7 +88,7 @@ AboutDialog::AboutDialog(QWidget *parent)
   QString revision = GITTYUP_BUILD_REVISION;
   QDateTime dateTime = QDateTime::fromString(GITTYUP_BUILD_DATE, Qt::ISODate);
   QString date = dateTime.date().toString(QLocale().dateFormat(QLocale::LongFormat));
-  QString text = kTextFmt.arg(name, version, date, revision, kUrl, kEmail);
+  QString text = kTextFmt.arg(name, version, date, revision, kUrl, kIssueTracker);
   QLabel *label = new QLabel(text, this);
   label->setWordWrap(true);
   label->setTextInteractionFlags(kTextFlags);
