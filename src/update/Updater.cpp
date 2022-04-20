@@ -44,7 +44,7 @@ namespace {
 
 const QString kTemplateFmt = "%1-XXXXXX.%2";
 const QString kLinkFmt =
-  "TODO: replace by release link<https://github.com/gitahead/gitahead/releases/download/v%1/GitAhead%2-%3.%4>";
+  "link<https://github.com/Murmele/gittyup/releases/download/v%1/Gittyup%2-%3.%4>";
 const QString kChangelogUrl =
   "https://raw.githubusercontent.com/Murmele/gittyup/master/doc/changelog.md";
 
@@ -168,7 +168,15 @@ void Updater::update(bool spontaneous)
       extension = "exe";
     }
 
-    QString link = kLinkFmt.arg(version, platformArg, version, extension);
+#ifdef FLATPAK
+	extension = ".flatpak";
+	platformArg = "";
+	// The bundle does not have any version in its filename
+	QString link = kLinkFmt.arg("", platformArg, version, extension);
+#else
+	QString link = kLinkFmt.arg(version, platformArg, version, extension);
+#endif
+
     emit updateAvailable(version, html, link);
   });
 }
