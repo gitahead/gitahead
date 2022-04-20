@@ -176,6 +176,7 @@ void Updater::update(bool spontaneous)
 #else
 	QString link = kLinkFmt.arg(version, platformArg, version, extension);
 #endif
+	qDebug() << "Download url of the update: " << link;
 
     emit updateAvailable(version, html, link);
   });
