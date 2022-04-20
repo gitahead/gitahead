@@ -254,7 +254,7 @@ jobs:
           echo "Show artifacts/Gittyup Flatpak folder:"
           ls "artifacts/Gittyup Flatpak"
           echo "Show artifacts/com.github.Murmele.Gittyup-x86_64:"
-          ls "artifacts/com.github.Murmele.Gittyup-x86_64"
+          ls "artifacts/Gittyup-x86_64"
 
       - name: Update GitHub prerelease
         if: ${{ github.ref == 'refs/heads/master' }}
@@ -268,5 +268,5 @@ jobs:
             **/artifacts/Gittyup win64/Gittyup*.exe
             **/artifacts/Gittyup win32/Gittyup*.exe
             **/artifacts/Gittyup Flatpak/com.github.Murmele.Gittyup.yml
-            **/com.github.Murmele.Gittyup-x86_64/*.flatpak
+            **/Gittyup-x86_64/*.flatpak
 ...
