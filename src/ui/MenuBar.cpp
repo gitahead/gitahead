@@ -1037,7 +1037,7 @@ MenuBar::MenuBar(QWidget *parent)
     QDesktopServices::openUrl(QUrl::fromLocalFile(url));
   });
 
-  QAction* donation = help->addAction(tr("Support us over Liberapay"));
+  QAction* donation = help->addAction(tr("Support us via Liberapay"));
   connect(donation, &QAction::triggered, [] {
 	QDesktopServices::openUrl(QUrl(donationUrlLiberapay));
   });
