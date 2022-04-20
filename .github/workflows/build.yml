@@ -54,7 +54,7 @@ jobs:
     - name: Build package
       uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v4
       with:
-        bundle: com.github.Murmele.Gittyup.flatpak
+        bundle: Gittyup
         manifest-path: com.github.Murmele.Gittyup/com.github.Murmele.Gittyup.yml
         cache: false
         branch: development
