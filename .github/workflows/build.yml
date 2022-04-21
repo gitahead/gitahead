@@ -250,7 +250,7 @@ jobs:
     # https://github.com/marvinpinto/actions/issues/177
     needs: [flatpak, build]
     runs-on: ubuntu-latest # does not matter which
-    if: ${{ github.ref == 'refs/heads/master' }}
+    #if: ${{ github.ref == 'refs/heads/master' }}
 
     steps:
       # https://stackoverflow.com/questions/60916931/github-action-does-the-if-have-an-else
@@ -260,7 +260,7 @@ jobs:
         with:
           cond: ${{ github.event_name == 'push' && github.ref_type == 'tag' && github.refname == 'gittyup_*' }}
           if_true: 'Gittyup Release $(cat build/release/Version.txt)'  # string value
-          if_false: 'Latest Build' # string value
+          if_false: 'Latest Build Testing' # string value
 
       - name: Determine if release 2
         uses: haya14busa/action-cond@v1
@@ -268,7 +268,7 @@ jobs:
         with:
           cond: ${{ github.event_name == 'push' && github.ref_type == 'tag' && github.refname == 'gittyup_*' }}
           if_true: 'null'  # string value
-          if_false: 'latest' # string value
+          if_false: 'latest_testing' # string value
 
       - name: Download artifacts
         uses: actions/download-artifact@v2
