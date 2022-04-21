@@ -21,7 +21,7 @@ jobs:
       uses: haya14busa/action-cond@v1
       id: check_release
       with:
-        cond: ${{ github.event_name == 'push' && github.ref_type == 'tag' && github.refname == 'gittyup_*' }}
+        cond: ${{ github.event_name == 'pull_request' }} # && github.ref_type == 'tag' && github.refname == 'gittyup_*' }}
         if_true: 'stable'  # string value
         if_false: 'development' # string value
 
@@ -266,7 +266,7 @@ jobs:
         uses: haya14busa/action-cond@v1
         id: check_release2
         with:
-          cond: ${{ github.event_name == 'push' && github.ref_type == 'tag' && github.refname == 'gittyup_*' }}
+          cond: ${{ github.event_name == 'pull_request' }} # && github.ref_type == 'tag' && github.refname == 'gittyup_*' }}
           if_true: 'null'  # string value
           if_false: 'latest_testing' # string value
 
