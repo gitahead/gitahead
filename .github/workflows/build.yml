@@ -262,14 +262,6 @@ jobs:
           if_true: 'Gittyup Release $(cat build/release/Version.txt)'  # string value
           if_false: 'Latest Build Testing' # string value
 
-      - name: Determine if release 2
-        uses: haya14busa/action-cond@v1
-        id: check_release2
-        with:
-          cond: ${{ github.event_name == 'pull_request' }} # && github.ref_type == 'tag' && github.refname == 'gittyup_*' }}
-          if_true: 'null'  # string value
-          if_false: 'latest_testing' # string value
-
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
@@ -288,8 +280,7 @@ jobs:
         uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          automatic_release_tag: ${{ steps.check_release2.outputs.value }}
-          prerelease: true
+          prerelease: ${{ github.event_name == 'pull_request' }} # && github.ref_type == 'tag' && github.refname == 'gittyup_*' }}
           title: ${{ steps.check_release.outputs.value }}
           files: |
             **/artifacts/Gittyup win64/Gittyup*.exe
