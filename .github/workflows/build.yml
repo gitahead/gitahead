@@ -15,6 +15,17 @@ jobs:
       image: bilelmoussaoui/flatpak-github-actions:kde-5.15-21.08
       options: --privileged
     steps:
+
+    # https://stackoverflow.com/questions/60916931/github-action-does-the-if-have-an-else
+    - name: Determine if release
+      uses: haya14busa/action-cond@v1
+      id: check_release
+      with:
+        cond: ${{ github.event_name == 'push' && github.ref_type == 'tag' && github.refname == 'gittyup_*' }}
+        if_true: 'stable'  # string value
+        if_false: 'development' # string value
+
+
     - name: Checkout repository
       uses: actions/checkout@v2
 
@@ -57,7 +68,7 @@ jobs:
         bundle: Gittyup
         manifest-path: com.github.Murmele.Gittyup/com.github.Murmele.Gittyup.yml
         cache: false
-        branch: development
+        branch: ${{ steps.check_release.outputs.value }}
 
     - name: Publish build artifacts
       uses: actions/upload-artifact@v2
@@ -235,13 +246,30 @@ jobs:
           cd build/release
           ninja check
 
-  prerelease:
+  publish:
     # https://github.com/marvinpinto/actions/issues/177
     needs: [flatpak, build]
     runs-on: ubuntu-latest # does not matter which
     if: ${{ github.ref == 'refs/heads/master' }}
 
     steps:
+      # https://stackoverflow.com/questions/60916931/github-action-does-the-if-have-an-else
+      - name: Determine if release
+        uses: haya14busa/action-cond@v1
+        id: check_release
+        with:
+          cond: ${{ github.event_name == 'push' && github.ref_type == 'tag' && github.refname == 'gittyup_*' }}
+          if_true: 'Gittyup Release $(cat build/release/Version.txt)'  # string value
+          if_false: 'Latest Build' # string value
+
+      - name: Determine if release 2
+        uses: haya14busa/action-cond@v1
+        id: check_release2
+        with:
+          cond: ${{ github.event_name == 'push' && github.ref_type == 'tag' && github.refname == 'gittyup_*' }}
+          if_true: 'null'  # string value
+          if_false: 'latest' # string value
+
       - name: Download artifacts
         uses: actions/download-artifact@v2
         with:
@@ -256,13 +284,14 @@ jobs:
           echo "Show artifacts/com.github.Murmele.Gittyup-x86_64:"
           ls "artifacts/Gittyup-x86_64"
 
-      - name: Update GitHub prerelease
+      - name: Update GitHub release
+        if: github.ref_type != 'tag'
         uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          automatic_release_tag: latest
+          automatic_release_tag: ${{ steps.check_release2.output.value }}
           prerelease: true
-          title: "Latest Build"
+          title: ${{ steps.check_release.output.value }}
           files: |
             **/artifacts/Gittyup win64/Gittyup*.exe
             **/artifacts/Gittyup win32/Gittyup*.exe
