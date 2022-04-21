@@ -10,6 +10,10 @@ set(GITTYUP_VERSION
   "${GITTYUP_VERSION_MAJOR}.${GITTYUP_VERSION_MINOR}.${GITTYUP_VERSION_PATCH}"
 )
 
+# Write version to file so it can be used also from external, for example
+# in the github manifest
+file(WRITE "${CMAKE_BINARY_DIR}/Version.txt" ${GITTYUP_VERSION})
+
 set(DEV_BUILD "" CACHE STRING "Mark this build as a development build with the given description")
 
 if (DEV_BUILD)
