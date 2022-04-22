@@ -265,8 +265,9 @@ jobs:
     # https://github.com/marvinpinto/actions/issues/177
     needs: [flatpak, build]
     runs-on: ubuntu-latest # does not matter which
-    #if: ${{ github.ref == 'refs/heads/master' }}
-
+    # a prerelase is created when pushing to master
+    # a release is created when a tag will be set
+    if: ${{ github.ref == 'refs/heads/master' || env.IS_RELEASE}}
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v2
