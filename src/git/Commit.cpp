@@ -153,6 +153,7 @@ Diff Commit::diff(
 
   git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
   opts.context_lines = contextLines;
+  opts.flags |=  GIT_DIFF_INCLUDE_TYPECHANGE;
   if (ignoreWhitespace)
     opts.flags |= GIT_DIFF_IGNORE_WHITESPACE;
 
