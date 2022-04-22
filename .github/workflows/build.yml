@@ -244,6 +244,13 @@ jobs:
           path: build/release/pack/Gittyup-*
           name: Gittyup ${{ matrix.env.name }}
 
+      - name: Publish version file
+        if: matrix.env.pack && !matrix.qt.check_only
+        uses: actions/upload-artifact@v2
+        with:
+          path: build/release/VERSION.txt
+          name: Gittyup VERSION
+
       - name: Test
         # TODO: Re-Enable this when https://github.com/actions/runner/issues/1206 gets resolved
         if: matrix.env.ninja_platform != 'win'
@@ -259,10 +266,26 @@ jobs:
     #if: ${{ github.ref == 'refs/heads/master' }}
 
     steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
+        with:
+          path: artifacts
+
+      - name: list artifacts folder
+        run: |
+          echo "Show artifacts folder:"
+          ls artifacts
+          echo "Show artifacts/Gittyup Flatpak folder:"
+          ls "artifacts/Gittyup Flatpak"
+          echo "Show artifacts/com.github.Murmele.Gittyup-x86_64:"
+          ls "artifacts/Gittyup-x86_64"
+          echo "Show artifacts/Gittyup VERSION"
+          ls "artifacts/Gittyup VERSION"
+    
       # version is exported from cmake to file
       - name: Retrieve version
         run: |
-          echo "::set-output name=VERSION::$(cat build/release/VERSION.txt)"
+          echo "::set-output name=VERSION::$(cat **/artifacts/Gittyup VERSION/VERSION.txt)"
         id: version
 
       - name: Determine release title
@@ -280,20 +303,6 @@ jobs:
           cond: ${{ env.IS_RELEASE }}
           if_true: 'stable'
           if_false: 'latest'
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v2
-        with:
-          path: artifacts
-
-      - name: list artifacts folder
-        run: |
-          echo "Show artifacts folder:"
-          ls artifacts
-          echo "Show artifacts/Gittyup Flatpak folder:"
-          ls "artifacts/Gittyup Flatpak"
-          echo "Show artifacts/com.github.Murmele.Gittyup-x86_64:"
-          ls "artifacts/Gittyup-x86_64"
 
       - name: Update GitHub release
         uses: marvinpinto/action-automatic-releases@latest
