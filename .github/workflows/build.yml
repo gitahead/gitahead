@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  IS_RELEASE: ${{ github.event_name == 'push' && github.ref_type == 'tag' && github.ref_name == 'gittyup_v*' }}
+  IS_RELEASE: ${{ github.event_name == 'push' && github.ref_type == 'tag' && startswith(github.ref_name, 'gittyup_v') }}
 
 
 jobs:
