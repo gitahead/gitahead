@@ -20,10 +20,10 @@ jobs:
       options: --privileged
     steps:
 
-    - name: Is Release
+    - name: Show environment variables
       run: >
-        echo ${{ env.IS_RELEASE }}
-        echo ${{ env.VERSION_NUMBER }}
+        echo IS_RELEASE: ${{ env.IS_RELEASE }}
+        echo VERSION_NUMBER: ${{ env.VERSION_NUMBER }}
 
     # https://stackoverflow.com/questions/60916931/github-action-does-the-if-have-an-else
     - name: Determine flatpak release branch
