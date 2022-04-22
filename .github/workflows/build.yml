@@ -294,7 +294,7 @@ jobs:
         with:
           cond: ${{ env.IS_RELEASE }}
           if_true: 'Gittyup Release ${{ steps.version.outputs.VERSION }}'
-          if_false: 'Latest Build Testing'
+          if_false: 'Latest Build (Development)'
 
       - name: Determine release tag
         uses: haya14busa/action-cond@v1
