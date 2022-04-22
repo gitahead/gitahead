@@ -6,6 +6,9 @@ on:
   page_build:
   workflow_dispatch:
 
+env:
+  IS_RELEASE: ${{ github.event_name == 'pull_request' }} # && github.ref_type == 'tag' && github.refname == 'gittyup_*' }}
+
 
 jobs:
   flatpak:
@@ -16,12 +19,15 @@ jobs:
       options: --privileged
     steps:
 
+    - name: Is Release
+      run: echo ${{ env.IS_RELEASE }}
+
     # https://stackoverflow.com/questions/60916931/github-action-does-the-if-have-an-else
-    - name: Determine if release
+    - name: Determine flatpak release branch
       uses: haya14busa/action-cond@v1
-      id: check_release
+      id: flatpak_release_branch
       with:
-        cond: ${{ github.event_name == 'pull_request' }} # && github.ref_type == 'tag' && github.refname == 'gittyup_*' }}
+        cond: ${{ env.IS_RELEASE }}
         if_true: 'stable'  # string value
         if_false: 'development' # string value
 
@@ -68,7 +74,7 @@ jobs:
         bundle: Gittyup
         manifest-path: com.github.Murmele.Gittyup/com.github.Murmele.Gittyup.yml
         cache: false
-        branch: ${{ steps.check_release.outputs.value }}
+        branch: ${{ steps.flatpak_release_branch.outputs.value }}
 
     - name: Publish build artifacts
       uses: actions/upload-artifact@v2
@@ -254,13 +260,21 @@ jobs:
 
     steps:
       # https://stackoverflow.com/questions/60916931/github-action-does-the-if-have-an-else
-      - name: Determine if release
+      - name: Determine release title
         uses: haya14busa/action-cond@v1
-        id: check_release
+        id: release_title
         with:
-          cond: ${{ github.event_name == 'push' && github.ref_type == 'tag' && github.refname == 'gittyup_*' }}
+          cond: ${{ env.IS_RELEASE }}
           if_true: 'Gittyup Release $(cat build/release/Version.txt)'  # string value
           if_false: 'Latest Build Testing' # string value
+
+      - name: Determine release tag
+        uses: haya14busa/action-cond@v1
+        id: release_tag
+        with:
+          cond: ${{ env.IS_RELEASE }}
+          if_true: 'stable'  # string value
+          if_false: 'latest' # string value
 
       - name: Download artifacts
         uses: actions/download-artifact@v2
@@ -280,8 +294,9 @@ jobs:
         uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          prerelease: ${{ github.event_name == 'pull_request' }} # && github.ref_type == 'tag' && github.refname == 'gittyup_*' }}
-          title: ${{ steps.check_release.outputs.value }}
+          prerelease: ${{ env.IS_RELEASE }}
+          title: ${{ steps.release_title.outputs.value }}
+          automatic_release_tag: ${{ steps.release_tag.outputs.value }}
           files: |
             **/artifacts/Gittyup win64/Gittyup*.exe
             **/artifacts/Gittyup win32/Gittyup*.exe
