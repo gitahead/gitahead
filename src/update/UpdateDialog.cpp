@@ -112,6 +112,9 @@ UpdateDialog::UpdateDialog(
   layout->addLayout(content);
 
   connect(this, &UpdateDialog::accepted, [this, platform, link] {
+
+#ifndef FLATAPK
+	// Only the pure linux package is missing
 	if (platform == "linux") {
 		QMessageBox msgBox(this);
 		msgBox.setText(tr("On linux distributions the preferred way to install applications is the packet manager."));
@@ -123,6 +126,7 @@ UpdateDialog::UpdateDialog(
 		if (msgBox.exec() == QMessageBox::StandardButton::No)
 			return;
 	}
+#endif
 
     // Start download.
 	if (Updater::DownloadRef download = Updater::instance()->download(link)) {
