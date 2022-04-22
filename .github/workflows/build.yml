@@ -293,7 +293,6 @@ jobs:
         uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          prerelease: ${{ env.IS_RELEASE }}
           prerelease: ${{ !env.IS_RELEASE }}
           title: ${{ steps.release_title.outputs.value }}
           automatic_release_tag: ${{ steps.release_tag.outputs.value }}
