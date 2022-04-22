@@ -1,6 +1,6 @@
-if(APPLE)
-  set(IMPL_FILES MainWindow_mac.mm)
-endif()
+#if(APPLE)
+#  set(IMPL_FILES MainWindow_mac.mm)
+#endif()
 
 add_library(
   ui

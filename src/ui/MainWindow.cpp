@@ -574,7 +574,7 @@ QString MainWindow::windowGroup() const {
   return QString::fromUtf8(hash.toHex());
 }
 
-#ifndef Q_OS_MAC
+//#ifndef Q_OS_MAC
 void MainWindow::installTouchBar() {}
 void MainWindow::updateTouchBar(int ahead, int behind) {}
-#endif
+//#endif
