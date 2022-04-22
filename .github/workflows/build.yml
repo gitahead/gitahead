@@ -285,7 +285,7 @@ jobs:
       # version is exported from cmake to file
       - name: Retrieve version
         run: |
-          echo "::set-output name=VERSION::$(cat **/artifacts/Gittyup-VERSION/VERSION.txt)"
+          echo "::set-output name=VERSION::$(cat artifacts/Gittyup-VERSION/VERSION.txt)"
         id: version
 
       - name: Determine release title
