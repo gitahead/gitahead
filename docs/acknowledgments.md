@@ -420,3 +420,12 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+-----
+
+#### Liberapay Icon
+
+Terence Eden
+
+[Liberapay Icon](https://icon-icons.com/icon/liberapay/130890) is used under the terms of the
+[CC Atribution](https://creativecommons.org/licenses/by/4.0/) License
