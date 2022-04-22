@@ -55,6 +55,7 @@ signals:
   void updateError(const QString &text, const QString &detail);
   void sslErrors(QNetworkReply *reply, const QList<QSslError> &errors);
   void updateAvailable(
+	const QString &platform,
     const QString &version,
     const QString &changelog,
     const QString &link);

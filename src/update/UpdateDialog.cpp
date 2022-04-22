@@ -23,6 +23,7 @@
 #include <QTextBrowser>
 #include <QVBoxLayout>
 #include <QDesktopServices>
+#include <QMessageBox>
 
 namespace {
 
@@ -35,6 +36,7 @@ const QString kStyleSheet =
 } // anon. namespace
 
 UpdateDialog::UpdateDialog(
+  const QString &platform,
   const QString &version,
   const QString &changelog,
   const QString &link,
@@ -109,9 +111,21 @@ UpdateDialog::UpdateDialog(
   layout->addLayout(iconLayout);
   layout->addLayout(content);
 
-  connect(this, &UpdateDialog::accepted, [link] {
+  connect(this, &UpdateDialog::accepted, [this, platform, link] {
+	if (platform == "linux") {
+		QMessageBox msgBox(this);
+		msgBox.setText(tr("On linux distributions the preferred way to install applications is the packet manager."));
+		msgBox.setInformativeText(tr("Do you still want to download the software manually?"));
+		msgBox.setStandardButtons(QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
+		msgBox.setDefaultButton(QMessageBox::StandardButton::No);
+		msgBox.setWindowTitle(tr("Linux download"));
+		msgBox.setIcon(QMessageBox::Icon::Question);
+		if (msgBox.exec() == QMessageBox::StandardButton::No)
+			return;
+	}
+
     // Start download.
-    if (Updater::DownloadRef download = Updater::instance()->download(link)) {
+	if (Updater::DownloadRef download = Updater::instance()->download(link)) {
       DownloadDialog *dialog = new DownloadDialog(download);
       dialog->show();
     }
