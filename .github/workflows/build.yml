@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  IS_RELEASE: ${{ github.event_name == 'pull_request' }} # && github.ref_type == 'tag' && github.refname == 'gittyup_*' }}
+  IS_RELEASE: ${{ github.event_name == 'push' }} && github.ref_type == 'tag' && github.refname == 'gittyup_v*' }}
 
 
 jobs:
