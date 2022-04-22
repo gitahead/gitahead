@@ -73,7 +73,7 @@ jobs:
     - name: Build package
       uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v4
       with:
-        bundle: Gittyup
+        bundle: Gittyup.flatpak
         manifest-path: com.github.Murmele.Gittyup/com.github.Murmele.Gittyup.yml
         cache: false
         branch: ${{ steps.flatpak_release_branch.outputs.value }}
@@ -279,7 +279,7 @@ jobs:
           ls artifacts
           echo "Show artifacts/Gittyup Flatpak folder:"
           ls "artifacts/Gittyup Flatpak"
-          echo "Show artifacts/com.github.Murmele.Gittyup-x86_64:"
+          echo "Show artifacts/Gittyup-x86_64:"
           ls "artifacts/Gittyup-x86_64"
           echo "Show artifacts/Gittyup VERSION"
           ls "artifacts/Gittyup-VERSION"
