@@ -28,8 +28,8 @@ jobs:
       id: flatpak_release_branch
       with:
         cond: ${{ env.IS_RELEASE }}
-        if_true: 'stable'  # string value
-        if_false: 'development' # string value
+        if_true: 'stable'
+        if_false: 'development'
 
 
     - name: Checkout repository
@@ -259,22 +259,21 @@ jobs:
     #if: ${{ github.ref == 'refs/heads/master' }}
 
     steps:
-      # https://stackoverflow.com/questions/60916931/github-action-does-the-if-have-an-else
       - name: Determine release title
         uses: haya14busa/action-cond@v1
         id: release_title
         with:
           cond: ${{ env.IS_RELEASE }}
-          if_true: 'Gittyup Release $(cat build/release/Version.txt)'  # string value
-          if_false: 'Latest Build Testing' # string value
+          if_true: 'Gittyup Release $(cat build/release/Version.txt)'  # version is exported from cmake to file
+          if_false: 'Latest Build Testing'
 
       - name: Determine release tag
         uses: haya14busa/action-cond@v1
         id: release_tag
         with:
           cond: ${{ env.IS_RELEASE }}
-          if_true: 'stable'  # string value
-          if_false: 'latest' # string value
+          if_true: 'stable'
+          if_false: 'latest'
 
       - name: Download artifacts
         uses: actions/download-artifact@v2
