@@ -1,3 +1,5 @@
+# https://docs.github.com/en/actions/learn-github-actions/contexts
+
 ---
 name: Gittyup
 on:
@@ -7,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  IS_RELEASE: ${{ github.event_name == 'push' && github.ref_type == 'tag' && github.refname == 'gittyup_v*' }}
+  IS_RELEASE: ${{ github.event_name == 'push' && github.ref_type == 'tag' && github.ref_name == 'gittyup_v*' }}
 
 
 jobs:
