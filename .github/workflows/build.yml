@@ -18,16 +18,9 @@ jobs:
       image: bilelmoussaoui/flatpak-github-actions:kde-5.15-21.08
       options: --privileged
     steps:
-
-    - name: Retrieve version
-      run: |
-        echo "::set-output name=VERSION::$(cat build/release/VERSION.txt)"
-      id: version
-
     - name: Show environment variables
       run: >
         echo IS_RELEASE: ${{ env.IS_RELEASE }}
-        echo VERSION: ${{ steps.version.outputs.VERSION }}
 
     # https://stackoverflow.com/questions/60916931/github-action-does-the-if-have-an-else
     - name: Determine flatpak release branch
