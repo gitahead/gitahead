@@ -8,6 +8,7 @@ on:
 
 env:
   IS_RELEASE: ${{ github.event_name == 'pull_request' }} # && github.ref_type == 'tag' && github.refname == 'gittyup_*' }}
+  VERSION_NUMBER: $(cat build/release/Version.txt)
 
 
 jobs:
@@ -20,7 +21,9 @@ jobs:
     steps:
 
     - name: Is Release
-      run: echo ${{ env.IS_RELEASE }}
+      run: >
+        echo ${{ env.IS_RELEASE }}
+        echo ${{ env.VERSION_NUMBER }}
 
     # https://stackoverflow.com/questions/60916931/github-action-does-the-if-have-an-else
     - name: Determine flatpak release branch
@@ -264,7 +267,7 @@ jobs:
         id: release_title
         with:
           cond: ${{ env.IS_RELEASE }}
-          if_true: 'Gittyup Release $(cat build/release/Version.txt)'  # version is exported from cmake to file
+          if_true: 'Gittyup Release ${{ env.VERSION_NUMBER }}'  # version is exported from cmake to file
           if_false: 'Latest Build Testing'
 
       - name: Determine release tag
