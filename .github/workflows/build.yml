@@ -267,6 +267,9 @@ jobs:
     runs-on: ubuntu-latest # does not matter which
     # a prerelase is created when pushing to master
     # a release is created when a tag will be set
+    # currently it is not supported to have access the env variable here
+    # therefore it has to be added to every step. 
+    # if: ${{ github.ref == 'refs/heads/master' || env.IS_RELEASE}}
     steps:
       - name: Download artifacts
         if: ${{ github.ref == 'refs/heads/master' || env.IS_RELEASE}}
