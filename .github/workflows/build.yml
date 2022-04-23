@@ -276,7 +276,7 @@ jobs:
 
       - name: Test
         # TODO: Re-Enable this when https://github.com/actions/runner/issues/1206 gets resolved
-        if: matrix.env.ninja_platform != 'win'
+        if: matrix.env.ninja_platform != 'win' && matrix.env.ninja_platform != 'mac'
         continue-on-error: true
         run: |
           cd build/release
