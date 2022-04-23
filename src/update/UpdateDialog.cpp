@@ -117,14 +117,22 @@ UpdateDialog::UpdateDialog(
 	// Only the pure linux package is missing
 	if (platform == "linux") {
 		QMessageBox msgBox(this);
-		msgBox.setText(tr("On linux distributions the preferred way to install applications is the packet manager."));
-		msgBox.setInformativeText(tr("Do you still want to download the software manually?"));
-		msgBox.setStandardButtons(QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
-		msgBox.setDefaultButton(QMessageBox::StandardButton::No);
 		msgBox.setWindowTitle(tr("Linux download"));
-		msgBox.setIcon(QMessageBox::Icon::Question);
-		if (msgBox.exec() == QMessageBox::StandardButton::No)
-			return;
+
+		msgBox.setText(tr("Linux download"));
+		msgBox.setInformativeText(tr("We don't provide a binary to install Gittyup manually on linux. Please download Gittyup from your package manager."));
+		msgBox.setStandardButtons(QMessageBox::StandardButton::Ok);
+		msgBox.setIcon(QMessageBox::Icon::Information);
+		msgBox.exec();
+		return;
+
+//		msgBox.setText(tr("On linux distributions the preferred way to install applications is the packet manager."));
+//		msgBox.setInformativeText(tr("Do you still want to download the software manually?"));
+//		msgBox.setStandardButtons(QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
+//		msgBox.setDefaultButton(QMessageBox::StandardButton::No);
+//		msgBox.setIcon(QMessageBox::Icon::Question);
+//		if (msgBox.exec() == QMessageBox::StandardButton::No)
+//			return;
 	}
 #endif
 
