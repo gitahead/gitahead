@@ -267,7 +267,7 @@ jobs:
     runs-on: ubuntu-latest # does not matter which
     # a prerelase is created when pushing to master
     # a release is created when a tag will be set
-    if: ${{ github.ref == 'refs/heads/master' || env.IS_RELEASE}}
+    if: ${{ github.ref == 'refs/heads/master' && env.IS_RELEASE}}
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v2
