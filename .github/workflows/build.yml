@@ -267,14 +267,15 @@ jobs:
     runs-on: ubuntu-latest # does not matter which
     # a prerelase is created when pushing to master
     # a release is created when a tag will be set
-    if: ${{ env.IS_RELEASE }}
     steps:
       - name: Download artifacts
+        if: ${{ github.ref == 'refs/heads/master' || env.IS_RELEASE}}
         uses: actions/download-artifact@v2
         with:
           path: artifacts
 
       - name: list artifacts folder
+        if: ${{ github.ref == 'refs/heads/master' || env.IS_RELEASE}}
         run: |
           echo "Show artifacts folder:"
           ls artifacts
@@ -287,11 +288,13 @@ jobs:
     
       # version is exported from cmake to file
       - name: Retrieve version
+        if: ${{ github.ref == 'refs/heads/master' || env.IS_RELEASE}}
         run: |
           echo "::set-output name=VERSION::$(cat artifacts/Gittyup-VERSION/VERSION.txt)"
         id: version
 
       - name: Determine release title
+        if: ${{ github.ref == 'refs/heads/master' || env.IS_RELEASE}}
         uses: haya14busa/action-cond@v1
         id: release_title
         with:
@@ -300,6 +303,7 @@ jobs:
           if_false: 'Latest Build (Development)'
 
       - name: Determine release tag
+        if: ${{ github.ref == 'refs/heads/master' || env.IS_RELEASE}}
         uses: haya14busa/action-cond@v1
         id: release_tag
         with:
@@ -308,6 +312,7 @@ jobs:
           if_false: 'latest'
 
       - name: Update GitHub release
+        if: ${{ github.ref == 'refs/heads/master' || env.IS_RELEASE}}
         uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
