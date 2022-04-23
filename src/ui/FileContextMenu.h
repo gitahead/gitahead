@@ -31,6 +31,7 @@ private slots:
   void ignoreFile();
 private:
   void addExternalToolsAction(const QList<ExternalTool *> &tools);
+  bool exportFile(const RepoView *view, const QString& folder, const QString& file);
 
   RepoView *mView;
   const QStringList &mFiles;

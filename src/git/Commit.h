@@ -14,6 +14,7 @@
 #include "git2/commit.h"
 #include "git2/revwalk.h"
 #include "git2/reset.h"
+#include "Blob.h"
 
 class QDateTime;
 
@@ -86,6 +87,8 @@ public:
   // Set path to emoji description file. This should be set before
   // any commits are created and is not expected to change.
   static void setEmojiFile(const QString &file);
+
+  Blob blob(const QString& file) const;
 
 private:
   Commit(git_commit *commit);
