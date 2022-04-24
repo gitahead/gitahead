@@ -134,6 +134,17 @@ UpdateDialog::UpdateDialog(
 //		if (msgBox.exec() == QMessageBox::StandardButton::No)
 //			return;
 	}
+#else
+	  QMessageBox msgBox(this);
+	  msgBox.setWindowTitle(tr("Flatpak download"));
+
+	  msgBox.setText(tr("If you have downloaded the package from flathub, please wait until the package will be updated there (about 1 day)."));
+	  msgBox.setInformativeText(tr("Would you like to download the flatpak package anyway manuall? "));
+	  msgBox.setStandardButtons(QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
+	  msgBox.setDefaultButton(QMessageBox::StandardButton::No);
+	  msgBox.setIcon(QMessageBox::Icon::Question);
+	  if (msgBox.exec() == QMessageBox::StandardButton::No)
+		  return;
 #endif
 
     // Start download.
