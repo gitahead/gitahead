@@ -25,7 +25,7 @@ Features
 --------
 
 ## Single branch view to focus on your work
-
+Select "Show Selected Branch" in the drop down menu above the commit list
 ![Single branch](https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/screenshots/main_show_selected_branch.png)
 
 ## Single line staging 
