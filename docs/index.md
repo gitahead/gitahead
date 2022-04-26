@@ -37,12 +37,9 @@ Select "Show Selected Branch" in the drop down menu above the commit list
 by eighter clicking on the checkboxes next to each line or by selecting the relevant code and pressing "S". For unstaging you can uncheck the checkboxes or press "U". To revert changes, select the text and press "R".
 
 ![Single line staging](https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/screenshots/double_treeview_single_line_staging.png)
-# TODO: image/gif
 
 ## Fullscreen
 of the history or the change dialog by pressing Ctrl+M
-
-# TODO: add gif
 
 ## Staring commits
 to find specific commits much faster
@@ -64,9 +61,9 @@ See blame of the current version with an integrated timeline to see who changed 
 ## Commit message template
 Create you commit messages according a defined template
 
-![Tree View](https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/screenshots/CommitMessageTemplateEditor.png)
+![Commit message template selection](https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/screenshots/CommitMessageTemplateSelection.png)
 
-# TODO: update screenshot
+![Commit message template editor](https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/screenshots/CommitMessageTemplateEditor.png)
 
 ## Tabs
 to be able to switch fast between repositories
