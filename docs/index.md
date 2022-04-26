@@ -1,3 +1,5 @@
+<!--- Github page main file --->
+
 Gittyup is a graphical Git client designed to help you understand and manage your source code history.
 The [pre-release](https://github.com/Murmele/Gittyup/releases) is available either as pre-built for
 - [flatpak for Linux](https://github.com/Murmele/Gittyup/releases/download/latest/com.github.Murmele.Gittyup.flatpak),
