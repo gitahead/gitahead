@@ -1,4 +1,4 @@
-[![Actions Status](https://github.com/Murmele/Gittyup/actions/workflows/build.yml/badge.svg)](https://github.com/Murmele/Gittyup/actions/workflows/build.yml)
+[![Gittyup Status](https://github.com/Murmele/Gittyup/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/Murmele/Gittyup/actions/workflows/build.yml)
 
 Gittyup
 ==================================
