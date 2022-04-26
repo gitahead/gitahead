@@ -31,8 +31,26 @@ Select "Show Selected Branch" in the drop down menu above the commit list
 ## Single line staging 
 by eighter clicking on the checkboxes next to each line or by selecting the relevant code and pressing "S". For unstaging you can uncheck the checkboxes or press "U". To revert changes, select the text and press "R".
 
+![Single line staging](https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/double_tree_single_line_staging.png)
 # TODO: image/gif
 
-Fullscreen of the history or the change dialog by pressing Ctrl+M
+## Fullscreen
+of the history or the change dialog by pressing Ctrl+M
 
-# TODO: 
+# TODO: add gif
+
+## Staring commits
+to find specific commits much faster
+![Staring commits](https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/starring_commits.png)
+
+## Tag selection
+Use an existing tag as template for your next tag. So you never have to look which is your latest tag
+
+![Tag selection](https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/tag_selection.png)
+
+## Tree View
+To visit the blame with its history for unchanged files
+
+![Tree View](https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/treeview.png)
+
+## And a lot more ...
