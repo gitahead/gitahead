@@ -11,6 +11,10 @@ Gittyup is a continuation of the [GitAhead](https://github.com/gitahead/gitahead
 
 ![Gittyup](https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/screenshots/main_dark_orig.png)
 
+Features
+---------------
+To get an overview of the current features please have a look at the [Github Page](https://murmele.github.io/Gittyup/)
+
 How to Get Help
 ---------------
 
