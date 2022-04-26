@@ -125,7 +125,7 @@ jobs:
         if: github.ref_type != 'tag'
         uses: allenevans/set-env@c4f231179ef63887be707202a295d9cb1c687eb9
         with:
-          CMAKE_FLAGS: "-DDEV_BUILD=${{ github.ref_name }}"
+          CMAKE_FLAGS: '-DDEV_BUILD="${{ github.ref_name }}"'
 
       - name: Checkout repository
         uses: actions/checkout@v1
