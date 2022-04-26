@@ -55,4 +55,10 @@ To visit the blame with its history for unchanged files
 
 ![Tree View](https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/treeview.png)
 
+## Blame View
+See blame of the current version with an integrated timeline to see who changed which line
+
+## Tabs
+to be able to switch fast between repositories
+
 ## And a lot more ...
