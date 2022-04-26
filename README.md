@@ -9,7 +9,7 @@ or, can be built from source by following the directions [below](https://github.
 
 Gittyup is a continuation of the [GitAhead](https://github.com/gitahead/gitahead) client.
 
-![Gittyup](https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/screenshots/main_show_all_branches.png)
+![Gittyup](https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/screenshots/main_dark_orig.png)
 
 How to Get Help
 ---------------
