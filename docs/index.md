@@ -24,7 +24,9 @@ If you still need help, check out our Matrix channel
 Features
 --------
 Single branch view to focus on your work
+
 ![Single branch](https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/screenshots/main_show_selected_branch.png)
 
 Single line staging by eighter clicking on the checkboxes next to each line or by selecting the relevant code and pressing "S". For unstaging you can uncheck the checkboxes or press "U". To revert changes, select the text and press "R".
+
 ###TODO: image/gif
