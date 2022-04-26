@@ -36,7 +36,7 @@ Select "Show Selected Branch" in the drop down menu above the commit list
 ## Single line staging 
 by eighter clicking on the checkboxes next to each line or by selecting the relevant code and pressing "S". For unstaging you can uncheck the checkboxes or press "U". To revert changes, select the text and press "R".
 
-![Single line staging](https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/screenshots/double_tree_single_line_staging.png)
+![Single line staging](https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/screenshots/double_treeview_single_line_staging.png)
 # TODO: image/gif
 
 ## Fullscreen
