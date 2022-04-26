@@ -56,45 +56,75 @@ UpdateDialog::UpdateDialog(
   iconLayout->addWidget(iconLabel);
   iconLayout->addStretch();
 
+#ifndef Q_OS_LINUX
   QString label =
-    tr("<h3>A new version of %1 is available!</h3>"
-       "<p>%1 %2 is now available - you have %3. "
-       "Would you like to download it now?</p>"
-       "<b>Release Notes:</b>").arg(appName, version, appVersion);
+	tr("<h3>A new version of %1 is available!</h3>"
+	   "<p>%1 %2 is now available - you have %3. "
+	   "Would you like to download it now?</p>"
+	   "<b>Release Notes:</b>").arg(appName, version, appVersion);
+#elif defined(FLATPAK)
+  QString label =
+	tr("<h3>A new version of %1 is available!</h3>"
+	   "<p>%1 %2 is now available - you have %3.</p>"
+	   "<p>If you downloaded the flatpak package over a package manager or from flathub.org <br/>"
+	   "you don't have to install manually a new version. It will be available within the next <br/>"
+	   "days during your system update: <code>flatpak update</code></p>"
+	   "<b>Release Notes:</b>").arg(appName, version, appVersion);
+#else
+  QString label =
+	tr("<h3>A new version of %1 is available!</h3>"
+	   "<p>%1 %2 is now available - you have %3. "
+	   "The new version will be soon available in your package manager. Just update your system.</p>"
+	   "<b>Release Notes:</b>").arg(appName, version, appVersion);
+#endif
+
+
 
   QTextBrowser *browser = new QTextBrowser;
   browser->document()->setDocumentMargin(12);
   browser->document()->setDefaultStyleSheet(kStyleSheet);
   browser->setHtml(changelog);
 
+#if !defined(Q_OS_LINUX) || defined(FLATPAK)
   QCheckBox *download = new QCheckBox(
     tr("Automatically download and install updates"), this);
   download->setChecked(Settings::instance()->value("update/download").toBool());
   connect(download, &QCheckBox::toggled, [](bool checked) {
     Settings::instance()->setValue("update/download", checked);
   });
+#endif
 
   QDialogButtonBox *buttons = new QDialogButtonBox(this);
+#if !defined(Q_OS_LINUX) || defined(FLATPAK)
   buttons->addButton(tr("Install Update"), QDialogButtonBox::AcceptRole);
   buttons->addButton(tr("Remind Me Later"), QDialogButtonBox::RejectRole);
-  QPushButton *skip =
-    buttons->addButton(tr("Skip This Version"), QDialogButtonBox::ResetRole);
   connect(buttons, &QDialogButtonBox::accepted, this, &UpdateDialog::accept);
+#else
+  buttons->addButton(tr("OK"), QDialogButtonBox::RejectRole);
+#endif
+
   connect(buttons, &QDialogButtonBox::rejected, this, &UpdateDialog::reject);
+
+  QPushButton *skip =
+	buttons->addButton(tr("Skip This Version"), QDialogButtonBox::ResetRole);
+
   connect(skip, &QPushButton::clicked, [this, version] {
-    Settings *settings = Settings::instance();
-    settings->beginGroup("update");
-    QStringList skipped = settings->value("skip").toStringList();
-    if (!skipped.contains(version))
-      settings->setValue("skip", skipped << version);
-    settings->endGroup();
-    reject();
+	Settings *settings = Settings::instance();
+	settings->beginGroup("update");
+	QStringList skipped = settings->value("skip").toStringList();
+	if (!skipped.contains(version))
+	  settings->setValue("skip", skipped << version);
+	settings->endGroup();
+	reject();
   });
+
 
   QHBoxLayout* l = new QHBoxLayout();
   QPushButton* supportButton = new QPushButton(QIcon(":/liberapay_icon_130890.png"), tr("Donate"), this);
   QSpacerItem* spacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum);
+#if !defined(Q_OS_LINUX) || defined(FLATPAK)
   l->addWidget(download);
+#endif
   l->addItem(spacer);
   l->addWidget(supportButton);
   connect(supportButton, &QPushButton::pressed, [] () {
@@ -111,42 +141,7 @@ UpdateDialog::UpdateDialog(
   layout->addLayout(iconLayout);
   layout->addLayout(content);
 
-  connect(this, &UpdateDialog::accepted, [this, platform, link] {
-
-#ifndef FLATAPK
-	// Only the pure linux package is missing
-	if (platform == "linux") {
-		QMessageBox msgBox(this);
-		msgBox.setWindowTitle(tr("Linux download"));
-
-		msgBox.setText(tr("Linux download"));
-		msgBox.setInformativeText(tr("We don't provide a binary to install Gittyup manually on linux. Please download Gittyup from your package manager."));
-		msgBox.setStandardButtons(QMessageBox::StandardButton::Ok);
-		msgBox.setIcon(QMessageBox::Icon::Information);
-		msgBox.exec();
-		return;
-
-//		msgBox.setText(tr("On linux distributions the preferred way to install applications is the packet manager."));
-//		msgBox.setInformativeText(tr("Do you still want to download the software manually?"));
-//		msgBox.setStandardButtons(QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
-//		msgBox.setDefaultButton(QMessageBox::StandardButton::No);
-//		msgBox.setIcon(QMessageBox::Icon::Question);
-//		if (msgBox.exec() == QMessageBox::StandardButton::No)
-//			return;
-	}
-#else
-	  QMessageBox msgBox(this);
-	  msgBox.setWindowTitle(tr("Flatpak download"));
-
-	  msgBox.setText(tr("If you have downloaded the package from flathub, please wait until the package will be updated there (about 1 day)."));
-	  msgBox.setInformativeText(tr("Would you like to download the flatpak package anyway manuall? "));
-	  msgBox.setStandardButtons(QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No);
-	  msgBox.setDefaultButton(QMessageBox::StandardButton::No);
-	  msgBox.setIcon(QMessageBox::Icon::Question);
-	  if (msgBox.exec() == QMessageBox::StandardButton::No)
-		  return;
-#endif
-
+  connect(this, &UpdateDialog::accepted, [/*this,*/ platform, link] {
     // Start download.
 	if (Updater::DownloadRef download = Updater::instance()->download(link)) {
       DownloadDialog *dialog = new DownloadDialog(download);

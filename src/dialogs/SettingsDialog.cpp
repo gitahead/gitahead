@@ -649,12 +649,16 @@ public:
       Settings::instance()->setValue("update/check", checked);
     });
 
+#if !defined(Q_OS_LINUX) || defined(FLATPAK)
+	// On linux the packages get installed over the package manager. So
+	// no manual download is needed
     QString downloadText = tr("Automatically download and install updates");
     QCheckBox *download = new QCheckBox(downloadText, this);
     download->setChecked(settings->value("download").toBool());
     connect(download, &QCheckBox::toggled, [](bool checked) {
       Settings::instance()->setValue("update/download", checked);
     });
+#endif
 
     QPushButton *button = new QPushButton(tr("Check Now"), this);
     connect(button, &QPushButton::clicked,
@@ -662,7 +666,9 @@ public:
 
     QFormLayout *layout = new QFormLayout(this);
     layout->addRow(tr("Software Update:"), check);
+#if !defined(Q_OS_LINUX) || defined(FLATPAK)
     layout->addRow(QString(), download);
+#endif
     layout->addRow(QString(), button);
 
     settings->endGroup();
