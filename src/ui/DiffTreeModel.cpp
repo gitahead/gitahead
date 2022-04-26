@@ -415,7 +415,7 @@ void Node::addChild(
   int indexFirstDifferent,
   bool listView)
 {
-  Node* node;
+  Node* node = nullptr;
 
   if (listView) {
     // Add child with full path in list view.
@@ -432,10 +432,11 @@ void Node::addChild(
       // Folders cannot have a patch Index!
       node = new Node(pathPart[indexFirstDifferent], -1, this);
       node->addChild(pathPart, patchIndex, indexFirstDifferent + 1, false);
-    } else
+	} else if (indexFirstDifferent < pathPart.length())
       node = new Node(pathPart[indexFirstDifferent], patchIndex, this);
   }
-  mChildren.append(node);
+  if (node)
+	mChildren.append(node);
 }
 
 git::Index::StagedState Node::stageState(const git::Index& idx, ParentStageState searchingState)

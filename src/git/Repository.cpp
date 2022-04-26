@@ -349,7 +349,7 @@ Diff Repository::diffTreeToIndex(
   bool ignoreWhitespace) const
 {
   git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
-  opts.flags |= GIT_DIFF_INCLUDE_UNTRACKED | GIT_DIFF_RECURSE_UNTRACKED_DIRS;
+  opts.flags |= GIT_DIFF_INCLUDE_UNTRACKED | GIT_DIFF_RECURSE_UNTRACKED_DIRS | GIT_DIFF_INCLUDE_TYPECHANGE;
   if (ignoreWhitespace)
     opts.flags |= GIT_DIFF_IGNORE_WHITESPACE;
 
@@ -364,7 +364,7 @@ Diff Repository::diffIndexToWorkdir(
   bool ignoreWhitespace) const
 {
   git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
-  opts.flags |= (GIT_DIFF_INCLUDE_UNTRACKED | GIT_DIFF_RECURSE_UNTRACKED_DIRS | GIT_DIFF_DISABLE_MMAP);
+  opts.flags |= (GIT_DIFF_INCLUDE_UNTRACKED | GIT_DIFF_RECURSE_UNTRACKED_DIRS | GIT_DIFF_DISABLE_MMAP | GIT_DIFF_INCLUDE_TYPECHANGE);
   if (ignoreWhitespace)
     opts.flags |= GIT_DIFF_IGNORE_WHITESPACE;
 
