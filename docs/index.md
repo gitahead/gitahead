@@ -30,3 +30,7 @@ Single branch view to focus on your work
 Single line staging by eighter clicking on the checkboxes next to each line or by selecting the relevant code and pressing "S". For unstaging you can uncheck the checkboxes or press "U". To revert changes, select the text and press "R".
 
 ###TODO: image/gif
+
+Fullscreen of the history or the change dialog by pressing Ctrl+M
+
+###TODO: 
