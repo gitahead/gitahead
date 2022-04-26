@@ -16,8 +16,8 @@
         <file>clone@2x.png</file>
         <file>cloud.png</file>
         <file>cloud@2x.png</file>
-        <file>dark.png</file>
-        <file>dark@2x.png</file>
+        <file>screenshots/main_dark.png</file>
+        <file>screenshots/main_dark@2x.png</file>
         <file>diff.png</file>
         <file>diff@2x.png</file>
         <file>editor.png</file>
@@ -36,8 +36,8 @@
         <file>lfs@2x.png</file>
         <file>logo-type.png</file>
         <file>logo-type@2x.png</file>
-        <file>native.png</file>
-        <file>native@2x.png</file>
+        <file>screenshots/main_native.png</file>
+        <file>screenshots/main_native@2x.png</file>
         <file>new.png</file>
         <file>new@2x.png</file>
         <file>open.png</file>
