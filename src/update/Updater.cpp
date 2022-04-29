@@ -44,7 +44,7 @@ namespace {
 
 const QString kTemplateFmt = "%1-XXXXXX.%2";
 const QString kLinkFmt =
-  "link<https://github.com/Murmele/gittyup/releases/download/v%1/Gittyup%2-%3.%4>";
+  "https://github.com/Murmele/gittyup/releases/download/v%1/Gittyup%2-%3.%4";
 const QString kChangelogUrl =
   "https://raw.githubusercontent.com/Murmele/gittyup/master/doc/changelog.md";
 
