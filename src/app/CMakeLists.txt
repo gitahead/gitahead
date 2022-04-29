@@ -22,8 +22,8 @@ file(GLOB LUA_PLUGINS ${CONF_DIR}/plugins/*.lua ${CONF_DIR}/plugins/*.txt)
 qt5_add_resources(RESOURCES ${RSRC_DIR}/resources.qrc)
 
 # Generate acknowledgments.
-set(DOC_SOURCE_DIR ${CMAKE_SOURCE_DIR}/doc)
-set(DOC_BINARY_DIR ${CMAKE_BINARY_DIR}/doc)
+set(DOC_SOURCE_DIR ${CMAKE_SOURCE_DIR}/docs)
+set(DOC_BINARY_DIR ${CMAKE_BINARY_DIR}/docs)
 set(CHANGELOG_MD ${DOC_SOURCE_DIR}/changelog.md)
 set(ACKNOWLEDGMENTS_MD ${DOC_SOURCE_DIR}/acknowledgments.md)
 set(PRIVACY_MD ${DOC_SOURCE_DIR}/privacy.md)
