@@ -141,7 +141,7 @@ UpdateDialog::UpdateDialog(
   layout->addLayout(iconLayout);
   layout->addLayout(content);
 
-  connect(this, &UpdateDialog::accepted, [/*this,*/ platform, link] {
+  connect(this, &UpdateDialog::accepted, [platform, link] {
     // Start download.
 	if (Updater::DownloadRef download = Updater::instance()->download(link)) {
       DownloadDialog *dialog = new DownloadDialog(download);
