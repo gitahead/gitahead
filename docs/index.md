@@ -13,11 +13,9 @@ The [development version](https://github.com/Murmele/Gittyup/releases) is availa
 
 or, can be built from source by following the directions in the [Gittyup Repository](https://github.com/Murmele/Gittyup#how-to-build).
 
-Gittyup is a continuation of the [GitAhead](https://github.com/gitahead/gitahead) client.
+To see the changes of the current version please have a look at the <A href="#changelog">changelog</A> section
 
 ![Gittyup](https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/screenshots/main_dark_orig.png)
-
-<A href="#changelog">Changelog</A>
 
 How to Get Help
 ===============
