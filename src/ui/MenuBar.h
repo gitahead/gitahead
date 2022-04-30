@@ -48,6 +48,8 @@ public:
    */
   bool isMaximized();
 
+  static const QString donationUrlLiberapay;
+
 private:
   QWidget *window() const;
   /*!

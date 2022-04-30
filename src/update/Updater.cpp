@@ -44,7 +44,7 @@ namespace {
 
 const QString kTemplateFmt = "%1-XXXXXX.%2";
 const QString kLinkFmt =
-  "TODO: replace by release link<https://github.com/gitahead/gitahead/releases/download/v%1/GitAhead%2-%3.%4>";
+  "https://github.com/Murmele/gittyup/releases/download/v%1/Gittyup%2-%3.%4";
 const QString kChangelogUrl =
   "https://raw.githubusercontent.com/Murmele/gittyup/master/doc/changelog.md";
 
@@ -74,25 +74,24 @@ Updater::Updater(QObject *parent)
   });
 
   connect(this, &Updater::updateAvailable,
-  [this](const QString &version, const QString &log, const QString &link) {
-	 // For now the update dialog is disabled.
-//    // Show the update dialog.
-//    QVersionNumber appVersion =
-//      QVersionNumber::fromString(QCoreApplication::applicationVersion());
-//    QVersionNumber newVersion = QVersionNumber::fromString(version);
-//    if (newVersion.majorVersion() > appVersion.majorVersion() ||
-//        !Settings::instance()->value("update/download").toBool()) {
-//      UpdateDialog *dialog = new UpdateDialog(version, log, link);
-//      connect(dialog, &UpdateDialog::rejected, this, &Updater::updateCanceled);
-//      dialog->show();
-//      return;
-//    }
+  [this](const QString& platform, const QString &version, const QString &log, const QString &link) {
+	// Show the update dialog.
+	QVersionNumber appVersion =
+	  QVersionNumber::fromString(QCoreApplication::applicationVersion());
+	QVersionNumber newVersion = QVersionNumber::fromString(version);
+	if (newVersion.majorVersion() > appVersion.majorVersion() ||
+		!Settings::instance()->value("update/download").toBool()) {
+	  UpdateDialog *dialog = new UpdateDialog(platform, version, log, link);
+	  connect(dialog, &UpdateDialog::rejected, this, &Updater::updateCanceled);
+	  dialog->show();
+	  return;
+	}
 
-//    // Skip the update dialog and just start downloading.
-//    if (Updater::DownloadRef download = this->download(link)) {
-//      DownloadDialog *dialog = new DownloadDialog(download);
-//      dialog->show();
-//    }
+	// Skip the update dialog and just start downloading.
+	if (Updater::DownloadRef download = this->download(link)) {
+	  DownloadDialog *dialog = new DownloadDialog(download);
+	  dialog->show();
+	}
   });
 
   connect(this, &Updater::updateError,
@@ -162,15 +161,23 @@ void Updater::update(bool spontaneous)
     QString platform(PLATFORM);
     QString platformArg;
     QString extension = "sh";
-    if (platform == "mac") {
-      extension = "dmg";
-    } else if (platform.startsWith("win")) {
-      platformArg = QString("-%1").arg(platform);
-      extension = "exe";
-    }
+#ifdef FLATPAK
+	extension = ".flatpak";
+	platformArg = "";
+	// The bundle does not have any version in its filename
+	QString link = kLinkFmt.arg("", platformArg, version, extension);
+#else
+	if (platform == "mac") {
+	  extension = "dmg";
+	} else if (platform.startsWith("win")) {
+	  platformArg = QString("-%1").arg(platform);
+	  extension = "exe";
+	}
+	QString link = kLinkFmt.arg(version, platformArg, version, extension);
+#endif
+	qDebug() << "Download url of the update: " << link;
 
-    QString link = kLinkFmt.arg(version, platformArg, version, extension);
-    emit updateAvailable(version, html, link);
+	emit updateAvailable(platform, version, html, link);
   });
 }
 

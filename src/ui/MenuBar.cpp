@@ -65,6 +65,8 @@ void openCloneDialog(CloneDialog::Kind kind)
 
 } // anon. namespace
 
+const QString MenuBar::donationUrlLiberapay = QStringLiteral("https://liberapay.com/Gittyup/donate");
+
 bool MenuBar::sDebugMenuVisible = false;
 
 static Hotkey newFileHotkey = HotkeyManager::registerHotkey(
@@ -1033,6 +1035,11 @@ MenuBar::MenuBar(QWidget *parent)
   connect(plugin, &QAction::triggered, [] {
     QString url = Settings::docDir().filePath("plugin.html");
     QDesktopServices::openUrl(QUrl::fromLocalFile(url));
+  });
+
+  QAction* donation = help->addAction(tr("Support us via Liberapay"));
+  connect(donation, &QAction::triggered, [] {
+	QDesktopServices::openUrl(QUrl(donationUrlLiberapay));
   });
 
   // Debug

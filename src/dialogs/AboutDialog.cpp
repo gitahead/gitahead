@@ -30,7 +30,7 @@
 
 namespace {
 
-const QString kEmail = QStringLiteral("TODO");
+const QString kIssueTracker = QStringLiteral("https://github.com/Murmele/Gittyup/issues");
 
 const QString kUrl =
   "https://stackoverflow.com/questions/tagged/gittyup?sort=frequent";
@@ -40,7 +40,7 @@ const QString kSubtitleFmt =
 
 const QString kTextFmt =
   "<p style='white-space: nowrap'><b style='font-size: large'>%1 v%2</b> "
-  "- %3 - %4<br>Copyright © 2021 Gittyup contributors"
+  "- %3 - %4<br>Copyright © 2021-2022 Gittyup contributors"
   "<br>Copyright © 2016-2020 Scientific Toolworks, Inc. and "
   "contributors</p><p> If you have a question that might benefit the "
   "community, consider asking it on <a href='%5'>Stack Overflow</a> by "
@@ -88,7 +88,7 @@ AboutDialog::AboutDialog(QWidget *parent)
   QString revision = GITTYUP_BUILD_REVISION;
   QDateTime dateTime = QDateTime::fromString(GITTYUP_BUILD_DATE, Qt::ISODate);
   QString date = dateTime.date().toString(QLocale().dateFormat(QLocale::LongFormat));
-  QString text = kTextFmt.arg(name, version, date, revision, kUrl, kEmail);
+  QString text = kTextFmt.arg(name, version, date, revision, kUrl, kIssueTracker);
   QLabel *label = new QLabel(text, this);
   label->setWordWrap(true);
   label->setTextInteractionFlags(kTextFlags);

@@ -19,11 +19,11 @@ class UpdateDialog : public QDialog
   Q_OBJECT
 
 public:
-  UpdateDialog(
-    const QString &version,
-    const QString &changelog,
-    const QString &link,
-    QWidget *parent = nullptr);
+  UpdateDialog(const QString &platform,
+	const QString &version,
+	const QString &changelog,
+	const QString &link,
+	QWidget *parent = nullptr);
 };
 
 #endif

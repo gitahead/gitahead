@@ -1,3 +1,5 @@
+# https://docs.github.com/en/actions/learn-github-actions/contexts
+
 ---
 name: Gittyup
 on:
@@ -5,6 +7,9 @@ on:
   pull_request:
   page_build:
   workflow_dispatch:
+
+env:
+  IS_RELEASE: ${{ github.event_name == 'push' && github.ref_type == 'tag' && startswith(github.ref_name, 'gittyup_v') }}
 
 
 jobs:
@@ -15,6 +20,20 @@ jobs:
       image: bilelmoussaoui/flatpak-github-actions:kde-5.15-21.08
       options: --privileged
     steps:
+    - name: Show environment variables
+      run: >
+        echo IS_RELEASE: ${{ env.IS_RELEASE }}
+
+    # https://stackoverflow.com/questions/60916931/github-action-does-the-if-have-an-else
+    - name: Determine flatpak release branch
+      uses: haya14busa/action-cond@v1
+      id: flatpak_release_branch
+      with:
+        cond: ${{ env.IS_RELEASE }}
+        if_true: 'stable'
+        if_false: 'development'
+
+
     - name: Checkout repository
       uses: actions/checkout@v2
 
@@ -54,10 +73,10 @@ jobs:
     - name: Build package
       uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v4
       with:
-        bundle: com.github.Murmele.Gittyup.flatpak
+        bundle: Gittyup.flatpak
         manifest-path: com.github.Murmele.Gittyup/com.github.Murmele.Gittyup.yml
         cache: false
-        branch: development
+        branch: ${{ steps.flatpak_release_branch.outputs.value }}
 
     - name: Publish build artifacts
       uses: actions/upload-artifact@v2
@@ -227,6 +246,13 @@ jobs:
           path: build/release/pack/Gittyup-*
           name: Gittyup ${{ matrix.env.name }}
 
+      - name: Publish version file
+        if: matrix.env.pack && !matrix.qt.check_only
+        uses: actions/upload-artifact@v2
+        with:
+          path: build/release/VERSION.txt
+          name: Gittyup-VERSION
+
       - name: Test
         # TODO: Re-Enable this when https://github.com/actions/runner/issues/1206 gets resolved
         if: matrix.env.ninja_platform != 'win'
@@ -235,12 +261,16 @@ jobs:
           cd build/release
           ninja check
 
-  prerelease:
+  publish:
     # https://github.com/marvinpinto/actions/issues/177
     needs: [flatpak, build]
     runs-on: ubuntu-latest # does not matter which
-    if: ${{ github.ref == 'refs/heads/master' }}
-
+    # a prerelase is created when pushing to master
+    # a release is created when a tag will be set
+    # last condition is the same as IS_RELEASE,
+    # but environment variables cannot be used outside of steps
+    # so it was copied to here too
+    if: ${{ github.ref == 'refs/heads/master' || (github.event_name == 'push' && github.ref_type == 'tag' && startswith(github.ref_name, 'gittyup_v'))  }}
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v2
@@ -253,20 +283,43 @@ jobs:
           ls artifacts
           echo "Show artifacts/Gittyup Flatpak folder:"
           ls "artifacts/Gittyup Flatpak"
-          echo "Show artifacts/com.github.Murmele.Gittyup-x86_64:"
-          ls "artifacts/com.github.Murmele.Gittyup-x86_64"
+          echo "Show artifacts/Gittyup-x86_64:"
+          ls "artifacts/Gittyup-x86_64"
+          echo "Show artifacts/Gittyup VERSION"
+          ls "artifacts/Gittyup-VERSION"
+    
+      # version is exported from cmake to file
+      - name: Retrieve version
+        run: |
+          echo "::set-output name=VERSION::$(cat artifacts/Gittyup-VERSION/VERSION.txt)"
+        id: version
 
-      - name: Update GitHub prerelease
-        if: ${{ github.ref == 'refs/heads/master' }}
+      - name: Determine release title
+        uses: haya14busa/action-cond@v1
+        id: release_title
+        with:
+          cond: ${{ env.IS_RELEASE }}
+          if_true: 'Gittyup Release ${{ steps.version.outputs.VERSION }}'
+          if_false: 'Latest Build (Development)'
+
+      - name: Determine release tag
+        uses: haya14busa/action-cond@v1
+        id: release_tag
+        with:
+          cond: ${{ env.IS_RELEASE }}
+          if_true: 'stable'
+          if_false: 'latest'
+
+      - name: Update GitHub release
         uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          automatic_release_tag: latest
-          prerelease: true
-          title: "Latest Build"
+          prerelease: ${{ !env.IS_RELEASE }}
+          title: ${{ steps.release_title.outputs.value }}
+          automatic_release_tag: ${{ steps.release_tag.outputs.value }}
           files: |
             **/artifacts/Gittyup win64/Gittyup*.exe
             **/artifacts/Gittyup win32/Gittyup*.exe
             **/artifacts/Gittyup Flatpak/com.github.Murmele.Gittyup.yml
-            **/com.github.Murmele.Gittyup-x86_64/*.flatpak
+            **/Gittyup-x86_64/*.flatpak
 ...
