@@ -44,7 +44,7 @@ namespace {
 
 const QString kTemplateFmt = "%1-XXXXXX.%2";
 const QString kLinkFmt =
-  "https://github.com/Murmele/gittyup/releases/download/gittyup_v%1/Gittyup%2%3.%4";
+  "https://github.com/Murmele/gittyup/releases/download/stable/Gittyup%1%2.%3";
 const QString kChangelogUrl =
   "https://raw.githubusercontent.com/Murmele/gittyup/master/docs/changelog.md";
 
@@ -165,7 +165,7 @@ void Updater::update(bool spontaneous)
 	extension = ".flatpak";
 	platformArg = "";
 	// The bundle does not have any version in its filename
-	QString link = kLinkFmt.arg(version, platformArg, "", extension);
+	QString link = kLinkFmt.arg(platformArg, "", extension);
 #else
 	if (platform == "mac") {
 	  extension = "dmg";
@@ -173,7 +173,7 @@ void Updater::update(bool spontaneous)
 	  platformArg = QString("-%1").arg(platform);
 	  extension = "exe";
 	}
-	QString link = kLinkFmt.arg(version, platformArg, QString("-%1").arg(version), extension);
+	QString link = kLinkFmt.arg(platformArg, QString("-%1").arg(version), extension);
 #endif
 	qDebug() << "Download url of the update: " << link;
 
