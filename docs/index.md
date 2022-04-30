@@ -2,16 +2,14 @@
 
 Gittyup is a graphical Git client designed to help you understand and manage your source code history. Gittyup is an open source software developed by voluntiers, if you like the application please support us [![Donate Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/Gittyup/donate)
 
-<!---
 The release version is available for
 - [flatpak for Linux](https://github.com/Murmele/Gittyup/releases/download/stable/Gittyup.flatpak)
-- [32](https://github.com/Murmele/Gittyup/releases/download/stable/Gittyup-win32-1.0.0-dev.exe) / [64](https://github.com/Murmele/Gittyup/releases/download/stable/Gittyup-win64-1.0.0-dev.exe) binary for Windows
---->
+- [32](https://github.com/Murmele/Gittyup/releases/download/stable/Gittyup-win32-1.1.0.exe) / [64](https://github.com/Murmele/Gittyup/releases/download/stable/Gittyup-win64-1.1.0.exe) binary for Windows
 
 
 The [development version](https://github.com/Murmele/Gittyup/releases) is available either as pre-built for
 - [flatpak for Linux](https://github.com/Murmele/Gittyup/releases/download/latest/Gittyup.flatpak),
-- [32](https://github.com/Murmele/Gittyup/releases/download/latest/Gittyup-win32-1.0.0-dev.exe) / [64](https://github.com/Murmele/Gittyup/releases/download/latest/Gittyup-win64-1.0.0-dev.exe) binary for Windows
+- [32](https://github.com/Murmele/Gittyup/releases/download/latest/Gittyup-win32-1.1.0-dev.exe) / [64](https://github.com/Murmele/Gittyup/releases/download/latest/Gittyup-win64-1.1.0-dev.exe) binary for Windows
 
 or, can be built from source by following the directions in the [Gittyup Repository](https://github.com/Murmele/Gittyup#how-to-build).
 
