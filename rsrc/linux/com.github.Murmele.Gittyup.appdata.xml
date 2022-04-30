@@ -26,19 +26,19 @@
   <screenshots>
     <screenshot type="default">
       <caption>The main view</caption>
-        <image>https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/dark.png</image>
+        <image>https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/screenshots/main_dark_orig.png</image>
     </screenshot>
     <screenshot>
-      <caption>Commit Message Template Editor</caption>
-        <image>https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/CommitMessageTemplateEditor.png</image>
+      <caption>Staging single lines</caption>
+        <image>https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/screenshots/double_treeview_single_line_staging.png</image>
     </screenshot>
     <screenshot>
-      <caption>Tag Creation</caption>
-        <image>https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/TagCreation.png</image>
+      <caption>Tree View</caption>
+        <image>https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/screenshots/treeview.png</image>
     </screenshot>
   </screenshots>
 
-  <url type="homepage">https://github.com/Murmele/Gittyup</url>
+  <url type="homepage">https://murmele.github.io/Gittyup</url>
 
   <provides>
     <binary>Gittyup</binary>
@@ -46,6 +46,23 @@
   </provides>
 
   <releases>
+    <release version="V1.1.0" date="2022-04-30">
+        <description>
+        <ul>
+          <li>Button to directly access the terminal and the filebrowser</li>
+          <li>Add support for running in single instance mode</li>
+          <li>Customizable hotkeys</li>
+          <li>Quick commit author overriding</li>
+          <li>keyboard-interactive SSH auth</li>
+          <li>Improved single line staging and replacing staging image to a more appropriate one</li>
+          <li>Font customizing</li>
+          <li>Options to switch between staging/unstaging treeview, single tree view and list view</li>
+          <li>Do not automatically abort rebase if conflicts occur</li>
+		  <li>Add possibility to save file of any version on local system</li>
+		  <li>Add possibility to open a file of any version with default editor</li>
+        </ul>
+      </description>
+    </release>
     <release version="V1.0.0" date="2021-11-18">
         <description>
         <ul>
