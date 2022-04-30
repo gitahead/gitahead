@@ -325,12 +325,12 @@ jobs:
 
       # needed otherwise the docs folder is not available     
       - name: Checkout repository
-        if: ${{ !env.IS_RELEASE }}
+        if: ${{ env.IS_RELEASE }}
         uses: actions/checkout@v1
 
       # update github pages only if it is a release 
       - name: Deploy Github pages
-        if: ${{ !env.IS_RELEASE }}
+        if: ${{ env.IS_RELEASE }}
         uses: JamesIves/github-pages-deploy-action@v4.3.3
         with:
           branch: gh-pages # The branch the action should deploy to.
