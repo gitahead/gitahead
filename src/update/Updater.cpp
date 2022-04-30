@@ -46,7 +46,7 @@ const QString kTemplateFmt = "%1-XXXXXX.%2";
 const QString kLinkFmt =
   "https://github.com/Murmele/gittyup/releases/download/stable/Gittyup%1%2.%3";
 const QString kChangelogUrl =
-  "https://raw.githubusercontent.com/Murmele/gittyup/master/docs/changelog.md";
+  "https://raw.githubusercontent.com/Murmele/Gittyup/gh-pages/changelog.md";
 
 } // anon. namespace
 
