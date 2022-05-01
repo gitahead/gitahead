@@ -27,14 +27,9 @@ class RevWalk;
 class Signature;
 class Tree;
 
-class Commit : public Object
-{
+class Commit : public Object {
 public:
-  enum MessageOption
-  {
-    NoMessageOption = 0x0,
-    SubstituteEmoji = 0x1
-  };
+  enum MessageOption { NoMessageOption = 0x0, SubstituteEmoji = 0x1 };
 
   Q_DECLARE_FLAGS(MessageOptions, MessageOption);
 
@@ -52,10 +47,8 @@ public:
   Signature author() const;
   Signature committer() const;
 
-  Diff diff(
-    const Commit &commit = git::Commit(),
-    int contextLines = -1,
-    bool ignoreWhitespace = false) const;
+  Diff diff(const Commit &commit = git::Commit(), int contextLines = -1,
+            bool ignoreWhitespace = false) const;
   Tree tree() const;
   QList<Commit> parents() const;
 
@@ -73,9 +66,8 @@ public:
   bool revert() const;
 
   // Reset HEAD to this commit.
-  bool reset(
-    git_reset_t type = GIT_RESET_MIXED,
-    const QStringList &paths = QStringList()) const;
+  bool reset(git_reset_t type = GIT_RESET_MIXED,
+             const QStringList &paths = QStringList()) const;
 
   // favorite commits
   bool isStarred() const;
@@ -88,7 +80,7 @@ public:
   // any commits are created and is not expected to change.
   static void setEmojiFile(const QString &file);
 
-  Blob blob(const QString& file) const;
+  Blob blob(const QString &file) const;
 
 private:
   Commit(git_commit *commit);

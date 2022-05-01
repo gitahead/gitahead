@@ -19,8 +19,7 @@ class QString;
 
 namespace git {
 
-class Signature
-{
+class Signature {
 public:
   bool isValid() const { return d; }
   explicit operator bool() const { return isValid(); }

@@ -14,13 +14,11 @@
 #include <QString>
 #include <QVariant>
 
-class Settings : public QObject
-{
+class Settings : public QObject {
   Q_OBJECT
 
 public:
-  enum PromptKind
-  {
+  enum PromptKind {
     PromptStash,
     PromptMerge,
     PromptRevert,
@@ -36,7 +34,8 @@ public:
   QVariant value(const QString &key) const;
   QVariant value(const QString &key, const QVariant &defaultValue) const;
   QVariant defaultValue(const QString &key) const;
-  void setValue(const QString &key, const QVariant &value, bool refresh = false);
+  void setValue(const QString &key, const QVariant &value,
+                bool refresh = false);
 
   // Look up lexer name by file name.
   QString lexer(const QString &filename);

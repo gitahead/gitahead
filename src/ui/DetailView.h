@@ -20,11 +20,10 @@ namespace git {
 class Diff;
 class Index;
 class Repository;
-}
+} // namespace git
 
 // Abstract interface for content widgets.
-class ContentWidget : public QWidget
-{
+class ContentWidget : public QWidget {
 public:
   ContentWidget(QWidget *parent = nullptr);
   virtual ~ContentWidget();
@@ -32,10 +31,8 @@ public:
   virtual QString selectedFile() const = 0;
   virtual QModelIndex selectedIndex() const = 0;
 
-  virtual void setDiff(
-    const git::Diff &diff,
-    const QString &file = QString(),
-    const QString &pathspec = QString()) = 0;
+  virtual void setDiff(const git::Diff &diff, const QString &file = QString(),
+                       const QString &pathspec = QString()) = 0;
 
   virtual void cancelBackgroundTasks() {}
 
@@ -44,8 +41,7 @@ public:
   virtual void findPrevious() {}
 };
 
-class DetailView : public QWidget
-{
+class DetailView : public QWidget {
   Q_OBJECT
 
 public:
@@ -69,10 +65,8 @@ public:
   QString file() const;
 
   void setCommitMessage(const QString &message);
-  void setDiff(
-    const git::Diff &diff,
-    const QString &file = QString(),
-    const QString &pathspec = QString());
+  void setDiff(const git::Diff &diff, const QString &file = QString(),
+               const QString &pathspec = QString());
 
   void cancelBackgroundTasks();
 
@@ -87,17 +81,9 @@ signals:
   void viewModeChanged(RepoView::ViewMode mode, bool spontaneous = false);
 
 private:
-  enum DetailIndex
-  {
-    CommitIndex,
-    EditorIndex
-  };
+  enum DetailIndex { CommitIndex, EditorIndex };
 
-  enum ContentIndex
-  {
-    DiffIndex,
-    TreeIndex
-  };
+  enum ContentIndex { DiffIndex, TreeIndex };
 
   QStackedWidget *mDetail;
   QStackedWidget *mContent;

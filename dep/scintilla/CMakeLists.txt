@@ -1,6 +1,7 @@
 set(SCINTILLA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/scintilla445/scintilla)
 
-add_library(scintilla
+add_library(
+  scintilla
   ${SCINTILLA_DIR}/src/AutoComplete.cxx
   ${SCINTILLA_DIR}/src/CallTip.cxx
   ${SCINTILLA_DIR}/src/CaseConvert.cxx
@@ -38,30 +39,21 @@ add_library(scintilla
   ${SCINTILLA_DIR}/lexlib/LexerSimple.cxx
   ${SCINTILLA_DIR}/lexlib/PropSetSimple.cxx
   ${SCINTILLA_DIR}/lexlib/StyleContext.cxx
-  ${SCINTILLA_DIR}/lexlib/WordList.cxx
-)
+  ${SCINTILLA_DIR}/lexlib/WordList.cxx)
 
-target_compile_definitions(scintilla
-  PUBLIC
-    SCINTILLA_QT
-    SCI_LEXER
-  PRIVATE
-    SCI_EMPTYCATALOGUE
-)
+target_compile_definitions(
+  scintilla
+  PUBLIC SCINTILLA_QT SCI_LEXER
+  PRIVATE SCI_EMPTYCATALOGUE)
 
-target_include_directories(scintilla
-  PUBLIC
-    ${SCINTILLA_DIR}/include
-    ${SCINTILLA_DIR}/lexlib
-    ${SCINTILLA_DIR}/src
-)
+target_include_directories(
+  scintilla PUBLIC ${SCINTILLA_DIR}/include ${SCINTILLA_DIR}/lexlib
+                   ${SCINTILLA_DIR}/src)
 
-target_link_libraries(scintilla
-  Qt5::Widgets
-)
+target_link_libraries(scintilla Qt5::Widgets)
 
-set_target_properties(scintilla PROPERTIES
-  AUTOMOC ON
-)
+set_target_properties(scintilla PROPERTIES AUTOMOC ON)
 
-set(SCINTILLUA_LEXERS_DIR ${SCINTILLA_DIR}/lexlua CACHE INTERNAL "")
+set(SCINTILLUA_LEXERS_DIR
+    ${SCINTILLA_DIR}/lexlua
+    CACHE INTERNAL "")

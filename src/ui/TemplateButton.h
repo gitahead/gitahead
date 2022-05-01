@@ -5,29 +5,30 @@
 
 #include <QToolButton>
 
-class TemplateButton: public QToolButton {
-    Q_OBJECT
+class TemplateButton : public QToolButton {
+  Q_OBJECT
 public:
-	struct Template {
-        QString name{""};
-        QString value{""};
-    };
-	static const QString cursorPositionString;
+  struct Template {
+    QString name{""};
+    QString value{""};
+  };
+  static const QString cursorPositionString;
 
-    TemplateButton(git::Config config, QWidget* parent = nullptr);
-    QMenu* menu() const;
-    void showMenu();
-    void storeTemplates();
-    QList<Template> loadTemplates();
-    void updateMenu();
+  TemplateButton(git::Config config, QWidget *parent = nullptr);
+  QMenu *menu() const;
+  void showMenu();
+  void storeTemplates();
+  QList<Template> loadTemplates();
+  void updateMenu();
 signals:
-	void templateChanged(QString& str);
-private:
-    void actionTriggered(QAction* action);
+  void templateChanged(QString &str);
 
-    QMenu* mMenu{nullptr};
-    QList<Template> mTemplates;
-    git::Config mConfig;
+private:
+  void actionTriggered(QAction *action);
+
+  QMenu *mMenu{nullptr};
+  QList<Template> mTemplates;
+  git::Config mConfig;
 };
 
 #endif

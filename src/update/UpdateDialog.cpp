@@ -27,22 +27,17 @@
 
 namespace {
 
-const QString kStyleSheet =
-  "h3 {"
-  "  color: #696969;"
-  "  text-decoration: underline"
-  "}";
+const QString kStyleSheet = "h3 {"
+                            "  color: #696969;"
+                            "  text-decoration: underline"
+                            "}";
 
-} // anon. namespace
+} // namespace
 
-UpdateDialog::UpdateDialog(
-  const QString &platform,
-  const QString &version,
-  const QString &changelog,
-  const QString &link,
-  QWidget *parent)
-  : QDialog(parent)
-{
+UpdateDialog::UpdateDialog(const QString &platform, const QString &version,
+                           const QString &changelog, const QString &link,
+                           QWidget *parent)
+    : QDialog(parent) {
   QString appName = QCoreApplication::applicationName();
   QString appVersion = QCoreApplication::applicationVersion();
 
@@ -57,28 +52,30 @@ UpdateDialog::UpdateDialog(
   iconLayout->addStretch();
 
 #ifndef Q_OS_LINUX
-  QString label =
-	tr("<h3>A new version of %1 is available!</h3>"
-	   "<p>%1 %2 is now available - you have %3. "
-	   "Would you like to download it now?</p>"
-	   "<b>Release Notes:</b>").arg(appName, version, appVersion);
+  QString label = tr("<h3>A new version of %1 is available!</h3>"
+                     "<p>%1 %2 is now available - you have %3. "
+                     "Would you like to download it now?</p>"
+                     "<b>Release Notes:</b>")
+                      .arg(appName, version, appVersion);
 #elif defined(FLATPAK)
   QString label =
-	tr("<h3>A new version of %1 is available!</h3>"
-	   "<p>%1 %2 is now available - you have %3.</p>"
-	   "<p>If you downloaded the flatpak package over a package manager or from flathub.org <br/>"
-	   "you don't have to install manually a new version. It will be available within the next <br/>"
-	   "days during your system update: <code>flatpak update</code></p>"
-	   "<b>Release Notes:</b>").arg(appName, version, appVersion);
+      tr("<h3>A new version of %1 is available!</h3>"
+         "<p>%1 %2 is now available - you have %3.</p>"
+         "<p>If you downloaded the flatpak package over a package manager or "
+         "from flathub.org <br/>"
+         "you don't have to install manually a new version. It will be "
+         "available within the next <br/>"
+         "days during your system update: <code>flatpak update</code></p>"
+         "<b>Release Notes:</b>")
+          .arg(appName, version, appVersion);
 #else
-  QString label =
-	tr("<h3>A new version of %1 is available!</h3>"
-	   "<p>%1 %2 is now available - you have %3. "
-	   "The new version will be soon available in your package manager. Just update your system.</p>"
-	   "<b>Release Notes:</b>").arg(appName, version, appVersion);
+  QString label = tr("<h3>A new version of %1 is available!</h3>"
+                     "<p>%1 %2 is now available - you have %3. "
+                     "The new version will be soon available in your package "
+                     "manager. Just update your system.</p>"
+                     "<b>Release Notes:</b>")
+                      .arg(appName, version, appVersion);
 #endif
-
-
 
   QTextBrowser *browser = new QTextBrowser;
   browser->document()->setDocumentMargin(12);
@@ -86,8 +83,8 @@ UpdateDialog::UpdateDialog(
   browser->setHtml(changelog);
 
 #if !defined(Q_OS_LINUX) || defined(FLATPAK)
-  QCheckBox *download = new QCheckBox(
-    tr("Automatically download and install updates"), this);
+  QCheckBox *download =
+      new QCheckBox(tr("Automatically download and install updates"), this);
   download->setChecked(Settings::instance()->value("update/download").toBool());
   connect(download, &QCheckBox::toggled, [](bool checked) {
     Settings::instance()->setValue("update/download", checked);
@@ -106,29 +103,30 @@ UpdateDialog::UpdateDialog(
   connect(buttons, &QDialogButtonBox::rejected, this, &UpdateDialog::reject);
 
   QPushButton *skip =
-	buttons->addButton(tr("Skip This Version"), QDialogButtonBox::ResetRole);
+      buttons->addButton(tr("Skip This Version"), QDialogButtonBox::ResetRole);
 
   connect(skip, &QPushButton::clicked, [this, version] {
-	Settings *settings = Settings::instance();
-	settings->beginGroup("update");
-	QStringList skipped = settings->value("skip").toStringList();
-	if (!skipped.contains(version))
-	  settings->setValue("skip", skipped << version);
-	settings->endGroup();
-	reject();
+    Settings *settings = Settings::instance();
+    settings->beginGroup("update");
+    QStringList skipped = settings->value("skip").toStringList();
+    if (!skipped.contains(version))
+      settings->setValue("skip", skipped << version);
+    settings->endGroup();
+    reject();
   });
 
-
-  QHBoxLayout* l = new QHBoxLayout();
-  QPushButton* supportButton = new QPushButton(QIcon(":/liberapay_icon_130890.png"), tr("Donate"), this);
-  QSpacerItem* spacer = new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum);
+  QHBoxLayout *l = new QHBoxLayout();
+  QPushButton *supportButton =
+      new QPushButton(QIcon(":/liberapay_icon_130890.png"), tr("Donate"), this);
+  QSpacerItem *spacer =
+      new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum);
 #if !defined(Q_OS_LINUX) || defined(FLATPAK)
   l->addWidget(download);
 #endif
   l->addItem(spacer);
   l->addWidget(supportButton);
-  connect(supportButton, &QPushButton::pressed, [] () {
-	  QDesktopServices::openUrl(QUrl(MenuBar::donationUrlLiberapay));
+  connect(supportButton, &QPushButton::pressed, []() {
+    QDesktopServices::openUrl(QUrl(MenuBar::donationUrlLiberapay));
   });
 
   QVBoxLayout *content = new QVBoxLayout;
@@ -143,7 +141,7 @@ UpdateDialog::UpdateDialog(
 
   connect(this, &UpdateDialog::accepted, [platform, link] {
     // Start download.
-	if (Updater::DownloadRef download = Updater::instance()->download(link)) {
+    if (Updater::DownloadRef download = Updater::instance()->download(link)) {
       DownloadDialog *dialog = new DownloadDialog(download);
       dialog->show();
     }

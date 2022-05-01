@@ -22,8 +22,7 @@
 
 namespace {
 
-bool copy(const QString &source, const QDir &targetDir)
-{
+bool copy(const QString &source, const QDir &targetDir) {
   // Disallow copy into self.
   if (source.startsWith(targetDir.path()))
     return false;
@@ -37,7 +36,8 @@ bool copy(const QString &source, const QDir &targetDir)
   if (!targetDir.mkdir(name))
     return false;
 
-  foreach (const QFileInfo &entry, QDir(source).entryInfoList(DiffViewStyle::kFilters)) {
+  foreach (const QFileInfo &entry,
+           QDir(source).entryInfoList(DiffViewStyle::kFilters)) {
     if (!copy(entry.filePath(), target))
       return false;
   }
@@ -45,11 +45,10 @@ bool copy(const QString &source, const QDir &targetDir)
   return true;
 }
 
-} // anon. namespace
+} // namespace
 
 DiffView::DiffView(const git::Repository &repo, QWidget *parent)
-  : QScrollArea(parent), mParent(parent)
-{
+    : QScrollArea(parent), mParent(parent) {
   setStyleSheet(DiffViewStyle::kStyleSheet);
   setAcceptDrops(true);
   setWidgetResizable(true);
@@ -60,44 +59,41 @@ DiffView::DiffView(const git::Repository &repo, QWidget *parent)
 
   // Update comments.
   if (Repository *remote = RepoView::parentView(this)->remoteRepo()) {
-    connect(remote->account(), &Account::commentsReady, this, [this, remote](
-      Repository *repo,
-      const QString &oid,
-      const Account::CommitComments &comments)
-    {
-      if (repo != remote)
-        return;
+    connect(remote->account(), &Account::commentsReady, this,
+            [this, remote](Repository *repo, const QString &oid,
+                           const Account::CommitComments &comments) {
+              if (repo != remote)
+                return;
 
-      RepoView *view = RepoView::parentView(this);
-      QList<git::Commit> commits = view->commits();
-      if (commits.size() != 1 || oid != commits.first().id().toString())
-        return;
+              RepoView *view = RepoView::parentView(this);
+              QList<git::Commit> commits = view->commits();
+              if (commits.size() != 1 || oid != commits.first().id().toString())
+                return;
 
-      mComments = comments;
+              mComments = comments;
 
-      // Invalidate editors.
-      foreach (QWidget *widget, mFiles) {
-        foreach (HunkWidget *hunk, static_cast<FileWidget *>(widget)->hunks())
-          hunk->invalidate();
-      }
+              // Invalidate editors.
+              foreach (QWidget *widget, mFiles) {
+                foreach (HunkWidget *hunk,
+                         static_cast<FileWidget *>(widget)->hunks())
+                  hunk->invalidate();
+              }
 
-      // Load commit comments.
-      if (!canFetchMore())
-        fetchMore();
-    });
+              // Load commit comments.
+              if (!canFetchMore())
+                fetchMore();
+            });
   }
 }
 
 DiffView::~DiffView() {}
 
-QWidget *DiffView::file(int index)
-{
+QWidget *DiffView::file(int index) {
   fetchAll(index);
   return mFiles.at(index);
 }
 
-void DiffView::setDiff(const git::Diff &diff)
-{
+void DiffView::setDiff(const git::Diff &diff) {
   RepoView *view = RepoView::parentView(this);
   git::Repository repo = view->repo();
 
@@ -132,7 +128,7 @@ void DiffView::setDiff(const git::Diff &diff)
   if (!diff.isValid()) {
     if (repo.isHeadUnborn()) {
       QPushButton *button =
-        new QPushButton(QIcon(":/file.png"), tr("Add new file"));
+          new QPushButton(QIcon(":/file.png"), tr("Add new file"));
       button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
       button->setStyleSheet("color: #484848");
       button->setIconSize(QSize(32, 32));
@@ -146,7 +142,7 @@ void DiffView::setDiff(const git::Diff &diff)
       connect(button, &QPushButton::clicked, view, &RepoView::newEditor);
 
       QLabel *label =
-        new QLabel(tr("Or drag files here to copy into the repository"));
+          new QLabel(tr("Or drag files here to copy into the repository"));
       label->setStyleSheet("color: #696969");
       label->setAlignment(Qt::AlignHCenter);
 
@@ -161,12 +157,18 @@ void DiffView::setDiff(const git::Diff &diff)
     }
 
     layout->addLayout(mFileWidgetLayout);
-    layout->addSpacerItem(new QSpacerItem(0,0, QSizePolicy::Expanding, QSizePolicy::Expanding)); // so the file is always starting from top and is not distributed over the hole diff view
+    layout->addSpacerItem(new QSpacerItem(
+        0, 0, QSizePolicy::Expanding,
+        QSizePolicy::Expanding)); // so the file is always starting from top and
+                                  // is not distributed over the hole diff view
     return;
   }
 
   layout->addLayout(mFileWidgetLayout);
-  layout->addSpacerItem(new QSpacerItem(0,0, QSizePolicy::Expanding, QSizePolicy::Expanding)); // so the file is always starting from top and is not distributed over the hole diff view
+  layout->addSpacerItem(new QSpacerItem(
+      0, 0, QSizePolicy::Expanding,
+      QSizePolicy::Expanding)); // so the file is always starting from top and
+                                // is not distributed over the hole diff view
 
   // Generate a diff between the head tree and index.
   if (diff.isStatusDiff()) {
@@ -185,18 +187,16 @@ void DiffView::setDiff(const git::Diff &diff)
   // Load patches on demand.
   QScrollBar *scrollBar = verticalScrollBar();
   mConnections.append(
-    connect(scrollBar, &QScrollBar::valueChanged, [this](int value) {
-      if (value > verticalScrollBar()->maximum() / 2 && canFetchMore())
-        fetchMore();
-    })
-  );
+      connect(scrollBar, &QScrollBar::valueChanged, [this](int value) {
+        if (value > verticalScrollBar()->maximum() / 2 && canFetchMore())
+          fetchMore();
+      }));
 
   mConnections.append(
-    connect(scrollBar, &QScrollBar::rangeChanged, [this](int min, int max) {
-      if (max - min < this->widget()->height() / 2 && canFetchMore())
-        fetchMore();
-    })
-  );
+      connect(scrollBar, &QScrollBar::rangeChanged, [this](int min, int max) {
+        if (max - min < this->widget()->height() / 2 && canFetchMore())
+          fetchMore();
+      }));
 
   // Request comments for this diff.
   if (Repository *remoteRepo = view->remoteRepo()) {
@@ -207,11 +207,11 @@ void DiffView::setDiff(const git::Diff &diff)
     }
   }
 
-  //connect(repo.notifier(), &git::RepositoryNotifier::indexChanged, this, &DiffView::indexChanged);
+  // connect(repo.notifier(), &git::RepositoryNotifier::indexChanged, this,
+  // &DiffView::indexChanged);
 }
 
-bool DiffView::scrollToFile(int index)
-{
+bool DiffView::scrollToFile(int index) {
   // Ensure that the given index is loaded.
   fetchAll(index);
 
@@ -227,78 +227,74 @@ bool DiffView::scrollToFile(int index)
   return true;
 }
 
-void DiffView::enable(bool enable)
-{
-    mEnabled = enable;
+void DiffView::enable(bool enable) { mEnabled = enable; }
+
+void DiffView::setModel(DiffTreeModel *model) {
+  if (mDiffTreeModel)
+    disconnect(mDiffTreeModel, nullptr, this, nullptr);
+
+  mDiffTreeModel = model;
+  connect(mDiffTreeModel, &DiffTreeModel::dataChanged, this,
+          &DiffView::diffTreeModelDataChanged);
 }
 
-void DiffView::setModel(DiffTreeModel* model)
-{
-    if (mDiffTreeModel)
-        disconnect(mDiffTreeModel, nullptr, this, nullptr);
+void DiffView::diffTreeModelDataChanged(const QModelIndex &topLeft,
+                                        const QModelIndex &bottomRight,
+                                        const QVector<int> &roles) {
+  assert(topLeft == bottomRight);
 
-    mDiffTreeModel = model;
-    connect(mDiffTreeModel, &DiffTreeModel::dataChanged, this, &DiffView::diffTreeModelDataChanged);
-}
+  if (!topLeft.isValid())
+    return;
+  if (roles[0] != Qt::CheckStateRole)
+    return;
 
-void DiffView::diffTreeModelDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles)
-{
-    assert(topLeft == bottomRight);
+  QString modelName = topLeft.data(Qt::DisplayRole).toString();
 
-    if (!topLeft.isValid())
-        return;
-    if (roles[0] != Qt::CheckStateRole)
-        return;
+  git::Index::StagedState stageState = static_cast<git::Index::StagedState>(
+      topLeft.data(Qt::CheckStateRole).toInt());
 
-    QString modelName = topLeft.data(Qt::DisplayRole).toString();
+  for (auto file : mFiles) {
+    if (file->modelIndex().internalPointer() == topLeft.internalPointer()) {
 
-    git::Index::StagedState stageState = static_cast<git::Index::StagedState>(topLeft.data(Qt::CheckStateRole).toInt());
+      // Respond to index changes only when file is visible in the diffview
+      RepoView *view = RepoView::parentView(this);
+      git::Repository repo = view->repo();
 
-    for (auto file: mFiles) {
-        if (file->modelIndex().internalPointer() == topLeft.internalPointer()) {
-
-            // Respond to index changes only when file is visible in the diffview
-            RepoView *view = RepoView::parentView(this);
-            git::Repository repo = view->repo();
-
-            mStagedPatches.clear();
-            // Generate a diff between the head tree and index.
-            if (mDiff.isStatusDiff()) {
-              if (git::Reference head = repo.head()) {
-                if (git::Commit commit = head.target()) {
-                  git::Diff stagedDiff = repo.diffTreeToIndex(commit.tree());
-                  for (int i = 0; i < stagedDiff.count(); ++i)
-                    mStagedPatches[stagedDiff.name(i)] = stagedDiff.patch(i);
-                }
-              }
-            }
-
-            QString filename = file->name();
-            git::Patch stagedPatch = mStagedPatches[file->name()];
-            file->updateHunks(stagedPatch);
-            file->setStageState(stageState);
-
-
-            return;
+      mStagedPatches.clear();
+      // Generate a diff between the head tree and index.
+      if (mDiff.isStatusDiff()) {
+        if (git::Reference head = repo.head()) {
+          if (git::Commit commit = head.target()) {
+            git::Diff stagedDiff = repo.diffTreeToIndex(commit.tree());
+            for (int i = 0; i < stagedDiff.count(); ++i)
+              mStagedPatches[stagedDiff.name(i)] = stagedDiff.patch(i);
+          }
         }
+      }
+
+      QString filename = file->name();
+      git::Patch stagedPatch = mStagedPatches[file->name()];
+      file->updateHunks(stagedPatch);
+      file->setStageState(stageState);
+
+      return;
     }
+  }
 }
 
-void DiffView::updateFiles()
-{
-    while (mFiles.count()) {
-        auto file = mFiles.takeFirst();
-        mFileWidgetLayout->removeWidget(file);
-		file->deleteLater();
-    }
-    mFiles.clear();
+void DiffView::updateFiles() {
+  while (mFiles.count()) {
+    auto file = mFiles.takeFirst();
+    mFileWidgetLayout->removeWidget(file);
+    file->deleteLater();
+  }
+  mFiles.clear();
 
-    if (canFetchMore())
-      fetchMore();
+  if (canFetchMore())
+    fetchMore();
 }
 
-QList<TextEditor *> DiffView::editors()
-{
+QList<TextEditor *> DiffView::editors() {
   fetchAll();
   QList<TextEditor *> editors;
   foreach (QWidget *widget, mFiles) {
@@ -309,8 +305,7 @@ QList<TextEditor *> DiffView::editors()
   return editors;
 }
 
-void DiffView::ensureVisible(TextEditor *editor, int pos)
-{
+void DiffView::ensureVisible(TextEditor *editor, int pos) {
   HunkWidget *hunk = static_cast<HunkWidget *>(editor->parentWidget());
   hunk->header()->button()->setChecked(true);
 
@@ -330,8 +325,7 @@ void DiffView::ensureVisible(TextEditor *editor, int pos)
   }
 }
 
-void DiffView::dropEvent(QDropEvent *event)
-{
+void DiffView::dropEvent(QDropEvent *event) {
   if (event->dropAction() != Qt::CopyAction)
     return;
 
@@ -349,17 +343,17 @@ void DiffView::dropEvent(QDropEvent *event)
   view->refresh();
 }
 
-void DiffView::dragEnterEvent(QDragEnterEvent *event)
-{
+void DiffView::dragEnterEvent(QDragEnterEvent *event) {
   if (event->mimeData()->hasUrls())
     event->acceptProposedAction();
 }
 
-bool DiffView::canFetchMore()
-{
-  auto dtw = dynamic_cast<DoubleTreeWidget*>(mParent); // for an unknown reason parent() and p are not the same
+bool DiffView::canFetchMore() {
+  auto dtw = dynamic_cast<DoubleTreeWidget *>(
+      mParent); // for an unknown reason parent() and p are not the same
   assert(dtw);
-  return  mDiff.isValid() && mFiles.size() < mDiffTreeModel->fileCount(dtw->selectedIndex());
+  return mDiff.isValid() &&
+         mFiles.size() < mDiffTreeModel->fileCount(dtw->selectedIndex());
 }
 
 /*!
@@ -367,8 +361,7 @@ bool DiffView::canFetchMore()
  * Fetch maxNewFiles more patches
  * use a while loop with canFetchMore() to get all
  */
-void DiffView::fetchMore()
-{
+void DiffView::fetchMore() {
   const int maxNewFiles = 8;
   QVBoxLayout *layout = static_cast<QVBoxLayout *>(widget()->layout());
 
@@ -376,8 +369,9 @@ void DiffView::fetchMore()
   RepoView *view = RepoView::parentView(this);
   int addedFiles = 0;
 
-  auto dtw = dynamic_cast<DoubleTreeWidget*>(mParent);
-  //QList<int> patchIndices = mDiffTreeModel->patchIndices(dtw->selectedIndex());
+  auto dtw = dynamic_cast<DoubleTreeWidget *>(mParent);
+  // QList<int> patchIndices =
+  // mDiffTreeModel->patchIndices(dtw->selectedIndex());
   QList<QModelIndex> indexList = dtw->selectedIndices();
   QList<QModelIndex> indices;
   for (auto index : indexList) {
@@ -392,7 +386,7 @@ void DiffView::fetchMore()
   for (int i = mFiles.count(); i < count && addedFiles < maxNewFiles; ++i) {
 
     int pidx = indices[i].data(DiffTreeModel::PatchIndexRole).toInt();
-    addedFiles ++;
+    addedFiles++;
     git::Patch patch = mDiff.patch(pidx);
     if (!patch.isValid()) {
       // This diff is stale. Refresh the view.
@@ -400,15 +394,17 @@ void DiffView::fetchMore()
       return;
     }
 
-    auto state = static_cast<git::Index::StagedState>(indices[i].data(Qt::CheckStateRole).toInt());
+    auto state = static_cast<git::Index::StagedState>(
+        indices[i].data(Qt::CheckStateRole).toInt());
 
     git::Patch staged = mStagedPatches.value(patch.name());
 
-	git::Repository repo = view->repo();
-	QString name = patch.name();
-	QString path = repo.workdir().filePath(name);
-	bool submodule = repo.lookupSubmodule(name).isValid();
-	FileWidget *file = new FileWidget(this, mDiff, patch, staged, indices[i], name, path, submodule, widget());
+    git::Repository repo = view->repo();
+    QString name = patch.name();
+    QString path = repo.workdir().filePath(name);
+    bool submodule = repo.lookupSubmodule(name).isValid();
+    FileWidget *file = new FileWidget(this, mDiff, patch, staged, indices[i],
+                                      name, path, submodule, widget());
     file->setStageState(state);
     mFileWidgetLayout->addWidget(file);
 
@@ -421,21 +417,21 @@ void DiffView::fetchMore()
     }
 
     // Respond to diagnostic signal.
-    connect(file, &FileWidget::diagnosticAdded,
-            this, &DiffView::diagnosticAdded);
+    connect(file, &FileWidget::diagnosticAdded, this,
+            &DiffView::diagnosticAdded);
     connect(file, &FileWidget::stageStateChanged,
-            [this] (const QModelIndex index, int state) {
-        /*emit fileStageStateChanged(state);*/
-        mDiffTreeModel->setData(index, state, Qt::CheckStateRole);
-        });
-    connect(file, &FileWidget::discarded, [this](const QModelIndex& index) {
-        RepoView *view = RepoView::parentView(this);
-        if (!mDiffTreeModel->discard(index)) {
-            QString name = index.data(Qt::DisplayRole).toString();
-            LogEntry *parent = view->addLogEntry(name, FileWidget::tr("Discard"));
-            view->error(parent, FileWidget::tr("discard"), name);
-        }
-        view->refresh();
+            [this](const QModelIndex index, int state) {
+              /*emit fileStageStateChanged(state);*/
+              mDiffTreeModel->setData(index, state, Qt::CheckStateRole);
+            });
+    connect(file, &FileWidget::discarded, [this](const QModelIndex &index) {
+      RepoView *view = RepoView::parentView(this);
+      if (!mDiffTreeModel->discard(index)) {
+        QString name = index.data(Qt::DisplayRole).toString();
+        LogEntry *parent = view->addLogEntry(name, FileWidget::tr("Discard"));
+        view->error(parent, FileWidget::tr("discard"), name);
+      }
+      view->refresh();
     });
   }
 
@@ -449,35 +445,34 @@ void DiffView::fetchMore()
   }
 }
 
-void DiffView::fetchAll(int index)
-{
+void DiffView::fetchAll(int index) {
   // Load all patches up to and including index.
   while ((index < 0 || mFiles.size() <= index) && canFetchMore())
     fetchMore();
 }
 
 void DiffView::indexChanged(const QStringList &paths) {
-//    // Respond to index changes.
-//    RepoView *view = RepoView::parentView(this);
-//    git::Repository repo = view->repo();
+  //    // Respond to index changes.
+  //    RepoView *view = RepoView::parentView(this);
+  //    git::Repository repo = view->repo();
 
-//    mStagedPatches.clear();
-//    // Generate a diff between the head tree and index.
-//    if (mDiff.isStatusDiff()) {
-//      if (git::Reference head = repo.head()) {
-//        if (git::Commit commit = head.target()) {
-//          git::Diff stagedDiff = repo.diffTreeToIndex(commit.tree());
-//          for (int i = 0; i < stagedDiff.count(); ++i)
-//            mStagedPatches[stagedDiff.name(i)] = stagedDiff.patch(i);
-//        }
-//      }
-//    }
+  //    mStagedPatches.clear();
+  //    // Generate a diff between the head tree and index.
+  //    if (mDiff.isStatusDiff()) {
+  //      if (git::Reference head = repo.head()) {
+  //        if (git::Commit commit = head.target()) {
+  //          git::Diff stagedDiff = repo.diffTreeToIndex(commit.tree());
+  //          for (int i = 0; i < stagedDiff.count(); ++i)
+  //            mStagedPatches[stagedDiff.name(i)] = stagedDiff.patch(i);
+  //        }
+  //      }
+  //    }
 
-//    for (auto* file : mFiles) {
-//        for (auto path : paths) {
-//            git::Patch stagedPatch = mStagedPatches[path];
-//            if (file->name() == path)
-//                file->updateHunks(stagedPatch);
-//        }
-//    }
+  //    for (auto* file : mFiles) {
+  //        for (auto path : paths) {
+  //            git::Patch stagedPatch = mStagedPatches[path];
+  //            if (file->name() == path)
+  //                file->updateHunks(stagedPatch);
+  //        }
+  //    }
 }

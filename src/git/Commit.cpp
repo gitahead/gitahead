@@ -33,50 +33,39 @@ namespace git {
 namespace {
 
 QString sEmojiFile;
-QMap<QString,QString> sEmojiCache;
+QMap<QString, QString> sEmojiCache;
 
-} // anon. namespace
+} // namespace
 
-Commit::Commit()
-  : Object()
-{}
+Commit::Commit() : Object() {}
 
 Commit::Commit(git_commit *commit)
-  : Object(reinterpret_cast<git_object *>(commit))
-{}
+    : Object(reinterpret_cast<git_object *>(commit)) {}
 
-Commit::operator git_commit *() const
-{
+Commit::operator git_commit *() const {
   return reinterpret_cast<git_commit *>(d.data());
 }
 
-bool Commit::isMerge() const
-{
-  return git_commit_parentcount(*this) > 1;
-}
+bool Commit::isMerge() const { return git_commit_parentcount(*this) > 1; }
 
-QString Commit::summary(MessageOptions options) const
-{
+QString Commit::summary(MessageOptions options) const {
   QString msg = decodeMessage(git_commit_summary(*this));
   return (options & SubstituteEmoji) ? substituteEmoji(msg) : msg;
 }
 
-QString Commit::body(MessageOptions options) const
-{
+QString Commit::body(MessageOptions options) const {
   QString msg = decodeMessage(git_commit_body(*this));
   return (options & SubstituteEmoji) ? substituteEmoji(msg) : msg;
 }
 
-QString Commit::message(MessageOptions options) const
-{
+QString Commit::message(MessageOptions options) const {
   QString msg = decodeMessage(git_commit_message(*this));
   return (options & SubstituteEmoji) ? substituteEmoji(msg) : msg;
 }
 
-QString Commit::description() const
-{
+QString Commit::description() const {
   // Build list of candidates.
-  QHash<Id,TagRef> candidates;
+  QHash<Id, TagRef> candidates;
   foreach (const TagRef &tag, repo().tags()) {
     if (Commit commit = tag.target())
       candidates.insert(commit.id(), tag);
@@ -109,8 +98,7 @@ QString Commit::description() const
   return QString();
 }
 
-QString Commit::detachedHeadName() const
-{
+QString Commit::detachedHeadName() const {
   foreach (const TagRef &tag, repo().tags()) {
     if (tag.target().id() == id())
       return tag.name();
@@ -119,29 +107,23 @@ QString Commit::detachedHeadName() const
   return shortId();
 }
 
-AnnotatedCommit Commit::annotatedCommit() const
-{
+AnnotatedCommit Commit::annotatedCommit() const {
   git_annotated_commit *commit = nullptr;
   git_repository *repo = git_object_owner(d.data());
   git_annotated_commit_lookup(&commit, repo, git_object_id(d.data()));
   return AnnotatedCommit(commit, repo);
 }
 
-Signature Commit::author() const
-{
+Signature Commit::author() const {
   return const_cast<git_signature *>(git_commit_author(*this));
 }
 
-Signature Commit::committer() const
-{
+Signature Commit::committer() const {
   return const_cast<git_signature *>(git_commit_committer(*this));
 }
 
-Diff Commit::diff(
-  const git::Commit &commit,
-  int contextLines,
-  bool ignoreWhitespace) const
-{
+Diff Commit::diff(const git::Commit &commit, int contextLines,
+                  bool ignoreWhitespace) const {
   Tree old;
   if (commit.isValid()) {
     old = commit.tree();
@@ -153,7 +135,7 @@ Diff Commit::diff(
 
   git_diff_options opts = GIT_DIFF_OPTIONS_INIT;
   opts.context_lines = contextLines;
-  opts.flags |=  GIT_DIFF_INCLUDE_TYPECHANGE;
+  opts.flags |= GIT_DIFF_INCLUDE_TYPECHANGE;
   if (ignoreWhitespace)
     opts.flags |= GIT_DIFF_IGNORE_WHITESPACE;
 
@@ -163,15 +145,13 @@ Diff Commit::diff(
   return Diff(diff);
 }
 
-Tree Commit::tree() const
-{
+Tree Commit::tree() const {
   git_tree *tree = nullptr;
   git_commit_tree(&tree, *this);
   return Tree(tree);
 }
 
-QList<Commit> Commit::parents() const
-{
+QList<Commit> Commit::parents() const {
   QList<Commit> list;
   int count = git_commit_parentcount(*this);
   for (int i = 0; i < count; ++i) {
@@ -185,8 +165,7 @@ QList<Commit> Commit::parents() const
   return list;
 }
 
-QList<Reference> Commit::refs() const
-{
+QList<Reference> Commit::refs() const {
   // Add detached HEAD.
   QList<Reference> refs;
   Repository repo = this->repo();
@@ -220,8 +199,7 @@ QList<Reference> Commit::refs() const
   return refs;
 }
 
-RevWalk Commit::walker(int sort) const
-{
+RevWalk Commit::walker(int sort) const {
   git_revwalk *revwalk = nullptr;
   if (git_revwalk_new(&revwalk, git_object_owner(d.data())))
     return RevWalk();
@@ -235,8 +213,7 @@ RevWalk Commit::walker(int sort) const
   return walker;
 }
 
-int Commit::difference(const Commit &commit) const
-{
+int Commit::difference(const Commit &commit) const {
   // Check for the same commit.
   if (id() == commit.id())
     return 0;
@@ -252,8 +229,7 @@ int Commit::difference(const Commit &commit) const
   return result;
 }
 
-bool Commit::revert() const
-{
+bool Commit::revert() const {
   Repository repo = this->repo();
   int state = repo.state();
   git_revert_options opts = GIT_REVERT_OPTIONS_INIT;
@@ -264,8 +240,7 @@ bool Commit::revert() const
   return !error;
 }
 
-bool Commit::reset(git_reset_t type, const QStringList &paths) const
-{
+bool Commit::reset(git_reset_t type, const QStringList &paths) const {
   QVector<char *> rawPaths;
   QVector<QByteArray> storage;
   git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
@@ -294,18 +269,13 @@ bool Commit::reset(git_reset_t type, const QStringList &paths) const
   return !error;
 }
 
-bool Commit::isStarred() const
-{
-  return repo().isCommitStarred(id());
-}
+bool Commit::isStarred() const { return repo().isCommitStarred(id()); }
 
-void Commit::setStarred(bool starred)
-{
+void Commit::setStarred(bool starred) {
   repo().setCommitStarred(id(), starred);
 }
 
-QString Commit::decodeMessage(const char *msg) const
-{
+QString Commit::decodeMessage(const char *msg) const {
   if (const char *encoding = git_commit_message_encoding(*this)) {
     if (QTextCodec *codec = QTextCodec::codecForName(encoding))
       return codec->toUnicode(msg);
@@ -314,8 +284,7 @@ QString Commit::decodeMessage(const char *msg) const
   return msg;
 }
 
-QString Commit::substituteEmoji(const QString &text) const
-{
+QString Commit::substituteEmoji(const QString &text) const {
   if (sEmojiFile.isEmpty())
     return text;
 
@@ -353,42 +322,39 @@ QString Commit::substituteEmoji(const QString &text) const
   return result;
 }
 
-void Commit::setEmojiFile(const QString &file)
-{
-  sEmojiFile = file;
-}
+void Commit::setEmojiFile(const QString &file) { sEmojiFile = file; }
 
-Blob Commit::blob(const QString& file) const{
-	git::Blob blob;
+Blob Commit::blob(const QString &file) const {
+  git::Blob blob;
 
-	if (!isValid())
-		return blob;
+  if (!isValid())
+    return blob;
 
-	// searching for the correct blob
-	auto list = file.split("/");
-	bool found = false;
-	auto t = tree();
-	if (!t.isValid())
-		return blob;
+  // searching for the correct blob
+  auto list = file.split("/");
+  bool found = false;
+  auto t = tree();
+  if (!t.isValid())
+    return blob;
 
-	for (int path_depth = 0; path_depth < list.count(); path_depth++) {
-	  auto element = list[path_depth];
-	  found = false;
-	  for (int i = 0; i < t.count(); ++i) {
-		auto n = t.name(i);
-		if (n == element) {
-		  if (path_depth >= list.count() -1)
-			blob = t.object(i);
-		  else
-			t = t.object(i);
-		  found = true;
-		  break;
-		}
-	  }
-	  if (!found)
-		break;
-	}
-	return blob;
+  for (int path_depth = 0; path_depth < list.count(); path_depth++) {
+    auto element = list[path_depth];
+    found = false;
+    for (int i = 0; i < t.count(); ++i) {
+      auto n = t.name(i);
+      if (n == element) {
+        if (path_depth >= list.count() - 1)
+          blob = t.object(i);
+        else
+          t = t.object(i);
+        found = true;
+        break;
+      }
+    }
+    if (!found)
+      break;
+  }
+  return blob;
 }
 
 } // namespace git

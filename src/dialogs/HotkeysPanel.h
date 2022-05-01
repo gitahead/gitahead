@@ -10,21 +10,17 @@
 #include <QKeyEvent>
 #include <QTreeView>
 
-class HotkeysPanel : public QTreeView
-{
+class HotkeysPanel : public QTreeView {
 public:
-  enum Column
-  {
-    Name,
-    Kind,
-    Description
-  };
+  enum Column { Name, Kind, Description };
 
   HotkeysPanel(QWidget *parent = nullptr);
 
   virtual QSize sizeHint() const override;
 
 protected:
-  virtual bool edit(const QModelIndex &index, QAbstractItemView::EditTrigger trigger, QEvent *event) override;
+  virtual bool edit(const QModelIndex &index,
+                    QAbstractItemView::EditTrigger trigger,
+                    QEvent *event) override;
   virtual void keyPressEvent(QKeyEvent *e) override;
 };

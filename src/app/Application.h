@@ -18,8 +18,7 @@ class QNetworkReply;
 class QSslError;
 class QUrlQuery;
 
-class Application : public QApplication
-{
+class Application : public QApplication {
   Q_OBJECT
 
 public:
@@ -44,8 +43,7 @@ private:
 };
 
 #ifdef Q_OS_LINUX
-class DBusGittyup: public QObject
-{
+class DBusGittyup : public QObject {
   Q_OBJECT
 
 public:

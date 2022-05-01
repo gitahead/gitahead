@@ -18,26 +18,19 @@ namespace {
 const QString kRecentKey = "recent";
 const QString kFilterKey = "recent/filter";
 
-} // anon. namespace
+} // namespace
 
-RecentRepositories::RecentRepositories(QObject *parent)
-  : QObject(parent)
-{
+RecentRepositories::RecentRepositories(QObject *parent) : QObject(parent) {
   load();
 }
 
-int RecentRepositories::count() const
-{
-  return mRepos.size();
-}
+int RecentRepositories::count() const { return mRepos.size(); }
 
-RecentRepository *RecentRepositories::repository(int index) const
-{
+RecentRepository *RecentRepositories::repository(int index) const {
   return mRepos.at(index);
 }
 
-void RecentRepositories::clear()
-{
+void RecentRepositories::clear() {
   emit repositoryAboutToBeRemoved();
 
   qDeleteAll(mRepos);
@@ -47,8 +40,7 @@ void RecentRepositories::clear()
   emit repositoryRemoved();
 }
 
-void RecentRepositories::remove(int index)
-{
+void RecentRepositories::remove(int index) {
   emit repositoryAboutToBeRemoved();
 
   delete mRepos.takeAt(index);
@@ -57,8 +49,7 @@ void RecentRepositories::remove(int index)
   emit repositoryRemoved();
 }
 
-void RecentRepositories::add(const QString &path)
-{
+void RecentRepositories::add(const QString &path) {
   emit repositoryAboutToBeAdded();
 
   auto end = mRepos.end();
@@ -76,16 +67,14 @@ void RecentRepositories::add(const QString &path)
   emit repositoryAdded();
 }
 
-RecentRepositories *RecentRepositories::instance()
-{
+RecentRepositories *RecentRepositories::instance() {
   static RecentRepositories *instance = nullptr;
   if (!instance)
     instance = new RecentRepositories(qApp);
   return instance;
 }
 
-void RecentRepositories::store()
-{
+void RecentRepositories::store() {
   QStringList paths;
   foreach (RecentRepository *repo, mRepos)
     paths.append(repo->path());
@@ -96,8 +85,7 @@ void RecentRepositories::store()
   load();
 }
 
-void RecentRepositories::load()
-{
+void RecentRepositories::load() {
   QSettings settings;
   QStringList paths = settings.value(kRecentKey).toStringList();
   paths.removeDuplicates();

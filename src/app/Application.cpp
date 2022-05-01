@@ -48,8 +48,7 @@
 
 static LPTOP_LEVEL_EXCEPTION_FILTER defaultFilter = nullptr;
 
-static LONG WINAPI exceptionFilter(PEXCEPTION_POINTERS info)
-{
+static LONG WINAPI exceptionFilter(PEXCEPTION_POINTERS info) {
   // Protect against reentering.
   static bool entered = false;
   if (entered)
@@ -68,31 +67,30 @@ static LONG WINAPI exceptionFilter(PEXCEPTION_POINTERS info)
   CreateDirectory(dir, NULL);
 
   char fileName[MAX_PATH];
-  StringCchPrintf(fileName, MAX_PATH,
-    "%s\\%s-%s-%04d%02d%02d-%02d%02d%02d-%ld-%ld.dmp",
-    dir, GITTYUP_NAME, GITTYUP_VERSION,
-    localTime.wYear, localTime.wMonth, localTime.wDay,
-    localTime.wHour, localTime.wMinute, localTime.wSecond,
-    GetCurrentProcessId(), GetCurrentThreadId());
+  StringCchPrintf(
+      fileName, MAX_PATH, "%s\\%s-%s-%04d%02d%02d-%02d%02d%02d-%ld-%ld.dmp",
+      dir, GITTYUP_NAME, GITTYUP_VERSION, localTime.wYear, localTime.wMonth,
+      localTime.wDay, localTime.wHour, localTime.wMinute, localTime.wSecond,
+      GetCurrentProcessId(), GetCurrentThreadId());
 
-  HANDLE dumpFile = CreateFile(fileName, GENERIC_READ|GENERIC_WRITE,
-    FILE_SHARE_WRITE|FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0);
+  HANDLE dumpFile =
+      CreateFile(fileName, GENERIC_READ | GENERIC_WRITE,
+                 FILE_SHARE_WRITE | FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0);
 
   MINIDUMP_EXCEPTION_INFORMATION expParam;
   expParam.ThreadId = GetCurrentThreadId();
   expParam.ExceptionPointers = info;
   expParam.ClientPointers = TRUE;
 
-  MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(),
-    dumpFile, MiniDumpWithDataSegs, &expParam, NULL, NULL);
+  MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), dumpFile,
+                    MiniDumpWithDataSegs, &expParam, NULL, NULL);
 
   return defaultFilter ? defaultFilter(info) : EXCEPTION_CONTINUE_SEARCH;
 }
 #endif
 
 Application::Application(int &argc, char **argv, bool haltOnParseError)
-  : QApplication(argc, argv)
-{
+    : QApplication(argc, argv) {
   Q_INIT_RESOURCE(resources);
 
   setApplicationName(GITTYUP_NAME);
@@ -103,17 +101,18 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   qRegisterMetaType<git::Id>();
 
   // Connect updater signals.
-  connect(Updater::instance(), &Updater::sslErrors,
-          this, &Application::handleSslErrors);
+  connect(Updater::instance(), &Updater::sslErrors, this,
+          &Application::handleSslErrors);
 
   // Parse command line arguments.
   QCommandLineParser parser;
   parser.setApplicationDescription("Gittyup" BUILD_DESCRIPTION);
   parser.addHelpOption();
   parser.addVersionOption();
-  parser.addPositionalArgument(
-    "repository", "Try to load a repository from the given path "
-    "instead of the current working directory.", "[repository]");
+  parser.addPositionalArgument("repository",
+                               "Try to load a repository from the given path "
+                               "instead of the current working directory.",
+                               "[repository]");
   parser.addOption({{"d", "debug-menu"}, "Show debug menu."});
   parser.addOption({{"t", "theme"}, "Choose theme.", "name"});
   parser.addOption({{"f", "filter"}, "Set the pathspec filter.", "pathspec"});
@@ -198,7 +197,7 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
     QFontDatabase::addApplicationFont(dir.filePath(name));
 
   // Create shared menu bar on Mac.
-  (void) MenuBar::instance(nullptr);
+  (void)MenuBar::instance(nullptr);
 
 #elif defined(Q_OS_WIN)
   // FIXME: Install in main before anything else?
@@ -227,8 +226,7 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   });
 }
 
-void Application::autoUpdate()
-{
+void Application::autoUpdate() {
   // Check for updates.
   if (Settings::instance()->value("update/check").toBool()) {
     // Check now.
@@ -236,16 +234,14 @@ void Application::autoUpdate()
 
     // Set a timer to check daily.
     QTimer *timer = new QTimer(this);
-    QObject::connect(timer, &QTimer::timeout, [] {
-      Updater::instance()->update(true);
-    });
+    QObject::connect(timer, &QTimer::timeout,
+                     [] { Updater::instance()->update(true); });
 
     timer->start(24 * 60 * 60 * 1000);
   }
 }
 
-bool Application::restoreWindows()
-{
+bool Application::restoreWindows() {
 #ifdef Q_OS_MAC
   // Check for connection to a terminal.
   if (!isatty(fileno(stdin)))
@@ -287,8 +283,7 @@ bool Application::restoreWindows()
   return MainWindow::restoreWindows();
 }
 
-static MainWindow *openOrSwitch(QDir repo)
-{
+static MainWindow *openOrSwitch(QDir repo) {
   repo.makeAbsolute();
 
   QList<MainWindow *> windows = MainWindow::windows();
@@ -314,89 +309,77 @@ static MainWindow *openOrSwitch(QDir repo)
 #define DBUS_INTERFACE_NAME "com.github.Murmele.Gittyup.Application"
 #define DBUS_OBJECT_PATH "/com/github/Murmele/Gittyup/Application"
 
-DBusGittyup::DBusGittyup(QObject *parent): QObject(parent)
-{
-}
+DBusGittyup::DBusGittyup(QObject *parent) : QObject(parent) {}
 
-void DBusGittyup::openRepository(const QString &repo)
-{
+void DBusGittyup::openRepository(const QString &repo) {
   openOrSwitch(QDir(repo));
 }
 
-void DBusGittyup::openAndFocusRepository(const QString &repo)
-{
+void DBusGittyup::openAndFocusRepository(const QString &repo) {
   openOrSwitch(QDir(repo))->activateWindow();
 }
 
-void DBusGittyup::setFocus()
-{
-  MainWindow::activeWindow()->activateWindow();
-}
+void DBusGittyup::setFocus() { MainWindow::activeWindow()->activateWindow(); }
 
 #elif defined(Q_OS_WIN)
-#define COPYDATA_WINDOW_TITLE "Gittyup WM_COPYDATA receiver 16b8b3f6-6446-4fa7-8c72-53c25b1f206c"
-enum CopyDataCommand
-{
-  Focus = 0,
-  FocusAndOpen = 1
-};
+#define COPYDATA_WINDOW_TITLE                                                  \
+  "Gittyup WM_COPYDATA receiver 16b8b3f6-6446-4fa7-8c72-53c25b1f206c"
+enum CopyDataCommand { Focus = 0, FocusAndOpen = 1 };
 
-namespace
-{
-  // Helper window class for receiving IPC messages
-  class CopyDataWindow: public QWindow
-  {
-  public:
-    CopyDataWindow()
-    {
-      setTitle(COPYDATA_WINDOW_TITLE);
-    }
+namespace {
+// Helper window class for receiving IPC messages
+class CopyDataWindow : public QWindow {
+public:
+  CopyDataWindow() { setTitle(COPYDATA_WINDOW_TITLE); }
 
-  protected:
-    virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) Q_DECL_OVERRIDE
-    {
-      MSG *msg = (MSG*) message;
+protected:
+  virtual bool nativeEvent(const QByteArray &eventType, void *message,
+                           long *result) Q_DECL_OVERRIDE {
+    MSG *msg = (MSG *)message;
 
-      if (msg->message == WM_COPYDATA) {
-        COPYDATASTRUCT *cds = (COPYDATASTRUCT*) msg->lParam;
+    if (msg->message == WM_COPYDATA) {
+      COPYDATASTRUCT *cds = (COPYDATASTRUCT *)msg->lParam;
 
-        switch (cds->dwData) {
-          case CopyDataCommand::Focus:
+      switch (cds->dwData) {
+        case CopyDataCommand::Focus:
+          MainWindow::activeWindow()->activateWindow();
+          break;
+
+        case CopyDataCommand::FocusAndOpen:
+          if (cds->cbData % 2 == 0) {
+            QString repo = QString::fromUtf16((const char16_t *)cds->lpData,
+                                              cds->cbData / 2);
+            openOrSwitch(QDir(repo));
+
             MainWindow::activeWindow()->activateWindow();
-            break;
-
-          case CopyDataCommand::FocusAndOpen:
-            if (cds->cbData % 2 == 0) {
-              QString repo = QString::fromUtf16((const char16_t*) cds->lpData, cds->cbData / 2);
-              openOrSwitch(QDir(repo));
-
-              MainWindow::activeWindow()->activateWindow();
-            }
-            break;
-        }
-
-        return true;
+          }
+          break;
       }
 
-      return QWindow::nativeEvent(eventType, message, result);
+      return true;
     }
-  };
-}
+
+    return QWindow::nativeEvent(eventType, message, result);
+  }
+};
+} // namespace
 #endif
 
-bool Application::runSingleInstance()
-{
+bool Application::runSingleInstance() {
   if (Settings::instance()->value("singleInstance").toBool()) {
 #if defined(Q_OS_LINUX)
     QDBusConnection bus = QDBusConnection::sessionBus();
 
     if (bus.isConnected()) {
-      QDBusInterface masterInstance(DBUS_SERVICE_NAME, DBUS_OBJECT_PATH, DBUS_INTERFACE_NAME, bus);
+      QDBusInterface masterInstance(DBUS_SERVICE_NAME, DBUS_OBJECT_PATH,
+                                    DBUS_INTERFACE_NAME, bus);
 
       // Is another instance running on the current DBus session bus?
       if (masterInstance.isValid()) {
         if (!mPositionalArguments.isEmpty())
-          masterInstance.call("openAndFocusRepository", QDir(mPositionalArguments.first()).absolutePath());
+          masterInstance.call(
+              "openAndFocusRepository",
+              QDir(mPositionalArguments.first()).absolutePath());
         return true;
       }
     }
@@ -414,16 +397,16 @@ bool Application::runSingleInstance()
         cds.cbData = 0;
         cds.lpData = nullptr;
 
-        SendMessage(handle, WM_COPYDATA, sender.winId(), (LPARAM) &cds);
+        SendMessage(handle, WM_COPYDATA, sender.winId(), (LPARAM)&cds);
 
       } else {
         QString arg = QDir(mPositionalArguments.first()).absolutePath();
 
         cds.dwData = CopyDataCommand::FocusAndOpen;
         cds.cbData = arg.length() * 2;
-        cds.lpData = (LPVOID) arg.utf16();
+        cds.lpData = (LPVOID)arg.utf16();
 
-        SendMessage(handle, WM_COPYDATA, sender.winId(), (LPARAM) &cds);
+        SendMessage(handle, WM_COPYDATA, sender.winId(), (LPARAM)&cds);
       }
 
       return true;
@@ -439,8 +422,7 @@ bool Application::runSingleInstance()
 }
 
 #ifndef Q_OS_MAC
-void Application::registerService()
-{
+void Application::registerService() {
 #if defined(Q_OS_LINUX)
   QDBusConnection bus = QDBusConnection::sessionBus();
 
@@ -450,7 +432,8 @@ void Application::registerService()
   if (!bus.registerService(DBUS_SERVICE_NAME))
     return;
 
-  bus.registerObject(DBUS_OBJECT_PATH, DBUS_INTERFACE_NAME, new DBusGittyup(), QDBusConnection::ExportScriptableSlots);
+  bus.registerObject(DBUS_OBJECT_PATH, DBUS_INTERFACE_NAME, new DBusGittyup(),
+                     QDBusConnection::ExportScriptableSlots);
 
 #elif defined(Q_OS_WIN)
   CopyDataWindow *receiver = new CopyDataWindow();
@@ -459,23 +442,19 @@ void Application::registerService()
 }
 #endif
 
-Theme *Application::theme()
-{
+Theme *Application::theme() {
   return static_cast<Application *>(instance())->mTheme.data();
 }
 
-bool Application::event(QEvent *event)
-{
+bool Application::event(QEvent *event) {
   if (event->type() == QEvent::FileOpen)
     MainWindow::open(static_cast<QFileOpenEvent *>(event)->file());
 
   return QApplication::event(event);
 }
 
-void Application::handleSslErrors(
-  QNetworkReply *reply,
-  const QList<QSslError> &errors)
-{
+void Application::handleSslErrors(QNetworkReply *reply,
+                                  const QList<QSslError> &errors) {
   QSettings settings;
   if (settings.value("ssl/ignore").toBool()) {
     // FIXME: Ignore individual errors?
@@ -485,7 +464,7 @@ void Application::handleSslErrors(
 
   QString title = tr("SSL Errors");
   QString text =
-    tr("Failed to set up SSL session. Do you want to ignore these errors?");
+      tr("Failed to set up SSL session. Do you want to ignore these errors?");
   auto buttons = QMessageBox::Abort | QMessageBox::Ignore;
   QMessageBox msg(QMessageBox::Warning, title, text, buttons);
 

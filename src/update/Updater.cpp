@@ -43,29 +43,23 @@
 namespace {
 
 const QString kTemplateFmt = "%1-XXXXXX.%2";
-const QString kLinkFmt =
-  "https://github.com/Murmele/gittyup/releases/download/stable/Gittyup%1%2.%3";
+const QString kLinkFmt = "https://github.com/Murmele/gittyup/releases/download/"
+                         "stable/Gittyup%1%2.%3";
 const QString kChangelogUrl =
-  "https://raw.githubusercontent.com/Murmele/Gittyup/gh-pages/changelog.md";
+    "https://raw.githubusercontent.com/Murmele/Gittyup/gh-pages/changelog.md";
 
-} // anon. namespace
+} // namespace
 
 Updater::Download::Download(const QString &link)
-  : mName(QUrl(link).fileName())
-{
+    : mName(QUrl(link).fileName()) {
   QFileInfo info(mName);
   QString name = kTemplateFmt.arg(info.completeBaseName(), info.suffix());
   mFile = new QTemporaryFile(QDir::temp().filePath(name));
 }
 
-Updater::Download::~Download()
-{
-  delete mFile;
-}
+Updater::Download::~Download() { delete mFile; }
 
-Updater::Updater(QObject *parent)
-  : QObject(parent)
-{
+Updater::Updater(QObject *parent) : QObject(parent) {
   // Set up connections.
   connect(&mMgr, &QNetworkAccessManager::sslErrors, this, &Updater::sslErrors);
   connect(this, &Updater::upToDate, [this] {
@@ -74,36 +68,38 @@ Updater::Updater(QObject *parent)
   });
 
   connect(this, &Updater::updateAvailable,
-  [this](const QString& platform, const QString &version, const QString &log, const QString &link) {
-	// Show the update dialog.
-	QVersionNumber appVersion =
-	  QVersionNumber::fromString(QCoreApplication::applicationVersion());
-	QVersionNumber newVersion = QVersionNumber::fromString(version);
-	if (newVersion.majorVersion() > appVersion.majorVersion() ||
-		!Settings::instance()->value("update/download").toBool()) {
-	  UpdateDialog *dialog = new UpdateDialog(platform, version, log, link);
-	  connect(dialog, &UpdateDialog::rejected, this, &Updater::updateCanceled);
-	  dialog->show();
-	  return;
-	}
+          [this](const QString &platform, const QString &version,
+                 const QString &log, const QString &link) {
+            // Show the update dialog.
+            QVersionNumber appVersion = QVersionNumber::fromString(
+                QCoreApplication::applicationVersion());
+            QVersionNumber newVersion = QVersionNumber::fromString(version);
+            if (newVersion.majorVersion() > appVersion.majorVersion() ||
+                !Settings::instance()->value("update/download").toBool()) {
+              UpdateDialog *dialog =
+                  new UpdateDialog(platform, version, log, link);
+              connect(dialog, &UpdateDialog::rejected, this,
+                      &Updater::updateCanceled);
+              dialog->show();
+              return;
+            }
 
-	// Skip the update dialog and just start downloading.
-	if (Updater::DownloadRef download = this->download(link)) {
-	  DownloadDialog *dialog = new DownloadDialog(download);
-	  dialog->show();
-	}
-  });
+            // Skip the update dialog and just start downloading.
+            if (Updater::DownloadRef download = this->download(link)) {
+              DownloadDialog *dialog = new DownloadDialog(download);
+              dialog->show();
+            }
+          });
 
   connect(this, &Updater::updateError,
-  [](const QString &text, const QString &detail) {
-    QMessageBox mb(QMessageBox::Critical, tr("Update Failed"), text);
-    mb.setInformativeText(detail);
-    mb.exec();
-  });
+          [](const QString &text, const QString &detail) {
+            QMessageBox mb(QMessageBox::Critical, tr("Update Failed"), text);
+            mb.setInformativeText(detail);
+            mb.exec();
+          });
 }
 
-void Updater::update(bool spontaneous)
-{
+void Updater::update(bool spontaneous) {
   QNetworkRequest request(kChangelogUrl);
   QNetworkReply *reply = mMgr.get(request);
   connect(reply, &QNetworkReply::finished, [this, spontaneous, reply] {
@@ -112,15 +108,15 @@ void Updater::update(bool spontaneous)
 
     if (reply->error() != QNetworkReply::NoError) {
       if (!spontaneous)
-        emit updateError(
-          tr("Unable to check for updates"), reply->errorString());
+        emit updateError(tr("Unable to check for updates"),
+                         reply->errorString());
       return;
     }
 
     QByteArray changelog;
     QList<QByteArray> versions;
     QVersionNumber appVersion =
-      QVersionNumber::fromString(QCoreApplication::applicationVersion());
+        QVersionNumber::fromString(QCoreApplication::applicationVersion());
 
     // Parse changelog.
     while (!reply->atEnd()) {
@@ -152,8 +148,8 @@ void Updater::update(bool spontaneous)
     while (changelog.endsWith('-') || changelog.endsWith('\n'))
       changelog.chop(1);
 
-    char *ptr = cmark_markdown_to_html(
-      changelog.data(), changelog.size(), CMARK_OPT_DEFAULT);
+    char *ptr = cmark_markdown_to_html(changelog.data(), changelog.size(),
+                                       CMARK_OPT_DEFAULT);
     QString html(ptr);
     free(ptr);
 
@@ -162,10 +158,10 @@ void Updater::update(bool spontaneous)
     QString platformArg;
     QString extension = "sh";
 #ifdef FLATPAK
-	extension = ".flatpak";
-	platformArg = "";
-	// The bundle does not have any version in its filename
-	QString link = kLinkFmt.arg(platformArg, "", extension);
+    extension = ".flatpak";
+    platformArg = "";
+    // The bundle does not have any version in its filename
+    QString link = kLinkFmt.arg(platformArg, "", extension);
 #else
 	if (platform == "mac") {
 	  extension = "dmg";
@@ -175,14 +171,13 @@ void Updater::update(bool spontaneous)
 	}
 	QString link = kLinkFmt.arg(platformArg, QString("-%1").arg(version), extension);
 #endif
-	qDebug() << "Download url of the update: " << link;
+    qDebug() << "Download url of the update: " << link;
 
-	emit updateAvailable(platform, version, html, link);
+    emit updateAvailable(platform, version, html, link);
   });
 }
 
-Updater::DownloadRef Updater::download(const QString &link)
-{
+Updater::DownloadRef Updater::download(const QString &link) {
   QString errorText = tr("Unable to download update");
   DownloadRef download = DownloadRef::create(link);
   if (!download->file()->open()) {
@@ -192,9 +187,8 @@ Updater::DownloadRef Updater::download(const QString &link)
 
   // Follow redirects.
   QNetworkRequest request(link);
-  request.setAttribute(
-    QNetworkRequest::RedirectPolicyAttribute,
-    QNetworkRequest::NoLessSafeRedirectPolicy);
+  request.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
+                       QNetworkRequest::NoLessSafeRedirectPolicy);
 
   QNetworkReply *reply = mMgr.get(request);
   connect(reply, &QNetworkReply::finished, [this, errorText, download] {
@@ -229,8 +223,7 @@ Updater::DownloadRef Updater::download(const QString &link)
   return download;
 }
 
-void Updater::install(const DownloadRef &download)
-{
+void Updater::install(const DownloadRef &download) {
   // First try to close all windows. Disable quit on close.
   QCloseEvent event;
   QString errorText = tr("Unable to install update");
@@ -254,8 +247,7 @@ void Updater::install(const DownloadRef &download)
   QCoreApplication::quit();
 }
 
-Updater *Updater::instance()
-{
+Updater *Updater::instance() {
   static Updater *instance = nullptr;
   if (!instance)
     instance = new Updater(qApp);
@@ -264,8 +256,7 @@ Updater *Updater::instance()
 }
 
 #if !defined(Q_OS_MAC) && !defined(Q_OS_WIN)
-bool Updater::install(const DownloadRef &download, QString &error)
-{
+bool Updater::install(const DownloadRef &download, QString &error) {
   QString path = download->file()->fileName();
   QDir dir(QCoreApplication::applicationDirPath());
   QString prefix = QString("--prefix=%1").arg(dir.path());

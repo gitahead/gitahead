@@ -15,12 +15,9 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 
-CommitDialog::CommitDialog(
-  const QString &message,
-  Settings::PromptKind kind,
-  QWidget *parent)
-  : QDialog(parent)
-{
+CommitDialog::CommitDialog(const QString &message, Settings::PromptKind kind,
+                           QWidget *parent)
+    : QDialog(parent) {
   setAttribute(Qt::WA_DeleteOnClose);
 
   QString title;
@@ -103,13 +100,9 @@ CommitDialog::CommitDialog(
   buttons->setFocus();
 }
 
-QString CommitDialog::message() const
-{
-  return mEditor->toPlainText();
-}
+QString CommitDialog::message() const { return mEditor->toPlainText(); }
 
-void CommitDialog::open()
-{
+void CommitDialog::open() {
   QDialog::open();
   mEditor->clearFocus();
 }

@@ -3,19 +3,18 @@ set(PATH ${CMAKE_CURRENT_SOURCE_DIR}/git/contrib/credential)
 macro(add_helper NAME)
   set(TARGET git-credential-${NAME})
   add_executable(${TARGET} ${PATH}/${NAME}/${TARGET}.c)
-  set_target_properties(${TARGET} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY $<TARGET_FILE_DIR:gittyup>
-  )
+  set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+                                             $<TARGET_FILE_DIR:gittyup>)
 
   if(${ARGC} GREATER 1)
     target_link_libraries(${TARGET} ${ARGV1})
   endif()
 
   if(NOT APPLE)
-    install(TARGETS ${TARGET}
+    install(
+      TARGETS ${TARGET}
       DESTINATION .
-      COMPONENT ${GITTYUP_NAME}
-    )
+      COMPONENT ${GITTYUP_NAME})
   endif()
 endmacro()
 

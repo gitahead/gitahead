@@ -19,8 +19,7 @@ class SearchField;
 class QButtonGroup;
 class QToolButton;
 
-class ToolBar : public QToolBar
-{
+class ToolBar : public QToolBar {
   Q_OBJECT
 
 public:

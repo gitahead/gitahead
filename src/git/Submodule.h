@@ -20,8 +20,7 @@ namespace git {
 class Id;
 class Repository;
 
-class Submodule
-{
+class Submodule {
 public:
   Submodule();
 
@@ -53,7 +52,8 @@ public:
    */
   int status() const;
 
-  Result update(Remote::Callbacks *callbacks, bool init = false, bool checkout_force = false);
+  Result update(Remote::Callbacks *callbacks, bool init = false,
+                bool checkout_force = false);
 
   Repository open() const;
 

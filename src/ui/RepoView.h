@@ -45,27 +45,24 @@ namespace git {
 class Result;
 }
 
-class RepoView : public QSplitter
-{
+class RepoView : public QSplitter {
   Q_OBJECT
 
 public:
-  enum ViewMode
-  {
+  enum ViewMode {
     DoubleTree,
-    //Diff,
-	Tree,
+    // Diff,
+    Tree,
   };
 
-  enum MergeFlag
-  {
-    Default       = 0x0,
-    Merge         = 0x1,
-    Rebase        = 0x2,
-    FastForward   = 0x4,  // equivalent to --ff-only
-    NoFastForward = 0x8,  // equivalent to --no-ff
-    NoCommit      = 0x10, // equivalent to --no-commit
-    Squash        = 0x20
+  enum MergeFlag {
+    Default = 0x0,
+    Merge = 0x1,
+    Rebase = 0x2,
+    FastForward = 0x4,   // equivalent to --ff-only
+    NoFastForward = 0x8, // equivalent to --no-ff
+    NoCommit = 0x10,     // equivalent to --no-commit
+    Squash = 0x20
   };
 
   Q_DECLARE_FLAGS(MergeFlags, MergeFlag);
@@ -73,7 +70,7 @@ public:
   RepoView(const git::Repository &repo, MainWindow *parent);
   virtual ~RepoView();
 
-  //clean
+  // clean
   void clean(const QStringList &untracked);
 
   // Select head reference in ref list.
@@ -148,10 +145,8 @@ public:
    * \param parent
    * \return
    */
-  LogEntry *addLogEntry(
-    const QString &text,
-    const QString &title,
-    LogEntry *parent = nullptr);
+  LogEntry *addLogEntry(const QString &text, const QString &title,
+                        LogEntry *parent = nullptr);
 
   /*!
    * \brief error
@@ -164,69 +159,50 @@ public:
    * Unable to Action 'Name' - the path
    * \return
    */
-  LogEntry *error(
-    LogEntry *parent,
-    const QString &action,
-    const QString &name = QString(),
-    const QString &defaultError = QString());
+  LogEntry *error(LogEntry *parent, const QString &action,
+                  const QString &name = QString(),
+                  const QString &defaultError = QString());
 
   // automatic fetch
   void startFetchTimer();
 
   // fetch
   void fetchAll();
-  QFuture<git::Result> fetch(
-    const git::Remote &remote = git::Remote(),
-    bool tags = false,
-    bool interactive = true,
-    LogEntry *parent = nullptr,
-    QStringList *submodules = nullptr);
-  QFuture<git::Result> fetch(
-    const git::Remote &remote,
-    bool tags,
-    bool interactive,
-    LogEntry *parent,
-    QStringList *submodules,
-    bool prune);
+  QFuture<git::Result> fetch(const git::Remote &remote = git::Remote(),
+                             bool tags = false, bool interactive = true,
+                             LogEntry *parent = nullptr,
+                             QStringList *submodules = nullptr);
+  QFuture<git::Result> fetch(const git::Remote &remote, bool tags,
+                             bool interactive, LogEntry *parent,
+                             QStringList *submodules, bool prune);
 
   // pull
-  void pull(
-    MergeFlags flags = Default,
-    const git::Remote &remote = git::Remote(),
-    bool tags = false,
-    bool prune = false);
-  void merge(
-    MergeFlags flags,
-    const git::Reference &ref = git::Reference(),
-    const git::AnnotatedCommit &commit = git::AnnotatedCommit(),
-    LogEntry *parent = nullptr,
-    const std::function<void()> &callback = std::function<void()>());
+  void pull(MergeFlags flags = Default,
+            const git::Remote &remote = git::Remote(), bool tags = false,
+            bool prune = false);
+  void merge(MergeFlags flags, const git::Reference &ref = git::Reference(),
+             const git::AnnotatedCommit &commit = git::AnnotatedCommit(),
+             LogEntry *parent = nullptr,
+             const std::function<void()> &callback = std::function<void()>());
 
   // fast-forward
-  void fastForward(
-    const git::Reference &ref,
-    const git::AnnotatedCommit &upstream,
-    LogEntry *parent,
-    const std::function<void()> &callback = std::function<void()>());
+  void
+  fastForward(const git::Reference &ref, const git::AnnotatedCommit &upstream,
+              LogEntry *parent,
+              const std::function<void()> &callback = std::function<void()>());
 
   // merge
-  void merge(
-    MergeFlags flags,
-    const git::AnnotatedCommit &upstream,
-    LogEntry *parent,
-    const std::function<void()> &callback = std::function<void()>());
+  void merge(MergeFlags flags, const git::AnnotatedCommit &upstream,
+             LogEntry *parent,
+             const std::function<void()> &callback = std::function<void()>());
   void mergeAbort(LogEntry *parent = nullptr);
 
   // rebase
-  void rebase(
-    const git::AnnotatedCommit &upstream,
-    LogEntry *parent,
-    const std::function<void()> &callback = std::function<void()>());
+  void rebase(const git::AnnotatedCommit &upstream, LogEntry *parent,
+              const std::function<void()> &callback = std::function<void()>());
 
   // squash
-  void squash(
-    const git::AnnotatedCommit &upstream,
-    LogEntry *parent);
+  void squash(const git::AnnotatedCommit &upstream, LogEntry *parent);
 
   // revert
   void revert(const git::Commit &commit);
@@ -235,43 +211,33 @@ public:
   void cherryPick(const git::Commit &commit);
 
   // push
-  void promptToForcePush(
-    const git::Remote &remote = git::Remote(),
-    const git::Reference &src = git::Reference());
+  void promptToForcePush(const git::Remote &remote = git::Remote(),
+                         const git::Reference &src = git::Reference());
 
-  void push(
-    const git::Remote &remote = git::Remote(),
-    const git::Reference &src = git::Reference(),
-    const QString &dst = QString(),
-    bool setUpstream = false,
-    bool force = false,
-    bool tags = false);
+  void push(const git::Remote &remote = git::Remote(),
+            const git::Reference &src = git::Reference(),
+            const QString &dst = QString(), bool setUpstream = false,
+            bool force = false, bool tags = false);
 
   // commit
-  bool commit(
-    const QString &message,
-    const git::AnnotatedCommit &upstream = git::AnnotatedCommit(),
-    LogEntry *parent = nullptr,
-    bool force = false);
+  bool commit(const QString &message,
+              const git::AnnotatedCommit &upstream = git::AnnotatedCommit(),
+              LogEntry *parent = nullptr, bool force = false);
   void amendCommit();
 
   // checkout
   void promptToCheckout();
   void checkout(const git::Commit &commit, const QStringList &paths);
   void checkout(const git::Reference &ref, bool detach = false);
-  void checkout(
-    const git::Commit &commit,
-    const git::Reference &ref = git::Reference(),
-    bool detach = true);
+  void checkout(const git::Commit &commit,
+                const git::Reference &ref = git::Reference(),
+                bool detach = true);
 
   // branches
   void promptToCreateBranch(const git::Commit &commit = git::Commit());
-  git::Branch createBranch(
-    const QString &name,
-    const git::Commit &target,
-    const git::Branch &upstream = git::Branch(),
-    bool checkout = false,
-    bool force = false);
+  git::Branch createBranch(const QString &name, const git::Commit &target,
+                           const git::Branch &upstream = git::Branch(),
+                           bool checkout = false, bool force = false);
   void promptToDeleteBranch(const git::Reference &ref);
 
   // stash
@@ -286,30 +252,24 @@ public:
   void promptToDeleteTag(const git::Reference &ref);
 
   // reset
-  void promptToReset(
-    const git::Commit &commit,
-    git_reset_t type,
-    const git::Commit &commitToAmend = git::Commit());
-  void reset(
-    const git::Commit &commit,
-    git_reset_t type,
-    const git::Commit &commitToAmend = git::Commit());
+  void promptToReset(const git::Commit &commit, git_reset_t type,
+                     const git::Commit &commitToAmend = git::Commit());
+  void reset(const git::Commit &commit, git_reset_t type,
+             const git::Commit &commitToAmend = git::Commit());
 
   // submodule
-  void resetSubmodules(const QList<git::Submodule> &submodules,
-          bool recursive, git_reset_t type,
-          LogEntry *parent);
-  void updateSubmodules(const QList<git::Submodule> &submodules = QList<git::Submodule>(),
-	bool recursive = true,
-	bool init = false,
-	bool checkout_force = false,
-	LogEntry *parent = nullptr);
+  void resetSubmodules(const QList<git::Submodule> &submodules, bool recursive,
+                       git_reset_t type, LogEntry *parent);
+  void updateSubmodules(
+      const QList<git::Submodule> &submodules = QList<git::Submodule>(),
+      bool recursive = true, bool init = false, bool checkout_force = false,
+      LogEntry *parent = nullptr);
   bool openSubmodule(const git::Submodule &submodule);
 
   // config
-  ConfigDialog *configureSettings(
-    ConfigDialog::Index index = ConfigDialog::General);
-  
+  ConfigDialog *
+  configureSettings(ConfigDialog::Index index = ConfigDialog::General);
+
   // terminal
   void openTerminal();
   // file manager
@@ -321,11 +281,9 @@ public:
   // editor
   EditorWindow *newEditor();
   bool edit(const QString &path, int line = -1);
-  EditorWindow *openEditor(
-    const QString &path,
-    int line = -1,
-    const git::Blob &blob = git::Blob(),
-    const git::Commit &commit = git::Commit());
+  EditorWindow *openEditor(const QString &path, int line = -1,
+                           const git::Blob &blob = git::Blob(),
+                           const git::Commit &commit = git::Commit());
 
   // refresh
   void refresh();
@@ -341,19 +299,19 @@ public:
   static RepoView *parentView(const QWidget *widget);
 
   enum class DetailSplitterWidgets {
-     NotDefined,
-     SideBar, // commit list, header, ...
-     DetailView, // DiffView, TreeView
+    NotDefined,
+    SideBar,    // commit list, header, ...
+    DetailView, // DiffView, TreeView
   };
   /*!
    * \brief match
-   * Check recursively if the searched object \p search is one of the childs of \p parent
-   * The \p parent is not checked. This must be done manually
-   * \param search Object which should match
-   * \param parent Parent of the childs which should be checked
-   * \return true if one of the childs is the searched one, else false
+   * Check recursively if the searched object \p search is one of the childs of
+   * \p parent The \p parent is not checked. This must be done manually \param
+   * search Object which should match \param parent Parent of the childs which
+   * should be checked \return true if one of the childs is the searched one,
+   * else false
    */
-  static bool match(QObject* search, QObject* parent);
+  static bool match(QObject *search, QObject *parent);
   /*!
    * \brief detailsMaximized
    * Returns if the details are maximized or not
@@ -365,10 +323,13 @@ public:
    *
    * \param maximized
    */
-  DetailSplitterWidgets detailSplitterMaximize(bool maximized, DetailSplitterWidgets maximizeWidget = DetailSplitterWidgets::NotDefined);
+  DetailSplitterWidgets detailSplitterMaximize(
+      bool maximized,
+      DetailSplitterWidgets maximizeWidget = DetailSplitterWidgets::NotDefined);
 
 public slots:
-  void diffSelected(const git::Diff diff, const QString &file, bool spontaneous);
+  void diffSelected(const git::Diff diff, const QString &file,
+                    bool spontaneous);
 
 signals:
   void statusChanged(bool dirty);
@@ -378,8 +339,7 @@ protected:
   void closeEvent(QCloseEvent *event) override;
 
 private:
-  struct SubmoduleInfo
-  {
+  struct SubmoduleInfo {
     git::Submodule submodule;
     git::Repository repo;
     LogEntry *entry;
@@ -394,20 +354,20 @@ private:
   bool suspendLogTimer();
   void resumeLogTimer(bool suspended = true);
 
-  QList<SubmoduleInfo> submoduleUpdateInfoList(const git::Repository &repo,
-	const QList<git::Submodule> &submodules,
-	bool init, bool checkout_force,
-	LogEntry *parent);
+  QList<SubmoduleInfo>
+  submoduleUpdateInfoList(const git::Repository &repo,
+                          const QList<git::Submodule> &submodules, bool init,
+                          bool checkout_force, LogEntry *parent);
   void updateSubmodulesAsync(const QList<SubmoduleInfo> &submodules,
-	bool recursive = true,
-	bool init = false, bool checkout_force = false);
+                             bool recursive = true, bool init = false,
+                             bool checkout_force = false);
 
-  QList<SubmoduleInfo> submoduleResetInfoList(const git::Repository &repo,
-    const QList<git::Submodule> &submodules,
-    LogEntry *parent);
+  QList<SubmoduleInfo>
+  submoduleResetInfoList(const git::Repository &repo,
+                         const QList<git::Submodule> &submodules,
+                         LogEntry *parent);
   void resetSubmodulesAsync(const QList<SubmoduleInfo> &submodules,
-    bool recursive,
-    git_reset_t type);
+                            bool recursive, git_reset_t type);
 
   bool checkForConflicts(LogEntry *parent, const QString &action);
 
@@ -426,7 +386,7 @@ private:
   PathspecWidget *mPathspec;
   CommitList *mCommits;
   DetailView *mDetails;
-  QWidget* mSideBar;
+  QWidget *mSideBar;
 
   LogEntry *mLogRoot;
   LogView *mLogView;
@@ -447,7 +407,7 @@ private:
    * \brief mDetailSplitter
    * Splits the history list and the detailview (diffView, TreeView)
    */
-  QSplitter* mDetailSplitter;
+  QSplitter *mDetailSplitter;
   /*!
    * \brief mMaximized
    * Maximizes the widgets in the mDetailSplitter

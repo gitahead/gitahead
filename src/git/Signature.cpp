@@ -14,42 +14,25 @@
 namespace git {
 
 Signature::Signature(git_signature *signature, bool owned)
-  : d(signature, owned ? git_signature_free : [](git_signature *) {})
-{}
+    : d(
+          signature, owned ? git_signature_free : [](git_signature *) {}) {}
 
-Signature::operator const git_signature *() const
-{
-  return d.data();
-}
+Signature::operator const git_signature *() const { return d.data(); }
 
-QString Signature::name() const
-{
-  return d->name;
-}
+QString Signature::name() const { return d->name; }
 
-QString Signature::email() const
-{
-  return d->email;
-}
+QString Signature::email() const { return d->email; }
 
-QDateTime Signature::date() const
-{
+QDateTime Signature::date() const {
   int offset = d->when.offset * 60; // Convert from minutes to seconds.
   return QDateTime::fromTime_t(d->when.time, Qt::OffsetFromUTC, offset);
 }
 
-git_time Signature::gitDate() const
-{
-  return d->when;
-}
+git_time Signature::gitDate() const { return d->when; }
 
-QString Signature::initials() const
-{
-  return initials(name());
-}
+QString Signature::initials() const { return initials(name()); }
 
-QString Signature::initials(const QString &name)
-{
+QString Signature::initials(const QString &name) {
   QStringList names = name.split(' ');
   QStringList initials(names.first().left(1).toUpper());
   if (names.size() > 1)

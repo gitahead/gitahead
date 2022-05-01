@@ -6,7 +6,8 @@ if(LUA_FOUND)
 else()
   set(LUA_DIR lua-5.4.0)
 
-  add_library(lua
+  add_library(
+    lua
     ${LUA_DIR}/src/lapi.c
     ${LUA_DIR}/src/lauxlib.c
     ${LUA_DIR}/src/lbaselib.c
@@ -40,10 +41,8 @@ else()
     ${LUA_DIR}/src/lundump.c
     ${LUA_DIR}/src/lutf8lib.c
     ${LUA_DIR}/src/lvm.c
-    ${LUA_DIR}/src/lzio.c
-  )
+    ${LUA_DIR}/src/lzio.c)
 
-  target_include_directories(lua INTERFACE
-    ${CMAKE_CURRENT_SOURCE_DIR}/${LUA_DIR}/src
-  )
+  target_include_directories(
+    lua INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/${LUA_DIR}/src)
 endif()

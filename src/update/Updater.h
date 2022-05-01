@@ -16,13 +16,11 @@
 class QNetworkReply;
 class QTemporaryFile;
 
-class Updater : public QObject
-{
+class Updater : public QObject {
   Q_OBJECT
 
 public:
-  class Download
-  {
+  class Download {
   public:
     Download(const QString &link);
     ~Download();
@@ -54,11 +52,8 @@ signals:
   void updateCanceled();
   void updateError(const QString &text, const QString &detail);
   void sslErrors(QNetworkReply *reply, const QList<QSslError> &errors);
-  void updateAvailable(
-	const QString &platform,
-    const QString &version,
-    const QString &changelog,
-    const QString &link);
+  void updateAvailable(const QString &platform, const QString &version,
+                       const QString &changelog, const QString &link);
 
 private:
   Updater(QObject *parent = nullptr);

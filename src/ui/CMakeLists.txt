@@ -2,7 +2,8 @@ if(APPLE)
   set(IMPL_FILES MainWindow_mac.mm)
 endif()
 
-add_library(ui
+add_library(
+  ui
   AdvancedSearchWidget.cpp
   Badge.cpp
   BlameEditor.cpp
@@ -55,16 +56,14 @@ add_library(ui
   TreeView.cpp
   TreeWidget.cpp
   ViewDelegate.cpp
-  ${IMPL_FILES}
-)
+  ${IMPL_FILES})
 
 target_compile_definitions(ui PRIVATE BUILD_DESCRIPTION="${BUILD_DESCRIPTION}")
 
-target_include_directories(ui PRIVATE
-  ${CMAKE_CURRENT_BINARY_DIR}
-)
+target_include_directories(ui PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(ui
+target_link_libraries(
+  ui
   conf
   cred
   dialogs
@@ -80,9 +79,6 @@ target_link_libraries(ui
   watcher
   Qt5::Concurrent
   Qt5::Network
-  Qt5::Widgets
-)
+  Qt5::Widgets)
 
-set_target_properties(ui PROPERTIES
-  AUTOMOC ON
-)
+set_target_properties(ui PROPERTIES AUTOMOC ON)

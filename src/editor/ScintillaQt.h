@@ -70,18 +70,15 @@
 
 namespace Scintilla {
 
-class ScintillaQt : public QAbstractScrollArea, public ScintillaBase
-{
+class ScintillaQt : public QAbstractScrollArea, public ScintillaBase {
   Q_OBJECT
 
 public:
   ScintillaQt(QWidget *parent = nullptr);
   virtual ~ScintillaQt();
 
-  sptr_t send(
-    unsigned int iMessage,
-    uptr_t wParam = 0,
-    sptr_t lParam = 0) const;
+  sptr_t send(unsigned int iMessage, uptr_t wParam = 0,
+              sptr_t lParam = 0) const;
 
 signals:
   // Clients can use this hook to add additional
@@ -97,9 +94,8 @@ signals:
   void key(int key);
   void doubleClick(int position, int line);
   void updateUi();
-  void modified(
-    int type, int position, int length, int linesAdded,
-    const QByteArray &text, int line, int foldNow, int foldPrev);
+  void modified(int type, int position, int length, int linesAdded,
+                const QByteArray &text, int line, int foldNow, int foldPrev);
   void macroRecord(int message, uptr_t wParam, sptr_t lParam);
   void marginClicked(int position, int modifiers, int margin);
   void textAreaClicked(int line, int modifiers);
@@ -137,15 +133,15 @@ protected:
   void inputMethodEvent(QInputMethodEvent *event) override;
   QVariant inputMethodQuery(Qt::InputMethodQuery query) const override;
   void scrollContentsBy(int dx, int dy) override {}
-  static sptr_t DirectFunction(
-    sptr_t ptr, unsigned int iMessage, uptr_t wParam, sptr_t lParam);
+  static sptr_t DirectFunction(sptr_t ptr, unsigned int iMessage, uptr_t wParam,
+                               sptr_t lParam);
   sptr_t WndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;
 
 private:
   void PasteFromMode(QClipboard::Mode);
   void CopyToModeClipboard(const SelectionText &, QClipboard::Mode);
 
-  void MoveImeCarets(int offset); 
+  void MoveImeCarets(int offset);
   void DrawImeIndicator(int indicator, int len);
 
   void Initialise() override;
@@ -174,7 +170,8 @@ private:
   std::string CaseMapString(const std::string &s, int caseMapping) override;
   void CreateCallTipWindow(PRectangle rc) override;
   void AddToPopUp(const char *label, int cmd = 0, bool enabled = true) override;
-  sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam, sptr_t lParam) override;
+  sptr_t DefWndProc(unsigned int iMessage, uptr_t wParam,
+                    sptr_t lParam) override;
 
 private:
   QElapsedTimer timer;

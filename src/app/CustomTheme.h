@@ -15,8 +15,7 @@
 #include <QDir>
 #include <QPalette>
 
-class CustomTheme : public Theme
-{
+class CustomTheme : public Theme {
 public:
   CustomTheme(const QString &name);
 
@@ -39,9 +38,7 @@ public:
   QVariantMap checkbox() const;
   void polishWindow(QWindow *window) const;
 
-  static void drawCloseButton(
-    const QStyleOption *option,
-    QPainter *painter);
+  static void drawCloseButton(const QStyleOption *option, QPainter *painter);
 
   static QDir userDir(bool create = false, bool *exists = nullptr);
   static bool isValid(const QString &name);

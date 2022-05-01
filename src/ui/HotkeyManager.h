@@ -22,8 +22,7 @@
 class HotkeyManager;
 struct HotkeyManagerHandle;
 
-class HotkeyHandle : public QObject
-{
+class HotkeyHandle : public QObject {
 public:
   HotkeyHandle(QMetaObject::Connection &&changeSignalConnection);
   ~HotkeyHandle();
@@ -32,36 +31,30 @@ private:
   QMetaObject::Connection changeSignalConnection;
 };
 
-class Hotkey
-{
+class Hotkey {
   friend class HotkeyManager;
 
 public:
-  inline Hotkey(): mHandle(nullptr)
-  {
-  }
+  inline Hotkey() : mHandle(nullptr) {}
 
-  HotkeyHandle *use(std::function<void(const QKeySequence&)> changeHandler, HotkeyManager *manager = nullptr) const;
+  HotkeyHandle *use(std::function<void(const QKeySequence &)> changeHandler,
+                    HotkeyManager *manager = nullptr) const;
   HotkeyHandle *use(QAction *action, HotkeyManager *manager = nullptr) const;
-  HotkeyHandle *use(QShortcut *shortcut, HotkeyManager *manager = nullptr) const;
+  HotkeyHandle *use(QShortcut *shortcut,
+                    HotkeyManager *manager = nullptr) const;
 
   QString label() const;
   QKeySequence currentKeys(const HotkeyManager *manager = nullptr) const;
   QString defaultKeys() const;
   void setKeys(const QKeySequence &keys, HotkeyManager *manager = nullptr);
 
-  inline bool isValid() const
-  {
-    return mHandle != nullptr;
-  }
+  inline bool isValid() const { return mHandle != nullptr; }
 
-  inline bool operator ==(const Hotkey &op) const
-  {
+  inline bool operator==(const Hotkey &op) const {
     return mHandle == op.mHandle;
   }
 
-  inline bool operator !=(const Hotkey &op) const
-  {
+  inline bool operator!=(const Hotkey &op) const {
     return mHandle != op.mHandle;
   }
 
@@ -73,15 +66,16 @@ private:
 
 Q_DECLARE_METATYPE(Hotkey)
 
-class HotkeyManager : public QObject
-{
+class HotkeyManager : public QObject {
   friend class Hotkey;
 
   Q_OBJECT
 
 public:
-  static Hotkey registerHotkey(const char *defaultKeys, const char *configPath, const char *label);
-  static Hotkey registerHotkey(QKeySequence::StandardKey defaultKeys, const char *configPath, const char *label);
+  static Hotkey registerHotkey(const char *defaultKeys, const char *configPath,
+                               const char *label);
+  static Hotkey registerHotkey(QKeySequence::StandardKey defaultKeys,
+                               const char *configPath, const char *label);
   static HotkeyManager *instance();
 
   HotkeyManager(Settings *settings = nullptr);
@@ -91,10 +85,12 @@ signals:
   void changed(const HotkeyManagerHandle *handle);
 
 private:
-  static Hotkey registerHotkey(const char *defaultKeys, QKeySequence::StandardKey standardKey, const char *configPath, const char *label);
+  static Hotkey registerHotkey(const char *defaultKeys,
+                               QKeySequence::StandardKey standardKey,
+                               const char *configPath, const char *label);
 
   Settings *mSettings;
-  QVector<HotkeyManagerHandle*> mHandles;
+  QVector<HotkeyManagerHandle *> mHandles;
   QVector<QKeySequence> mKeys;
 
   QKeySequence keys(const HotkeyManagerHandle *handle) const;
