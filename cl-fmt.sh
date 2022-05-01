@@ -8,8 +8,8 @@ FOLDERS=("src" "test")
 # Some distros just call it clang-format. Others (e.g. Ubuntu) are insistent
 # that the version number be part of the command. We prefer clang-format if
 # that's present, otherwise we work backwards from highest version to lowest
-# version.
-for clangfmt in clang-format{,-{4,3}.{9,8,7,6,5,4,3,2,1,0}}; do
+# version but at least 13.
+for clangfmt in clang-format{,-{1,2,3}{9,8,7,6,5,4,3}}; do
     if which "$clangfmt" &>/dev/null; then
         FMT="$clangfmt"
         break
