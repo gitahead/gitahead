@@ -1,4 +1,5 @@
-add_library(ui
+add_library(
+  ui
   AdvancedSearchWidget.cpp
   Badge.cpp
   BlameEditor.cpp
@@ -50,8 +51,7 @@ add_library(ui
   TreeProxy.cpp
   TreeView.cpp
   TreeWidget.cpp
-  ViewDelegate.cpp
-)
+  ViewDelegate.cpp)
 
 target_compile_definitions(ui PRIVATE BUILD_DESCRIPTION="${BUILD_DESCRIPTION}")
 
