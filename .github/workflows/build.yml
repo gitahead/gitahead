@@ -13,6 +13,27 @@ env:
 
 
 jobs:
+  formatting-check:
+    name: Formatting Check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        path:
+          - 'src'
+          - 'test'
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run clang-format style check for C/C++/Protobuf programs.
+      uses: jidicula/clang-format-action@v4.5.0
+      with:
+        clang-format-version: '13'
+        check-path: ${{ matrix.path }}
+
+    - name: Check CMake code style
+      run: |
+        pip install cmake-format==0.6.13 && \
+        find \( -type d -path './dep/*/*' -prune \) -o \( -name CMakeLists.txt -exec cmake-format --check {} + \)
+
   flatpak:
     name: "Flatpak"
     runs-on: ubuntu-latest
