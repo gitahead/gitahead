@@ -77,27 +77,26 @@ void _Images::Arrow::paintEvent(QPaintEvent *event) {
 Images::Images(const git::Patch patch, bool lfs, QWidget *parent)
     : QWidget(parent), mPatch(patch) {
   int size = 0;
-  QPixmap pixmap = loadPixmap(git::Diff::NewFile, size, lfs);
-  if (pixmap.isNull()) {
+  QPixmap newFile = loadPixmap(git::Diff::NewFile, size, lfs);
+  if (newFile.isNull()) {
     QString path = mPatch.repo().workdir().filePath(mPatch.name());
     size = QFileInfo(path).size();
-    pixmap.load(path);
+    newFile.load(path);
   }
-
-  if (pixmap.isNull())
-    return;
 
   QHBoxLayout *layout = new QHBoxLayout(this);
   layout->setContentsMargins(6, 4, 8, 4);
 
   int beforeSize = 0;
   QPixmap before = loadPixmap(git::Diff::OldFile, beforeSize, lfs);
-  if (!before.isNull()) {
+  if (!before.isNull())
     layout->addLayout(imageLayout(before, beforeSize), 1);
-    layout->addWidget(new _Images::Arrow(this));
-  }
 
-  layout->addLayout(imageLayout(pixmap, size), 1);
+  if (!before.isNull() && !newFile.isNull())
+    layout->addWidget(new _Images::Arrow(this));
+
+  if (!newFile.isNull())
+    layout->addLayout(imageLayout(newFile, size), 1);
   layout->addStretch();
 }
 
