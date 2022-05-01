@@ -73,9 +73,6 @@ private:
   QStringList paths() const;
   QString windowGroup() const;
 
-  void installTouchBar();
-  void updateTouchBar(int ahead = -1, int behind = -1);
-
   ToolBar *mToolBar;
   MenuBar *mMenuBar;
 

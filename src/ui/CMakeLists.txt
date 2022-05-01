@@ -1,9 +1,4 @@
-#if(APPLE)
-#  set(IMPL_FILES MainWindow_mac.mm)
-#endif()
-
-add_library(
-  ui
+add_library(ui
   AdvancedSearchWidget.cpp
   Badge.cpp
   BlameEditor.cpp
@@ -56,7 +51,7 @@ add_library(
   TreeView.cpp
   TreeWidget.cpp
   ViewDelegate.cpp
-  ${IMPL_FILES})
+)
 
 target_compile_definitions(ui PRIVATE BUILD_DESCRIPTION="${BUILD_DESCRIPTION}")
 

@@ -383,7 +383,6 @@ void MainWindow::showEvent(QShowEvent *event) {
     return;
 
   mShown = true;
-  installTouchBar();
   updateInterface();
 }
 
@@ -485,7 +484,6 @@ void MainWindow::updateInterface() {
     }
   }
 
-  updateTouchBar(ahead, behind);
   updateWindowTitle(ahead, behind);
   mToolBar->updateButtons(ahead, behind);
 }
@@ -573,8 +571,3 @@ QString MainWindow::windowGroup() const {
   QByteArray hash = QCryptographicHash::hash(group, QCryptographicHash::Md5);
   return QString::fromUtf8(hash.toHex());
 }
-
-//#ifndef Q_OS_MAC
-void MainWindow::installTouchBar() {}
-void MainWindow::updateTouchBar(int ahead, int behind) {}
-//#endif
