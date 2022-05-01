@@ -81,7 +81,7 @@ Images::Images(const git::Patch patch, bool lfs, QWidget *parent)
   if (newFile.isNull()) {
     QString path = mPatch.repo().workdir().filePath(mPatch.name());
     size = QFileInfo(path).size();
-	newFile.load(path);
+    newFile.load(path);
   }
 
   QHBoxLayout *layout = new QHBoxLayout(this);
@@ -93,10 +93,10 @@ Images::Images(const git::Patch patch, bool lfs, QWidget *parent)
     layout->addLayout(imageLayout(before, beforeSize), 1);
 
   if (!before.isNull() && !newFile.isNull())
-	  layout->addWidget(new _Images::Arrow(this));
+    layout->addWidget(new _Images::Arrow(this));
 
   if (!newFile.isNull())
-	layout->addLayout(imageLayout(newFile, size), 1);
+    layout->addLayout(imageLayout(newFile, size), 1);
   layout->addStretch();
 }
 
