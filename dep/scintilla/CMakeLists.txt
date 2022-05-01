@@ -1,24 +1,22 @@
 set(SCINTILLA_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lexilla)
 
-add_library(lexilla
-	  ${SCINTILLA_DIR}/lexlib/Accessor.cxx
-	  ${SCINTILLA_DIR}/lexlib/CharacterCategory.cxx
-	  ${SCINTILLA_DIR}/lexlib/CharacterSet.cxx
-	  ${SCINTILLA_DIR}/lexlib/LexerBase.cxx
-	  ${SCINTILLA_DIR}/lexlib/LexerModule.cxx
-	  ${SCINTILLA_DIR}/lexlib/LexerSimple.cxx
-	  ${SCINTILLA_DIR}/lexlib/PropSetSimple.cxx
-	  ${SCINTILLA_DIR}/lexlib/StyleContext.cxx
-	  ${SCINTILLA_DIR}/lexlib/WordList.cxx
-  )
+add_library(
+  lexilla
+  ${SCINTILLA_DIR}/lexlib/Accessor.cxx
+  ${SCINTILLA_DIR}/lexlib/CharacterCategory.cxx
+  ${SCINTILLA_DIR}/lexlib/CharacterSet.cxx
+  ${SCINTILLA_DIR}/lexlib/LexerBase.cxx
+  ${SCINTILLA_DIR}/lexlib/LexerModule.cxx
+  ${SCINTILLA_DIR}/lexlib/LexerSimple.cxx
+  ${SCINTILLA_DIR}/lexlib/PropSetSimple.cxx
+  ${SCINTILLA_DIR}/lexlib/StyleContext.cxx
+  ${SCINTILLA_DIR}/lexlib/WordList.cxx)
 
-target_include_directories(lexilla
-	PUBLIC
-	${SCINTILLA_DIR}/lexlib
-	${SCINTILLA_DIR}/include
-)
+target_include_directories(lexilla PUBLIC ${SCINTILLA_DIR}/lexlib
+                                          ${SCINTILLA_DIR}/include)
 
-add_library(scintilla
+add_library(
+  scintilla
   ${SCINTILLA_DIR}/src/AutoComplete.cxx
   ${SCINTILLA_DIR}/src/CallTip.cxx
   ${SCINTILLA_DIR}/src/CaseConvert.cxx
@@ -47,24 +45,19 @@ add_library(scintilla
   ${SCINTILLA_DIR}/src/UniConversion.cxx
   ${SCINTILLA_DIR}/src/UniqueString.cxx
   ${SCINTILLA_DIR}/src/ViewStyle.cxx
-  ${SCINTILLA_DIR}/src/XPM.cxx
-)
+  ${SCINTILLA_DIR}/src/XPM.cxx)
 
 target_compile_definitions(
   scintilla
   PUBLIC SCINTILLA_QT SCI_LEXER
   PRIVATE SCI_EMPTYCATALOGUE)
 
-target_include_directories(scintilla
-  PUBLIC
-    ${SCINTILLA_DIR}/src
-)
+target_include_directories(scintilla PUBLIC ${SCINTILLA_DIR}/src)
 
-target_link_libraries(scintilla
-  Qt5::Widgets
-  lexilla
-)
+target_link_libraries(scintilla Qt5::Widgets lexilla)
 
 set_target_properties(scintilla PROPERTIES AUTOMOC ON)
 
-set(SCINTILLUA_LEXERS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/scintillua/lexers CACHE INTERNAL "")
+set(SCINTILLUA_LEXERS_DIR
+    ${CMAKE_CURRENT_SOURCE_DIR}/scintillua/lexers
+    CACHE INTERNAL "")
