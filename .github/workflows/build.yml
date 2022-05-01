@@ -121,13 +121,13 @@ jobs:
             openssl_arch: linux-x86_64
             cmake_env: {}
 
-          #- name: mac
-            #os: macos-latest
-            #ninja_platform: mac
-            #qt_platform: mac
-            #openssl_arch: darwin64-x86_64-cc
-            #cmake_env: {}
-            #pack: 1
+          - name: mac
+            os: macos-latest
+            ninja_platform: mac
+            qt_platform: mac
+            openssl_arch: darwin64-x86_64-cc
+            cmake_env: {}
+            pack: 1
 
           - name: win64
             os: windows-latest
