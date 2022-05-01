@@ -7,8 +7,7 @@
 
 using namespace QTest;
 
-class TestHunkWidget : public QObject
-{
+class TestHunkWidget : public QObject {
   Q_OBJECT
 
 private slots:
@@ -17,19 +16,15 @@ private slots:
 
 private:
   int closeDelay = 0;
-  HunkWidget* mHunk{nullptr};
+  HunkWidget *mHunk{nullptr};
 };
 
-void TestHunkWidget::initTestCase()
-{
+void TestHunkWidget::initTestCase() {
   bool lfs = false;
   bool submodule = false;
 }
 
-void TestHunkWidget::cleanupTestCase()
-{
-  qWait(closeDelay);
-}
+void TestHunkWidget::cleanupTestCase() { qWait(closeDelay); }
 
 TEST_MAIN(TestHunkWidget)
 #include "HunkWidget.moc"

@@ -19,28 +19,19 @@ const QString kUrl = "https://github.com/Murmele/Gittyup";
 Submodule::Submodule() {}
 
 Submodule::Submodule(git_submodule *submodule)
-  : d(submodule, git_submodule_free)
-{}
+    : d(submodule, git_submodule_free) {}
 
-Submodule::operator git_submodule *() const
-{
-  return d.data();
-}
+Submodule::operator git_submodule *() const { return d.data(); }
 
-bool Submodule::isInitialized() const
-{
+bool Submodule::isInitialized() const {
   Repository repo(git_submodule_owner(d.data()));
   QString key = QString("submodule.%1.url").arg(name());
   return !repo.config().value<QString>(key).isEmpty();
 }
 
-void Submodule::initialize() const
-{
-  git_submodule_init(d.data(), false);
-}
+void Submodule::initialize() const { git_submodule_init(d.data(), false); }
 
-void Submodule::deinitialize() const
-{
+void Submodule::deinitialize() const {
   // Remove git config entry.
   Repository repo(git_submodule_owner(d.data()));
   Config config = repo.config();
@@ -55,23 +46,13 @@ void Submodule::deinitialize() const
     dir.mkpath(".");
 }
 
-QString Submodule::name() const
-{
-  return git_submodule_name(d.data());
-}
+QString Submodule::name() const { return git_submodule_name(d.data()); }
 
-QString Submodule::path() const
-{
-  return git_submodule_path(d.data());
-}
+QString Submodule::path() const { return git_submodule_path(d.data()); }
 
-QString Submodule::url() const
-{
-  return git_submodule_url(d.data());
-}
+QString Submodule::url() const { return git_submodule_url(d.data()); }
 
-void Submodule::setUrl(const QString &url)
-{
+void Submodule::setUrl(const QString &url) {
   if (url == this->url())
     return;
 
@@ -81,13 +62,9 @@ void Submodule::setUrl(const QString &url)
   git_submodule_set_url(repo, git_submodule_name(d.data()), data);
 }
 
-QString Submodule::branch() const
-{
-  return git_submodule_branch(d.data());
-}
+QString Submodule::branch() const { return git_submodule_branch(d.data()); }
 
-void Submodule::setBranch(const QString &branch)
-{
+void Submodule::setBranch(const QString &branch) {
   if (branch == this->branch())
     return;
 
@@ -97,23 +74,13 @@ void Submodule::setBranch(const QString &branch)
   git_submodule_set_branch(repo, git_submodule_name(d.data()), data);
 }
 
-Id Submodule::headId() const
-{
-  return git_submodule_head_id(d.data());
-}
+Id Submodule::headId() const { return git_submodule_head_id(d.data()); }
 
-Id Submodule::indexId() const
-{
-  return git_submodule_index_id(d.data());
-}
+Id Submodule::indexId() const { return git_submodule_index_id(d.data()); }
 
-Id Submodule::workdirId() const
-{
-  return git_submodule_wd_id(d.data());
-}
+Id Submodule::workdirId() const { return git_submodule_wd_id(d.data()); }
 
-int Submodule::status() const
-{
+int Submodule::status() const {
   unsigned int status = 0;
   if (git_submodule_status(&status, d.data(), GIT_SUBMODULE_IGNORE_UNSPECIFIED))
     return -1;
@@ -121,8 +88,8 @@ int Submodule::status() const
   return status;
 }
 
-Result Submodule::update(Remote::Callbacks *callbacks, bool init, bool checkout_force)
-{
+Result Submodule::update(Remote::Callbacks *callbacks, bool init,
+                         bool checkout_force) {
   git_submodule_update_options opts = GIT_SUBMODULE_UPDATE_OPTIONS_INIT;
   opts.fetch_opts.callbacks.connect = &Remote::Callbacks::connect;
   opts.fetch_opts.callbacks.disconnect = &Remote::Callbacks::disconnect;
@@ -135,7 +102,7 @@ Result Submodule::update(Remote::Callbacks *callbacks, bool init, bool checkout_
   opts.fetch_opts.callbacks.payload = callbacks;
 
   if (checkout_force)
-	  opts.checkout_opts.checkout_strategy |= GIT_CHECKOUT_FORCE;
+    opts.checkout_opts.checkout_strategy |= GIT_CHECKOUT_FORCE;
   // Use a fake URL. Submodule update doesn't have a way to
   // query a different proxy for each submodule remote.
   QByteArray proxy = Remote::proxyUrl(kUrl, opts.fetch_opts.proxy_opts.type);
@@ -144,8 +111,7 @@ Result Submodule::update(Remote::Callbacks *callbacks, bool init, bool checkout_
   return git_submodule_update(d.data(), init, &opts);
 }
 
-Repository Submodule::open() const
-{
+Repository Submodule::open() const {
   git_repository *repo = nullptr;
   git_submodule_open(&repo, d.data());
   return Repository(repo);

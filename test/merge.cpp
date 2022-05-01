@@ -22,8 +22,7 @@
 using namespace Test;
 using namespace QTest;
 
-class TestMerge : public QObject
-{
+class TestMerge : public QObject {
   Q_OBJECT
 
 private slots:
@@ -44,16 +43,14 @@ private:
   QString mMainBranch;
 };
 
-void TestMerge::initTestCase()
-{
+void TestMerge::initTestCase() {
   mMainBranch = mRepo->unbornHeadName();
   mWindow = new MainWindow(mRepo);
   mWindow->show();
   QVERIFY(qWaitForWindowActive(mWindow));
 }
 
-void TestMerge::firstCommit()
-{
+void TestMerge::firstCommit() {
   // Add file and refresh.
   QFile file(mRepo->workdir().filePath("test"));
   QVERIFY(file.open(QFile::WriteOnly));
@@ -73,9 +70,8 @@ void TestMerge::firstCommit()
 
   // Click on the check box.
   QModelIndex index = model->index(0, 0);
-  mouseClick(
-    files->viewport(), Qt::LeftButton, Qt::KeyboardModifiers(),
-    files->checkRect(index).center());
+  mouseClick(files->viewport(), Qt::LeftButton, Qt::KeyboardModifiers(),
+             files->checkRect(index).center());
 
   // Commit and refresh.
   QTextEdit *editor = view->findChild<QTextEdit *>("MessageEditor");
@@ -86,8 +82,7 @@ void TestMerge::firstCommit()
   refresh(view, false);
 }
 
-void TestMerge::secondCommit()
-{
+void TestMerge::secondCommit() {
   RepoView *view = mWindow->currentView();
   git::Branch branch = mRepo->createBranch("branch2", mRepo->head().target());
   QVERIFY(branch.isValid());
@@ -112,9 +107,8 @@ void TestMerge::secondCommit()
 
   // Click on the check box.
   QModelIndex index = model->index(0, 0);
-  mouseClick(
-    files->viewport(), Qt::LeftButton, Qt::KeyboardModifiers(),
-    files->checkRect(index).center());
+  mouseClick(files->viewport(), Qt::LeftButton, Qt::KeyboardModifiers(),
+             files->checkRect(index).center());
 
   // Commit and refresh.
   QTextEdit *editor = view->findChild<QTextEdit *>("MessageEditor");
@@ -123,15 +117,12 @@ void TestMerge::secondCommit()
   editor->setText("conflicting commit b");
   view->commit();
   refresh(view, false);
-
 }
 
-void TestMerge::thirdCommit()
-{
+void TestMerge::thirdCommit() {
   RepoView *view = mWindow->currentView();
-  git::Reference ref = mRepo->lookupRef(
-    QString("refs/heads/%1").arg(mMainBranch)
-  );
+  git::Reference ref =
+      mRepo->lookupRef(QString("refs/heads/%1").arg(mMainBranch));
   QVERIFY(ref);
 
   view->checkout(ref);
@@ -154,9 +145,8 @@ void TestMerge::thirdCommit()
 
   // Click on the check box.
   QModelIndex index = model->index(0, 0);
-  mouseClick(
-    files->viewport(), Qt::LeftButton, Qt::KeyboardModifiers(),
-    files->checkRect(index).center());
+  mouseClick(files->viewport(), Qt::LeftButton, Qt::KeyboardModifiers(),
+             files->checkRect(index).center());
 
   // Commit and refresh.
   QTextEdit *editor = view->findChild<QTextEdit *>("MessageEditor");
@@ -167,12 +157,10 @@ void TestMerge::thirdCommit()
   refresh(view, false);
 }
 
-void TestMerge::mergeConflict()
-{
+void TestMerge::mergeConflict() {
   RepoView *view = mWindow->currentView();
-  git::Reference master = mRepo->lookupRef(
-    QString("refs/heads/%1").arg(mMainBranch)
-  );
+  git::Reference master =
+      mRepo->lookupRef(QString("refs/heads/%1").arg(mMainBranch));
   QVERIFY(master);
 
   git::Reference branch2 = mRepo->lookupRef("refs/heads/branch2");
@@ -187,8 +175,7 @@ void TestMerge::mergeConflict()
   QVERIFY(diff.isConflicted());
 }
 
-void TestMerge::resolve()
-{
+void TestMerge::resolve() {
   RepoView *view = mWindow->currentView();
   DiffView *diffView = view->findChild<DiffView *>();
 
@@ -200,25 +187,30 @@ void TestMerge::resolve()
 
   // Wait for refresh
   QAbstractItemModel *model = files->model();
-  while(model->rowCount() < 1)
+  while (model->rowCount() < 1)
     qWait(300);
 
-  files->selectionModel()->select(
-    files->model()->index(0, 0),
-    QItemSelectionModel::Select
-  );
+  files->selectionModel()->select(files->model()->index(0, 0),
+                                  QItemSelectionModel::Select);
 
   QToolButton *theirs = diffView->findChild<QToolButton *>("ConflictTheirs");
-  mouseClick(theirs, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(), inputDelay);
+  mouseClick(theirs, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(),
+             inputDelay);
 
-  QToolButton *undo = diffView->widget()->findChild<QToolButton *>("ConflictUndo");
-  mouseClick(undo, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(), inputDelay);
+  QToolButton *undo =
+      diffView->widget()->findChild<QToolButton *>("ConflictUndo");
+  mouseClick(undo, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(),
+             inputDelay);
 
-  QToolButton *ours = diffView->widget()->findChild<QToolButton *>("ConflictOurs");
-  mouseClick(ours, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(), inputDelay);
+  QToolButton *ours =
+      diffView->widget()->findChild<QToolButton *>("ConflictOurs");
+  mouseClick(ours, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(),
+             inputDelay);
 
-  QToolButton *save = diffView->widget()->findChild<QToolButton *>("ConflictSave");
-  mouseClick(save, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(), inputDelay);
+  QToolButton *save =
+      diffView->widget()->findChild<QToolButton *>("ConflictSave");
+  mouseClick(save, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(),
+             inputDelay);
 
   DetailView *detailView = view->findChild<DetailView *>();
   QPushButton *stageAll = nullptr;
@@ -226,7 +218,8 @@ void TestMerge::resolve()
     stageAll = detailView->findChild<QPushButton *>("StageAll");
     qWait(100);
   }
-  mouseClick(stageAll, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(), inputDelay);
+  mouseClick(stageAll, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(),
+             inputDelay);
 
   // Commit and refresh.
   QTextEdit *editor = view->findChild<QTextEdit *>("MessageEditor");
@@ -241,8 +234,7 @@ void TestMerge::resolve()
   QVERIFY(!diff.isConflicted());
 }
 
-void TestMerge::cleanupTestCase()
-{
+void TestMerge::cleanupTestCase() {
   qWait(closeDelay);
   mWindow->close();
 }

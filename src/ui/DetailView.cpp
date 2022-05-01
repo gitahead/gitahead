@@ -72,19 +72,15 @@ const QString kUrl = "http://www.gravatar.com/avatar/%1?s=%2&d=mm";
 const QString kDictKey = "commit.spellcheck.dict";
 
 const Qt::TextInteractionFlags kTextFlags =
-  Qt::TextSelectableByMouse | Qt::LinksAccessibleByMouse;
+    Qt::TextSelectableByMouse | Qt::LinksAccessibleByMouse;
 
-QString brightText(const QString &text)
-{
+QString brightText(const QString &text) {
   return kAltFmt.arg(QPalette().color(QPalette::BrightText).name(), text);
 }
 
-class MessageLabel : public QTextEdit
-{
+class MessageLabel : public QTextEdit {
 public:
-  MessageLabel(QWidget *parent = nullptr)
-    : QTextEdit(parent)
-  {
+  MessageLabel(QWidget *parent = nullptr) : QTextEdit(parent) {
     setObjectName("MessageLabel");
     setFrameShape(QFrame::NoFrame);
     setSizeAdjustPolicy(QAbstractScrollArea::AdjustToContents);
@@ -93,19 +89,17 @@ public:
 
     // Notify the layout system when size hint changes.
     connect(document()->documentLayout(),
-            &QAbstractTextDocumentLayout::documentSizeChanged,
-            this, &MessageLabel::updateGeometry);
+            &QAbstractTextDocumentLayout::documentSizeChanged, this,
+            &MessageLabel::updateGeometry);
   }
 
 protected:
-  QSize minimumSizeHint() const override
-  {
+  QSize minimumSizeHint() const override {
     QSize size = QTextEdit::minimumSizeHint();
     return QSize(size.width(), fontMetrics().lineSpacing());
   }
 
-  QSize viewportSizeHint() const override
-  {
+  QSize viewportSizeHint() const override {
     // Choose the smaller of the height of the document or five lines.
     QSize size = QTextEdit::viewportSizeHint();
     int height = document()->documentLayout()->documentSize().height();
@@ -113,30 +107,20 @@ protected:
   }
 };
 
-class StackedWidget : public QStackedWidget
-{
+class StackedWidget : public QStackedWidget {
 public:
-  StackedWidget(QWidget *parent = nullptr)
-    : QStackedWidget(parent)
-  {}
+  StackedWidget(QWidget *parent = nullptr) : QStackedWidget(parent) {}
 
-  QSize sizeHint() const override
-  {
-    return currentWidget()->sizeHint();
-  }
+  QSize sizeHint() const override { return currentWidget()->sizeHint(); }
 
-  QSize minimumSizeHint() const override
-  {
+  QSize minimumSizeHint() const override {
     return currentWidget()->minimumSizeHint();
   }
 };
 
-class AuthorDate : public QWidget
-{
+class AuthorDate : public QWidget {
 public:
-  AuthorDate(QWidget *parent = nullptr)
-    : QWidget(parent)
-  {
+  AuthorDate(QWidget *parent = nullptr) : QWidget(parent) {
     mAuthor = new QLabel(this);
     mAuthor->setTextInteractionFlags(kTextFlags);
 
@@ -146,26 +130,18 @@ public:
     mSpacing = style()->pixelMetric(QStyle::PM_DefaultLayoutSpacing);
   }
 
-  void moveEvent(QMoveEvent *event) override
-  {
-    updateLayout();
-  }
+  void moveEvent(QMoveEvent *event) override { updateLayout(); }
 
-  void resizeEvent(QResizeEvent *event) override
-  {
-    updateLayout();
-  }
+  void resizeEvent(QResizeEvent *event) override { updateLayout(); }
 
-  QSize sizeHint() const override
-  {
+  QSize sizeHint() const override {
     QSize date = mDate->sizeHint();
     QSize author = mAuthor->sizeHint();
     int width = author.width() + date.width() + mSpacing;
     return QSize(width, qMax(author.height(), date.height()));
   }
 
-  QSize minimumSizeHint() const override
-  {
+  QSize minimumSizeHint() const override {
     QSize date = mDate->minimumSizeHint();
     QSize author = mAuthor->minimumSizeHint();
     int width = qMax(author.width(), date.width());
@@ -174,31 +150,27 @@ public:
 
   bool hasHeightForWidth() const override { return true; }
 
-  int heightForWidth(int width) const override
-  {
+  int heightForWidth(int width) const override {
     int date = mDate->sizeHint().height();
     int author = mAuthor->sizeHint().height();
     bool wrapped = (width < sizeHint().width());
     return wrapped ? (author + date + mSpacing) : qMax(author, date);
   }
 
-  void setAuthor(const QString &author)
-  {
+  void setAuthor(const QString &author) {
     mAuthor->setText(author);
     mAuthor->adjustSize();
     updateGeometry();
   }
 
-  void setDate(const QString &date)
-  {
+  void setDate(const QString &date) {
     mDate->setText(date);
     mDate->adjustSize();
     updateGeometry();
   }
 
 private:
-  void updateLayout()
-  {
+  void updateLayout() {
     mAuthor->move(0, 0);
 
     bool wrapped = (width() < sizeHint().width());
@@ -213,14 +185,11 @@ private:
   int mSpacing;
 };
 
-class CommitDetail : public QFrame
-{
+class CommitDetail : public QFrame {
   Q_OBJECT
 
 public:
-  CommitDetail(QWidget *parent = nullptr)
-    : QFrame(parent)
-  {
+  CommitDetail(QWidget *parent = nullptr) : QFrame(parent) {
     mAuthorDate = new AuthorDate(this);
 
     mHash = new QLabel(this);
@@ -228,9 +197,8 @@ public:
 
     QToolButton *copy = new QToolButton(this);
     copy->setText(tr("Copy"));
-    connect(copy, &QToolButton::clicked, [this] {
-      QApplication::clipboard()->setText(mId);
-    });
+    connect(copy, &QToolButton::clicked,
+            [this] { QApplication::clipboard()->setText(mId); });
 
     mRefs = new Badge(QList<Badge::Label>(), this);
 
@@ -265,16 +233,16 @@ public:
     mSeparator->setFrameShape(QFrame::HLine);
 
     mMessage = new MessageLabel(this);
-    connect(mMessage, &QTextEdit::copyAvailable,
-            MenuBar::instance(this), &MenuBar::updateCutCopyPaste);
+    connect(mMessage, &QTextEdit::copyAvailable, MenuBar::instance(this),
+            &MenuBar::updateCutCopyPaste);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->addLayout(header);
     layout->addWidget(mSeparator);
     layout->addWidget(mMessage);
 
-    connect(&mMgr, &QNetworkAccessManager::finished,
-            this, &CommitDetail::setPicture);
+    connect(&mMgr, &QNetworkAccessManager::finished, this,
+            &CommitDetail::setPicture);
 
     RepoView *view = RepoView::parentView(this);
     connect(mHash, &QLabel::linkActivated, view, &RepoView::visitLink);
@@ -298,8 +266,7 @@ public:
     connect(notifier, &git::RepositoryNotifier::referenceUpdated, resetRefs);
   }
 
-  void setReferences(const QList<git::Commit> &commits)
-  {
+  void setReferences(const QList<git::Commit> &commits) {
     QList<Badge::Label> refs;
     foreach (const git::Commit &commit, commits) {
       foreach (const git::Reference &ref, commit.refs())
@@ -311,11 +278,10 @@ public:
     // Compute description asynchronously.
     if (commits.size() == 1)
       mWatcher.setFuture(
-        QtConcurrent::run(commits.first(), &git::Commit::description));
+          QtConcurrent::run(commits.first(), &git::Commit::description));
   }
 
-  void setCommits(const QList<git::Commit> &commits)
-  {
+  void setCommits(const QList<git::Commit> &commits) {
     // Clear fields.
     mHash->setText(QString());
     mAuthorDate->setDate(QString());
@@ -353,8 +319,9 @@ public:
       QDate firstDate = first.committer().date().date();
       QString lastDateStr = lastDate.toString(Qt::DefaultLocaleShortDate);
       QString firstDateStr = firstDate.toString(Qt::DefaultLocaleShortDate);
-      QString dateStr = (lastDate == firstDate) ? lastDateStr :
-        kDateRangeFmt.arg(lastDateStr, firstDateStr);
+      QString dateStr = (lastDate == firstDate)
+                            ? lastDateStr
+                            : kDateRangeFmt.arg(lastDateStr, firstDateStr);
       mAuthorDate->setDate(brightText(dateStr));
 
       // Set id range.
@@ -415,7 +382,8 @@ public:
 
     // Request the image from gravatar.
     if (!mCache.contains(key)) {
-      QUrl url(kUrl.arg(QString::fromUtf8(hash.toHex()), QString::number(size)));
+      QUrl url(
+          kUrl.arg(QString::fromUtf8(hash.toHex()), QString::number(size)));
       QNetworkReply *reply = mMgr.get(QNetworkRequest(url));
       reply->setProperty(kCacheKey, key);
     }
@@ -424,8 +392,7 @@ public:
     mId = commit.id().toString();
   }
 
-  void setPicture(QNetworkReply *reply)
-  {
+  void setPicture(QNetworkReply *reply) {
     // Load source.
     QPixmap source;
     source.loadFromData(reply->readAll());
@@ -450,8 +417,7 @@ public:
     reply->deleteLater();
   }
 
-  void cancelBackgroundTasks()
-  {
+  void cancelBackgroundTasks() {
     // Just wait.
     mWatcher.waitForFinished();
   }
@@ -467,18 +433,15 @@ private:
 
   QString mId;
   QNetworkAccessManager mMgr;
-  QMap<QByteArray,QPixmap> mCache;
+  QMap<QByteArray, QPixmap> mCache;
   QFutureWatcher<QString> mWatcher;
 };
 
-class TextEdit : public QTextEdit
-{
+class TextEdit : public QTextEdit {
   Q_OBJECT
 
 public:
-  explicit TextEdit(QWidget *parent = nullptr)
-    : QTextEdit(parent)
-  {
+  explicit TextEdit(QWidget *parent = nullptr) : QTextEdit(parent) {
     // Spell check with delay timeout.
     connect(&mTimer, &QTimer::timeout, [this] {
       mTimer.stop();
@@ -487,17 +450,12 @@ public:
     });
 
     // Spell check on textchange.
-    connect(this, &QTextEdit::textChanged, [this] {
-      mTimer.start(500);
-    });
+    connect(this, &QTextEdit::textChanged, [this] { mTimer.start(500); });
   }
 
-  bool setupSpellCheck(
-    const QString &dictPath,
-    const QString &userDict,
-    const QTextCharFormat &spellFormat,
-    const QTextCharFormat &ignoredFormat)
-  {
+  bool setupSpellCheck(const QString &dictPath, const QString &userDict,
+                       const QTextCharFormat &spellFormat,
+                       const QTextCharFormat &ignoredFormat) {
     mSpellChecker = new SpellChecker(dictPath, userDict);
     if (!mSpellChecker->isValid()) {
       delete mSpellChecker;
@@ -514,8 +472,7 @@ public:
   }
 
 private:
-  void contextMenuEvent(QContextMenuEvent *event) override
-  {
+  void contextMenuEvent(QContextMenuEvent *event) override {
     // Check for spell checking enabled and a word under the cursor.
     QTextCursor cursor = cursorForPosition(event->pos());
     cursor.select(QTextCursor::WordUnderCursor);
@@ -546,14 +503,13 @@ private:
             });
 
             QAction *replaceAll = spellReplaceAll->addAction(str);
-              connect(replaceAll, &QAction::triggered, [this, word, str] {
+            connect(replaceAll, &QAction::triggered, [this, word, str] {
               QTextCursor cursor(document());
               while (!cursor.atEnd()) {
                 cursor.movePosition(QTextCursor::EndOfWord,
                                     QTextCursor::KeepAnchor, 1);
                 QString search = wordAt(cursor);
-                if (!search.isEmpty() && (search == word) &&
-                    !ignoredAt(cursor))
+                if (!search.isEmpty() && (search == word) && !ignoredAt(cursor))
                   cursor.insertText(str);
 
                 cursor.movePosition(QTextCursor::NextWord,
@@ -628,8 +584,7 @@ private:
     delete menu;
   }
 
-  void keyPressEvent(QKeyEvent *event) override
-  {
+  void keyPressEvent(QKeyEvent *event) override {
     QTextEdit::keyPressEvent(event);
 
     QString text = event->text();
@@ -647,14 +602,12 @@ private:
     }
   }
 
-  void checkSpelling()
-  {
+  void checkSpelling() {
     QTextCursor cursor(document());
     mSpellList.clear();
 
     while (!cursor.atEnd()) {
-      cursor.movePosition(QTextCursor::EndOfWord,
-                          QTextCursor::KeepAnchor, 1);
+      cursor.movePosition(QTextCursor::EndOfWord, QTextCursor::KeepAnchor, 1);
       QString word = wordAt(cursor);
       if (!word.isEmpty() && !mSpellChecker->spell(word)) {
         // Highlight the unknown or ignored word.
@@ -664,14 +617,12 @@ private:
 
         mSpellList << es;
       }
-      cursor.movePosition(QTextCursor::NextWord,
-                          QTextCursor::MoveAnchor, 1);
+      cursor.movePosition(QTextCursor::NextWord, QTextCursor::MoveAnchor, 1);
     }
     setSelections();
   }
 
-  bool ignoredAt(const QTextCursor &cursor)
-  {
+  bool ignoredAt(const QTextCursor &cursor) {
     foreach (const QTextEdit::ExtraSelection &es, extraSelections()) {
       if (es.cursor == cursor && es.format == mIgnoredFormat)
         return true;
@@ -680,8 +631,7 @@ private:
     return false;
   }
 
-  const QString wordAt(QTextCursor &cursor)
-  {
+  const QString wordAt(QTextCursor &cursor) {
     QString word = cursor.selectedText();
 
     // For a better recognition of words
@@ -696,8 +646,7 @@ private:
     return word;
   }
 
-  void setSelections(void)
-  {
+  void setSelections(void) {
     QList<QTextEdit::ExtraSelection> esList;
     esList.append(mSpellList);
     setExtraSelections(esList);
@@ -711,34 +660,32 @@ private:
   QList<QTextEdit::ExtraSelection> mSpellList;
 };
 
-
 /*!
  * \brief The CommitEditor class
- * This widget contains the textedit element for entering the commit message, the buttons
- * for commiting, staging all and unstage all
+ * This widget contains the textedit element for entering the commit message,
+ * the buttons for commiting, staging all and unstage all
  */
-class CommitEditor : public QFrame
-{
+class CommitEditor : public QFrame {
   Q_OBJECT
 
 public:
   CommitEditor(const git::Repository &repo, QWidget *parent = nullptr)
-    : QFrame(parent), mRepo(repo)
-  {
+      : QFrame(parent), mRepo(repo) {
     git::Config config = repo.appConfig();
 
     TemplateButton *templateButton = new TemplateButton(config, this);
     templateButton->setText(tr("T"));
-    connect(templateButton, &TemplateButton::templateChanged, this, &CommitEditor::applyTemplate);
+    connect(templateButton, &TemplateButton::templateChanged, this,
+            &CommitEditor::applyTemplate);
 
     QLabel *label = new QLabel(tr("<b>Commit Message:</b>"), this);
 
     // Style and color setup for checks.
-    mSpellError.setUnderlineColor(Application::theme()->commitEditor(
-                                    Theme::CommitEditor::SpellError));
+    mSpellError.setUnderlineColor(
+        Application::theme()->commitEditor(Theme::CommitEditor::SpellError));
     mSpellError.setUnderlineStyle(QTextCharFormat::SpellCheckUnderline);
-    mSpellIgnore.setUnderlineColor(Application::theme()->commitEditor(
-                                     Theme::CommitEditor::SpellIgnore));
+    mSpellIgnore.setUnderlineColor(
+        Application::theme()->commitEditor(Theme::CommitEditor::SpellIgnore));
     mSpellIgnore.setUnderlineStyle(QTextCharFormat::WaveUnderline);
 
     // Spell check configuration
@@ -753,14 +700,13 @@ public:
 
     // Find installed Dictionaries.
     QDir dictDir = Settings::dictionariesDir();
-    QStringList dictNameList = dictDir.entryList({"*.dic"},
-                                                 QDir::Files,
-                                                 QDir::Name);
+    QStringList dictNameList =
+        dictDir.entryList({"*.dic"}, QDir::Files, QDir::Name);
     dictNameList.replaceInStrings(".dic", "");
 
     // Spell check language menu actions.
     bool selected = false;
-    QList<QAction*> actionList;
+    QList<QAction *> actionList;
     foreach (const QString &dict, dictNameList) {
       QLocale locale(dict);
 
@@ -793,9 +739,9 @@ public:
 
     // Sort menu entries alphabetical.
     std::sort(actionList.begin(), actionList.end(),
-    [actionList](QAction *la, QAction *ra) {
-      return la->text() < ra->text();
-    });
+              [actionList](QAction *la, QAction *ra) {
+                return la->text() < ra->text();
+              });
 
     QActionGroup *dictActionGroup = new QActionGroup(this);
     dictActionGroup->setExclusive(true);
@@ -827,8 +773,7 @@ public:
       }
     }
 
-    connect(dictActionGroup, &QActionGroup::triggered,
-    [this](QAction *action) {
+    connect(dictActionGroup, &QActionGroup::triggered, [this](QAction *action) {
       QString dict = action->data().toString();
       if (mDictName == dict) {
         action->setChecked(false);
@@ -841,15 +786,16 @@ public:
 
       // Apply changes, disable invalid dictionary.
       QString path = mDictPath + "/" + mDictName;
-      if (!mMessage->setupSpellCheck(
-            path, mUserDict, mSpellError, mSpellIgnore) &&
+      if (!mMessage->setupSpellCheck(path, mUserDict, mSpellError,
+                                     mSpellIgnore) &&
           mDictName != "none") {
-        QMessageBox mb(QMessageBox::Critical,
-                       tr("Spell Check Language"),
-                       tr("The dictionary '%1' is invalid").arg(action->text()));
+        QMessageBox mb(
+            QMessageBox::Critical, tr("Spell Check Language"),
+            tr("The dictionary '%1' is invalid").arg(action->text()));
         mb.setInformativeText(tr("Spell checking is disabled."));
         mb.setDetailedText(tr("The choosen dictionary '%1.dic' is not a "
-                              "valid hunspell dictionary.").arg(mDictName));
+                              "valid hunspell dictionary.")
+                               .arg(mDictName));
         mb.exec();
 
         action->setChecked(false);
@@ -906,14 +852,14 @@ public:
     // Setup spell check.
     if (mDictName != "none") {
       QString path = mDictPath + "/" + mDictName;
-      if (!mMessage->setupSpellCheck(
-            path, mUserDict, mSpellError, mSpellIgnore)) {
+      if (!mMessage->setupSpellCheck(path, mUserDict, mSpellError,
+                                     mSpellIgnore)) {
         foreach (QAction *action, dictActionGroup->actions()) {
           action->setChecked(false);
           if (mDictName == action->data().toString()) {
             action->setEnabled(false);
-            action->setToolTip(tr("Invalid dictionary '%1.dic'")
-                                 .arg(mDictName));
+            action->setToolTip(
+                tr("Invalid dictionary '%1.dic'").arg(mDictName));
           }
         }
         mDictName = "none";
@@ -922,15 +868,15 @@ public:
 
     // Update menu items.
     MenuBar *menuBar = MenuBar::instance(this);
-    connect(mMessage, &QTextEdit::undoAvailable,
-            menuBar, &MenuBar::updateUndoRedo);
-    connect(mMessage, &QTextEdit::redoAvailable,
-            menuBar, &MenuBar::updateUndoRedo);
-    connect(mMessage, &QTextEdit::copyAvailable,
-            menuBar, &MenuBar::updateCutCopyPaste);
+    connect(mMessage, &QTextEdit::undoAvailable, menuBar,
+            &MenuBar::updateUndoRedo);
+    connect(mMessage, &QTextEdit::redoAvailable, menuBar,
+            &MenuBar::updateUndoRedo);
+    connect(mMessage, &QTextEdit::copyAvailable, menuBar,
+            &MenuBar::updateCutCopyPaste);
 
     QVBoxLayout *messageLayout = new QVBoxLayout;
-    messageLayout->setContentsMargins(12,8,0,0);
+    messageLayout->setContentsMargins(12, 8, 0, 0);
     messageLayout->addLayout(labelLayout);
     messageLayout->addWidget(mMessage);
 
@@ -947,25 +893,24 @@ public:
 
     // Update buttons on index change.
     connect(repo.notifier(), &git::RepositoryNotifier::indexChanged,
-    [this](const QStringList &paths, bool yieldFocus) {
-      updateButtons(yieldFocus);
-    });
+            [this](const QStringList &paths, bool yieldFocus) {
+              updateButtons(yieldFocus);
+            });
 
     QVBoxLayout *buttonLayout = new QVBoxLayout;
-    buttonLayout->setContentsMargins(0,8,12,0);
+    buttonLayout->setContentsMargins(0, 8, 12, 0);
     buttonLayout->addStretch();
     buttonLayout->addWidget(mStage);
     buttonLayout->addWidget(mUnstage);
     buttonLayout->addWidget(mCommit);
 
     QHBoxLayout *layout = new QHBoxLayout(this);
-    layout->setContentsMargins(0,0,0,12);
+    layout->setContentsMargins(0, 0, 0, 12);
     layout->addLayout(messageLayout);
     layout->addLayout(buttonLayout);
   }
 
-  void commit()
-  {
+  void commit() {
     // Check for a merge head.
     git::AnnotatedCommit upstream;
     RepoView *view = RepoView::parentView(this);
@@ -976,39 +921,22 @@ public:
       mMessage->clear(); // Clear the message field.
   }
 
-  bool isCommitEnabled() const
-  {
-    return mCommit->isEnabled();
-  }
+  bool isCommitEnabled() const { return mCommit->isEnabled(); }
 
-  void stage()
-  {
-    mDiff.setAllStaged(true);
-  }
+  void stage() { mDiff.setAllStaged(true); }
 
-  bool isStageEnabled() const
-  {
-    return mStage->isEnabled();
-  }
+  bool isStageEnabled() const { return mStage->isEnabled(); }
 
-  void unstage()
-  {
-    mDiff.setAllStaged(false);
-  }
+  void unstage() { mDiff.setAllStaged(false); }
 
-  bool isUnstageEnabled() const
-  {
-    return mUnstage->isEnabled();
-  }
+  bool isUnstageEnabled() const { return mUnstage->isEnabled(); }
 
-  void setMessage(const QString &message)
-  {
+  void setMessage(const QString &message) {
     mMessage->setPlainText(message);
     mMessage->selectAll();
   }
 
-  void setDiff(const git::Diff &diff)
-  {
+  void setDiff(const git::Diff &diff) {
     mDiff = diff;
     updateButtons(false);
 
@@ -1019,22 +947,20 @@ public:
   }
 
 public slots:
-  void applyTemplate(QString& templ)
-  {
-	auto index = templ.indexOf(TemplateButton::cursorPositionString);
-	if (index < 0)
-		index = templ.length();
+  void applyTemplate(QString &templ) {
+    auto index = templ.indexOf(TemplateButton::cursorPositionString);
+    if (index < 0)
+      index = templ.length();
 
-	templ.replace("%|", "");
+    templ.replace("%|", "");
     mMessage->setText(templ);
-	auto cursor = mMessage->textCursor();
-	cursor.setPosition(index);
-	mMessage->setTextCursor(cursor);
+    auto cursor = mMessage->textCursor();
+    cursor.setPosition(index);
+    mMessage->setTextCursor(cursor);
   }
 
 private:
-  void updateButtons(bool yieldFocus = true)
-  {
+  void updateButtons(bool yieldFocus = true) {
     if (!mDiff.isValid()) {
       mStage->setEnabled(false);
       mUnstage->setEnabled(false);
@@ -1073,7 +999,7 @@ private:
 
     if (mPopulate) {
       QSignalBlocker blocker(mMessage);
-      (void) blocker;
+      (void)blocker;
 
       QString msg;
       switch (list.size()) {
@@ -1089,13 +1015,14 @@ private:
           break;
 
         case 3:
-          msg = tr("Update %1, %2, and %3").arg(
-                  list.at(0), list.at(1), list.at(2));
+          msg = tr("Update %1, %2, and %3")
+                    .arg(list.at(0), list.at(1), list.at(2));
           break;
 
         default:
-          msg = tr("Update %1, %2, and %3 more files...").arg(
-                  list.at(0), list.at(1), QString::number(list.size() - 2));
+          msg = tr("Update %1, %2, and %3 more files...")
+                    .arg(list.at(0), list.at(1),
+                         QString::number(list.size() - 2));
           break;
       }
 
@@ -1112,19 +1039,20 @@ private:
     // Set status text.
     QString status = tr("Nothing staged");
     if (staged || partial || conflicted) {
-      QString fmt = (staged == 1 && count == 1) ?
-        tr("%1 of %2 file staged") : tr("%1 of %2 files staged");
+      QString fmt = (staged == 1 && count == 1) ? tr("%1 of %2 file staged")
+                                                : tr("%1 of %2 files staged");
       QStringList fragments(fmt.arg(staged).arg(count));
 
       if (partial) {
-        QString partialFmt = (partial == 1) ?
-          tr("%1 file partially staged") : tr("%1 files partially staged");
+        QString partialFmt = (partial == 1) ? tr("%1 file partially staged")
+                                            : tr("%1 files partially staged");
         fragments.append(partialFmt.arg(partial));
       }
 
       if (conflicted) {
-        QString conflictedFmt = (conflicted == 1) ?
-          tr("%1 unresolved conflict") : tr("%1 unresolved conflicts");
+        QString conflictedFmt = (conflicted == 1)
+                                    ? tr("%1 unresolved conflict")
+                                    : tr("%1 unresolved conflicts");
         fragments.append(conflictedFmt.arg(conflicted));
       } else if (mDiff.isConflicted()) {
         fragments.append(tr("all conflicts resolved"));
@@ -1164,24 +1092,22 @@ private:
   QTextCharFormat mSpellIgnore;
 };
 
-} // anon. namespace
+} // namespace
 
-ContentWidget::ContentWidget(QWidget *parent)
-  : QWidget(parent)
-{}
+ContentWidget::ContentWidget(QWidget *parent) : QWidget(parent) {}
 
 ContentWidget::~ContentWidget() {}
 
 DetailView::DetailView(const git::Repository &repo, QWidget *parent)
-  : QWidget(parent)
-{
+    : QWidget(parent) {
   QVBoxLayout *layout = new QVBoxLayout(this);
-  layout->setContentsMargins(0,0,0,0);
+  layout->setContentsMargins(0, 0, 0, 0);
   layout->setSpacing(0);
 
   mAuthorLabel = new QLabel(this);
   mAuthorLabel->setTextFormat(Qt::TextFormat::RichText);
-  connect(mAuthorLabel, &QLabel::linkActivated, this, &DetailView::authorLinkActivated);
+  connect(mAuthorLabel, &QLabel::linkActivated, this,
+          &DetailView::authorLinkActivated);
   updateAuthor();
   layout->addWidget(mAuthorLabel);
 
@@ -1201,52 +1127,44 @@ DetailView::DetailView(const git::Repository &repo, QWidget *parent)
 
 DetailView::~DetailView() {}
 
-void DetailView::commit()
-{
+void DetailView::commit() {
   Q_ASSERT(isCommitEnabled());
   static_cast<CommitEditor *>(mDetail->currentWidget())->commit();
 }
 
-bool DetailView::isCommitEnabled() const
-{
+bool DetailView::isCommitEnabled() const {
   QWidget *widget = mDetail->currentWidget();
   return (mDetail->currentIndex() == EditorIndex &&
           static_cast<CommitEditor *>(widget)->isCommitEnabled());
 }
 
-void DetailView::stage()
-{
+void DetailView::stage() {
   Q_ASSERT(isStageEnabled());
   static_cast<CommitEditor *>(mDetail->currentWidget())->stage();
 }
 
-bool DetailView::isStageEnabled() const
-{
+bool DetailView::isStageEnabled() const {
   QWidget *widget = mDetail->currentWidget();
   return (mDetail->currentIndex() == EditorIndex &&
           static_cast<CommitEditor *>(widget)->isStageEnabled());
 }
 
-void DetailView::unstage()
-{
+void DetailView::unstage() {
   Q_ASSERT(isUnstageEnabled());
   static_cast<CommitEditor *>(mDetail->currentWidget())->unstage();
 }
 
-bool DetailView::isUnstageEnabled() const
-{
+bool DetailView::isUnstageEnabled() const {
   QWidget *widget = mDetail->currentWidget();
   return (mDetail->currentIndex() == EditorIndex &&
           static_cast<CommitEditor *>(widget)->isUnstageEnabled());
 }
 
-RepoView::ViewMode DetailView::viewMode() const
-{
+RepoView::ViewMode DetailView::viewMode() const {
   return static_cast<RepoView::ViewMode>(mContent->currentIndex());
 }
 
-void DetailView::setViewMode(RepoView::ViewMode mode, bool spontaneous)
-{
+void DetailView::setViewMode(RepoView::ViewMode mode, bool spontaneous) {
   if (mode == mContent->currentIndex())
     return;
 
@@ -1256,21 +1174,18 @@ void DetailView::setViewMode(RepoView::ViewMode mode, bool spontaneous)
   emit viewModeChanged(mode, spontaneous);
 }
 
-QString DetailView::file() const
-{
-  return static_cast<ContentWidget *>(mContent->currentWidget())->selectedFile();
+QString DetailView::file() const {
+  return static_cast<ContentWidget *>(mContent->currentWidget())
+      ->selectedFile();
 }
 
-void DetailView::setCommitMessage(const QString &message)
-{
-  static_cast<CommitEditor *>(mDetail->widget(EditorIndex))->setMessage(message);
+void DetailView::setCommitMessage(const QString &message) {
+  static_cast<CommitEditor *>(mDetail->widget(EditorIndex))
+      ->setMessage(message);
 }
 
-void DetailView::setDiff(
-  const git::Diff &diff,
-  const QString &file,
-  const QString &pathspec)
-{
+void DetailView::setDiff(const git::Diff &diff, const QString &file,
+                         const QString &pathspec) {
   RepoView *view = RepoView::parentView(this);
   QList<git::Commit> commits = view->commits();
 
@@ -1290,8 +1205,7 @@ void DetailView::setDiff(
   MenuBar::instance(this)->updateRepository();
 }
 
-void DetailView::cancelBackgroundTasks()
-{
+void DetailView::cancelBackgroundTasks() {
   CommitDetail *cd = static_cast<CommitDetail *>(mDetail->widget(CommitIndex));
   cd->cancelBackgroundTasks();
 
@@ -1299,33 +1213,23 @@ void DetailView::cancelBackgroundTasks()
   cw->cancelBackgroundTasks();
 }
 
-void DetailView::find()
-{
+void DetailView::find() {
   static_cast<ContentWidget *>(mContent->currentWidget())->find();
 }
 
-void DetailView::findNext()
-{
+void DetailView::findNext() {
   static_cast<ContentWidget *>(mContent->currentWidget())->findNext();
 }
 
-void DetailView::findPrevious()
-{
+void DetailView::findPrevious() {
   static_cast<ContentWidget *>(mContent->currentWidget())->findPrevious();
 }
 
-QString DetailView::overrideUser() const
-{
-  return mOverrideUser;
-}
+QString DetailView::overrideUser() const { return mOverrideUser; }
 
-QString DetailView::overrideEmail() const
-{
-  return mOverrideEmail;
-}
+QString DetailView::overrideEmail() const { return mOverrideEmail; }
 
-void DetailView::updateAuthor()
-{
+void DetailView::updateAuthor() {
   git::Config config = RepoView::parentView(this)->repo().config();
 
   QString text = "<a href=\"changeAuthor\"><b>" + tr("Author:") + "</b></a> ";
@@ -1336,7 +1240,8 @@ void DetailView::updateAuthor()
     text += mOverrideUser.toHtmlEscaped();
 
   if (mOverrideEmail.isEmpty())
-    text += " &lt;" + config.value<QString>("user.email").toHtmlEscaped() + "&gt;";
+    text +=
+        " &lt;" + config.value<QString>("user.email").toHtmlEscaped() + "&gt;";
   else
     text += " &lt;" + mOverrideEmail.toHtmlEscaped() + "&gt;";
 
@@ -1346,16 +1251,14 @@ void DetailView::updateAuthor()
   mAuthorLabel->setText(text);
 }
 
-void DetailView::authorLinkActivated(const QString &href)
-{
+void DetailView::authorLinkActivated(const QString &href) {
   if (href == "changeAuthor") {
     QDialog *dialog = new QDialog(this);
     QFormLayout *layout = new QFormLayout(dialog);
 
-    layout->addRow(new QLabel(tr(
-      "Here you can set the author used for committing\n"
-      "These settings will not be saved permanently"
-    )));
+    layout->addRow(
+        new QLabel(tr("Here you can set the author used for committing\n"
+                      "These settings will not be saved permanently")));
 
     QLineEdit *userEdit = new QLineEdit(mOverrideUser, dialog);
     layout->addRow(tr("Author:"), userEdit);

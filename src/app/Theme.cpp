@@ -18,15 +18,11 @@
 
 namespace {
 
-class Style : public QProxyStyle
-{
+class Style : public QProxyStyle {
 public:
-  Style(const Theme *theme)
-    : mTheme(theme)
-  {}
+  Style(const Theme *theme) : mTheme(theme) {}
 
-  void polish(QPalette &palette) override
-  {
+  void polish(QPalette &palette) override {
     baseStyle()->polish(palette);
     mTheme->polish(palette);
   }
@@ -35,10 +31,9 @@ private:
   const Theme *mTheme;
 };
 
-} // anon. namespace
+} // namespace
 
-Theme::Theme()
-{
+Theme::Theme() {
   mDir = Settings::themesDir();
   mName = QString("System");
 
@@ -54,10 +49,11 @@ Theme::Theme()
       tempFile.write(themeFile.readAll());
 
       // Add theme colors for scintilla editor.
-      tempFile.write(QString("theme.property['style.default']      = 'fore:%1,back:%2'\n")
-                             .arg(QPalette().color(QPalette::Text).name(QColor::HexRgb),
-                                  QPalette().color(QPalette::Base).name(QColor::HexRgb))
-                             .toUtf8());
+      tempFile.write(
+          QString("theme.property['style.default']      = 'fore:%1,back:%2'\n")
+              .arg(QPalette().color(QPalette::Text).name(QColor::HexRgb),
+                   QPalette().color(QPalette::Base).name(QColor::HexRgb))
+              .toUtf8());
       tempFile.close();
     }
     themeFile.close();
@@ -73,35 +69,21 @@ Theme::Theme()
   mDark = (text.lightnessF() > base.lightnessF());
 }
 
-QDir Theme::dir() const
-{
-  return mDir;
-}
+QDir Theme::dir() const { return mDir; }
 
-QString Theme::name() const
-{
-  return mName;
-}
+QString Theme::name() const { return mName; }
 
-QStyle *Theme::style() const
-{
-  return new Style(this);
-}
+QStyle *Theme::style() const { return new Style(this); }
 
-QString Theme::styleSheet() const
-{
-  return QString();
-}
+QString Theme::styleSheet() const { return QString(); }
 
-void Theme::polish(QPalette &palette) const
-{
+void Theme::polish(QPalette &palette) const {
   palette.setColor(QPalette::BrightText, palette.color(QPalette::Text));
   palette.setColor(QPalette::Light, palette.color(QPalette::Dark));
   palette.setColor(QPalette::Shadow, palette.color(QPalette::Mid));
 }
 
-QColor Theme::badge(BadgeRole role, BadgeState state)
-{
+QColor Theme::badge(BadgeRole role, BadgeState state) {
   switch (role) {
     case BadgeRole::Foreground:
       switch (state) {
@@ -118,28 +100,26 @@ QColor Theme::badge(BadgeRole role, BadgeState state)
     case BadgeRole::Background:
       switch (state) {
         case BadgeState::Normal:
-          return mDark ? QPalette().color(QPalette::Inactive, QPalette::Highlight) :
-                         QPalette().color(QPalette::Mid);
+          return mDark
+                     ? QPalette().color(QPalette::Inactive, QPalette::Highlight)
+                     : QPalette().color(QPalette::Mid);
 
         case BadgeState::Selected:
           return QPalette().color(QPalette::Base);
 
         case BadgeState::Conflicted:
-          return mDark ? "#DA2ADA" :
-                         "#D22222";
+          return mDark ? "#DA2ADA" : "#D22222";
 
         case BadgeState::Head:
           return QPalette().color(QPalette::Highlight);
 
         case BadgeState::Notification:
-          return mDark ? "#8C2026" :
-                         "#FF0000";
+          return mDark ? "#8C2026" : "#FF0000";
       }
   }
 }
 
-QList<QColor> Theme::branchTopologyEdges()
-{
+QList<QColor> Theme::branchTopologyEdges() {
   QVariantMap edge = mMap.value("graph").toMap();
 
   QList<QColor> colors;
@@ -151,84 +131,101 @@ QList<QColor> Theme::branchTopologyEdges()
   return colors;
 }
 
-QColor Theme::buttonChecked()
-{
-  return QPalette().color(QPalette::Highlight);
-}
+QColor Theme::buttonChecked() { return QPalette().color(QPalette::Highlight); }
 
-QPalette Theme::commitList()
-{
-  return QPalette();
-}
+QPalette Theme::commitList() { return QPalette(); }
 
-QColor Theme::commitEditor(CommitEditor color)
-{
+QColor Theme::commitEditor(CommitEditor color) {
   switch (color) {
-    case CommitEditor::SpellError:    return Qt::red;
-    case CommitEditor::SpellIgnore:   return Qt::gray;
-    case CommitEditor::LengthWarning: return Qt::yellow;
+    case CommitEditor::SpellError:
+      return Qt::red;
+    case CommitEditor::SpellIgnore:
+      return Qt::gray;
+    case CommitEditor::LengthWarning:
+      return Qt::yellow;
   }
 }
 
-QColor Theme::diff(Diff color)
-{
+QColor Theme::diff(Diff color) {
   if (mDark) {
     switch (color) {
-      case Diff::Ours:         return "#000060";
-      case Diff::Theirs:       return "#600060";
-      case Diff::Addition:     return "#394734";
-      case Diff::Deletion:     return "#5E3638";
-      case Diff::WordAddition: return "#296812";
-      case Diff::WordDeletion: return "#781B20";
-      case Diff::Plus:         return "#207A00";
-      case Diff::Minus:        return "#BC0009";
-      case Diff::Note:         return "#E1E5F2";
-      case Diff::Warning:      return "#E8C080";
-      case Diff::Error:        return "#7E494B";
+      case Diff::Ours:
+        return "#000060";
+      case Diff::Theirs:
+        return "#600060";
+      case Diff::Addition:
+        return "#394734";
+      case Diff::Deletion:
+        return "#5E3638";
+      case Diff::WordAddition:
+        return "#296812";
+      case Diff::WordDeletion:
+        return "#781B20";
+      case Diff::Plus:
+        return "#207A00";
+      case Diff::Minus:
+        return "#BC0009";
+      case Diff::Note:
+        return "#E1E5F2";
+      case Diff::Warning:
+        return "#E8C080";
+      case Diff::Error:
+        return "#7E494B";
     }
   }
 
   switch (color) {
-    case Diff::Ours:         return "#DCFFFF";
-    case Diff::Theirs:       return "#FFDCFF";
-    case Diff::Addition:     return "#DCFFDC";
-    case Diff::Deletion:     return "#FFDCDC";
-    case Diff::WordAddition: return "#B0F2B0";
-    case Diff::WordDeletion: return "#F2B0B0";
-    case Diff::Plus:         return "#45CC45";
-    case Diff::Minus:        return "#F28080";
-    case Diff::Note:         return "#000000";
-    case Diff::Warning:      return "#FFFF00";
-    case Diff::Error:        return "#FF0000";
+    case Diff::Ours:
+      return "#DCFFFF";
+    case Diff::Theirs:
+      return "#FFDCFF";
+    case Diff::Addition:
+      return "#DCFFDC";
+    case Diff::Deletion:
+      return "#FFDCDC";
+    case Diff::WordAddition:
+      return "#B0F2B0";
+    case Diff::WordDeletion:
+      return "#F2B0B0";
+    case Diff::Plus:
+      return "#45CC45";
+    case Diff::Minus:
+      return "#F28080";
+    case Diff::Note:
+      return "#000000";
+    case Diff::Warning:
+      return "#FFFF00";
+    case Diff::Error:
+      return "#FF0000";
   }
 }
 
-QColor Theme::heatMap(HeatMap color)
-{
+QColor Theme::heatMap(HeatMap color) {
   switch (color) {
-    case HeatMap::Hot:  return QPalette().color(QPalette::Highlight);
-    case HeatMap::Cold: return mDark ? QPalette().color(QPalette::Inactive, QPalette::Highlight) :
-                                       QPalette().color(QPalette::Mid);
+    case HeatMap::Hot:
+      return QPalette().color(QPalette::Highlight);
+    case HeatMap::Cold:
+      return mDark ? QPalette().color(QPalette::Inactive, QPalette::Highlight)
+                   : QPalette().color(QPalette::Mid);
   }
 }
 
-QColor Theme::remoteComment(Comment color)
-{
+QColor Theme::remoteComment(Comment color) {
   switch (color) {
-    case Comment::Background: return QPalette().color(QPalette::Base);
-    case Comment::Body:       return QPalette().color(QPalette::Window);
-    case Comment::Author:     return QPalette().color(QPalette::WindowText);
-    case Comment::Timestamp:  return QPalette().color(QPalette::WindowText);
+    case Comment::Background:
+      return QPalette().color(QPalette::Base);
+    case Comment::Body:
+      return QPalette().color(QPalette::Window);
+    case Comment::Author:
+      return QPalette().color(QPalette::WindowText);
+    case Comment::Timestamp:
+      return QPalette().color(QPalette::WindowText);
   }
 }
 
-QColor Theme::star()
-{
-  return QPalette().color(QPalette::Highlight);
-}
+QColor Theme::star() { return QPalette().color(QPalette::Highlight); }
 
-Theme *Theme::create(const QString &defaultName)
-{
+Theme *Theme::create(const QString &defaultName) {
   // Upgrade theme key to capital case.
   Settings *settings = Settings::instance();
   QString key = settings->value("window/theme").toString();

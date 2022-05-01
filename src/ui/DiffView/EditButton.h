@@ -5,17 +5,12 @@
 #include "git/Patch.h"
 #include <QMenu>
 
-class EditButton : public Button
-{
+class EditButton : public Button {
   Q_OBJECT
 
 public:
-  EditButton(
-    const git::Patch &patch,
-    int index,
-    bool binary,
-    bool lfs,
-    QWidget *parent = nullptr);
+  EditButton(const git::Patch &patch, int index, bool binary, bool lfs,
+             QWidget *parent = nullptr);
 
   void updatePatch(const git::Patch &patch, int index, bool init = false);
 

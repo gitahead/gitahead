@@ -3,14 +3,9 @@
 #include "ui/RepoView.h"
 #include <QPainterPath>
 
-EditButton::EditButton(
-  const git::Patch &patch,
-  int index,
-  bool binary,
-  bool lfs,
-  QWidget *parent)
-  : Button(parent)
-{
+EditButton::EditButton(const git::Patch &patch, int index, bool binary,
+                       bool lfs, QWidget *parent)
+    : Button(parent) {
   setObjectName("EditButton");
 
   // Add edit button menu.
@@ -29,8 +24,7 @@ EditButton::EditButton(
   setVisible(!binary && !lfs);
 }
 
-void EditButton::updatePatch(const git::Patch &patch, int index, bool init)
-{
+void EditButton::updatePatch(const git::Patch &patch, int index, bool init) {
   if ((!isEnabled() || !isVisible()) && !init)
     return;
 
@@ -50,9 +44,7 @@ void EditButton::updatePatch(const git::Patch &patch, int index, bool init)
   if (patch.repo().workdir().exists(name)) {
     mEditWorkingCopyAction->setVisible(true);
     connect(mEditWorkingCopyAction, &QAction::triggered, this,
-      [view, name, newLine] {
-      view->edit(name, newLine);
-    });
+            [view, name, newLine] { view->edit(name, newLine); });
   } else
     mEditWorkingCopyAction->setVisible(false);
 
@@ -66,9 +58,9 @@ void EditButton::updatePatch(const git::Patch &patch, int index, bool init)
   if (newBlob.isValid()) {
     mEditNewRevisionAction->setVisible(true);
     connect(mEditNewRevisionAction, &QAction::triggered, this,
-      [view, name, newLine, newBlob, commit] {
-      view->openEditor(name, newLine, newBlob, commit);
-    });
+            [view, name, newLine, newBlob, commit] {
+              view->openEditor(name, newLine, newBlob, commit);
+            });
   } else
     mEditNewRevisionAction->setVisible(false);
 
@@ -82,15 +74,14 @@ void EditButton::updatePatch(const git::Patch &patch, int index, bool init)
     }
 
     connect(mEditOldRevisionAction, &QAction::triggered, this,
-      [view, name, oldLine, oldBlob, commit] {
-      view->openEditor(name, oldLine, oldBlob, commit);
-    });
+            [view, name, oldLine, oldBlob, commit] {
+              view->openEditor(name, oldLine, oldBlob, commit);
+            });
   } else
     mEditOldRevisionAction->setVisible(false);
 }
 
-void EditButton::paintEvent(QPaintEvent *event)
-{
+void EditButton::paintEvent(QPaintEvent *event) {
   Q_UNUSED(event)
 
   QPainter painter(this);

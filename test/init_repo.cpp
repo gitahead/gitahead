@@ -28,8 +28,7 @@
 using namespace Test;
 using namespace QTest;
 
-class TestInitRepo : public QObject
-{
+class TestInitRepo : public QObject {
   Q_OBJECT
 
 private slots:
@@ -44,8 +43,7 @@ private:
   MainWindow *mWindow = nullptr;
 };
 
-void TestInitRepo::initTestCase()
-{
+void TestInitRepo::initTestCase() {
   QDir dir = QDir::temp();
   if (dir.cd("test_init_repo"))
     QVERIFY(dir.removeRecursively());
@@ -72,7 +70,7 @@ void TestInitRepo::initTestCase()
   mouseClick(plus, Qt::LeftButton);
 
   CloneDialog *cloneDialog =
-    qobject_cast<CloneDialog *>(QApplication::activeModalWidget());
+      qobject_cast<CloneDialog *>(QApplication::activeModalWidget());
   QVERIFY(cloneDialog);
 
   // Set fields.
@@ -87,8 +85,7 @@ void TestInitRepo::initTestCase()
   QVERIFY(mWindow && qWaitForWindowActive(mWindow));
 }
 
-void TestInitRepo::addFile()
-{
+void TestInitRepo::addFile() {
   // Create a file.
   QDir dir = QDir::temp();
   QVERIFY(dir.cd("test_init_repo"));
@@ -108,15 +105,14 @@ void TestInitRepo::addFile()
 
   // Wait for refresh
   QAbstractItemModel *model = files->model();
-  while(model->rowCount() < 1)
+  while (model->rowCount() < 1)
     qWait(300);
 
   QCOMPARE(model->rowCount(), 1);
   QCOMPARE(model->data(model->index(0, 0)).toString(), QString("test"));
 }
 
-void TestInitRepo::commitFile()
-{
+void TestInitRepo::commitFile() {
   RepoView *view = mWindow->currentView();
   DetailView *detailView = view->findChild<DetailView *>();
   QVERIFY(detailView);
@@ -128,15 +124,12 @@ void TestInitRepo::commitFile()
   view->commit();
 }
 
-void TestInitRepo::amendCommit()
-{
+void TestInitRepo::amendCommit() {
   RepoView *view = mWindow->currentView();
   QVERIFY(view);
 
   bool finished = false;
-  connect(view, &RepoView::statusChanged, [&finished]() {
-    finished = true;
-  });
+  connect(view, &RepoView::statusChanged, [&finished]() { finished = true; });
 
   view->amendCommit();
 
@@ -147,13 +140,12 @@ void TestInitRepo::amendCommit()
   CommitList *commitList = view->findChild<CommitList *>();
   QVERIFY(commitList);
   QAbstractItemModel *commitModel = commitList->model();
-  QModelIndex index = commitModel->index(0,0);
+  QModelIndex index = commitModel->index(0, 0);
   QString name = commitModel->data(index, Qt::DisplayRole).toString();
   QCOMPARE(name, QString("Uncommitted changes"));
 }
 
-void TestInitRepo::editFile()
-{
+void TestInitRepo::editFile() {
   RepoView *view = mWindow->currentView();
 
   auto doubleTree = view->findChild<DoubleTreeWidget *>();
@@ -162,10 +154,8 @@ void TestInitRepo::editFile()
   auto files = doubleTree->findChild<TreeView *>("Staged");
   QVERIFY(files);
 
-  files->selectionModel()->select(
-    files->model()->index(0, 0),
-    QItemSelectionModel::Select
-  );
+  files->selectionModel()->select(files->model()->index(0, 0),
+                                  QItemSelectionModel::Select);
 
   DiffView *diff = view->findChild<DiffView *>();
   QVERIFY(diff);
@@ -185,8 +175,7 @@ void TestInitRepo::editFile()
   mouseClick(edit, Qt::LeftButton);
 }
 
-void TestInitRepo::cleanupTestCase()
-{
+void TestInitRepo::cleanupTestCase() {
   mWindow->close();
   QDir dir = QDir::temp();
   QVERIFY(dir.cd("test_init_repo"));

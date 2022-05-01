@@ -15,15 +15,13 @@
 namespace git {
 class Reference;
 class Repository;
-}
+} // namespace git
 
-class ReferenceView : public QTreeView
-{
+class ReferenceView : public QTreeView {
   Q_OBJECT
 
 public:
-  enum Kind
-  {
+  enum Kind {
     InvalidRef = 0x1, // invalid element
     DetachedHead = 0x2,
     LocalBranches = 0x4,
@@ -36,11 +34,8 @@ public:
 
   Q_DECLARE_FLAGS(Kinds, Kind);
 
-  ReferenceView(
-    const git::Repository &repo,
-    Kinds kinds = AllRefs,
-    bool popup = false,
-    QWidget *parent = nullptr);
+  ReferenceView(const git::Repository &repo, Kinds kinds = AllRefs,
+                bool popup = false, QWidget *parent = nullptr);
 
   bool isPopup() const { return mPopup; }
   void resetTabIndex();

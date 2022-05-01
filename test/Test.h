@@ -15,22 +15,20 @@
 #include <QTemporaryDir>
 #include <QtTest/QtTest>
 
-#define TEST_MAIN(TestClass) \
-int main(int argc, char *argv[]) \
-{ \
-  int orig_argc = argc;\
-  Application app = Test::createApp(argc, argv); \
-  TestClass test; \
-  QTEST_SET_MAIN_SOURCE_PATH \
-  return QTest::qExec(&test, orig_argc, argv); \
-}
+#define TEST_MAIN(TestClass)                                                   \
+  int main(int argc, char *argv[]) {                                           \
+    int orig_argc = argc;                                                      \
+    Application app = Test::createApp(argc, argv);                             \
+    TestClass test;                                                            \
+    QTEST_SET_MAIN_SOURCE_PATH                                                 \
+    return QTest::qExec(&test, orig_argc, argv);                               \
+  }
 
 class RepoView;
 
 namespace Test {
 
-class ScratchRepository
-{
+class ScratchRepository {
 public:
   ScratchRepository(bool autoRemove = true);
 

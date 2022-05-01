@@ -26,30 +26,22 @@
 
 namespace {
 
-void warnRevisionNotFound(
-  QWidget *parent,
-  const QString &fragment,
-  const QString &file)
-{
+void warnRevisionNotFound(QWidget *parent, const QString &fragment,
+                          const QString &file) {
   QString title = FileContextMenu::tr("Revision Not Found");
-  QString text = FileContextMenu::tr(
-    "The selected file doesn't have a %1 revision.").arg(fragment);
+  QString text =
+      FileContextMenu::tr("The selected file doesn't have a %1 revision.")
+          .arg(fragment);
   QMessageBox msg(QMessageBox::Warning, title, text, QMessageBox::Ok, parent);
   msg.setInformativeText(file);
   msg.exec();
 }
 
-} // anon. namespace
+} // namespace
 
-FileContextMenu::FileContextMenu(
-  RepoView *view,
-  const QStringList &files,
-  const git::Index &index,
-  QWidget *parent)
-  : QMenu(parent),
-    mFiles(files),
-    mView(view)
-{
+FileContextMenu::FileContextMenu(RepoView *view, const QStringList &files,
+                                 const git::Index &index, QWidget *parent)
+    : QMenu(parent), mFiles(files), mView(view) {
   // Show diff and merge tools for the currently selected diff.
   git::Diff diff = view->diff();
   git::Repository repo = view->repo();
@@ -91,8 +83,10 @@ FileContextMenu::FileContextMenu(
 
         QString title = tr("Bash Not Found");
         QString text = tr("Bash was not found on your PATH.");
-        QMessageBox msg(QMessageBox::Warning, title, text, QMessageBox::Ok, this);
-        msg.setInformativeText(tr("Bash is required to execute external tools."));
+        QMessageBox msg(QMessageBox::Warning, title, text, QMessageBox::Ok,
+                        this);
+        msg.setInformativeText(
+            tr("Bash is required to execute external tools."));
         msg.exec();
       });
     }
@@ -178,9 +172,9 @@ FileContextMenu::FileContextMenu(
 
     QAction *discard = addAction(tr("Discard Changes"), [view, modified] {
       QMessageBox *dialog = new QMessageBox(
-        QMessageBox::Warning, tr("Discard Changes?"),
-        tr("Are you sure you want to discard changes in the selected files?"),
-        QMessageBox::Cancel, view);
+          QMessageBox::Warning, tr("Discard Changes?"),
+          tr("Are you sure you want to discard changes in the selected files?"),
+          QMessageBox::Cancel, view);
       dialog->setAttribute(Qt::WA_DeleteOnClose);
       dialog->setInformativeText(tr("This action cannot be undone."));
       dialog->setDetailedText(modified.join('\n'));
@@ -203,9 +197,8 @@ FileContextMenu::FileContextMenu(
       dialog->open();
     });
 
-    QAction *remove = addAction(tr("Remove Untracked Files"), [view, untracked] {
-      view->clean(untracked);
-    });
+    QAction *remove = addAction(tr("Remove Untracked Files"),
+                                [view, untracked] { view->clean(untracked); });
 
     discard->setEnabled(!modified.isEmpty());
     remove->setEnabled(!untracked.isEmpty());
@@ -237,65 +230,76 @@ FileContextMenu::FileContextMenu(
     });
 
     // Checkout to ...
-	QAction *checkoutTo = addAction(tr("Save Selected Version as ..."), [this, view, files] {
-      QFileDialog d(this);
-      d.setFileMode(QFileDialog::FileMode::Directory);
-      d.setOption(QFileDialog::ShowDirsOnly);
-	  d.setWindowTitle(tr("Select new file directory"));
-      if (d.exec()) {
-		  const auto folder = d.selectedFiles().first();
-		  const auto save = view->addLogEntry(tr("Saving files"), tr("Saving files of selected version to disk"));
-			for (const auto& file: files) {
-				const auto saveFile = view->addLogEntry(tr("Save file ") + file, "Save file", save);
-				// assumption. file is a file not a folder!
-				if (!exportFile(view, folder, file))
-					view->error(saveFile, "save file", file, tr("Invalid Blob"));
-			}
-          view->setViewMode(RepoView::DoubleTree);
-      }
-	  return true;
-      });
+    QAction *checkoutTo =
+        addAction(tr("Save Selected Version as ..."), [this, view, files] {
+          QFileDialog d(this);
+          d.setFileMode(QFileDialog::FileMode::Directory);
+          d.setOption(QFileDialog::ShowDirsOnly);
+          d.setWindowTitle(tr("Select new file directory"));
+          if (d.exec()) {
+            const auto folder = d.selectedFiles().first();
+            const auto save = view->addLogEntry(
+                tr("Saving files"),
+                tr("Saving files of selected version to disk"));
+            for (const auto &file : files) {
+              const auto saveFile =
+                  view->addLogEntry(tr("Save file ") + file, "Save file", save);
+              // assumption. file is a file not a folder!
+              if (!exportFile(view, folder, file))
+                view->error(saveFile, "save file", file, tr("Invalid Blob"));
+            }
+            view->setViewMode(RepoView::DoubleTree);
+          }
+          return true;
+        });
 
-	QAction *open = addAction(tr("Open this version"), [this, view, files] {
-	  QString folder = QDir::tempPath();
-	  const auto& file = files.first();
-	  auto filename = file.split("/").last();
+    QAction *open = addAction(tr("Open this version"), [this, view, files] {
+      QString folder = QDir::tempPath();
+      const auto &file = files.first();
+      auto filename = file.split("/").last();
 
-	  auto logentry = view->addLogEntry(tr("Opening file"), tr("Open ") + filename);
+      auto logentry =
+          view->addLogEntry(tr("Opening file"), tr("Open ") + filename);
 
-	  if (exportFile(view, folder, file))
-		QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(folder + "/" + filename).absoluteFilePath()));
-	  else
-		  view->error(logentry, tr("open file"), filename, tr("Blob is invalid."));
-	});
+      if (exportFile(view, folder, file))
+        QDesktopServices::openUrl(QUrl::fromLocalFile(
+            QFileInfo(folder + "/" + filename).absoluteFilePath()));
+      else
+        view->error(logentry, tr("open file"), filename,
+                    tr("Blob is invalid."));
+    });
 
-	// should show a dialog to select an application
-	// Don't forgett to uncomment "openWith->setEnabled(!isBare);" below
-//	QAction *openWith = addAction(tr("Open this Version with ..."), [this, view, files] {
-//	  QString folder = QDir::tempPath();
-//	  const auto& file = files.first();
-//	  auto filename = file.split("/").last();
+    // should show a dialog to select an application
+    // Don't forgett to uncomment "openWith->setEnabled(!isBare);" below
+    //	QAction *openWith = addAction(tr("Open this Version with ..."), [this,
+    // view, files] { 	  QString folder = QDir::tempPath(); 	  const auto&
+    // file = files.first(); 	  auto filename = file.split("/").last();
 
-//	  auto logentry = view->addLogEntry(tr("Opening file with ..."), tr("Open ") + filename);
+    //	  auto logentry = view->addLogEntry(tr("Opening file with ..."),
+    // tr("Open ") + filename);
 
-//	  if (exportFile(view, folder, file))
-//		QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(folder + "/" + filename).absoluteFilePath()));
-//	  else
-//		view->error(logentry, tr("open file"), filename, tr("Blob is invalid."));
-//	});
+    //	  if (exportFile(view, folder, file))
+    //		QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(folder +
+    //"/"
+    //+ filename).absoluteFilePath())); 	  else
+    // view->error(logentry, tr("open file"), filename, tr("Blob is invalid."));
+    //	});
 
     auto isBare = view->repo().isBare();
     const auto blob = view->commits().first().blob(files.first());
     checkout->setEnabled(!isBare);
-	checkout->setToolTip(!isBare ? "" : tr("Unable to checkout bare repositories"));
+    checkout->setToolTip(!isBare ? ""
+                                 : tr("Unable to checkout bare repositories"));
     checkoutTo->setEnabled(!isBare && blob.isValid());
-	checkoutTo->setToolTip(!isBare ? "" : tr("Unable to checkout bare repositories"));
-	open->setEnabled(!isBare && blob.isValid());
-	open->setToolTip(!isBare ? "" : tr("Unable to open files from bare repository"));
-	//openWith->setEnabled(!isBare && blob.isValid());
+    checkoutTo->setToolTip(
+        !isBare ? "" : tr("Unable to checkout bare repositories"));
+    open->setEnabled(!isBare && blob.isValid());
+    open->setToolTip(!isBare ? ""
+                             : tr("Unable to open files from bare repository"));
+    // openWith->setEnabled(!isBare && blob.isValid());
 
-	/* disable checkout if the file is already
-	 * in the current working directory */
+    /* disable checkout if the file is already
+     * in the current working directory */
     git::Commit commit = commits.first();
     foreach (const QString &file, files) {
       if (commit.tree().id(file) == repo.workdirId(file)) {
@@ -317,9 +321,8 @@ FileContextMenu::FileContextMenu(
       }
     }
 
-    addAction(locked ? tr("Unlock") : tr("Lock"), [view, files, locked] {
-      view->lfsSetLocked(files, !locked);
-    });
+    addAction(locked ? tr("Unlock") : tr("Lock"),
+              [view, files, locked] { view->lfsSetLocked(files, !locked); });
   }
 
   // Add single selection actions.
@@ -334,23 +337,16 @@ FileContextMenu::FileContextMenu(
     QString name = QFileInfo(file).fileName();
     QMenu *copy = addMenu(tr("Copy File Name"));
     if (!name.isEmpty() && name != file) {
-      copy->addAction(name, [name] {
-        QApplication::clipboard()->setText(name);
-      });
+      copy->addAction(name,
+                      [name] { QApplication::clipboard()->setText(name); });
     }
-    copy->addAction(rel, [rel] {
-      QApplication::clipboard()->setText(rel);
-    });
-    copy->addAction(abs, [abs] {
-      QApplication::clipboard()->setText(abs);
-    });
+    copy->addAction(rel, [rel] { QApplication::clipboard()->setText(rel); });
+    copy->addAction(abs, [abs] { QApplication::clipboard()->setText(abs); });
 
     addSeparator();
 
     // History
-    addAction(tr("Filter History"), [view, file] {
-      view->setPathspec(file);
-    });
+    addAction(tr("Filter History"), [view, file] { view->setPathspec(file); });
 
     // Navigate
     QMenu *navigate = addMenu(tr("Navigate to"));
@@ -380,8 +376,8 @@ FileContextMenu::FileContextMenu(
       bool exe = (mode == GIT_FILEMODE_BLOB_EXECUTABLE);
       QString exeName = exe ? tr("Unset Executable") : tr("Set Executable");
       QAction *exeAct = addAction(exeName, [index, file, exe] {
-        git::Index(index).setMode(
-          file, exe ? GIT_FILEMODE_BLOB : GIT_FILEMODE_BLOB_EXECUTABLE);
+        git::Index(index).setMode(file, exe ? GIT_FILEMODE_BLOB
+                                            : GIT_FILEMODE_BLOB_EXECUTABLE);
       });
 
       exeAct->setEnabled(exe || mode == GIT_FILEMODE_BLOB);
@@ -389,43 +385,42 @@ FileContextMenu::FileContextMenu(
   }
 }
 
-void FileContextMenu::ignoreFile()
-{
+void FileContextMenu::ignoreFile() {
   QString ignore;
 
   if (!mFiles.count())
-      return;
+    return;
 
-  for (int i=0; i < mFiles.count() - 1; i++) {
-     ignore.append(mFiles[i] + "\n");
+  for (int i = 0; i < mFiles.count() - 1; i++) {
+    ignore.append(mFiles[i] + "\n");
   }
   ignore.append(mFiles.last());
 
- IgnoreDialog d(ignore, this);
- if (d.exec()) {
+  IgnoreDialog d(ignore, this);
+  if (d.exec()) {
     if (!ignore.isEmpty())
-        mView->ignore(ignore);
- }
+      mView->ignore(ignore);
+  }
 }
 
-bool FileContextMenu::exportFile(const RepoView* view, const QString& folder, const QString& file) {
-	const auto blob = view->commits().first().blob(file);
-	if (!blob.isValid())
-		return false;
+bool FileContextMenu::exportFile(const RepoView *view, const QString &folder,
+                                 const QString &file) {
+  const auto blob = view->commits().first().blob(file);
+  if (!blob.isValid())
+    return false;
 
-	auto filename = file.split("/").last();
-	QFile f(folder + "/" + filename);
-	if (!f.open(QFile::ReadWrite))
-	  return false;
+  auto filename = file.split("/").last();
+  QFile f(folder + "/" + filename);
+  if (!f.open(QFile::ReadWrite))
+    return false;
 
-	f.write(blob.content());
-	f.close();
-	return true;
+  f.write(blob.content());
+  f.close();
+  return true;
 }
 
 void FileContextMenu::addExternalToolsAction(
-  const QList<ExternalTool *> &tools)
-{
+    const QList<ExternalTool *> &tools) {
   if (tools.isEmpty())
     return;
 

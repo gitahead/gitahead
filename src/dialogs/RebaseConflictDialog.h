@@ -12,28 +12,18 @@
 
 #include <QDialog>
 
-class RebaseConflictDialog : public QDialog
-{
+class RebaseConflictDialog : public QDialog {
   Q_OBJECT
 
 public:
-  enum class ChosenAction
-  {
-    Unset,
-    Abort,
-    Leave
-  };
+  enum class ChosenAction { Unset, Abort, Leave };
 
   RebaseConflictDialog(QWidget *parent = nullptr);
 
-  inline ChosenAction userChoice() const
-  {
-    return mUserChoice;
-  }
+  inline ChosenAction userChoice() const { return mUserChoice; }
 
 private:
   ChosenAction mUserChoice = ChosenAction::Unset;
 };
 
 #endif
-

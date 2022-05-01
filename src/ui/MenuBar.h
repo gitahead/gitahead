@@ -16,8 +16,7 @@ class History;
 class RepoView;
 class StateAction;
 
-class MenuBar : public QMenuBar
-{
+class MenuBar : public QMenuBar {
   Q_OBJECT
 
 public:

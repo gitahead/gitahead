@@ -36,42 +36,35 @@ namespace {
 const int kHeight = 200;
 const QString kNowrapFmt = "<span style='white-space: nowrap'>%1</span>";
 
-bool refComparator(const git::Reference &lhs, const git::Reference &rhs)
-{
+bool refComparator(const git::Reference &lhs, const git::Reference &rhs) {
   git::Commit lhsCommit = lhs.target();
   git::Commit rhsCommit = rhs.target();
   return (lhsCommit.isValid() && rhsCommit.isValid() &&
           lhsCommit.committer().date() > rhsCommit.committer().date());
 }
 
-class ReferenceModel : public QAbstractItemModel
-{
+class ReferenceModel : public QAbstractItemModel {
   Q_OBJECT
 
 public:
-  struct ReferenceList
-  {
+  struct ReferenceList {
     QString name;
     QList<git::Reference> refs;
   };
 
-  ReferenceModel(
-    const git::Repository &repo,
-    ReferenceView::Kinds kinds,
-    QObject *parent = nullptr)
-    : QAbstractItemModel(parent), mRepo(repo), mKinds(kinds)
-  {
+  ReferenceModel(const git::Repository &repo, ReferenceView::Kinds kinds,
+                 QObject *parent = nullptr)
+      : QAbstractItemModel(parent), mRepo(repo), mKinds(kinds) {
     git::RepositoryNotifier *notifier = repo.notifier();
-    connect(notifier, &git::RepositoryNotifier::referenceAdded,
-            this, &ReferenceModel::update);
-    connect(notifier, &git::RepositoryNotifier::referenceRemoved,
-            this, &ReferenceModel::update);
-    connect(notifier, &git::RepositoryNotifier::referenceUpdated,
-            this, &ReferenceModel::update);
+    connect(notifier, &git::RepositoryNotifier::referenceAdded, this,
+            &ReferenceModel::update);
+    connect(notifier, &git::RepositoryNotifier::referenceRemoved, this,
+            &ReferenceModel::update);
+    connect(notifier, &git::RepositoryNotifier::referenceUpdated, this,
+            &ReferenceModel::update);
   }
 
-  void update()
-  {
+  void update() {
     beginResetModel();
 
     mRefs.clear();
@@ -137,11 +130,8 @@ public:
     endResetModel();
   }
 
-  QModelIndex index(
-    int row,
-    int column,
-    const QModelIndex &parent = QModelIndex()) const override
-  {
+  QModelIndex index(int row, int column,
+                    const QModelIndex &parent = QModelIndex()) const override {
     if (!hasIndex(row, column, parent))
       return QModelIndex();
 
@@ -149,8 +139,7 @@ public:
     return createIndex(row, column, !id ? parent.row() + 1 : 0);
   }
 
-  QModelIndex parent(const QModelIndex &index) const override
-  {
+  QModelIndex parent(const QModelIndex &index) const override {
     if (!index.isValid())
       return QModelIndex();
 
@@ -158,8 +147,7 @@ public:
     return !id ? QModelIndex() : createIndex(id - 1, 0);
   }
 
-  int rowCount(const QModelIndex &parent = QModelIndex()) const override
-  {
+  int rowCount(const QModelIndex &parent = QModelIndex()) const override {
     if (!parent.isValid())
       return mRefs.size();
 
@@ -169,15 +157,12 @@ public:
     return mRefs.at(parent.row()).refs.size();
   }
 
-  int columnCount(const QModelIndex &parent = QModelIndex()) const override
-  {
+  int columnCount(const QModelIndex &parent = QModelIndex()) const override {
     return 1;
   }
 
-  QVariant data(
-    const QModelIndex &index,
-    int role = Qt::DisplayRole) const override
-  {
+  QVariant data(const QModelIndex &index,
+                int role = Qt::DisplayRole) const override {
     // kinds
     int row = index.row();
     quintptr id = index.internalId();
@@ -229,11 +214,8 @@ public:
     }
   }
 
-  QVariant headerData(
-    int section,
-    Qt::Orientation orientation,
-    int role = Qt::DisplayRole) const override
-  {
+  QVariant headerData(int section, Qt::Orientation orientation,
+                      int role = Qt::DisplayRole) const override {
     return QVariant();
   }
 
@@ -243,21 +225,16 @@ private:
   QList<ReferenceList> mRefs;
 };
 
-class FilterProxyModel : public QSortFilterProxyModel
-{
+class FilterProxyModel : public QSortFilterProxyModel {
 public:
-  FilterProxyModel(QObject *parent = nullptr)
-    : QSortFilterProxyModel(parent)
-  {}
+  FilterProxyModel(QObject *parent = nullptr) : QSortFilterProxyModel(parent) {}
 
-  void setFilter(const QString &filter)
-  {
+  void setFilter(const QString &filter) {
     setFilterRegExp(QRegExp(filter, Qt::CaseInsensitive, QRegExp::FixedString));
   }
 
 protected:
-  bool filterAcceptsRow(int row, const QModelIndex &parent) const override
-  {
+  bool filterAcceptsRow(int row, const QModelIndex &parent) const override {
     if (!parent.isValid())
       return true;
 
@@ -265,31 +242,23 @@ protected:
   }
 };
 
-class Delegate : public QStyledItemDelegate
-{
+class Delegate : public QStyledItemDelegate {
 public:
-  Delegate(QObject *parent = nullptr)
-    : QStyledItemDelegate(parent)
-  {}
+  Delegate(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
 
 protected:
-  void initStyleOption(
-    QStyleOptionViewItem *option,
-    const QModelIndex &index) const
-  {
+  void initStyleOption(QStyleOptionViewItem *option,
+                       const QModelIndex &index) const {
     QStyledItemDelegate::initStyleOption(option, index);
     option->state |= QStyle::State_Active;
   }
 };
 
-class Header : public QHeaderView
-{
+class Header : public QHeaderView {
   Q_OBJECT
 
 public:
-  Header(ReferenceView *view = nullptr)
-    : QHeaderView(Qt::Horizontal, view)
-  {
+  Header(ReferenceView *view = nullptr) : QHeaderView(Qt::Horizontal, view) {
     setStretchLastSection(true);
 
     mTabs = new TabBar(this);
@@ -316,14 +285,14 @@ public:
     mField->setClearButtonEnabled(true);
 
     QHBoxLayout *fieldLayout = new QHBoxLayout;
-    fieldLayout->setContentsMargins(2,2,2,2);
+    fieldLayout->setContentsMargins(2, 2, 2, 2);
     fieldLayout->addWidget(mField);
 
     mWidget = new QWidget(this);
     mWidget->setAutoFillBackground(true);
 
     QVBoxLayout *layout = new QVBoxLayout(mWidget);
-    layout->setContentsMargins(0,0,0,0);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
 
     layout->addWidget(mTabs);
@@ -333,19 +302,12 @@ public:
   QLineEdit *field() const { return mField; }
   QTabBar *tabs() const { return mTabs; }
 
-  QSize sizeHint() const override
-  {
-    return mWidget->sizeHint();
-  }
+  QSize sizeHint() const override { return mWidget->sizeHint(); }
 
 protected:
-  void hideEvent(QHideEvent *event) override
-  {
-    mField->clear();
-  }
+  void hideEvent(QHideEvent *event) override { mField->clear(); }
 
-  void resizeEvent(QResizeEvent *event) override
-  {
+  void resizeEvent(QResizeEvent *event) override {
     QHeaderView::resizeEvent(event);
     mWidget->resize(size());
   }
@@ -356,15 +318,11 @@ private:
   QWidget *mWidget;
 };
 
-} // anon. namespace
+} // namespace
 
-ReferenceView::ReferenceView(
-  const git::Repository &repo,
-  Kinds kinds,
-  bool popup,
-  QWidget *parent)
-  : QTreeView(parent), mPopup(popup)
-{
+ReferenceView::ReferenceView(const git::Repository &repo, Kinds kinds,
+                             bool popup, QWidget *parent)
+    : QTreeView(parent), mPopup(popup) {
   // Constrain height.
   setMinimumHeight(kHeight);
   setMaximumHeight(kHeight);
@@ -409,14 +367,15 @@ ReferenceView::ReferenceView(
   if (!popup) {
     // Checkout on double-click.
     connect(this, &ReferenceView::doubleClicked,
-    [this, repo](const QModelIndex &index) {
-      if (repo.isBare())
-        return;
+            [this, repo](const QModelIndex &index) {
+              if (repo.isBare())
+                return;
 
-      git::Reference ref = index.data(Qt::UserRole).value<git::Reference>();
-      if (ref.isValid() && !ref.isHead())
-        RepoView::parentView(this)->checkout(ref);
-    });
+              git::Reference ref =
+                  index.data(Qt::UserRole).value<git::Reference>();
+              if (ref.isValid() && !ref.isHead())
+                RepoView::parentView(this)->checkout(ref);
+            });
   }
 
   // Keep focus on the field.
@@ -426,8 +385,7 @@ ReferenceView::ReferenceView(
   source->update();
 }
 
-void ReferenceView::resetTabIndex()
-{
+void ReferenceView::resetTabIndex() {
   QModelIndex root = currentIndex();
   while (root.parent().isValid())
     root = root.parent();
@@ -435,13 +393,11 @@ void ReferenceView::resetTabIndex()
   static_cast<Header *>(header())->tabs()->setCurrentIndex(root.row());
 }
 
-git::Reference ReferenceView::currentReference() const
-{
+git::Reference ReferenceView::currentReference() const {
   return currentIndex().data(Qt::UserRole).value<git::Reference>();
 }
 
-bool ReferenceView::eventFilter(QObject *watched, QEvent *event)
-{
+bool ReferenceView::eventFilter(QObject *watched, QEvent *event) {
   if (event->type() != QEvent::KeyPress)
     return false;
 
@@ -456,8 +412,7 @@ bool ReferenceView::eventFilter(QObject *watched, QEvent *event)
   return false;
 }
 
-QString ReferenceView::kindString(const git::Reference &ref)
-{
+QString ReferenceView::kindString(const git::Reference &ref) {
   if (ref.isLocalBranch())
     return tr("Branch");
 
@@ -470,16 +425,14 @@ QString ReferenceView::kindString(const git::Reference &ref)
   return QString();
 }
 
-void ReferenceView::showEvent(QShowEvent *event)
-{
+void ReferenceView::showEvent(QShowEvent *event) {
   resetTabIndex();
   setFocus();
 
   QTreeView::showEvent(event);
 }
 
-void ReferenceView::contextMenuEvent(QContextMenuEvent *event)
-{
+void ReferenceView::contextMenuEvent(QContextMenuEvent *event) {
   QModelIndex index = indexAt(event->pos());
   git::Reference ref = index.data(Qt::UserRole).value<git::Reference>();
   if (!ref.isValid())
@@ -520,16 +473,13 @@ void ReferenceView::contextMenuEvent(QContextMenuEvent *event)
     });
 
     remove->setEnabled(ref.isTag() || !ref.isHead());
-
   }
 
   if (ref.isTag()) {
     git::Remote remote = ref.repo().defaultRemote();
     if (remote.isValid()) {
       menu.addAction(tr("Push Tag to %1").arg(remote.name()),
-        [this, ref, view, remote] {
-          view->push(remote, ref);
-        });
+                     [this, ref, view, remote] { view->push(remote, ref); });
     }
   }
 
@@ -544,8 +494,7 @@ void ReferenceView::contextMenuEvent(QContextMenuEvent *event)
 
   QAction *merge = menu.addAction(tr("Merge..."), [this, ref] {
     RepoView *view = RepoView::parentView(this);
-    MergeDialog *dialog =
-      new MergeDialog(RepoView::Merge, view->repo(), view);
+    MergeDialog *dialog = new MergeDialog(RepoView::Merge, view->repo(), view);
     connect(dialog, &QDialog::accepted, [view, dialog] {
       view->merge(dialog->flags(), dialog->reference());
     });
@@ -556,8 +505,7 @@ void ReferenceView::contextMenuEvent(QContextMenuEvent *event)
 
   QAction *rebase = menu.addAction(tr("Rebase..."), [this, ref] {
     RepoView *view = RepoView::parentView(this);
-    MergeDialog *dialog =
-      new MergeDialog(RepoView::Rebase, view->repo(), view);
+    MergeDialog *dialog = new MergeDialog(RepoView::Rebase, view->repo(), view);
     connect(dialog, &QDialog::accepted, [view, dialog] {
       view->merge(dialog->flags(), dialog->reference());
     });
@@ -568,8 +516,7 @@ void ReferenceView::contextMenuEvent(QContextMenuEvent *event)
 
   QAction *squash = menu.addAction(tr("Squash..."), [this, ref] {
     RepoView *view = RepoView::parentView(this);
-    MergeDialog *dialog =
-      new MergeDialog(RepoView::Squash, view->repo(), view);
+    MergeDialog *dialog = new MergeDialog(RepoView::Squash, view->repo(), view);
     connect(dialog, &QDialog::accepted, [view, dialog] {
       view->merge(dialog->flags(), dialog->reference());
     });

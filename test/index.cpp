@@ -19,8 +19,7 @@
 using namespace Test;
 using namespace QTest;
 
-class TestIndex : public QObject
-{
+class TestIndex : public QObject {
   Q_OBJECT
 
 private slots:
@@ -35,15 +34,13 @@ private:
   MainWindow *mWindow = nullptr;
 };
 
-void TestIndex::initTestCase()
-{
+void TestIndex::initTestCase() {
   mWindow = new MainWindow(mRepo);
   mWindow->show();
   QVERIFY(qWaitForWindowActive(mWindow));
 }
 
-void TestIndex::stageAddition()
-{
+void TestIndex::stageAddition() {
   // Add file and refresh.
   QFile file(mRepo->workdir().filePath("test"));
   QVERIFY(file.open(QFile::WriteOnly));
@@ -69,9 +66,8 @@ void TestIndex::stageAddition()
   QVERIFY(!unstagedIndex.data(Qt::CheckStateRole).toBool());
 
   // Click on the check box.
-  mouseClick(
-    unstagedFiles->viewport(), Qt::LeftButton, Qt::KeyboardModifiers(),
-    unstagedFiles->checkRect(unstagedIndex).center());
+  mouseClick(unstagedFiles->viewport(), Qt::LeftButton, Qt::KeyboardModifiers(),
+             unstagedFiles->checkRect(unstagedIndex).center());
 
   QAbstractItemModel *stagedModel = stagedFiles->model();
   QCOMPARE(stagedModel->rowCount(), 1);
@@ -89,8 +85,7 @@ void TestIndex::stageAddition()
   refresh(view, false);
 }
 
-void TestIndex::stageDeletion()
-{
+void TestIndex::stageDeletion() {
   // Remove file and refresh.
   mRepo->workdir().remove("test");
 
@@ -114,9 +109,8 @@ void TestIndex::stageDeletion()
   QVERIFY(!unstagedIndex.data(Qt::CheckStateRole).toBool());
 
   // Click on the check box.
-  mouseClick(
-    unstagedFiles->viewport(), Qt::LeftButton, Qt::KeyboardModifiers(),
-    unstagedFiles->checkRect(unstagedIndex).center());
+  mouseClick(unstagedFiles->viewport(), Qt::LeftButton, Qt::KeyboardModifiers(),
+             unstagedFiles->checkRect(unstagedIndex).center());
 
   QAbstractItemModel *stagedModel = stagedFiles->model();
   QCOMPARE(stagedModel->rowCount(), 1);
@@ -134,8 +128,7 @@ void TestIndex::stageDeletion()
   refresh(view, false);
 }
 
-void TestIndex::stageDirectory()
-{
+void TestIndex::stageDirectory() {
   QDir dir = mRepo->workdir();
   dir.mkdir("dir");
   QVERIFY(dir.cd("dir"));
@@ -168,27 +161,24 @@ void TestIndex::stageDirectory()
   QCOMPARE(unstagedModel->rowCount(unstagedIndex), 2);
   QVERIFY(!unstagedIndex.data(Qt::CheckStateRole).toBool());
 
-  QVERIFY(
-    !unstagedModel->index(0, 0, unstagedIndex)
-      .data(Qt::CheckStateRole).toBool()
-  );
-  QVERIFY(
-    !unstagedModel->index(1, 0, unstagedIndex)
-      .data(Qt::CheckStateRole).toBool()
-  );
+  QVERIFY(!unstagedModel->index(0, 0, unstagedIndex)
+               .data(Qt::CheckStateRole)
+               .toBool());
+  QVERIFY(!unstagedModel->index(1, 0, unstagedIndex)
+               .data(Qt::CheckStateRole)
+               .toBool());
 
   // Setup post refresh trigger.
   bool finished = false;
-  auto connection = QObject::connect(view, &RepoView::statusChanged,
-  [&finished](bool dirty) {
-    QVERIFY(dirty);
-    finished = true;
-  });
+  auto connection =
+      QObject::connect(view, &RepoView::statusChanged, [&finished](bool dirty) {
+        QVERIFY(dirty);
+        finished = true;
+      });
 
   // Click on the check box.
-  mouseClick(
-    unstagedFiles->viewport(), Qt::LeftButton, Qt::KeyboardModifiers(),
-    unstagedFiles->checkRect(unstagedIndex).center());
+  mouseClick(unstagedFiles->viewport(), Qt::LeftButton, Qt::KeyboardModifiers(),
+             unstagedFiles->checkRect(unstagedIndex).center());
 
   // Wait for the refresh to finish.
   while (!finished)
@@ -205,19 +195,12 @@ void TestIndex::stageDirectory()
 
   // Check that they're staged now.
   QVERIFY(
-    stagedModel->index(0, 0, stagedIndex)
-      .data(Qt::CheckStateRole).toBool()
-  );
+      stagedModel->index(0, 0, stagedIndex).data(Qt::CheckStateRole).toBool());
   QVERIFY(
-    stagedModel->index(1, 0, stagedIndex)
-      .data(Qt::CheckStateRole).toBool()
-  );
+      stagedModel->index(1, 0, stagedIndex).data(Qt::CheckStateRole).toBool());
 }
 
-void TestIndex::cleanupTestCase()
-{
-  mWindow->close();
-}
+void TestIndex::cleanupTestCase() { mWindow->close(); }
 
 TEST_MAIN(TestIndex)
 

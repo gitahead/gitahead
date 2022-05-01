@@ -13,31 +13,22 @@
 //#############################################################################
 
 _Images::Image::Image(const QPixmap &pixmap, QWidget *parent)
-  : QWidget(parent), mPixmap(pixmap)
-{
+    : QWidget(parent), mPixmap(pixmap) {
   setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
 }
 
-QSize _Images::Image::sizeHint() const
-{
-  return mPixmap.size();
-}
+QSize _Images::Image::sizeHint() const { return mPixmap.size(); }
 
-bool _Images::Image::hasHeightForWidth() const
-{
-  return true;
-}
+bool _Images::Image::hasHeightForWidth() const { return true; }
 
-int _Images::Image::heightForWidth(int w) const
-{
+int _Images::Image::heightForWidth(int w) const {
   QSize size = sizeHint();
   int width = size.width();
   int height = size.height();
-  return (w >= width) ? height : height * (w / (qreal) width);
+  return (w >= width) ? height : height * (w / (qreal)width);
 }
 
-void _Images::Image::paintEvent(QPaintEvent *event)
-{
+void _Images::Image::paintEvent(QPaintEvent *event) {
   QPainter painter(this);
   painter.drawPixmap(rect(), mPixmap);
 }
@@ -46,20 +37,13 @@ void _Images::Image::paintEvent(QPaintEvent *event)
 //###########     Arrow     ###################################################
 //#############################################################################
 
-_Images::Arrow::Arrow(QWidget *parent)
-  : QWidget(parent)
-{
+_Images::Arrow::Arrow(QWidget *parent) : QWidget(parent) {
   setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Minimum);
 }
 
-QSize _Images::Arrow::sizeHint() const
-{
-  return QSize(100, 100);
-}
+QSize _Images::Arrow::sizeHint() const { return QSize(100, 100); }
 
-
-void _Images::Arrow::paintEvent(QPaintEvent *event)
-{
+void _Images::Arrow::paintEvent(QPaintEvent *event) {
   QPainter painter(this);
   painter.setRenderHint(QPainter::Antialiasing);
 
@@ -86,17 +70,12 @@ void _Images::Arrow::paintEvent(QPaintEvent *event)
   painter.drawPath(arrow);
 }
 
-
 //#############################################################################
 //###########     Images     ##################################################
 //#############################################################################
 
-Images::Images(
-  const git::Patch patch,
-  bool lfs,
-  QWidget *parent)
-  : QWidget(parent), mPatch(patch)
-{
+Images::Images(const git::Patch patch, bool lfs, QWidget *parent)
+    : QWidget(parent), mPatch(patch) {
   int size = 0;
   QPixmap pixmap = loadPixmap(git::Diff::NewFile, size, lfs);
   if (pixmap.isNull()) {
@@ -122,8 +101,7 @@ Images::Images(
   layout->addStretch();
 }
 
-QPixmap Images::loadPixmap(git::Diff::File type, int &size, bool lfs)
-{
+QPixmap Images::loadPixmap(git::Diff::File type, int &size, bool lfs) {
   git::Blob blob = mPatch.blob(type);
   if (!blob.isValid())
     return QPixmap();
@@ -146,8 +124,7 @@ QPixmap Images::loadPixmap(git::Diff::File type, int &size, bool lfs)
   return icon.pixmap(windowHandle(), QSize(64, 64));
 }
 
-QVBoxLayout *Images::imageLayout(const QPixmap pixmap, int size)
-{
+QVBoxLayout *Images::imageLayout(const QPixmap pixmap, int size) {
   QString arg = locale().formattedDataSize(size);
   QLabel *label = new QLabel(tr("<b>Size:</b> %1").arg(arg));
   label->setAlignment(Qt::AlignCenter);

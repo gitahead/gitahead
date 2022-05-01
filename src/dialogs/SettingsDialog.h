@@ -12,13 +12,11 @@
 
 #include <QMainWindow>
 
-class SettingsDialog : public QMainWindow
-{
+class SettingsDialog : public QMainWindow {
   Q_OBJECT
 
 public:
-  enum Index
-  {
+  enum Index {
     General,
     Diff,
     Tools,

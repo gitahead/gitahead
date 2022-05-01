@@ -12,8 +12,7 @@
 
 #include "ExternalTool.h"
 
-class ShowTool : public ExternalTool
-{
+class ShowTool : public ExternalTool {
   Q_OBJECT
 
 public:

@@ -21,32 +21,23 @@
 class AccountError;
 class AccountProgress;
 
-class Account : public QObject
-{
+class Account : public QObject {
   Q_OBJECT
 
 public:
-  enum Kind
-  {
-    GitHub,
-    Bitbucket,
-    Beanstalk,
-    GitLab
-  };
+  enum Kind { GitHub, Bitbucket, Beanstalk, GitLab };
 
-  struct Comment
-  {
+  struct Comment {
     QString body;
     QString author;
   };
 
-  using Comments = QMap<QDateTime,Comment>;
-  using FileComments = QMap<int,Comments>;
+  using Comments = QMap<QDateTime, Comment>;
+  using FileComments = QMap<int, Comments>;
 
-  struct CommitComments
-  {
+  struct CommitComments {
     Comments comments;
-    QMap<QString,FileComments> files;
+    QMap<QString, FileComments> files;
   };
 
   Account(const QString &username);
@@ -76,15 +67,10 @@ public:
   virtual void connect(const QString &password = QString()) = 0;
 
   virtual void requestForkParents(Repository *repo) {}
-  virtual void createPullRequest(
-    Repository *repo,
-    const QString &ownerRepo,
-    const QString &title,
-    const QString &body,
-    const QString &head,
-    const QString &base,
-    bool canModify)
-  {}
+  virtual void createPullRequest(Repository *repo, const QString &ownerRepo,
+                                 const QString &title, const QString &body,
+                                 const QString &head, const QString &base,
+                                 bool canModify) {}
 
   virtual void requestComments(Repository *repo, const QString &oid) {}
 
@@ -102,12 +88,10 @@ signals:
 
   void repositoryPathChanged(int index, const QString &path);
 
-  void commentsReady(
-    Repository *repo,
-    const QString &oid,
-    const CommitComments &comments);
+  void commentsReady(Repository *repo, const QString &oid,
+                     const CommitComments &comments);
 
-  void forkParentsReady(const QMap<QString,QString> &parents);
+  void forkParentsReady(const QMap<QString, QString> &parents);
   void pullRequestError(const QString &name, const QString &message);
 
 protected:
@@ -120,7 +104,7 @@ protected:
   QString mAccessToken;
 
   QList<Repository *> mRepos;
-  mutable QMap<int,QString> mRepoPaths;
+  mutable QMap<int, QString> mRepoPaths;
 
   AccountError *mError;
   AccountProgress *mProgress;
@@ -128,8 +112,7 @@ protected:
   QTcpServer mRedirectServer;
 };
 
-class AccountError : public QObject
-{
+class AccountError : public QObject {
   Q_OBJECT
 
 public:
@@ -147,8 +130,7 @@ private:
   QString mDetailedText;
 };
 
-class AccountProgress : public QObject
-{
+class AccountProgress : public QObject {
   Q_OBJECT
 
 public:

@@ -15,8 +15,7 @@
 
 class RecentRepository;
 
-class RecentRepositories : public QObject
-{
+class RecentRepositories : public QObject {
   Q_OBJECT
 
 public:

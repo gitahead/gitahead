@@ -19,8 +19,7 @@ namespace git {
 
 class Commit;
 
-class Rebase
-{
+class Rebase {
 public:
   bool isValid() const { return !d.isNull(); }
 
@@ -33,12 +32,9 @@ public:
   bool finish();
 
 private:
-  Rebase(
-    git_repository *repo,
-    git_rebase *rebase = nullptr,
-    const QString &overrideUser = QString(),
-    const QString &overrideEmail = QString()
-  );
+  Rebase(git_repository *repo, git_rebase *rebase = nullptr,
+         const QString &overrideUser = QString(),
+         const QString &overrideEmail = QString());
 
   git_repository *mRepo;
   QSharedPointer<git_rebase> d;
