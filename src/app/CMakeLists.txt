@@ -41,8 +41,7 @@ add_custom_command(
   COMMAND cmark_exe ${ACKNOWLEDGMENTS_MD} > ${ACKNOWLEDGMENTS_HTML}
   COMMAND cmark_exe ${PRIVACY_MD} > ${PRIVACY_HTML}
   COMMAND cmark_exe ${PLUGIN_MD} > ${PLUGIN_HTML}
-  DEPENDS ${CHANGELOG_MD} ${ACKNOWLEDGMENTS_MD} ${PRIVACY_MD} ${PLUGIN_MD}
-)
+  DEPENDS ${CHANGELOG_MD} ${ACKNOWLEDGMENTS_MD} ${PRIVACY_MD} ${PLUGIN_MD})
 
 # Add application library.
 add_library(app Application.cpp CustomTheme.cpp Theme.cpp ${RESOURCES}
