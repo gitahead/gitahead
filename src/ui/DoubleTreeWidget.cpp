@@ -409,16 +409,14 @@ void DoubleTreeWidget::storeSelection() {
   mSelectedFile.filename = "";
 }
 
-void DoubleTreeWidget::loadSelection()
-{
+void DoubleTreeWidget::loadSelection() {
   QModelIndex index;
 
   if (mSelectedFile.filename == "") {
-	if (mDiffTreeModel->rowCount() > 0)
-		index = mDiffTreeModel->index(0, 0);
+    if (mDiffTreeModel->rowCount() > 0)
+      index = mDiffTreeModel->index(0, 0);
   } else
-	index = mDiffTreeModel->index(mSelectedFile.filename);
-
+    index = mDiffTreeModel->index(mSelectedFile.filename);
 
   if (!index.isValid())
     return;
