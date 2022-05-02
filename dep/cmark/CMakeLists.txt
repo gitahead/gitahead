@@ -11,10 +11,10 @@ if(NOT LIBCMARK_FOUND)
 
   add_subdirectory(cmark)
   target_include_directories(
-    libcmark_static
+    cmark_static
     INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/cmark/src>
               $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/cmark/src>)
   set(LIBCMARK_LIBRARIES
-      libcmark_static
+      cmark_static
       CACHE INTERNAL "libcmark implementation" FORCE)
 endif()
