@@ -12,6 +12,8 @@
 
 #include <cstddef>
 #include <vector>
+#include <string_view>
+#include <memory>
 #include "Platform.h"
 #include <QColor>
 #include <QRect>

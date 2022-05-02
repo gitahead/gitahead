@@ -1,7 +1,3 @@
-if(APPLE)
-  set(IMPL_FILES MainWindow_mac.mm)
-endif()
-
 add_library(
   ui
   AdvancedSearchWidget.cpp
@@ -55,8 +51,7 @@ add_library(
   TreeProxy.cpp
   TreeView.cpp
   TreeWidget.cpp
-  ViewDelegate.cpp
-  ${IMPL_FILES})
+  ViewDelegate.cpp)
 
 target_compile_definitions(ui PRIVATE BUILD_DESCRIPTION="${BUILD_DESCRIPTION}")
 
