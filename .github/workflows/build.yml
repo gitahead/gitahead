@@ -4,6 +4,8 @@
 name: Gittyup
 on:
   push:
+    branches:
+    - master
   pull_request:
   page_build:
   workflow_dispatch:
