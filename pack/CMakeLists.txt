@@ -226,7 +226,7 @@ elseif(WIN32)
   set(CPACK_NSIS_EXECUTABLES_DIRECTORY ".")
   set(CPACK_NSIS_MUI_FINISHPAGE_RUN ${GITTYUP_NAME}.exe)
 
-  if(CMAKE_CL_64)
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     install(
       FILES ${RSRC_DIR}/vcredist_x64.exe
       DESTINATION .
