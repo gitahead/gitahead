@@ -139,6 +139,7 @@ jobs:
             qt_arch_check_only: win64_msvc2017_64
             openssl_arch: VC-WIN64A
             msvc_arch: x64
+            cmake_flags: "-DUSE_BUNDLED_ZLIB=1"
             cmake_env:
               CMAKE_RC_FLAGS: "/C 1252"
               CC: clang
