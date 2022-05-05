@@ -33,7 +33,7 @@ private:
 
 void TestBareRepo::initTestCase() {
   StartDialog *dialog = StartDialog::openSharedInstance();
-  QVERIFY(qWaitForWindowActive(dialog));
+  QVERIFY(qWaitForWindowExposed(dialog));
 
   // Find the first button in the first footer.
   Footer *footer = dialog->findChild<Footer *>();
@@ -50,8 +50,12 @@ void TestBareRepo::initTestCase() {
     keyClick(menu, Qt::Key_Return);
   });
 
-  // Show popup menu.
-  mouseClick(plus, Qt::LeftButton);
+  {
+    auto timeout = Timeout(1000, "Start dialog hasn't been dismissed in time");
+
+    // Show popup menu.
+    mouseClick(plus, Qt::LeftButton);
+  }
 
   CloneDialog *cloneDialog =
       qobject_cast<CloneDialog *>(QApplication::activeModalWidget());

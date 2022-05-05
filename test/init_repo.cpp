@@ -66,8 +66,12 @@ void TestInitRepo::initTestCase() {
     keyClick(menu, Qt::Key_Return);
   });
 
-  // Show popup menu.
-  mouseClick(plus, Qt::LeftButton);
+  {
+    auto timeout = Timeout(1000, "Start dialog didn't close in time");
+
+    // Show popup menu.
+	mouseClick(plus, Qt::LeftButton);
+  }
 
   CloneDialog *cloneDialog =
       qobject_cast<CloneDialog *>(QApplication::activeModalWidget());
@@ -82,7 +86,7 @@ void TestInitRepo::initTestCase() {
 
   // Wait on the new window.
   mWindow = MainWindow::activeWindow();
-  QVERIFY(mWindow && qWaitForWindowActive(mWindow));
+  QVERIFY(mWindow && qWaitForWindowExposed(mWindow));
 }
 
 void TestInitRepo::addFile() {
@@ -103,10 +107,14 @@ void TestInitRepo::addFile() {
   auto files = doubleTree->findChild<TreeView *>("Unstaged");
   QVERIFY(files);
 
-  // Wait for refresh
   QAbstractItemModel *model = files->model();
-  while (model->rowCount() < 1)
-    qWait(300);
+
+  {
+    // Wait for refresh
+    auto timeout = Timeout(10000, "Repository didn't refresh in time");
+    while (model->rowCount() < 1)
+      qWait(300);
+  }
 
   QCOMPARE(model->rowCount(), 1);
   QCOMPARE(model->data(model->index(0, 0)).toString(), QString("test"));
@@ -133,8 +141,12 @@ void TestInitRepo::amendCommit() {
 
   view->amendCommit();
 
-  while (!finished)
-    qWait(300);
+  {
+    auto timeout =
+        Timeout(10000, "Repository didn't detect status change in time");
+    while (!finished)
+      qWait(300);
+  }
 
   // Verify commit amended
   CommitList *commitList = view->findChild<CommitList *>();
@@ -172,7 +184,11 @@ void TestInitRepo::editFile() {
     keyClick(menu, Qt::Key_Return);
   });
 
-  mouseClick(edit, Qt::LeftButton);
+  {
+    auto timeout = Timeout(1000, "Popup didn't close in time");
+    // mouseClick(edit, Qt::LeftButton);
+    edit->click();
+  }
 }
 
 void TestInitRepo::cleanupTestCase() {

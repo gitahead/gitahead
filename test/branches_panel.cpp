@@ -58,7 +58,7 @@ void TestBranchesPanel::initTestCase() {
 
   mWindow->show();
   mConfigDialog = view->configureSettings(ConfigDialog::Branches);
-  QVERIFY(qWaitForWindowActive(mConfigDialog));
+  QVERIFY(qWaitForWindowExposed(mConfigDialog));
 }
 
 void TestBranchesPanel::createBranch() {

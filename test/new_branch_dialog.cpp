@@ -36,7 +36,7 @@ void TestNewBranchDialog::initTestCase() {
   mWindow = new QMainWindow;
   NewBranchDialog *dialog = new NewBranchDialog(mRepo, git::Commit(), mWindow);
   dialog->show();
-  QVERIFY(qWaitForWindowActive(dialog));
+  QVERIFY(qWaitForWindowExposed(dialog));
 }
 
 void TestNewBranchDialog::verifyName() {

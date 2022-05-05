@@ -11,7 +11,7 @@ macro(test TEST_NAME)
                               ${CMAKE_CURRENT_BINARY_DIR})
 
   add_test(NAME ${TEST_NAME} COMMAND $<TARGET_FILE:test_${TEST_NAME}>)
-  add_dependencies(check test_${TEST_NAME})
+  add_dependencies(check_build test_${TEST_NAME})
 
   if(WIN32)
     string(REPLACE ";" "\;" NEWPATH "$ENV{PATH}")
@@ -22,13 +22,16 @@ macro(test TEST_NAME)
         "PATH=${CMAKE_BINARY_DIR}\;${NEWPATH};QT_PLUGIN_PATH=${CMAKE_BINARY_DIR}\\Plugins"
     )
   endif()
-  message("PATH: " ${CMAKE_BINARY_DIR})
 endmacro()
+
+add_custom_target(check_build)
 
 # Add check target.
 add_custom_target(
   check
   COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process --output-on-failure
+          --timeout 300
+  DEPENDS check_build
   COMMENT "Running tests..."
   USES_TERMINAL)
 
