@@ -168,23 +168,9 @@ void TestIndex::stageDirectory() {
                .data(Qt::CheckStateRole)
                .toBool());
 
-  // Setup post refresh trigger.
-  bool finished = false;
-  auto connection =
-      QObject::connect(view, &RepoView::statusChanged, [&finished](bool dirty) {
-        QVERIFY(dirty);
-        finished = true;
-      });
-
   // Click on the check box.
   mouseClick(unstagedFiles->viewport(), Qt::LeftButton, Qt::KeyboardModifiers(),
              unstagedFiles->checkRect(unstagedIndex).center());
-
-  // Wait for the refresh to finish.
-  while (!finished)
-    qWait(100);
-
-  QObject::disconnect(connection);
 
   // Check for two staged files.
   QAbstractItemModel *stagedModel = stagedFiles->model();
