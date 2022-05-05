@@ -212,7 +212,7 @@ Application createApp(int &argc, char *argv[]) {
   memcpy(new_argv, argv, sizeof(char *) * argc);
 
   // Make string comparisons with messages fail less
-  new_argv[argc] = "--no-translation";
+  new_argv[argc] = (char *)"--no-translation";
 
   argc += 1;
   return Application(argc, new_argv);
