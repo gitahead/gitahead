@@ -208,11 +208,23 @@ void fetch(RepoView *view, git::Remote remote) {
 }
 
 Application createApp(int &argc, char *argv[]) {
+#define OFFSCREEN 1
+
+#if OFFSCREEN == 1
+  auto new_argv = new char *[argc + 1 + 2];
+#else
   auto new_argv = new char *[argc + 1];
+#endif
   memcpy(new_argv, argv, sizeof(char *) * argc);
 
   // Make string comparisons with messages fail less
   new_argv[argc] = (char *)"--no-translation";
+
+#if OFFSCREEN == 1
+  new_argv[argc + 1] = (char *)"--platform";
+  new_argv[argc + 2] = (char *)"offscreen";
+  argc += 2;
+#endif
 
   argc += 1;
   return Application(argc, new_argv);
