@@ -164,6 +164,12 @@ jobs:
             pack: 1
 
     steps:
+      # otherwise the testcases will fail, because signature is invalid
+      - name: Set git name and email
+        run: |
+          git config --global user.name "Your Name"
+          git config --global user.email "youremail@yourdomain.com"
+          git config --list
       - name: Configure development build
         if: github.ref_type != 'tag'
         uses: allenevans/set-env@c4f231179ef63887be707202a295d9cb1c687eb9
