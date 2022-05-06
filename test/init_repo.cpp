@@ -70,7 +70,7 @@ void TestInitRepo::initTestCase() {
     auto timeout = Timeout(1000, "Start dialog didn't close in time");
 
     // Show popup menu.
-	mouseClick(plus, Qt::LeftButton);
+    mouseClick(plus, Qt::LeftButton);
   }
 
   CloneDialog *cloneDialog =
