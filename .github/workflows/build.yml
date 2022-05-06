@@ -283,21 +283,6 @@ jobs:
           path: build/release/VERSION.txt
           name: Gittyup-VERSION
 
-      - name: Test Requirements
-        if: matrix.env.ninja_platform == 'linux'
-        continue-on-error: false
-        run: |
-          sudo apt update -q
-          sudo apt install -y -q build-essential libgl1-mesa-dev \
-            libxcb-icccm4 \
-            libxcb-image0 \
-            libxcb-util1 \
-            libxcb-keysyms1 \
-            libxcb-randr0 \
-            libxcb-render-util0 \
-            libxcb-xinerama0 \
-            icewm xvfb
-
       - name: Test
         # TODO: Re-Enable this when https://github.com/actions/runner/issues/1206 gets resolved
         if: matrix.env.ninja_platform != 'win' && matrix.env.ninja_platform != 'mac'

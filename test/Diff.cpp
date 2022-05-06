@@ -53,4 +53,5 @@ private slots:
   }
 };
 
-QTEST_MAIN(TestDiff)
+TEST_MAIN(TestDiff)
+#include "Diff.moc"
