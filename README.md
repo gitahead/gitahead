@@ -5,8 +5,8 @@ Gittyup
 ==================================
 
 Gittyup is a graphical Git client designed to help you understand and manage your source code history. The [pre-release](https://github.com/Murmele/Gittyup/releases)
-is available either as pre-built [flatpak for Linux](https://github.com/Murmele/Gittyup/releases/download/latest/Gittyup.flatpak), [32](https://github.com/Murmele/Gittyup/releases/download/latest/Gittyup-win32-1.1.0-dev.exe) / [64](https://github.com/Murmele/Gittyup/releases/download/latest/Gittyup-win64-1.1.0-dev.exe) binary for Windows, [macOS X](https://github.com/Murmele/Gittyup/releases/download/latest/Gittyup-1.1.0-dev.dmg),
-or, can be built from source by following the directions [below](https://github.com/Murmele/Gittyup#how-to-build).
+is available either as pre-built [flatpak for Linux](https://github.com/Murmele/Gittyup/releases/download/latest/Gittyup.flatpak), [32](https://github.com/Murmele/Gittyup/releases/download/latest/Gittyup-win32-1.1.0-dev.exe) / [64](https://github.com/Murmele/Gittyup/releases/download/latest/Gittyup-win64-1.1.0-dev.exe) binary for Windows, [macOS](https://github.com/Murmele/Gittyup/releases/download/latest/Gittyup-1.1.0-dev.dmg),
+or can be built from source by following the directions [below](https://github.com/Murmele/Gittyup#how-to-build).
 
 Gittyup is a continuation of the [GitAhead](https://github.com/gitahead/gitahead) client.
 
@@ -14,7 +14,7 @@ Gittyup is a continuation of the [GitAhead](https://github.com/gitahead/gitahead
 
 Features
 ---------------
-To get an overview of the current features please have a look at the [Github Page](https://murmele.github.io/Gittyup/)
+To get an overview of the current features please have a look at the [GitHub Page](https://murmele.github.io/Gittyup/)
 
 How to Get Help
 ---------------
@@ -29,7 +29,7 @@ Report bugs in Gittyup by opening an issue in the
 Remember to search for existing issues before creating a new one.
 
 If you still need help, check out our Matrix channel
-[Gittyup:martix.org](https://matrix.to/#/#Gittyup:matrix.org).
+[Gittyup:matrix.org](https://matrix.to/#/#Gittyup:matrix.org).
 
 Build Environment
 -----------------
