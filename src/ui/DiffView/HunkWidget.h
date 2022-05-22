@@ -82,7 +82,7 @@ public:
    * \brief hunk
    * \return
    */
-  QByteArray apply() const;
+  QByteArray apply();
   /*!
    * \brief stageState
    * Calculate stage state of the hunk. Git does not provide
