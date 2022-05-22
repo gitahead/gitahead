@@ -304,6 +304,8 @@ FileContextMenu::FileContextMenu(RepoView *view, const QStringList &files,
     foreach (const QString &file, files) {
       if (commit.tree().id(file) == repo.workdirId(file)) {
         checkout->setEnabled(false);
+        checkout->setToolTip(
+            tr("The file is already in the current working directory"));
         break;
       }
     }
