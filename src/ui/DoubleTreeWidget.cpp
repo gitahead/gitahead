@@ -124,6 +124,14 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
   stagedFiles->setSelectionMode(QAbstractItemView::ExtendedSelection);
   mDiffTreeModel = new DiffTreeModel(repo, this);
   mDiffView->setModel(mDiffTreeModel);
+  auto *repoView = qobject_cast<RepoView *>(parent->parent());
+  Q_ASSERT(repoView);
+  connect(mDiffTreeModel, &DiffTreeModel::updateSubmodules,
+          [repoView](const QList<git::Submodule> &submodules, bool recursive,
+                     bool init, bool force_checkout) {
+            repoView->updateSubmodules(submodules, recursive, init,
+                                       force_checkout);
+          });
   TreeProxy *treewrapperStaged = new TreeProxy(true, this);
   treewrapperStaged->setSourceModel(mDiffTreeModel);
   stagedFiles->setModel(treewrapperStaged);

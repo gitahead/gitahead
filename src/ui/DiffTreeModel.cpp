@@ -259,18 +259,18 @@ bool DiffTreeModel::discard(const QModelIndex &index) {
   }
 
   auto s = mRepo.submodules();
+  QList<git::Submodule> submodules;
   QStringList filePatches;
   for (auto trackedPatch : trackedPatches) {
     bool is_submodule = false;
     for (auto submodule : s) {
       if (submodule.path() == trackedPatch) {
         is_submodule = true;
-        submodule.update(nullptr, false,
-                         true); // In Repo view it is done asynchron. Maybe
-                                // changing here too!
+        submodules.append(submodule);
         break;
       }
     }
+    emit updateSubmodules(submodules, true, false, true);
 
     if (!is_submodule)
       filePatches.append(trackedPatch);
