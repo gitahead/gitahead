@@ -220,6 +220,11 @@ public:
             bool force = false, bool tags = false);
 
   // commit
+  bool commit(const git::Signature &author, const git::Signature &commiter,
+              const QString &message,
+              const git::AnnotatedCommit &upstream = git::AnnotatedCommit(),
+              LogEntry *parent = nullptr, bool force = false,
+              bool fakeSignature = false);
   bool commit(const QString &message,
               const git::AnnotatedCommit &upstream = git::AnnotatedCommit(),
               LogEntry *parent = nullptr, bool force = false);
