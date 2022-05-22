@@ -47,7 +47,7 @@ const QString kTextFmt =
     "contributors</p><p> If you have a question that might benefit the "
     "community, consider asking it on <a href='%5'>Stack Overflow</a> by "
     "including 'gittyup' in the tags. Otherwise, contact us at "
-	"<a href='%6'>%6</a> or ask in the matrix channel: <a href='%7'>%7</a>";
+    "<a href='%6'>%6</a> or ask in the matrix channel: <a href='%7'>%7</a>";
 
 const QString kStyleSheet = "h3 {"
                             "  text-decoration: underline"
@@ -88,8 +88,8 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent) {
   QDateTime dateTime = QDateTime::fromString(GITTYUP_BUILD_DATE, Qt::ISODate);
   QString date =
       dateTime.date().toString(QLocale().dateFormat(QLocale::LongFormat));
-  QString text =
-	  kTextFmt.arg(name, version, date, revision, kUrl, kIssueTracker, kUrlMatrix);
+  QString text = kTextFmt.arg(name, version, date, revision, kUrl,
+                              kIssueTracker, kUrlMatrix);
   QLabel *label = new QLabel(text, this);
   label->setWordWrap(true);
   label->setTextInteractionFlags(kTextFlags);
