@@ -1,4 +1,5 @@
 [![Gittyup Status](https://github.com/Murmele/Gittyup/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/Murmele/Gittyup/actions/workflows/build.yml)
+[![Matrix](https://img.shields.io/matrix/Gittyup:matrix.org?label=Matrix%20Chat)](https://matrix.to/#/#Gittyup:matrix.org)
 [![Donate Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/Gittyup/donate)
 
 Gittyup
