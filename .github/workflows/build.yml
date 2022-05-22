@@ -164,6 +164,12 @@ jobs:
             pack: 1
 
     steps:
+      # otherwise the testcases will fail, because signature is invalid
+      - name: Set git name and email
+        run: |
+          git config --global user.name "Your Name"
+          git config --global user.email "youremail@yourdomain.com"
+          git config --list
       - name: Configure development build
         if: github.ref_type != 'tag'
         uses: allenevans/set-env@c4f231179ef63887be707202a295d9cb1c687eb9
@@ -280,10 +286,10 @@ jobs:
       - name: Test
         # TODO: Re-Enable this when https://github.com/actions/runner/issues/1206 gets resolved
         if: matrix.env.ninja_platform != 'win' && matrix.env.ninja_platform != 'mac'
-        continue-on-error: true
-        run: |
-          cd build/release
-          ninja check
+        uses: GabrielBB/xvfb-action@v1
+        with:
+          working-directory: build/release
+          run: ninja check
 
   publish:
     # https://github.com/marvinpinto/actions/issues/177

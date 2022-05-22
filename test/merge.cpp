@@ -47,7 +47,7 @@ void TestMerge::initTestCase() {
   mMainBranch = mRepo->unbornHeadName();
   mWindow = new MainWindow(mRepo);
   mWindow->show();
-  QVERIFY(qWaitForWindowActive(mWindow));
+  QVERIFY(qWaitForWindowExposed(mWindow));
 }
 
 void TestMerge::firstCommit() {

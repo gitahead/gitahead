@@ -9,6 +9,7 @@
 
 #include "Theme.h"
 #include "CustomTheme.h"
+#include "app/Application.h"
 #include "conf/ConfFile.h"
 #include "conf/Settings.h"
 #include "dialogs/ThemeDialog.h"
@@ -235,7 +236,7 @@ Theme *Theme::create(const QString &defaultName) {
   }
 
   QString name = !defaultName.isEmpty() ? defaultName : key;
-  if (name.isEmpty()) {
+  if (name.isEmpty() && !Application::isInTest()) {
     ThemeDialog dialog;
     dialog.exec();
     name = settings->value("window/theme").toString();

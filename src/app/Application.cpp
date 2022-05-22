@@ -34,6 +34,8 @@
 #include <QUrlQuery>
 #include <QUuid>
 
+bool Application::mIsInTest = false;
+
 #if defined(Q_OS_LINUX)
 #include <QtDBus/QtDBus>
 
@@ -441,6 +443,10 @@ void Application::registerService() {
 #endif
 }
 #endif
+
+bool Application::isInTest() { return mIsInTest; }
+
+void Application::setInTest() { mIsInTest = true; }
 
 Theme *Application::theme() {
   return static_cast<Application *>(instance())->mTheme.data();

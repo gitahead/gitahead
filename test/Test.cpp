@@ -10,6 +10,7 @@
 #include "Test.h"
 #include "ui/RepoView.h"
 //#include <JlCompress.h>
+#include <exception>
 #include <QFileInfo>
 #include "zip.h"
 using namespace QTest;
@@ -154,12 +155,30 @@ ScratchRepository::operator git::Repository() { return mRepo; }
 
 git::Repository *ScratchRepository::operator->() { return &mRepo; }
 
+Timeout::Timeout(int milliseconds, QString message) {
+  timer.callOnTimeout(this, &Timeout::onTimeout, Qt::DirectConnection);
+  this->message = message;
+
+  timer.setSingleShot(true);
+  timer.setInterval(milliseconds);
+  timer.start();
+}
+
+Timeout::~Timeout() { timer.stop(); }
+
+void Timeout::dismiss() { timer.stop(); }
+
+void Timeout::onTimeout() {
+  std::cerr << "Hard timeout: " << message.toStdString() << std::endl;
+  abort();
+}
+
 void refresh(RepoView *view, bool expectDirty) {
   // Setup post refresh trigger.
   bool finished = false;
   auto connection = QObject::connect(view, &RepoView::statusChanged,
                                      [&finished, expectDirty](bool dirty) {
-                                       QCOMPARE(expectDirty, dirty);
+                                       QCOMPARE(dirty, expectDirty);
                                        finished = true;
                                      });
 
@@ -189,11 +208,23 @@ void fetch(RepoView *view, git::Remote remote) {
 }
 
 Application createApp(int &argc, char *argv[]) {
+#define OFFSCREEN 1
+
+#if OFFSCREEN == 1
+  auto new_argv = new char *[argc + 1 + 2];
+#else
   auto new_argv = new char *[argc + 1];
+#endif
   memcpy(new_argv, argv, sizeof(char *) * argc);
 
   // Make string comparisons with messages fail less
-  new_argv[argc] = "--no-translation";
+  new_argv[argc] = (char *)"--no-translation";
+
+#if OFFSCREEN == 1
+  new_argv[argc + 1] = (char *)"--platform";
+  new_argv[argc + 2] = (char *)"offscreen";
+  argc += 2;
+#endif
 
   argc += 1;
   return Application(argc, new_argv);

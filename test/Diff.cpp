@@ -53,4 +53,4 @@ private slots:
   }
 };
 
-QTEST_MAIN(TestDiff)
+TEST_MAIN(TestDiff)
