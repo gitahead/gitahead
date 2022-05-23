@@ -47,6 +47,10 @@ add_custom_command(
   COMMAND cmark_exe ${ACKNOWLEDGMENTS_MD} > ${ACKNOWLEDGMENTS_HTML}
   COMMAND cmark_exe ${PRIVACY_MD} > ${PRIVACY_HTML}
   COMMAND cmark_exe ${PLUGIN_MD} > ${PLUGIN_HTML}
+  COMMAND ${CMAKE_COMMAND} -DCHANGELOG_HTML:STRING=${CHANGELOG_HTML}
+  -DAPPDATA_CONF:STRING=${APPDATA_CONF}
+  -DAPPDATA:STRING=${APPDATA}
+  -P "${CMAKE_SOURCE_DIR}/cmake/generate_appdata.cmake"
   DEPENDS ${CHANGELOG_MD} ${ACKNOWLEDGMENTS_MD} ${PRIVACY_MD} ${PLUGIN_MD})
 
 # Add application library.
@@ -88,17 +92,6 @@ add_executable(
   ${ACKNOWLEDGMENTS_HTML}
   ${PRIVACY_HTML}
   ${PLUGIN_HTML})
-
-if(GENERATE_APPDATA)
-  add_custom_command(
-    TARGET gittyup
-    COMMAND
-      ${CMAKE_COMMAND} -DCHANGELOG_HTML:STRING=${CHANGELOG_HTML} -
-      DAPPDATA_CONF:STRING=${APPDATA_CONF} -DAPPDATA:STRING=${APPDATA} -P
-      "${CMAKE_SOURCE_DIR}/cmake/generate_appdata.cmake" DEPENDS
-      ${CHANGELOG_HTML}
-    COMMENT "Create appdata file")
-endif()
 
 target_link_libraries(gittyup app)
 
