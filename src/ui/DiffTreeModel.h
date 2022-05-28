@@ -147,6 +147,8 @@ public:
 
 signals:
   void checkStateChanged(const QModelIndex &index, int state);
+  void updateSubmodules(const QList<git::Submodule> &submodules, bool recursive,
+                        bool init, bool checkout_force);
 
 private:
   Node *node(const QModelIndex &index) const;
