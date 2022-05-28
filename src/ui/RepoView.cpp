@@ -1516,6 +1516,9 @@ void RepoView::revert(const git::Commit &commit) {
   if (checkForConflicts(parent, tr("revert")))
     return;
 
+  git::Signature committer = mRepo.defaultSignature(
+      nullptr, mDetails->overrideUser(), mDetails->overrideEmail());
+
   QString id = commit.id().toString();
   QString summary = commit.summary();
   QString msg = tr("Revert \"%1\"\n\nThis reverts commit %2.").arg(summary, id);
@@ -1528,9 +1531,11 @@ void RepoView::revert(const git::Commit &commit) {
       mergeAbort(parent);
     });
     connect(dialog, &QDialog::accepted, this,
-            [this, dialog, parent, suspended] {
+            [this, dialog, parent, suspended, commit, committer] {
               resumeLogTimer(suspended);
-              this->commit(dialog->message(), git::AnnotatedCommit(), parent);
+              // TODO: or doing it differently
+              this->commit(commit.author(), committer, dialog->message(),
+                           git::AnnotatedCommit(), parent);
             });
 
     dialog->open();
@@ -1538,7 +1543,7 @@ void RepoView::revert(const git::Commit &commit) {
   }
 
   // Automatically commit with the default message.
-  this->commit(msg, git::AnnotatedCommit(), parent);
+  this->commit(commit.author(), committer, msg, git::AnnotatedCommit(), parent);
 }
 
 void RepoView::cherryPick(const git::Commit &commit) {
@@ -1575,10 +1580,10 @@ void RepoView::cherryPick(const git::Commit &commit) {
       mergeAbort(parent);
     });
     connect(dialog, &QDialog::accepted, this,
-            [this, dialog, parent, suspended, commit] {
+            [this, dialog, parent, suspended, commit, committer] {
               resumeLogTimer(suspended);
-              this->commit(commit.author(), commit.committer(),
-                           dialog->message(), git::AnnotatedCommit(), parent);
+              this->commit(commit.author(), committer, dialog->message(),
+                           git::AnnotatedCommit(), parent);
             });
 
     dialog->open();
