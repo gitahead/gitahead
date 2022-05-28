@@ -1176,7 +1176,9 @@ QByteArray HunkWidget::hunk() const {
   return ar;
 }
 
-QByteArray HunkWidget::apply() const {
+QByteArray HunkWidget::apply() {
+
+  load(mStaged);
   QByteArray ar;
   int lineCount = mEditor->lineCount();
   for (int i = 0; i < lineCount; i++) {
