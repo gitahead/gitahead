@@ -133,19 +133,12 @@ void TextEditor::applySettings()
 {
   // Set default font and size.
   Settings *settings = Settings::instance();
-  settings->beginGroup("editor");
-  settings->beginGroup("font");
-  QString family = settings->value("family").toString();
-  int pointSize = settings->value("size").toInt();
+  QString family = settings->value("editor/font/family").toString();
+  int pointSize = settings->value("editor/font/size").toInt();
   styleSetFont(STYLE_DEFAULT, QFont(family, pointSize));
-  settings->endGroup(); // font
-
-  settings->beginGroup("indent");
-  setUseTabs(settings->value("tabs").toBool());
-  setIndent(settings->value("width").toInt());
-  setTabWidth(settings->value("tabwidth").toInt());
-  settings->endGroup(); // indent
-  settings->endGroup(); // editor
+  setUseTabs(settings->value("editor/indent/tabs").toBool());
+  setIndent(settings->value("editor/indent/width").toInt());
+  setTabWidth(settings->value("editor/indent/tabwidth").toInt());
 
   // Initialize markers.
   markerDefine(Context, SC_MARK_EMPTY);

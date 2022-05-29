@@ -200,17 +200,11 @@ public:
     mEmail->setText(config.value<QString>("user.email"));
 
     Settings *settings = Settings::instance();
-    settings->beginGroup("global");
-    settings->beginGroup("autofetch");
-    mFetch->setChecked(settings->value("enable").toBool());
-    mFetchMinutes->setValue(settings->value("minutes").toInt());
-    settings->endGroup();
-
-    mPushCommit->setChecked(settings->value("autopush/enable").toBool());
-    mPullUpdate->setChecked(settings->value("autoupdate/enable").toBool());
-    mAutoPrune->setChecked(settings->value("autoprune/enable").toBool());
-    settings->endGroup();
-
+    mFetch->setChecked(settings->value("global/autofetch/enable").toBool());
+    mFetchMinutes->setValue(settings->value("global/autofetch/minutes").toInt());
+    mPushCommit->setChecked(settings->value("global/autopush/enable").toBool());
+    mPullUpdate->setChecked(settings->value("global/autoupdate/enable").toBool());
+    mAutoPrune->setChecked(settings->value("global/autoprune/enable").toBool());
     mNoTranslation->setChecked(settings->value("translation/disable").toBool());
     mStoreCredentials->setChecked(settings->value("credential/store").toBool());
     mUsageReporting->setChecked(settings->value("tracking/enabled").toBool());
@@ -319,8 +313,6 @@ public:
     : QWidget(parent)
   {
     Settings *settings = Settings::instance();
-    settings->beginGroup("window");
-
     QComboBox *comboBox = new QComboBox(this);
 
     // default theme
@@ -355,7 +347,7 @@ public:
 
     comboBox->insertSeparator(comboBox->count());
 
-    int index = comboBox->findText(settings->value("theme").toString());
+    int index = comboBox->findText(settings->value("window/theme").toString());
 
     // add theme
     comboBox->addItem(tr("Add New Theme"));
@@ -448,31 +440,28 @@ public:
     });
 
     QCheckBox *fullPath = new QCheckBox(tr("Show full repository path"));
-    fullPath->setChecked(settings->value("path/full").toBool());
+    fullPath->setChecked(settings->value("window/path/full").toBool());
     connect(fullPath, &QCheckBox::toggled, [](bool checked) {
       Settings::instance()->setValue("window/path/full", checked);
     });
 
     QCheckBox *hideLog = new QCheckBox(tr("Hide automatically"));
-    hideLog->setChecked(settings->value("log/hide").toBool());
+    hideLog->setChecked(settings->value("window/log/hide").toBool());
     connect(hideLog, &QCheckBox::toggled, [](bool checked) {
       Settings::instance()->setValue("window/log/hide", checked);
     });
 
-    settings->beginGroup("tabs");
     QCheckBox *smTabs = new QCheckBox(tr("Open submodules in tabs"));
-    smTabs->setChecked(settings->value("submodule").toBool());
+    smTabs->setChecked(settings->value("window/tabs/submodule").toBool());
     connect(smTabs, &QCheckBox::toggled, [](bool checked) {
       Settings::instance()->setValue("window/tabs/submodule", checked);
     });
 
     QCheckBox *repoTabs = new QCheckBox(tr("Open all repositories in tabs"));
-    repoTabs->setChecked(settings->value("repository").toBool());
+    repoTabs->setChecked(settings->value("window/tabs/repository").toBool());
     connect(repoTabs, &QCheckBox::toggled, [](bool checked) {
       Settings::instance()->setValue("window/tabs/repository", checked);
     });
-    settings->endGroup(); // tabs
-    settings->endGroup(); // window
 
     QString mergeText = settings->promptDescription(Settings::PromptMerge);
     QCheckBox *merge = new QCheckBox(mergeText, this);
@@ -544,56 +533,48 @@ public:
     auto combo = QOverload<int>::of(&QComboBox::currentIndexChanged);
 
     Settings *settings = Settings::instance();
-    settings->beginGroup("editor");
-
-    settings->beginGroup("font");
     QFontComboBox *font = new QFontComboBox(this);
     font->setEditable(false);
     font->setFontFilters(QFontComboBox::MonospacedFonts);
-    font->setCurrentText(settings->value("family").toString());
+    font->setCurrentText(settings->value("editor/font/family").toString());
     connect(font, &QFontComboBox::currentTextChanged, [](const QString &text) {
       Settings::instance()->setValue("editor/font/family", text);
     });
 
     QSpinBox *fontSize = new QSpinBox(this);
     fontSize->setRange(2, 32);
-    fontSize->setValue(settings->value("size").toInt());
+    fontSize->setValue(settings->value("editor/font/size").toInt());
     connect(fontSize, spin, [](int i) {
       Settings::instance()->setValue("editor/font/size", i);
     });
-    settings->endGroup(); // font
 
-    settings->beginGroup("indent");
     QComboBox *indent = new QComboBox(this);
     indent->addItem(tr("Tabs"));
     indent->addItem(tr("Spaces"));
-    indent->setCurrentIndex(settings->value("tabs").toBool() ? 0 : 1);
+    indent->setCurrentIndex(settings->value("editor/indent/tabs").toBool() ? 0 : 1);
     connect(indent, combo, [](int i) {
       Settings::instance()->setValue("editor/indent/tabs", i == 0);
     });
 
     QSpinBox *indentWidth = new QSpinBox(this);
     indentWidth->setRange(1, 32);
-    indentWidth->setValue(settings->value("width").toInt());
+    indentWidth->setValue(settings->value("editor/indent/width").toInt());
     connect(indentWidth, spin, [](int i) {
       Settings::instance()->setValue("editor/indent/width", i);
     });
 
     QSpinBox *tabWidth = new QSpinBox(this);
     tabWidth->setRange(1, 32);
-    tabWidth->setValue(settings->value("tabwidth").toInt());
+    tabWidth->setValue(settings->value("editor/indent/tabwidth").toInt());
     connect(tabWidth, spin, [](int i) {
       Settings::instance()->setValue("editor/indent/tabwidth", i);
     });
-    settings->endGroup(); // indent
 
     QCheckBox *blameHeatMap = new QCheckBox(tr("Show heat map"), this);
-    blameHeatMap->setChecked(settings->value("blame/heatmap").toBool());
+    blameHeatMap->setChecked(settings->value("editor/blame/heatmap").toBool());
     connect(blameHeatMap, &QCheckBox::toggled, [](bool checked) {
       Settings::instance()->setValue("editor/blame/heatmap", checked);
     });
-
-    settings->endGroup(); // editor
 
     QFormLayout *layout = new QFormLayout(this);
     layout->addRow(tr("Font:"), font);
@@ -614,18 +595,16 @@ public:
     : QWidget(parent)
   {
     Settings *settings = Settings::instance();
-    settings->beginGroup("update");
-
     QString checkText = tr("Check for updates automatically");
     QCheckBox *check = new QCheckBox(checkText, this);
-    check->setChecked(settings->value("check").toBool());
+    check->setChecked(settings->value("update/check").toBool());
     connect(check, &QCheckBox::toggled, [](bool checked) {
       Settings::instance()->setValue("update/check", checked);
     });
 
     QString downloadText = tr("Automatically download and install updates");
     QCheckBox *download = new QCheckBox(downloadText, this);
-    download->setChecked(settings->value("download").toBool());
+    download->setChecked(settings->value("update/download").toBool());
     connect(download, &QCheckBox::toggled, [](bool checked) {
       Settings::instance()->setValue("update/download", checked);
     });
@@ -638,8 +617,6 @@ public:
     layout->addRow(tr("Software Update:"), check);
     layout->addRow(QString(), download);
     layout->addRow(QString(), button);
-
-    settings->endGroup();
   }
 };
 
@@ -679,21 +656,17 @@ public:
     : QWidget(parent)
   {
     Settings *settings = Settings::instance();
-    settings->beginGroup("terminal");
-
-    mNameBox = new QLineEdit(settings->value("name").toString(), this);
+    mNameBox = new QLineEdit(settings->value("terminal/name").toString(), this);
     connect(mNameBox, &QLineEdit::textChanged, [this](const QString &text) {
       Settings::instance()->setValue("terminal/name", text);
       updateInstallButton();
     });
 
-    mPathBox = new QLineEdit(settings->value("path").toString(), this);
+    mPathBox = new QLineEdit(settings->value("terminal/path").toString(), this);
     connect(mPathBox, &QLineEdit::textChanged, [this](const QString &text) {
       Settings::instance()->setValue("terminal/path", text);
       updateInstallButton();
     });
-
-    settings->endGroup();
 
     mInstallButton = new QPushButton(tr("Install"), this);
     connect(mInstallButton, &QPushButton::clicked, [this] {
