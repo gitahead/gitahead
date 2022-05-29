@@ -105,13 +105,51 @@ FileContextMenu::FileContextMenu(
   QList<git::Commit> commits = view->commits();
   if (commits.isEmpty()) {
     if (index.isValid()) {
+      QString statusText;
+      git_delta_t status;
+
+      // Single file selected.
+      if (files.size() == 1) {
+        int idx = diff.indexOf(files.first());
+        if (idx >= 0) {
+          status = diff.status(idx);
+          switch (diff.status(idx)) {
+            case GIT_DELTA_ADDED:     statusText = tr("Added");     break;
+            case GIT_DELTA_DELETED:   statusText = tr("Deleted");   break;
+            case GIT_DELTA_MODIFIED:  statusText = tr("Modified");  break;
+            case GIT_DELTA_UNTRACKED: statusText = tr("Untracked"); break;
+            default:                                                break;
+          }
+        }
+      }
+
       // Stage/Unstage
       QAction *stage = addAction(tr("Stage"), [index, files] {
         git::Index(index).setStaged(files, true);
       });
 
+      QAction *stageAll = addAction(tr("Stage All %1 Files").arg(statusText), [index, diff, status] {
+        QStringList files;
+        for (int i = 0; i < diff.count(); i++) {
+          if (diff.status(i) == status)
+            files.append(diff.name(i));
+        }
+        if (!files.isEmpty())
+          git::Index(index).setStaged(files, true);
+      });
+
       QAction *unstage = addAction(tr("Unstage"), [index, files] {
         git::Index(index).setStaged(files, false);
+      });
+
+      QAction *unstageAll = addAction(tr("Unstage All %1 Files").arg(statusText), [index, diff, status] {
+        QStringList files;
+        for (int i = 0; i < diff.count(); i++) {
+          if (diff.status(i) == status)
+            files.append(diff.name(i));
+        }
+        if (!files.isEmpty())
+          git::Index(index).setStaged(files, false);
       });
 
       int staged = 0;
@@ -142,6 +180,8 @@ FileContextMenu::FileContextMenu(
 
       stage->setEnabled(unstaged > 0);
       unstage->setEnabled(staged > 0);
+      stageAll->setVisible((unstaged > 0) && !statusText.isEmpty());
+      unstageAll->setVisible((staged > 0) && !statusText.isEmpty());
 
       addSeparator();
     }
