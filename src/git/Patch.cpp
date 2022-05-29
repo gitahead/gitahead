@@ -350,39 +350,11 @@ QByteArray Patch::apply(const QBitArray &hunks,
   return generateResult(image, filters);
 }
 
-QByteArray Patch::apply(int hidx, int start_line, int end_line,
-                        const FilterList &filters) const {
-  QList<QList<QByteArray>> image;
-  populatePreimage(image);
-  apply(image, hidx, start_line, end_line);
-  return generateResult(image, filters);
-}
-
-QByteArray Patch::apply(int hidx, QByteArray &hunkData,
-                        const FilterList &filters) const {
-  QList<QList<QByteArray>> image;
-  populatePreimage(image);
-  apply(image, hidx, hunkData);
-  return generateResult(image, filters);
-}
-
 QByteArray Patch::apply(int hidx, QByteArray &hunkData, QByteArray fileContent,
                         const FilterList &filters) const {
   QList<QList<QByteArray>> image;
   populatePreimage(image, fileContent);
   apply(image, hidx, hunkData);
-  return generateResult(image, filters);
-}
-
-QByteArray Patch::apply(QList<QByteArray> &hunkData,
-                        const FilterList &filters) const {
-
-  assert(git_patch_num_hunks(d.data()) == hunkData.length());
-  QList<QList<QByteArray>> image;
-  populatePreimage(image);
-  for (int i = 0; i < hunkData.length(); i++) {
-    apply(image, i, hunkData[i]);
-  }
   return generateResult(image, filters);
 }
 

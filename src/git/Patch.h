@@ -124,19 +124,7 @@ public:
    */
   QByteArray apply(const QBitArray &hunks,
                    const FilterList &filters = FilterList()) const;
-  QByteArray apply(int hidx, int start_line, int end_line,
-                   const FilterList &filters = FilterList()) const;
-  QByteArray apply(int hidx, QByteArray &hunkData,
-                   const FilterList &filters = FilterList()) const;
   QByteArray apply(int hidx, QByteArray &hunkData, QByteArray fileContent,
-                   const FilterList &filters = FilterList()) const;
-  /*!
-   * applies all hunk data to the patch.
-   * Important: The length of hunkData must match with the number of hunks in
-   * the patch! \brief apply \param hunkData hunk contents \param filters
-   * \return
-   */
-  QByteArray apply(QList<QByteArray> &hunkData,
                    const FilterList &filters = FilterList()) const;
 
   /*!
