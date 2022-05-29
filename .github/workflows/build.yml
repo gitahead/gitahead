@@ -291,14 +291,6 @@ jobs:
           working-directory: build/release
           run: ninja check
 
-      # TODO: remove if the above issue gets resolved         
-      - name: Test Windows
-        if: matrix.env.ninja_platform == 'win'
-        uses: HorstBaerbel/action-ctest@1.1
-        with:
-          sourcedir: '.'
-          builddir: 'build'
-
   publish:
     # https://github.com/marvinpinto/actions/issues/177
     needs: [flatpak, build]
