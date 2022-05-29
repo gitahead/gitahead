@@ -48,10 +48,14 @@ protected:
 private:
   void updateMenu(const git::Diff &diff);
 
-  QAction *mSortName;
-  QAction *mSortStatus;
+  QIcon mSpacerIcon;
+  QIcon mAscIcon;
+  QIcon mDesIcon;
+
+  QMap<int, QByteArray> mSortMap;
+  QList<QAction *> mActionList;
+
   QMenu *mSelectMenu;
-  QMenu *mSortMenu;
   QAction *mIgnoreWs;
   QModelIndex mPressedIndex;
   QToolButton *mButton;

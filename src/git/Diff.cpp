@@ -11,6 +11,7 @@
 #include "Patch.h"
 #include "git2/patch.h"
 #include <algorithm>
+#include <QFileInfo>
 
 namespace git {
 
@@ -157,7 +158,78 @@ void Diff::sort(SortRole role, Qt::SortOrder order)
         git_delta_t rhsStatus = git_diff_get_delta(d->diff, rhs)->status;
         return ascending ? (lhsStatus < rhsStatus) : (rhsStatus < lhsStatus);
       }
+
+      default:
+        return lhs < rhs;
     }
+  });
+}
+
+void Diff::sort(QList<SortRole> roleList, QList<Qt::SortOrder> orderList)
+{
+  std::sort(d->map.begin(), d->map.end(),
+  [this, roleList, orderList](int lhs, int rhs) {
+    QFileInfo lhsInfo(git_diff_get_delta(d->diff, lhs)->new_file.path);
+    QFileInfo rhsInfo(git_diff_get_delta(d->diff, rhs)->new_file.path);
+    QString lhsPath = lhsInfo.path();
+    QString rhsPath = rhsInfo.path();
+    QString lhsName = lhsInfo.baseName();
+    QString rhsName = rhsInfo.baseName();
+    QString lhsExt = lhsInfo.suffix();
+    QString rhsExt = rhsInfo.suffix();
+
+    git_delta_t lhsStatus = git_diff_get_delta(d->diff, lhs)->status;
+    git_delta_t rhsStatus = git_diff_get_delta(d->diff, rhs)->status;
+    uint16_t lhsFlags = git_diff_get_delta(d->diff, lhs)->flags & GIT_DIFF_FLAG_BINARY;
+    uint16_t rhsFlags = git_diff_get_delta(d->diff, rhs)->flags & GIT_DIFF_FLAG_BINARY;
+
+    bool comp = lhs < rhs;
+    for (int i = 0; i < roleList.count(); i++) {
+      bool asc = orderList.at(i) == Qt::AscendingOrder;
+      bool des = orderList.at(i) == Qt::DescendingOrder;
+
+      // Sort order is not set, skip this sort role.
+      if (!asc && !des)
+        continue;
+
+      // Sort role.
+      switch (roleList.at(i)) {
+        case git::Diff::NameRole:
+          comp = asc ? (lhsName < rhsName) : (rhsName < lhsName);
+          if (lhsName != rhsName)
+            return comp;
+          break;
+
+        case git::Diff::PathRole:
+          comp = asc ? (lhsPath < rhsPath) : (rhsPath < lhsPath);
+          if (lhsPath != rhsPath)
+            return comp;
+          break;
+
+        case git::Diff::StatusRole:
+          comp = asc ? (lhsStatus < rhsStatus) : (rhsStatus < lhsStatus);
+          if (lhsStatus != rhsStatus)
+            return comp;
+          break;
+
+        case git::Diff::BinaryRole:
+          comp = asc ? (lhsFlags < rhsFlags) : (rhsFlags < lhsFlags);
+          if (lhsFlags != rhsFlags)
+            return comp;
+          break;
+
+        case git::Diff::ExtensionRole:
+          comp = asc ? (lhsExt < rhsExt) : (rhsExt < lhsExt);
+          if (lhsExt != rhsExt)
+            return comp;
+          break;
+
+        default:
+          break;
+      }
+    }
+
+    return comp;
   });
 }
 

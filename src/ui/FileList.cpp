@@ -209,6 +209,70 @@ protected:
   }
 };
 
+class Menu : public QMenu
+{
+  Q_OBJECT
+
+public:
+  Menu(QMenu *parent = nullptr)
+    : QMenu(parent)
+  {}
+
+signals:
+  void keyPressed(QAction *action, int key, ulong msDiff);
+  void mouseWheel(QAction *action, int wheelX, int wheelY);
+
+private:
+  void actionEvent(QActionEvent *e) override
+  {
+    QMenu::actionEvent(e);
+
+    if (e->type() == QEvent::ActionAdded) {
+      QAction *action = e->action();
+      connect(action, &QAction::hovered, [this, action] {
+        mAction = action;
+      });
+    }
+  }
+
+  void keyPressEvent(QKeyEvent *e) override
+  {
+    if (mAction != nullptr) {
+      ulong timestamp = e->timestamp();
+      emit keyPressed(mAction, e->key(), timestamp - mTimeStamp);
+      mTimeStamp = timestamp;
+    }
+    QMenu::keyPressEvent(e);
+  }
+
+  void mouseMoveEvent(QMouseEvent *e) override
+  {
+    mAction = actionAt(e->pos());
+    QMenu::mouseMoveEvent(e);
+  }
+
+  void wheelEvent(QWheelEvent *e) override
+  {
+    QPoint degrees = e->angleDelta();
+    if (!degrees.isNull()) {
+
+      // Degrees in 1/8 of a degree
+      degrees /= 8;
+
+      // Default wheel step = 15 degrees
+      QPoint numSteps = degrees / 15;
+      if ((numSteps.x() != 0) || (numSteps.y() != 0)) {
+        if (mAction != nullptr)
+          emit mouseWheel(mAction, numSteps.x(), numSteps.y());
+      }
+    }
+    QMenu::wheelEvent(e);
+  }
+
+  QAction *mAction = nullptr;
+  ulong mTimeStamp;
+};
+
 } // anon. namespace
 
 FileList::FileList(const git::Repository &repo, QWidget *parent)
@@ -225,34 +289,259 @@ FileList::FileList(const git::Repository &repo, QWidget *parent)
   setModel(new FileModel(repo, this));
   setItemDelegate(new FileDelegate(this));
 
+  Settings *settings = Settings::instance();
+
+  // Load sort role and order map.
+  QByteArray inArray;
+  inArray = settings->value("sort/map").toByteArray();
+  QDataStream inStream(&inArray, QIODevice::ReadOnly);
+  inStream >> mSortMap;
+
+  // Map sort role validation.
+  bool invalid = mSortMap.count() != 5;
+  QList<git::Diff::SortRole> roleList;
+  for (int i = 0; i < mSortMap.count(); i++) {
+    QByteArray ba = mSortMap.value(i, QByteArray(2, -1));
+    git::Diff::SortRole role = static_cast<git::Diff::SortRole>(ba.at(0));
+    if ((role >= git::Diff::NameRole) &&
+        (role <= git::Diff::ExtensionRole))
+      roleList.append(role);
+    else {
+      invalid = true;
+      break;
+    }
+  }
+  if (!roleList.contains(git::Diff::NameRole))       invalid = true;
+  if (!roleList.contains(git::Diff::PathRole))       invalid = true;
+  if (!roleList.contains(git::Diff::StatusRole))     invalid = true;
+  if (!roleList.contains(git::Diff::BinaryRole))     invalid = true;
+  if (!roleList.contains(git::Diff::ExtensionRole))  invalid = true;
+
+  // Default sort role and order map.
+  if (invalid) {
+    QByteArray ba(2, -1);
+    mSortMap.clear();
+    ba[0] = git::Diff::PathRole;
+    ba[1] = Qt::AscendingOrder;
+    mSortMap.insert(0, ba);
+    ba[0] = git::Diff::NameRole;
+    ba[1] = Qt::AscendingOrder;
+    mSortMap.insert(1, ba);
+    ba[0] = git::Diff::ExtensionRole;
+    ba[1] = Qt::AscendingOrder;
+    mSortMap.insert(2, ba);
+    ba[0] = git::Diff::StatusRole;
+    ba[1] = -1;
+    mSortMap.insert(3, ba);
+    ba[0] = git::Diff::BinaryRole;
+    ba[1] = -1;
+    mSortMap.insert(4, ba);
+  }
+
+  // Setup sort actions.
+  for (int i = 0; i < mSortMap.count(); i++) {
+    QByteArray ba = mSortMap.value(i, QByteArray(2, -1));
+    QAction *action = nullptr;
+
+    // Sort role.
+    switch (ba[0]) {
+      case git::Diff::NameRole:
+        action = new QAction(tr("File Name"));
+        break;
+      case git::Diff::PathRole:
+        action = new QAction(tr("File Path"));
+        break;
+      case git::Diff::StatusRole:
+        action = new QAction(tr("Status"));
+        break;
+      case git::Diff::BinaryRole:
+        action = new QAction(tr("Text/Binary"));
+        break;
+      case git::Diff::ExtensionRole:
+        action = new QAction(tr("File Extension"));
+        break;
+      default:
+        action = new QAction("---");
+        break;
+    }
+
+    action->setToolTip(tr("Use mouse wheel and '+', '-', space key"));
+    action->setData(i);
+    mActionList.append(action);
+  }
+
   mButton = new ContextMenuButton(this);
   QMenu *menu = new QMenu(this);
   mButton->setMenu(menu);
 
-  mSortMenu = menu->addMenu(tr("Sort By"));
+  Menu *sortMenu = new Menu();
+  sortMenu->setTitle(tr("Sort By"));
+  menu->addMenu(sortMenu);
+
+  sortMenu->addActions(mActionList);
+  connect(sortMenu, &Menu::mouseWheel, [this, sortMenu](QAction *action, int wheelX, int wheelY) {
+    sortMenu->setToolTipsVisible(false);
+
+    int i = action->data().toInt();
+    bool save = true;
+    QByteArray ba = mSortMap.take(i);
+
+    if (wheelY > 0) {
+      switch (ba[1]) {
+        case Qt::AscendingOrder:
+          ba[1] = -1;
+          break;
+        case Qt::DescendingOrder:
+          save = false;
+          break;
+        default:
+          ba[1] = Qt::DescendingOrder;
+          break;
+      }
+    }
+    if (wheelY < 0) {
+      switch (ba[1]) {
+        case Qt::AscendingOrder:
+          save = false;
+          break;
+        case Qt::DescendingOrder:
+          ba[1] = -1;
+          break;
+        default:
+          ba[1] = Qt::AscendingOrder;
+          break;
+      }
+    }
+
+    mSortMap.insert(i, ba);
+
+    if (save) {
+      // Sort order.
+      switch (ba[1]) {
+        case Qt::AscendingOrder:
+          action->setIcon(mAscIcon);
+          break;
+        case Qt::DescendingOrder:
+          action->setIcon(mDesIcon);
+          break;
+        default:
+          action->setIcon(mSpacerIcon);
+          break;
+      }
+
+      // Save sort settings.
+      Settings *settings = Settings::instance();
+      QByteArray outArray;
+      QDataStream outStream(&outArray, QIODevice::WriteOnly);
+      outStream << mSortMap;
+      settings->setValue("sort/map", outArray);
+
+      emit sortRequested();
+    }
+  });
+
+  connect(sortMenu, &Menu::keyPressed, [this, sortMenu](QAction *action, int key, ulong msDiff) {
+    sortMenu->setToolTipsVisible(false);
+
+    int i = action->data().toInt();
+    bool save = false;
+
+    // Next sort order.
+    if (key == Qt::Key_Space) {
+      QByteArray ba = mSortMap.take(i);
+
+      // Set next sort order.
+      switch (ba[1]) {
+        case Qt::AscendingOrder:
+          ba[1] = Qt::DescendingOrder;
+          action->setIcon(mDesIcon);
+          break;
+        case Qt::DescendingOrder:
+          ba[1] = -1;
+          action->setIcon(mSpacerIcon);
+          break;
+        default:
+          ba[1] = Qt::AscendingOrder;
+          action->setIcon(mAscIcon);
+          break;
+      }
+
+      mSortMap.insert(i, ba);
+      save = true;
+    }
+
+    // Sort role.
+    int j = -1;
+    if (key == Qt::Key_Minus)
+      j = i + 1;
+    if (key == Qt::Key_Plus)
+      j = i - 1;
+
+    // Swap sort actions.
+    if ((j >= 0) && (j < mSortMap.count())) {
+      QByteArray baj = mSortMap.take(i);
+      QByteArray bai = mSortMap.take(j);
+      mSortMap.insert(i, bai);
+      mSortMap.insert(j, baj);
+
+      for (i = 0; i < mSortMap.count(); i++) {
+        QByteArray ba = mSortMap.value(i, QByteArray(2, -1));
+
+        // Sort role.
+        switch (ba[0]) {
+          case git::Diff::NameRole:
+            mActionList[i]->setText(tr("File Name"));
+            break;
+          case git::Diff::PathRole:
+            mActionList[i]->setText(tr("File Path"));
+            break;
+          case git::Diff::StatusRole:
+            mActionList[i]->setText(tr("Status"));
+            break;
+          case git::Diff::BinaryRole:
+            mActionList[i]->setText(tr("Text/Binary"));
+            break;
+          case git::Diff::ExtensionRole:
+            mActionList[i]->setText(tr("File Extension"));
+            break;
+          default:
+            mActionList[i]->setText("---");
+            break;
+        }
+
+        // Sort order.
+        switch (ba[1]) {
+          case Qt::AscendingOrder:
+            mActionList[i]->setIcon(mAscIcon);
+            break;
+          case Qt::DescendingOrder:
+            mActionList[i]->setIcon(mDesIcon);
+            break;
+          default:
+            mActionList[i]->setIcon(mSpacerIcon);
+            break;
+        }
+      }
+      save = true;
+    }
+
+    // Save sort settings.
+    if (save) {
+      Settings *settings = Settings::instance();
+      QByteArray outArray;
+      QDataStream outStream(&outArray, QIODevice::WriteOnly);
+      outStream << mSortMap;
+      settings->setValue("sort/map", outArray);
+
+      emit sortRequested();
+    }
+  });
+
+  connect(sortMenu, &QMenu::aboutToShow, [sortMenu] {
+    sortMenu->setToolTipsVisible(true);
+  });
+
   mSelectMenu = menu->addMenu(tr("Select"));
-
-  mSortName = mSortMenu->addAction(tr("Name"), [this] {
-    Settings *settings = Settings::instance();
-    Qt::SortOrder order = Qt::AscendingOrder;
-    if (settings->value("sort/role").toInt() == git::Diff::NameRole &&
-        settings->value("sort/order").toInt() == Qt::AscendingOrder)
-      order = Qt::DescendingOrder;
-    settings->setValue("sort/order", order);
-    settings->setValue("sort/role", git::Diff::NameRole);
-    emit sortRequested();
-  });
-
-  mSortStatus = mSortMenu->addAction(tr("Status"), [this] {
-    Settings *settings = Settings::instance();
-    Qt::SortOrder order = Qt::AscendingOrder;
-    if (settings->value("sort/role").toInt() == git::Diff::StatusRole &&
-        settings->value("sort/order").toInt() == Qt::AscendingOrder)
-      order = Qt::DescendingOrder;
-    settings->setValue("sort/order", order);
-    settings->setValue("sort/role", git::Diff::StatusRole);
-    emit sortRequested();
-  });
 
   menu->addSeparator();
 
@@ -288,7 +577,7 @@ FileList::FileList(const git::Repository &repo, QWidget *parent)
 void FileList::resizeEvent(QResizeEvent *event)
 {
   QListView::resizeEvent(event);
-  mButton->move(viewport()->width() - mButton->width() - 2, y() + 2);
+  mButton->move(viewport()->width() - mButton->width() - 2, y() + 3);
 }
 
 void FileList::setDiff(const git::Diff &diff, const QString &pathspec)
@@ -399,40 +688,76 @@ void FileList::updateMenu(const git::Diff &diff)
   if (!diff.isValid())
     return;
 
-  // sort
-  Settings *settings = Settings::instance();
-  int role = settings->value("sort/role").toInt();
-  int order = settings->value("sort/order").toInt();
-
+  //Setup icons.
   qreal dpr = window()->windowHandle()->devicePixelRatio();
-  QPixmap pixmap(16 * dpr, 16 * dpr);
-  pixmap.setDevicePixelRatio(dpr);
-  pixmap.fill(Qt::transparent);
 
-  QIcon spacer;
-  spacer.addPixmap(pixmap);
+  if (mSpacerIcon.isNull()) {
+    QPixmap spacermap(16 * dpr, 16 * dpr);
+    spacermap.setDevicePixelRatio(dpr);
+    spacermap.fill(Qt::transparent);
+    mSpacerIcon.addPixmap(spacermap);
+  }
 
-  qreal x = pixmap.width() / (2 * dpr);
-  qreal y = pixmap.height() / (2 * dpr);
-  qreal f = (order == Qt::AscendingOrder) ? 1 : -1;
+  if (mAscIcon.isNull()) {
+    QPixmap ascmap(16 * dpr, 16 * dpr);
+    ascmap.setDevicePixelRatio(dpr);
+    ascmap.fill(Qt::transparent);
 
-  QPainterPath path;
-  path.moveTo(x - (3 * f), y - (1.5 * f));
-  path.lineTo(x, y + (1.5 * f));
-  path.lineTo(x + (3 * f), y - (1.5 * f));
+    qreal x = ascmap.width() / (2 * dpr);
+    qreal y = ascmap.height() / (2 * dpr);
+    qreal f = 1;
 
-  QPainter painter(&pixmap);
-  painter.setRenderHint(QPainter::Antialiasing);
-  painter.setPen(QPen(palette().color(QPalette::Text), 1.5));
-  painter.drawPath(path);
+    QPainterPath ascpath;
+    ascpath.moveTo(x - (3 * f), y - (1.5 * f));
+    ascpath.lineTo(x, y + (1.5 * f));
+    ascpath.lineTo(x + (3 * f), y - (1.5 * f));
 
-  QIcon icon;
-  icon.addPixmap(pixmap);
+    QPainter ascpainter(&ascmap);
+    ascpainter.setRenderHint(QPainter::Antialiasing);
+    ascpainter.setPen(QPen(palette().color(QPalette::Text), 1.5));
+    ascpainter.drawPath(ascpath);
+    mAscIcon.addPixmap(ascmap);
+  }
 
-  mSortName->setIcon(role == git::Diff::NameRole ? icon : spacer);
-  mSortStatus->setIcon(role == git::Diff::StatusRole ? icon : spacer);
+  if (mDesIcon.isNull()) {
+    QPixmap desmap(16 * dpr, 16 * dpr);
+    desmap.setDevicePixelRatio(dpr);
+    desmap.fill(Qt::transparent);
+    qreal x = desmap.width() / (2 * dpr);
+    qreal y = desmap.height() / (2 * dpr);
+    qreal f = -1;
 
-  // select
+    QPainterPath despath;
+    despath.moveTo(x - (3 * f), y - (1.5 * f));
+    despath.lineTo(x, y + (1.5 * f));
+    despath.lineTo(x + (3 * f), y - (1.5 * f));
+
+    QPainter despainter(&desmap);
+    despainter.setRenderHint(QPainter::Antialiasing);
+    despainter.setPen(QPen(palette().color(QPalette::Text), 1.5));
+    despainter.drawPath(despath);
+    mDesIcon.addPixmap(desmap);
+  }
+
+  // Sort order icons.
+  for (int i = 0; i < mSortMap.count(); i++) {
+    QByteArray ba = mSortMap.value(i, QByteArray(2, -1));
+
+    // Sort order icon.
+    switch (ba[1]) {
+      case Qt::AscendingOrder:
+        mActionList[i]->setIcon(mAscIcon);
+        break;
+      case Qt::DescendingOrder:
+        mActionList[i]->setIcon(mDesIcon);
+        break;
+      default:
+        mActionList[i]->setIcon(mSpacerIcon);
+        break;
+    }
+  }
+
+  // Select.
   mSelectMenu->clear();
   QSet<git_delta_t> kinds;
   for (int i = 0; i < diff.count(); ++i)
@@ -466,8 +791,8 @@ void FileList::updateMenu(const git::Diff &diff)
     });
   }
 
-  // ignore whitespace
-  mIgnoreWs->setChecked(settings->isWhitespaceIgnored());
+  // Ignore whitespace.
+  mIgnoreWs->setChecked(Settings::instance()->isWhitespaceIgnored());
 }
 
 #include "FileList.moc"

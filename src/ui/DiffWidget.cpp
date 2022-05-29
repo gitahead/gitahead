@@ -97,15 +97,30 @@ void DiffWidget::setDiff(
 
   // Populate views.
   if (mDiff.isValid()) {
-    Qt::SortOrder order = Qt::DescendingOrder;
-    git::Diff::SortRole role = git::Diff::StatusRole;
     if (!mDiff.isConflicted()) {
       Settings *settings = Settings::instance();
-      role = static_cast<git::Diff::SortRole>(settings->value("sort/role").toInt());
-      order = static_cast<Qt::SortOrder>(settings->value("sort/order").toInt());
-    }
+      QMap<int, QByteArray> sortMap;
+      QByteArray inArray;
+      inArray = settings->value("sort/map").toByteArray();
+      QDataStream inStream(&inArray, QIODevice::ReadOnly);
+      inStream >> sortMap;
 
-    mDiff.sort(role, order);
+      if (sortMap.count()) {
+        QList<git::Diff::SortRole> roleList;
+        QList<Qt::SortOrder> orderList;
+        for (int i = 0; i < sortMap.count(); i++) {
+          QByteArray ba = sortMap.value(i, QByteArray(2, -1));
+          roleList.append(static_cast<git::Diff::SortRole>(ba.at(0)));
+          orderList.append(static_cast<Qt::SortOrder>(ba.at(1)));
+        }
+
+        mDiff.sort(roleList, orderList);
+      } else {
+        mDiff.sort(git::Diff::NameRole, Qt::AscendingOrder);
+      }
+    } else {
+      mDiff.sort(git::Diff::StatusRole, Qt::DescendingOrder);
+    }
   }
 
   mDiffView->setDiff(diff);
