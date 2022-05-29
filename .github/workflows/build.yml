@@ -294,9 +294,10 @@ jobs:
       # TODO: remove if the above issue gets resolved         
       - name: Test Windows
         if: matrix.env.ninja_platform == 'win'
-        run: |
-          cd build/release
-          ninja check --verbose
+        uses: HorstBaerbel/action-ctest@1.1
+        with:
+          sourcedir: '.'
+          builddir: 'build'
 
   publish:
     # https://github.com/marvinpinto/actions/issues/177
