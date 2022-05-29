@@ -36,13 +36,15 @@ public:
   void setDiff(const git::Diff &diff);
 
   bool scrollToFile(int index);
-  void setFilter(const QStringList &paths);
+  void setFilter(const QList<int> &indexes);
 
   const QList<PluginRef> &plugins() const { return mPlugins; }
   const Account::CommitComments &comments() const { return mComments; }
 
   QList<TextEditor *> editors() override;
   void ensureVisible(TextEditor *editor, int pos) override;
+
+  int borderWidth(void);
 
 signals:
   void diagnosticAdded(TextEditor::DiagnosticKind kind);
@@ -53,7 +55,7 @@ protected:
 
 private:
   bool canFetchMore();
-  void fetchMore();
+  void fetchMore(int count = 8);
   void fetchAll(int index = -1);
 
   git::Diff mDiff;
@@ -64,6 +66,9 @@ private:
 
   QList<PluginRef> mPlugins;
   Account::CommitComments mComments;
+
+  int mVisibleFiles = -1;
+  int mBorderWidth = -1;
 };
 
 #endif

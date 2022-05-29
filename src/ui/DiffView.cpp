@@ -2143,7 +2143,7 @@ DiffView::DiffView(const git::Repository &repo, QWidget *parent)
 
       // Load commit comments.
       if (!canFetchMore())
-        fetchMore();
+        fetchMore(0);
     });
   }
 }
@@ -2186,6 +2186,7 @@ void DiffView::setDiff(const git::Diff &diff)
   QVBoxLayout *layout = new QVBoxLayout(widget);
   layout->setSpacing(4);
   layout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+  layout->addStretch();
 
   if (!diff.isValid()) {
     if (repo.isHeadUnborn()) {
@@ -2212,7 +2213,6 @@ void DiffView::setDiff(const git::Diff &diff)
       labelFont.setPointSize(18);
       label->setFont(labelFont);
 
-      layout->addStretch();
       layout->addWidget(button, 0, Qt::AlignHCenter);
       layout->addWidget(label, 0, Qt::AlignHCenter);
       layout->addStretch();
@@ -2234,24 +2234,42 @@ void DiffView::setDiff(const git::Diff &diff)
     }
   }
 
+  mVisibleFiles = -1;
   if (canFetchMore())
     fetchMore();
 
   // Load patches on demand.
+  QTimer *loadTimer = new QTimer();
   QScrollBar *scrollBar = verticalScrollBar();
   mConnections.append(
     connect(scrollBar, &QScrollBar::valueChanged, [this](int value) {
-      if (value > verticalScrollBar()->maximum() / 2 && canFetchMore())
+      if ((value > (verticalScrollBar()->maximum() / 2)) && canFetchMore() &&
+          ((mVisibleFiles < 0) || (mVisibleFiles >= mFiles.size())))
         fetchMore();
     })
   );
 
   mConnections.append(
-    connect(scrollBar, &QScrollBar::rangeChanged, [this](int min, int max) {
-      if (max - min < this->widget()->height() / 2 && canFetchMore())
-        fetchMore();
+    connect(scrollBar, &QScrollBar::rangeChanged, [loadTimer](int min, int max) {
+      // Scroll bar got disabled, start load timer.
+      if ((max - min) <= 0)
+        loadTimer->start(1);
     })
   );
+
+  // Make sure to load enough patches, scroll bar should be visible.
+  mConnections.append(
+    connect(loadTimer, &QTimer::timeout, [this, scrollBar, loadTimer] {
+      if ((((scrollBar->maximum()) - scrollBar->minimum()) <= 0) && canFetchMore() &&
+           ((mVisibleFiles < 0) || (mVisibleFiles >= mFiles.size()))) {
+        fetchMore();
+        loadTimer->start(100);
+      } else {
+        loadTimer->stop();
+      }
+    })
+  );
+  loadTimer->start(100);
 
   // Request comments for this diff.
   if (Repository *remoteRepo = view->remoteRepo()) {
@@ -2280,14 +2298,26 @@ bool DiffView::scrollToFile(int index)
   return true;
 }
 
-void DiffView::setFilter(const QStringList &paths)
+void DiffView::setFilter(const QList<int> &indexes)
 {
-  fetchAll();
-  QSet<QString> set = QSet<QString>::fromList(paths);
-  foreach (QWidget *widget, mFiles) {
-    FileWidget *file = static_cast<FileWidget *>(widget);
-    file->setVisible(set.isEmpty() || set.contains(file->name()));
+  if (!indexes.isEmpty())
+    fetchAll(indexes.last());
+
+  mVisibleFiles = 0;
+
+  for (int i = 0; i < mFiles.size(); i++) {
+    FileWidget *file = static_cast<FileWidget *>(mFiles.at(i));
+    bool visible = indexes.isEmpty() || indexes.contains(i);
+    file->setVisible(visible);
+    if (visible)
+      mVisibleFiles += 1;
   }
+
+  // Scroll to top widget.
+  if (!indexes.isEmpty())
+    verticalScrollBar()->setValue(0);
+  else
+    mVisibleFiles = -1;
 }
 
 QList<TextEditor *> DiffView::editors()
@@ -2323,6 +2353,27 @@ void DiffView::ensureVisible(TextEditor *editor, int pos)
   }
 }
 
+int DiffView::borderWidth(void)
+{
+  if (mBorderWidth > 0)
+    return mBorderWidth;
+
+  QString diffStyleSheet = kStyleSheet;
+  mBorderWidth = 8;
+
+  if (diffStyleSheet.contains("border-width")) {
+    int s = diffStyleSheet.indexOf("border-width");
+    s = diffStyleSheet.indexOf(':', s) + 1;
+    int e = diffStyleSheet.indexOf(';', s);
+    if (s < e) {
+      QString borderString = diffStyleSheet.mid(s, e - s);
+      mBorderWidth = borderString.toInt();
+    }
+  }
+
+  return mBorderWidth;
+}
+
 void DiffView::dropEvent(QDropEvent *event)
 {
   if (event->dropAction() != Qt::CopyAction)
@@ -2353,7 +2404,7 @@ bool DiffView::canFetchMore()
   return (mDiff.isValid() && mFiles.size() < mDiff.count());
 }
 
-void DiffView::fetchMore()
+void DiffView::fetchMore(int count)
 {
   QVBoxLayout *layout = static_cast<QVBoxLayout *>(widget()->layout());
 
@@ -2361,7 +2412,7 @@ void DiffView::fetchMore()
   int init = mFiles.size();
   int patchCount = mDiff.count();
   RepoView *view = RepoView::parentView(this);
-  for (int pidx = init; pidx < patchCount && pidx - init < 8; ++pidx) {
+  for (int pidx = init; (pidx < patchCount) && ((pidx - init) < count); ++pidx) {
     git::Patch patch = mDiff.patch(pidx);
     if (!patch.isValid()) {
       // This diff is stale. Refresh the view.
@@ -2371,7 +2422,7 @@ void DiffView::fetchMore()
 
     git::Patch staged = mStagedPatches.value(patch.name());
     FileWidget *file = new FileWidget(this, mDiff, patch, staged, widget());
-    layout->addWidget(file);
+    layout->insertWidget(layout->count() - 1, file);
 
     mFiles.append(file);
 
@@ -2390,17 +2441,17 @@ void DiffView::fetchMore()
   if (mFiles.size() == mDiff.count()) {
     // Add comments widget.
     if (!mComments.comments.isEmpty())
-      layout->addWidget(new CommentWidget(mComments.comments, widget()));
-
-    layout->addStretch();
+      layout->insertWidget(layout->count() - 1, new CommentWidget(mComments.comments, widget()));
   }
 }
 
 void DiffView::fetchAll(int index)
 {
+  int count = index < 0 ? mDiff.count() : index - mFiles.size() + 1;
+
   // Load all patches up to and including index.
-  while ((index < 0 || mFiles.size() <= index) && canFetchMore())
-    fetchMore();
+  if ((count >= 0) && canFetchMore())
+    fetchMore(count);
 }
 
 #include "DiffView.moc"

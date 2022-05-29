@@ -16,6 +16,7 @@
 #include "git/Commit.h"
 #include "git/Diff.h"
 #include "git/Index.h"
+#include <QApplication>
 #include <QScrollBar>
 #include <QShortcut>
 #include <QSplitter>
@@ -60,19 +61,7 @@ DiffWidget::DiffWidget(const git::Repository &repo, QWidget *parent)
   layout->setContentsMargins(0,0,0,0);
   layout->addWidget(mSplitter);
 
-  // Filter on selection change.
-  QItemSelectionModel *selection = mFiles->selectionModel();
-  connect(selection, &QItemSelectionModel::selectionChanged, [this] {
-    QStringList paths;
-    QModelIndexList indexes = mFiles->selectionModel()->selectedIndexes();
-    foreach (const QModelIndex &index, indexes)
-      paths.append(index.data().toString());
-    mDiffView->setFilter(paths);
-  });
-
-  connect(mDiffView->verticalScrollBar(), &QScrollBar::valueChanged,
-          this, &DiffWidget::setCurrentFile);
-
+  // Sort request.
   connect(mFiles, &FileList::sortRequested, [this] {
     setDiff(mDiff);
   });
@@ -90,6 +79,11 @@ void DiffWidget::setDiff(
   const QString &file,
   const QString &pathspec)
 {
+  // Disconnect signals.
+  foreach (QMetaObject::Connection connection, mConnections)
+    disconnect(connection);
+  mConnections.clear();
+
   mDiff = diff;
 
   // Cancel find.
@@ -108,17 +102,49 @@ void DiffWidget::setDiff(
     mDiff.sort(role, order);
   }
 
-  mDiffView->setDiff(diff);
+
+  // Setup FileList, splitter and DiffView.
   mFiles->setDiff(diff, pathspec);
+  mSplitter->setSizes({mFiles->sizeHint().height(), -1});
+  mDiffView->setDiff(diff);
 
   // Reset find.
   mFind->reset();
 
-  // Adjust splitter.
-  mSplitter->setSizes({mFiles->sizeHint().height(), -1});
-
   // Scroll to file.
   selectFile(file);
+
+  // Filter on selection change.
+  QItemSelectionModel *selection = mFiles->selectionModel();
+  mConnections.append(
+    connect(selection, &QItemSelectionModel::selectionChanged, [this] {
+      // Reset find.
+      mFind->reset();
+
+      QList<int>indexes;
+      QModelIndexList selectedIndexes = mFiles->selectionModel()->selectedIndexes();
+      foreach (const QModelIndex &selectedIndex, selectedIndexes)
+        indexes.append(selectedIndex.row());
+
+      // Apply DiffView filter.
+      QApplication::setOverrideCursor(QCursor(Qt::BusyCursor));
+      mDiffView->setFilter(indexes);
+      QApplication::restoreOverrideCursor();
+
+      // Adjust DiffView scroll to match the FileList scroll.
+      if (indexes.isEmpty()) {
+        QScrollBar *scroll = mFiles->verticalScrollBar();
+        if (scroll != nullptr)
+          mDiffView->scrollToFile(scroll->value());
+      }
+    })
+  );
+
+  // Syncronize DiffView scroll and FileList scroll.
+  mConnections.append(
+    connect(mDiffView->verticalScrollBar(), &QScrollBar::valueChanged,
+            this, &DiffWidget::setCurrentFile)
+  );
 }
 
 void DiffWidget::find()
@@ -156,8 +182,8 @@ void DiffWidget::selectFile(const QString &file)
 
 void DiffWidget::setCurrentFile(int value)
 {
-  // FIXME: This is bogus.
-  if (!mDiffView->widget())
+  // Scroll if selection is empty.
+  if (!mFiles->selectionModel()->selection().isEmpty())
     return;
 
   QAbstractItemModel *model = mFiles->model();
@@ -166,16 +192,20 @@ void DiffWidget::setCurrentFile(int value)
     if (!mDiffView->file(i)->isVisible())
       continue;
 
-    // Get the position of the next widget.
-    int pos = mDiffView->widget()->height();
+    // Get the position of the next widget
+    // respecting the border between the widgets.
+    int pos = 0;
     if (i < rows - 1)
-      pos = mDiffView->file(i + 1)->y();
+      pos = mDiffView->file(i + 1)->y() - mDiffView->borderWidth() - 1;
+    else
+      pos = mDiffView->widget()->height();
 
     // Stop at the first index where the scroll
     // value is less than the next widget.
     if (value < pos) {
       QModelIndex index = model->index(i, 0);
       mFiles->selectionModel()->select(index, kSelectionFlags);
+      mFiles->scrollToBottom();
       mFiles->scrollTo(index);
       break;
     }
