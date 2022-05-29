@@ -36,6 +36,16 @@ RecentRepository *RecentRepositories::repository(int index) const
   return mRepos.at(index);
 }
 
+RecentRepository *RecentRepositories::repository(const QString &path) const
+{
+  for (int index = 0; index < mRepos.count(); index++) {
+    if (mRepos.at(index)->path().compare(path) == 0)
+      return mRepos.at(index);
+  }
+
+  return nullptr;
+}
+
 void RecentRepositories::clear()
 {
   emit repositoryAboutToBeRemoved();

@@ -17,6 +17,7 @@
 #include "TabWidget.h"
 #include "ToolBar.h"
 #include "conf/RecentRepositories.h"
+#include "conf/RecentRepository.h"
 #include "conf/Settings.h"
 #include "git/Repository.h"
 #include "git/Submodule.h"
@@ -44,28 +45,6 @@ const QString kActiveKey = "active";
 const QString kSidebarKey = "sidebar";
 const QString kGeometryKey = "geometry";
 const QString kWindowsGroup = "windows";
-
-class TabName
-{
-public:
-  TabName(const QString &path)
-    : mPath(path)
-  {}
-
-  QString name() const
-  {
-    return mPath.section('/', -mSections);
-  }
-
-  void increment()
-  {
-    ++mSections;
-  }
-
-private:
-  QString mPath;
-  int mSections = 1;
-};
 
 } // anon. namespace
 
@@ -485,25 +464,11 @@ void MainWindow::warnInvalidRepo(const QString &path)
 
 void MainWindow::updateTabNames()
 {
-  QList<TabName> names;
-  for (int i = 0; i < count(); ++i) {
-    TabName name(view(i)->repo().workdir().path());
-    auto functor = [&name](const TabName &rhs) {
-      return (name.name() == rhs.name());
-    };
-
-    QList<TabName>::iterator it, end = names.end();
-    while ((it = std::find_if(names.begin(), end, functor)) != end) {
-      it->increment();
-      name.increment();
-    }
-
-    names.append(name);
-  }
-
   TabWidget *tabs = tabWidget();
-  for (int i = 0; i < count(); ++i)
-    tabs->setTabText(i, names.at(i).name());
+  for (int i = 0; i < count(); ++i) {
+    RecentRepository *repo = RecentRepositories::instance()->repository(view(i)->repo().workdir().path());
+    tabs->setTabText(i, repo->name());
+  }
 }
 
 void MainWindow::updateInterface()

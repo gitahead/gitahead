@@ -22,6 +22,7 @@ class RecentRepositories : public QObject
 public:
   int count() const;
   RecentRepository *repository(int index) const;
+  RecentRepository *repository(const QString &path) const;
 
   void clear();
   void remove(int index);

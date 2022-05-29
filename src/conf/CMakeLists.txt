@@ -6,6 +6,7 @@ add_library(conf
 )
 
 target_link_libraries(conf
+  index
   lua
   Qt5::Core
 )
