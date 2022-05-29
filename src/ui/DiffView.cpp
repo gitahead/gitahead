@@ -2363,7 +2363,8 @@ void DiffView::fetchMore()
   RepoView *view = RepoView::parentView(this);
   for (int pidx = init; pidx < patchCount && pidx - init < 8; ++pidx) {
     git::Patch patch = mDiff.patch(pidx);
-    if (!patch.isValid()) {
+    if (!patch.isValid() &&
+        (mDiff.status(pidx) != GIT_DELTA_UNMODIFIED)) {
       // This diff is stale. Refresh the view.
       QTimer::singleShot(0, view, &RepoView::refresh);
       return;
@@ -2375,7 +2376,7 @@ void DiffView::fetchMore()
 
     mFiles.append(file);
 
-    if (file->isEmpty()) {
+    if (file->isEmpty() || !patch.isValid()) {
       DisclosureButton *button = file->header()->disclosureButton();
       button->setChecked(false);
       button->setEnabled(false);
