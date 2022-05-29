@@ -482,6 +482,8 @@ void FileWidget::stageHunks(const HunkWidget *hunk,
   QByteArray fileContent = dev.readAll();
   dev.close();
 
+  const bool crlf = crlfNewLine(fileContent);
+
   QByteArray buffer;
   QList<QList<QByteArray>> image;
   git::Patch::populatePreimage(image, fileContent);
@@ -491,6 +493,8 @@ void FileWidget::stageHunks(const HunkWidget *hunk,
     mPatch.apply(image, i, hunk_content);
   }
   buffer = mPatch.generateResult(image);
+  if (crlf)
+      buffer = buffer.replace("\r\n", "\n");
 
   // Add the buffer to the index.
   index.add(mPatch.name(), buffer);
@@ -520,6 +524,7 @@ void FileWidget::discardHunk() {
   if (!file.open(QFile::WriteOnly))
     return;
 
+  const bool crlf = crlfNewLine(fileContent);
   QByteArray buffer;
   for (int i = 0; i < mHunks.size(); ++i) {
 
@@ -530,6 +535,8 @@ void FileWidget::discardHunk() {
     }
   }
 
+  if (crlf)
+      buffer = buffer.replace("\r\n", "\n");
   file.write(buffer);
   if (!file.commit())
     return;
@@ -572,4 +579,17 @@ void FileWidget::headerCheckStateChanged(int state) {
     emit stageStateChanged(mModelIndex, git::Index::Staged);
   else
     emit stageStateChanged(mModelIndex, git::Index::Unstaged);
+}
+
+bool FileWidget::crlfNewLine(const QByteArray& ba) const {
+    int index = ba.indexOf("\n");
+
+    // If the file does not contain any new line just return false
+    if (index < 0)
+        return false;
+
+    if (index - 1 > 0)
+        return ba.at(index - 1) == '\r';
+
+    return false;
 }
