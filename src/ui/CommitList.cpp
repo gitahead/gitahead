@@ -1453,21 +1453,28 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
   if (!commit.isValid()) {
     QMenu menu;
 
-    // clean
+    // Untracked and modified files.
     QStringList untracked;
+    QStringList modified;
     if (git::Diff diff = status()) {
       for (int i = 0; i < diff.count(); i++) {
         if (diff.status(i) == GIT_DELTA_UNTRACKED)
           untracked.append(diff.name(i));
+        else if (diff.status(i) != GIT_DELTA_UNMODIFIED)
+          modified.append(diff.name(i));
       }
     }
 
-    QAction *clean = menu.addAction(tr("Remove Untracked Files"),
+    QAction *remove = menu.addAction(tr("Remove Untracked Files"),
     [view, untracked] {
-      view->clean(untracked);
+      view->promptToRemove(untracked);
     });
+    remove->setEnabled(!untracked.isEmpty());
 
-    clean->setEnabled(!untracked.isEmpty());
+    QAction *discard = menu.addAction(tr("Discard All Changes"), [view, modified] {
+      view->promptToDiscard(view->repo().head().target(), modified, true);
+    });
+    discard->setEnabled(!modified.isEmpty() && view->repo().isValid());
 
     menu.exec(event->globalPos());
     return;
