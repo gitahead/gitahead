@@ -121,7 +121,6 @@ signals:
 
 private:
   void discard();
-  bool crlfNewLine(const QByteArray& ba) const;
 
   DiffView *mView{nullptr};
 

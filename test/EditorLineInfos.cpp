@@ -802,15 +802,14 @@ void TestEditorLineInfo::windowsCRLF() {
   bool submodule = mRepo.lookupSubmodule(name).isValid();
 
   auto *fw = new FileWidget(&diffView, diff, patch, stagedPatch, QModelIndex(),
-							name, path_, submodule);
+                            name, path_, submodule);
   fw->setStageState(git::Index::StagedState::Unstaged);
 
   auto hunks = fw->hunks();
   QVERIFY(hunks.count() == 1);
   hunks[0]->load();
 
-  checkEditorMarkers(hunks.at(0)->editor(),
-                     QVector<int>(), QVector<int>(),
+  checkEditorMarkers(hunks.at(0)->editor(), QVector<int>(), QVector<int>(),
                      QVector<int>({3, 4, 5}), QVector<int>());
 
   // Stage single lines
@@ -825,14 +824,13 @@ void TestEditorLineInfo::windowsCRLF() {
 
   delete fw;
   fw = new FileWidget(&diffView, diff, patch, stagedPatch, QModelIndex(), name,
-					  path, submodule);
+                      path, submodule);
 
   hunks = fw->hunks();
   QVERIFY(hunks.count() == 1);
   hunks[0]->load();
 
-  checkEditorMarkers(hunks.at(0)->editor(),
-                     QVector<int>(), QVector<int>(),
+  checkEditorMarkers(hunks.at(0)->editor(), QVector<int>(), QVector<int>(),
                      QVector<int>({5}), QVector<int>({3, 4}));
 
   delete fw;
@@ -842,7 +840,8 @@ void TestEditorLineInfo::windowsCRLF() {
 
 void TestEditorLineInfo::windowsCRLFMultiHunk() {
   /*
-   * Staging single lines in a file with CRLF instead of single LF for multiple hunks
+   * Staging single lines in a file with CRLF instead of single LF for multiple
+   * hunks
    */
 
   INIT_REPO("15_windowsCRLF_multipleHunks.zip", false)
@@ -857,7 +856,7 @@ void TestEditorLineInfo::windowsCRLFMultiHunk() {
   bool submodule = mRepo.lookupSubmodule(name).isValid();
 
   auto *fw = new FileWidget(&diffView, diff, patch, stagedPatch, QModelIndex(),
-							name, path_, submodule);
+                            name, path_, submodule);
   fw->setStageState(git::Index::StagedState::Unstaged);
 
   auto hunks = fw->hunks();
@@ -865,13 +864,11 @@ void TestEditorLineInfo::windowsCRLFMultiHunk() {
   hunks[0]->load();
   hunks[1]->load();
 
-  checkEditorMarkers(hunks.at(0)->editor(),
-					 QVector<int>(), QVector<int>(),
-					 QVector<int>({3, 4}), QVector<int>());
+  checkEditorMarkers(hunks.at(0)->editor(), QVector<int>(), QVector<int>(),
+                     QVector<int>({3, 4}), QVector<int>());
 
-  checkEditorMarkers(hunks.at(1)->editor(),
-					 QVector<int>(), QVector<int>(),
-					 QVector<int>({3}), QVector<int>());
+  checkEditorMarkers(hunks.at(1)->editor(), QVector<int>(), QVector<int>(),
+                     QVector<int>({3}), QVector<int>());
 
   // Stage single lines
   hunks[0]->stageSelected(3, 4); // stage first deletion
@@ -885,24 +882,21 @@ void TestEditorLineInfo::windowsCRLFMultiHunk() {
 
   delete fw;
   fw = new FileWidget(&diffView, diff, patch, stagedPatch, QModelIndex(), name,
-					  path, submodule);
+                      path, submodule);
 
   hunks = fw->hunks();
   QVERIFY(hunks.count() == 2);
   hunks[0]->load();
   hunks[1]->load();
 
-  checkEditorMarkers(hunks.at(0)->editor(),
-					 QVector<int>(), QVector<int>(),
-					 QVector<int>({4}), QVector<int>({3}));
+  checkEditorMarkers(hunks.at(0)->editor(), QVector<int>(), QVector<int>(),
+                     QVector<int>({4}), QVector<int>({3}));
 
-  checkEditorMarkers(hunks.at(1)->editor(),
-					 QVector<int>(), QVector<int>(),
-					 QVector<int>({3}), QVector<int>({}));
+  checkEditorMarkers(hunks.at(1)->editor(), QVector<int>(), QVector<int>(),
+                     QVector<int>({3}), QVector<int>({}));
 
   delete fw;
 }
-
 
 void TestEditorLineInfo::cleanupTestCase() { qWait(closeDelay); }
 

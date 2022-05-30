@@ -565,16 +565,3 @@ void FileWidget::headerCheckStateChanged(int state) {
   else
     emit stageStateChanged(mModelIndex, git::Index::Unstaged);
 }
-
-bool FileWidget::crlfNewLine(const QByteArray& ba) const {
-    int index = ba.indexOf("\n");
-
-    // If the file does not contain any new line just return false
-    if (index < 0)
-        return false;
-
-    if (index - 1 > 0)
-        return ba.at(index - 1) == '\r';
-
-    return false;
-}

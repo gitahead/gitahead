@@ -129,10 +129,10 @@ QString extractRepository(const QString &filename, bool useTempDir) {
     folder.removeRecursively();
   }
   const char *path_c = exportPath.data();
-  // Copy data because for some reason the pointer to the char array might change otherwise
+  // Copy data because for some reason the pointer to the char array might
+  // change otherwise
   QByteArray ba_filename = f.absoluteFilePath().toLatin1();
   const char *filename_c = ba_filename.data();
-
 
   int arg = 2;
   auto res = zip_extract(filename_c, path_c, on_extract_entry, &arg);
