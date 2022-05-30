@@ -272,7 +272,7 @@ jobs:
 
       # Command copied from flathub build process
       - name: Validate appdata file
-        if: matrix.env.ninja_platform == 'linux'
+        if: matrix.env.ninja_platform == 'linux' && !matrix.qt.check_only
         run: |
           sudo apt install flatpak
           sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
