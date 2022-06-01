@@ -79,7 +79,7 @@
  * git diff --cached: to get the staged diff
  */
 
-#define EXECUTE_ONLY_LAST_TEST 1
+#define EXECUTE_ONLY_LAST_TEST 0
 
 using namespace QTest;
 
