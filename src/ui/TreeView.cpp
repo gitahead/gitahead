@@ -153,6 +153,20 @@ bool TreeView::eventFilter(QObject *obj, QEvent *event) {
   return false;
 }
 
+void TreeView::keyPressEvent(QKeyEvent *event) {
+  auto index = currentIndex();
+  if (index.isValid() && event->key() == Qt::Key_Space) {
+    auto checkState =
+        static_cast<Qt::CheckState>(index.data(Qt::CheckStateRole).toInt());
+    if (checkState == Qt::Checked)
+      checkState = Qt::Unchecked;
+    else
+      checkState = Qt::Checked;
+    model()->setData(index, checkState, Qt::CheckStateRole);
+  } else
+    QTreeView::keyPressEvent(event);
+}
+
 void TreeView::handleSelectionChange(const QItemSelection &selected,
                                      const QItemSelection &deselected) {
   Q_UNUSED(selected)
