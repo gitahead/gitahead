@@ -106,7 +106,7 @@ private slots:
   void singleHunk_deletionsOnly_secondStagedPatch();
   void multipleHunks_StageSingleLines();
   void multipleHunks_StageSingleLines2();
-
+#ifdef Q_OS_WIN
   void windowsCRLF();
 #endif
   void windowsCRLFMultiHunk();
@@ -785,6 +785,13 @@ void TestEditorLineInfo::multipleHunks_StageSingleLines2() {
   delete fw;
 }
 
+#ifdef Q_OS_WIN
+// This test is only relevant on windows, because on linux this scenario does not happen.
+// The problem with this repo on linux is that the repo was created on windows but git
+// uses internally \n instead of \r\n so when opening this repo on linux,
+// the diff shows more than it should, because all unchanged lines have \n and all
+// changed lines have \r\n so the diff looks different. This cannot happen normaly,
+// because when cloning, git converts automatically for the used OS
 void TestEditorLineInfo::windowsCRLF() {
   /*
    * Staging single lines in a file with CRLF instead of single LF
@@ -833,6 +840,7 @@ void TestEditorLineInfo::windowsCRLF() {
   checkEditorMarkers(hunks.at(0)->editor(), QVector<int>(), QVector<int>(),
                      QVector<int>({5}), QVector<int>({3, 4}));
 }
+#endif // Q_OS_WIN
 
 #endif
 
@@ -842,7 +850,7 @@ void TestEditorLineInfo::windowsCRLFMultiHunk() {
    * hunks. The CRLF file was created directly on linux and not on windows
    */
 
-  INIT_REPO("15_windowsCRLF_multipleHunks.zip", false)
+  INIT_REPO("15_windowsCRLF_multipleHunks.zip", true)
   QVERIFY(diff.count() > 0);
   git::Patch patch = diff.patch(0);
   // no staged lines yet, so no staged patch
