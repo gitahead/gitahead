@@ -108,7 +108,9 @@ private slots:
   void multipleHunks_StageSingleLines2();
 #ifdef Q_OS_WIN
   void windowsCRLF();
-#endif
+#endif // Q_OS_WIN
+
+#endif // EXECUTE_ONLY_LAST_TEST == 0
   void windowsCRLFMultiHunk();
 
 private:
