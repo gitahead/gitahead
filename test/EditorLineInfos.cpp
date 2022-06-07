@@ -801,11 +801,11 @@ void TestEditorLineInfo::windowsCRLF() {
   QString path_ = mRepo.workdir().filePath(name);
   bool submodule = mRepo.lookupSubmodule(name).isValid();
 
-  auto *fw = new FileWidget(&diffView, diff, patch, stagedPatch, QModelIndex(),
+  FileWidget fw(&diffView, diff, patch, stagedPatch, QModelIndex(),
                             name, path_, submodule);
-  fw->setStageState(git::Index::StagedState::Unstaged);
+  fw.setStageState(git::Index::StagedState::Unstaged);
 
-  auto hunks = fw->hunks();
+  auto hunks = fw.hunks();
   QVERIFY(hunks.count() == 1);
   hunks[0]->load();
 
@@ -822,18 +822,15 @@ void TestEditorLineInfo::windowsCRLF() {
   QVERIFY(diff.count() > 0);
   stagedPatch = stagedDiff.patch(0);
 
-  delete fw;
-  fw = new FileWidget(&diffView, diff, patch, stagedPatch, QModelIndex(), name,
+  FileWidget fw2(&diffView, diff, patch, stagedPatch, QModelIndex(), name,
                       path, submodule);
 
-  hunks = fw->hunks();
+  hunks = fw2.hunks();
   QVERIFY(hunks.count() == 1);
   hunks[0]->load();
 
   checkEditorMarkers(hunks.at(0)->editor(), QVector<int>(), QVector<int>(),
                      QVector<int>({5}), QVector<int>({3, 4}));
-
-  delete fw;
 }
 
 #endif
@@ -855,11 +852,11 @@ void TestEditorLineInfo::windowsCRLFMultiHunk() {
   QString path_ = mRepo.workdir().filePath(name);
   bool submodule = mRepo.lookupSubmodule(name).isValid();
 
-  auto *fw = new FileWidget(&diffView, diff, patch, stagedPatch, QModelIndex(),
+  FileWidget fw(&diffView, diff, patch, stagedPatch, QModelIndex(),
                             name, path_, submodule);
-  fw->setStageState(git::Index::StagedState::Unstaged);
+  fw.setStageState(git::Index::StagedState::Unstaged);
 
-  auto hunks = fw->hunks();
+  auto hunks = fw.hunks();
   QVERIFY(hunks.count() == 2);
   hunks[0]->load();
   hunks[1]->load();
@@ -880,11 +877,10 @@ void TestEditorLineInfo::windowsCRLFMultiHunk() {
   QVERIFY(diff.count() == 1); // one file changed
   stagedPatch = stagedDiff.patch(0);
 
-  delete fw;
-  fw = new FileWidget(&diffView, diff, patch, stagedPatch, QModelIndex(), name,
+  FileWidget fw2(&diffView, diff, patch, stagedPatch, QModelIndex(), name,
                       path, submodule);
 
-  hunks = fw->hunks();
+  hunks = fw2.hunks();
   QVERIFY(hunks.count() == 2);
   hunks[0]->load();
   hunks[1]->load();
@@ -894,8 +890,6 @@ void TestEditorLineInfo::windowsCRLFMultiHunk() {
 
   checkEditorMarkers(hunks.at(1)->editor(), QVector<int>(), QVector<int>(),
                      QVector<int>({3}), QVector<int>({}));
-
-  delete fw;
 }
 
 void TestEditorLineInfo::cleanupTestCase() { qWait(closeDelay); }
