@@ -788,6 +788,7 @@ void TestEditorLineInfo::multipleHunks_StageSingleLines2() {
 void TestEditorLineInfo::windowsCRLF() {
   /*
    * Staging single lines in a file with CRLF instead of single LF
+   * The repository was created on windows
    */
 
   INIT_REPO("14_windowsCRLF.zip", true)
@@ -838,7 +839,7 @@ void TestEditorLineInfo::windowsCRLF() {
 void TestEditorLineInfo::windowsCRLFMultiHunk() {
   /*
    * Staging single lines in a file with CRLF instead of single LF for multiple
-   * hunks
+   * hunks. The CRLF file was created directly on linux and not on windows
    */
 
   INIT_REPO("15_windowsCRLF_multipleHunks.zip", false)
