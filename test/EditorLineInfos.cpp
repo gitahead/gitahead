@@ -788,12 +788,13 @@ void TestEditorLineInfo::multipleHunks_StageSingleLines2() {
 }
 
 #ifdef Q_OS_WIN
-// This test is only relevant on windows, because on linux this scenario does not happen.
-// The problem with this repo on linux is that the repo was created on windows but git
-// uses internally \n instead of \r\n so when opening this repo on linux,
-// the diff shows more than it should, because all unchanged lines have \n and all
-// changed lines have \r\n so the diff looks different. This cannot happen normaly,
-// because when cloning, git converts automatically for the used OS
+// This test is only relevant on windows, because on linux this scenario does
+// not happen. The problem with this repo on linux is that the repo was created
+// on windows but git uses internally \n instead of \r\n so when opening this
+// repo on linux, the diff shows more than it should, because all unchanged
+// lines have \n and all changed lines have \r\n so the diff looks different.
+// This cannot happen normaly, because when cloning, git converts automatically
+// for the used OS
 void TestEditorLineInfo::windowsCRLF() {
   /*
    * Staging single lines in a file with CRLF instead of single LF
@@ -811,8 +812,8 @@ void TestEditorLineInfo::windowsCRLF() {
   QString path_ = mRepo.workdir().filePath(name);
   bool submodule = mRepo.lookupSubmodule(name).isValid();
 
-  FileWidget fw(&diffView, diff, patch, stagedPatch, QModelIndex(),
-                            name, path_, submodule);
+  FileWidget fw(&diffView, diff, patch, stagedPatch, QModelIndex(), name, path_,
+                submodule);
   fw.setStageState(git::Index::StagedState::Unstaged);
 
   auto hunks = fw.hunks();
@@ -832,8 +833,8 @@ void TestEditorLineInfo::windowsCRLF() {
   QVERIFY(diff.count() > 0);
   stagedPatch = stagedDiff.patch(0);
 
-  FileWidget fw2(&diffView, diff, patch, stagedPatch, QModelIndex(), name,
-                      path, submodule);
+  FileWidget fw2(&diffView, diff, patch, stagedPatch, QModelIndex(), name, path,
+                 submodule);
 
   hunks = fw2.hunks();
   QVERIFY(hunks.count() == 1);
@@ -863,8 +864,8 @@ void TestEditorLineInfo::windowsCRLFMultiHunk() {
   QString path_ = mRepo.workdir().filePath(name);
   bool submodule = mRepo.lookupSubmodule(name).isValid();
 
-  FileWidget fw(&diffView, diff, patch, stagedPatch, QModelIndex(),
-                            name, path_, submodule);
+  FileWidget fw(&diffView, diff, patch, stagedPatch, QModelIndex(), name, path_,
+                submodule);
   fw.setStageState(git::Index::StagedState::Unstaged);
 
   auto hunks = fw.hunks();
@@ -888,8 +889,8 @@ void TestEditorLineInfo::windowsCRLFMultiHunk() {
   QVERIFY(diff.count() == 1); // one file changed
   stagedPatch = stagedDiff.patch(0);
 
-  FileWidget fw2(&diffView, diff, patch, stagedPatch, QModelIndex(), name,
-                      path, submodule);
+  FileWidget fw2(&diffView, diff, patch, stagedPatch, QModelIndex(), name, path,
+                 submodule);
 
   hunks = fw2.hunks();
   QVERIFY(hunks.count() == 2);
