@@ -1,6 +1,8 @@
 set(CONF_DIR ${CMAKE_SOURCE_DIR}/conf)
 set(RSRC_DIR ${CMAKE_SOURCE_DIR}/rsrc)
 
+option(GENERATE_APPDATA "Create appdata/metadata file" OFF)
+
 if(APPLE)
   set(ICON ${RSRC_DIR}/Gittyup.icns)
   set(APP_IMPL_FILE Application_mac.mm)
@@ -33,6 +35,10 @@ set(CHANGELOG_HTML ${DOC_BINARY_DIR}/changelog.html)
 set(ACKNOWLEDGMENTS_HTML ${DOC_BINARY_DIR}/acknowledgments.html)
 set(PRIVACY_HTML ${DOC_BINARY_DIR}/privacy.html)
 set(PLUGIN_HTML ${DOC_BINARY_DIR}/plugin.html)
+set(APPDATA_CONF
+    ${CMAKE_SOURCE_DIR}/rsrc/linux/com.github.Murmele.Gittyup.appdata.xml.in)
+set(APPDATA
+    ${CMAKE_BINARY_DIR}/rsrc/linux/com.github.Murmele.Gittyup.appdata.xml)
 add_custom_command(
   OUTPUT ${CHANGELOG_HTML} ${ACKNOWLEDGMENTS_HTML} ${PRIVACY_HTML}
          ${PLUGIN_HTML}
@@ -82,6 +88,17 @@ add_executable(
   ${ACKNOWLEDGMENTS_HTML}
   ${PRIVACY_HTML}
   ${PLUGIN_HTML})
+
+if(GENERATE_APPDATA)
+  add_custom_target(
+    appdata ALL
+    COMMAND
+      ${CMAKE_COMMAND} -DCHANGELOG_HTML:STRING=${CHANGELOG_HTML}
+      -DAPPDATA_CONF:STRING=${APPDATA_CONF} -DAPPDATA:STRING=${APPDATA} -P
+      "${CMAKE_SOURCE_DIR}/cmake/generate_appdata.cmake"
+    DEPENDS ${CHANGELOG_HTML}
+    COMMENT "Create appdata file")
+endif()
 
 target_link_libraries(gittyup app)
 
@@ -158,34 +175,34 @@ if(APPLE)
   set(RELAUNCHER ${GITTYUP_NAME}.app/Contents/MacOS/relauncher)
   install(
     CODE "execute_process(COMMAND
-      ${CMAKE_INSTALL_NAME_TOOL} -delete_rpath \"${RPATH}\"
-        \"\${CMAKE_INSTALL_PREFIX}/${RELAUNCHER}\"
-    )
-    execute_process(COMMAND
-      ${CMAKE_INSTALL_NAME_TOOL} -add_rpath \"/usr/local/qt\"
-        \"\${CMAKE_INSTALL_PREFIX}/${RELAUNCHER}\"
-    )
-    execute_process(COMMAND
-      ${CMAKE_INSTALL_NAME_TOOL} -add_rpath \"@loader_path/../Frameworks\"
-        \"\${CMAKE_INSTALL_PREFIX}/${RELAUNCHER}\"
-    )"
+		${CMAKE_INSTALL_NAME_TOOL} -delete_rpath \"${RPATH}\"
+	  \"\${CMAKE_INSTALL_PREFIX}/${RELAUNCHER}\"
+  )
+execute_process(COMMAND
+	${CMAKE_INSTALL_NAME_TOOL} -add_rpath \"/usr/local/qt\"
+	  \"\${CMAKE_INSTALL_PREFIX}/${RELAUNCHER}\"
+  )
+execute_process(COMMAND
+	${CMAKE_INSTALL_NAME_TOOL} -add_rpath \"@loader_path/../Frameworks\"
+	  \"\${CMAKE_INSTALL_PREFIX}/${RELAUNCHER}\"
+  )"
     COMPONENT ${GITTYUP_NAME})
 
   # Fixup indexer RPATH.
   set(INDEXER ${GITTYUP_NAME}.app/Contents/MacOS/indexer)
   install(
     CODE "execute_process(COMMAND
-      ${CMAKE_INSTALL_NAME_TOOL} -delete_rpath \"${RPATH}\"
-        \"\${CMAKE_INSTALL_PREFIX}/${INDEXER}\"
-    )
-    execute_process(COMMAND
-      ${CMAKE_INSTALL_NAME_TOOL} -add_rpath \"/usr/local/qt\"
-        \"\${CMAKE_INSTALL_PREFIX}/${INDEXER}\"
-    )
-    execute_process(COMMAND
-      ${CMAKE_INSTALL_NAME_TOOL} -add_rpath \"@loader_path/../Frameworks\"
-        \"\${CMAKE_INSTALL_PREFIX}/${INDEXER}\"
-    )"
+		${CMAKE_INSTALL_NAME_TOOL} -delete_rpath \"${RPATH}\"
+	  \"\${CMAKE_INSTALL_PREFIX}/${INDEXER}\"
+  )
+execute_process(COMMAND
+	${CMAKE_INSTALL_NAME_TOOL} -add_rpath \"/usr/local/qt\"
+	  \"\${CMAKE_INSTALL_PREFIX}/${INDEXER}\"
+  )
+execute_process(COMMAND
+	${CMAKE_INSTALL_NAME_TOOL} -add_rpath \"@loader_path/../Frameworks\"
+	  \"\${CMAKE_INSTALL_PREFIX}/${INDEXER}\"
+  )"
     COMPONENT ${GITTYUP_NAME})
 else()
   # Install config files.

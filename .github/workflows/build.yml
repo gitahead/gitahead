@@ -121,6 +121,7 @@ jobs:
             ninja_platform: linux
             qt_platform: linux
             openssl_arch: linux-x86_64
+            cmake_flags: "-DGENERATE_APPDATA=ON"
             cmake_env: {}
 
           - name: mac
@@ -268,6 +269,15 @@ jobs:
         run: |
           cd build/release
           ninja package
+
+      # Command copied from flathub build process
+      - name: Validate appdata file
+        if: matrix.env.ninja_platform == 'linux' && !matrix.qt.check_only
+        run: |
+          sudo apt install flatpak
+          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak install -y org.freedesktop.appstream-glib
+          flatpak run --env=G_DEBUG=fatal-criticals org.freedesktop.appstream-glib validate ./build/release/rsrc/linux/com.github.Murmele.Gittyup.appdata.xml
 
       - name: Publish build artifacts
         if: matrix.env.pack && !matrix.qt.check_only
