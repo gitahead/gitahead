@@ -475,12 +475,9 @@ void FileWidget::stageHunks(const HunkWidget *hunk,
   // available in the file.
   QString name = mPatch.name();
   git::Repository repo = mPatch.repo();
-  QFile dev(repo.workdir().filePath(name));
-  if (!dev.open(QFile::ReadOnly))
-    return;
+  git::Blob blob = repo.lookupBlob(repo.workdirId(name));
 
-  QByteArray fileContent = dev.readAll();
-  dev.close();
+  QByteArray fileContent = blob.content();
 
   QByteArray buffer;
   QList<QList<QByteArray>> image;
@@ -509,26 +506,21 @@ void FileWidget::discardHunk() {
   }
 
   QString name = mPatch.name();
-  QFile dev(repo.workdir().filePath(name));
-  if (!dev.open(QFile::ReadOnly))
-    return;
-
-  QByteArray fileContent = dev.readAll();
-  dev.close();
-
-  QSaveFile file(repo.workdir().filePath(name));
-  if (!file.open(QFile::WriteOnly))
-    return;
+  git::Blob blob = repo.lookupBlob(repo.workdirId(name));
+  QByteArray fileContent = blob.content();
 
   QByteArray buffer;
   for (int i = 0; i < mHunks.size(); ++i) {
-
     QByteArray hunk_content;
     if (mHunks[i] == hunk) {
       hunk_content = mHunks[i]->hunk();
       buffer = mPatch.apply(i, hunk_content, fileContent);
     }
   }
+
+  QSaveFile file(repo.workdir().filePath(name));
+  if (!file.open(QFile::WriteOnly))
+    return;
 
   file.write(buffer);
   if (!file.commit())
