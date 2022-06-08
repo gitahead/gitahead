@@ -291,6 +291,13 @@ jobs:
           working-directory: build/release
           run: ninja check
 
+      - name: Test (Windows)
+        # TODO: Re-Enable this when https://github.com/actions/runner/issues/1206 gets resolved
+        if: matrix.env.ninja_platform == 'win'
+        run: |
+          cd build/release
+          ninja check_no_win32_offscreen
+
   publish:
     # https://github.com/marvinpinto/actions/issues/177
     needs: [flatpak, build]
