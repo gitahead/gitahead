@@ -274,6 +274,9 @@ jobs:
       - name: Validate appdata file
         if: matrix.env.ninja_platform == 'linux' && !matrix.qt.check_only
         run: |
+          echo "Show generated appdata file"
+          cat ./build/release/rsrc/linux/com.github.Murmele.Gittyup.appdata.xml
+          echo "Start validating appdata file"
           sudo apt install flatpak
           sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
           sudo flatpak install -y org.freedesktop.appstream-glib
