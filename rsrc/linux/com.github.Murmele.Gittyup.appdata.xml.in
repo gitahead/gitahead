@@ -5,6 +5,7 @@
   <project_license>MIT</project_license>
   <name>Gittyup</name>
   <summary>Graphical Git client designed to help you understand and manage your source code history</summary>
+  <developer_name>Gittyup Community</developer_name>
 
   <description>
     <p>Graphical Git client designed to help you understand and manage your source code history</p>
