@@ -118,11 +118,14 @@ public:
   }
 };
 
-class AuthorDate : public QWidget {
+class AuthorCommitterDate : public QWidget {
 public:
-  AuthorDate(QWidget *parent = nullptr) : QWidget(parent) {
+  AuthorCommitterDate(QWidget *parent = nullptr) : QWidget(parent) {
     mAuthor = new QLabel(this);
     mAuthor->setTextInteractionFlags(kTextFlags);
+
+    mCommitter = new QLabel(this);
+    mCommitter->setTextInteractionFlags(kTextFlags);
 
     mDate = new QLabel(this);
     mDate->setTextInteractionFlags(kTextFlags);
@@ -137,15 +140,29 @@ public:
   QSize sizeHint() const override {
     QSize date = mDate->sizeHint();
     QSize author = mAuthor->sizeHint();
+    QSize committer = mCommitter->sizeHint();
     int width = author.width() + date.width() + mSpacing;
-    return QSize(width, qMax(author.height(), date.height()));
+    int height;
+    if (mSameAuthorCommitter)
+      height = qMax(qMax(author.height(), committer.height()), date.height());
+    else
+      height =
+          qMax(author.height(), date.height()) + committer.height() + mSpacing;
+    return QSize(width, height);
   }
 
   QSize minimumSizeHint() const override {
     QSize date = mDate->minimumSizeHint();
     QSize author = mAuthor->minimumSizeHint();
-    int width = qMax(author.width(), date.width());
-    return QSize(width, qMax(author.height(), date.height()));
+    QSize committer = mAuthor->minimumSizeHint();
+    int width = qMax(qMax(author.width(), committer.width()), date.width());
+    int height;
+    if (mSameAuthorCommitter)
+      height = qMax(qMax(author.height(), committer.height()), date.height());
+    else
+      height =
+          qMax(author.height(), date.height()) + committer.height() + mSpacing;
+    return QSize(width, height);
   }
 
   bool hasHeightForWidth() const override { return true; }
@@ -153,13 +170,28 @@ public:
   int heightForWidth(int width) const override {
     int date = mDate->sizeHint().height();
     int author = mAuthor->sizeHint().height();
+    int committer = mCommitter->sizeHint().height();
     bool wrapped = (width < sizeHint().width());
-    return wrapped ? (author + date + mSpacing) : qMax(author, date);
+    int unwrappedHeight = mSameAuthorCommitter
+                              ? qMax(committer, qMax(author, date))
+                              : qMax(author + committer + mSpacing, date);
+    return wrapped ? (author + committer + date + 2 * mSpacing)
+                   : unwrappedHeight;
   }
 
-  void setAuthor(const QString &author) {
-    mAuthor->setText(author);
-    mAuthor->adjustSize();
+  void setAuthorCommitter(const QString &author, const QString &committer) {
+    mSameAuthorCommitter = author == committer;
+    if (mSameAuthorCommitter) {
+      mAuthor->setText(tr("Author/Committer: ") + author);
+      mAuthor->adjustSize();
+      mCommitter->setVisible(false);
+    } else {
+      mAuthor->setText(tr("Author: ") + author);
+      mAuthor->adjustSize();
+      mCommitter->setText(tr("Committer: ") + committer);
+      mCommitter->adjustSize();
+      mCommitter->setVisible(true);
+    }
     updateGeometry();
   }
 
@@ -172,17 +204,22 @@ public:
 private:
   void updateLayout() {
     mAuthor->move(0, 0);
+    if (mCommitter->isVisible())
+      mCommitter->move(0, mAuthor->height() + mSpacing);
 
     bool wrapped = (width() < sizeHint().width());
     int x = wrapped ? 0 : width() - mDate->width();
-    int y = wrapped ? mAuthor->height() + mSpacing : 0;
+    int y =
+        wrapped ? mAuthor->height() + mCommitter->height() + 2 * mSpacing : 0;
     mDate->move(x, y);
   }
 
   QLabel *mAuthor;
+  QLabel *mCommitter;
   QLabel *mDate;
 
   int mSpacing;
+  bool mSameAuthorCommitter{false};
 };
 
 class CommitDetail : public QFrame {
@@ -190,7 +227,7 @@ class CommitDetail : public QFrame {
 
 public:
   CommitDetail(QWidget *parent = nullptr) : QFrame(parent) {
-    mAuthorDate = new AuthorDate(this);
+    mAuthorCommitterDate = new AuthorCommitterDate(this);
 
     mHash = new QLabel(this);
     mHash->setTextInteractionFlags(kTextFlags);
@@ -201,24 +238,19 @@ public:
             [this] { QApplication::clipboard()->setText(mId); });
 
     mRefs = new Badge(QList<Badge::Label>(), this);
-
-    QHBoxLayout *line2 = new QHBoxLayout;
-    line2->addWidget(mHash);
-    line2->addWidget(copy);
-    line2->addStretch();
-    line2->addWidget(mRefs);
-
     mParents = new QLabel(this);
     mParents->setTextInteractionFlags(kTextFlags);
 
     QHBoxLayout *line3 = new QHBoxLayout;
+    line3->addWidget(mHash);
+    line3->addWidget(copy);
     line3->addWidget(mParents);
     line3->addStretch();
+    line3->addWidget(mRefs);
 
     QVBoxLayout *details = new QVBoxLayout;
     details->setSpacing(6);
-    details->addWidget(mAuthorDate);
-    details->addLayout(line2);
+    details->addWidget(mAuthorCommitterDate); // line 1 + 2
     details->addLayout(line3);
     details->addStretch();
 
@@ -284,8 +316,8 @@ public:
   void setCommits(const QList<git::Commit> &commits) {
     // Clear fields.
     mHash->setText(QString());
-    mAuthorDate->setDate(QString());
-    mAuthorDate->setAuthor(QString());
+    mAuthorCommitterDate->setDate(QString());
+    mAuthorCommitterDate->setAuthorCommitter(QString(), QString());
     mParents->setText(QString());
     mMessage->setPlainText(QString());
     mPicture->setPixmap(QPixmap());
@@ -306,13 +338,19 @@ public:
       git::Commit first = commits.first();
 
       // Add names.
-      QSet<QString> names;
-      foreach (const git::Commit &commit, commits)
-        names.insert(kBoldFmt.arg(commit.author().name()));
-      QStringList list = names.values();
-      if (list.size() > 3)
-        list = list.mid(0, 3) << kBoldFmt.arg("...");
-      mAuthorDate->setAuthor(list.join(", "));
+      QSet<QString> authors, committers;
+      foreach (const git::Commit &commit, commits) {
+        authors.insert(kBoldFmt.arg(commit.author().name()));
+        committers.insert(kBoldFmt.arg(commit.committer().name()));
+      }
+      QStringList author = authors.values();
+      if (author.size() > 3)
+        author = author.mid(0, 3) << kBoldFmt.arg("...");
+      QStringList committer = committers.values();
+      if (committer.size() > 3)
+        committer = committer.mid(0, 3) << kBoldFmt.arg("...");
+      mAuthorCommitterDate->setAuthorCommitter(author.join(", "),
+                                               committer.join(", "));
 
       // Set date range.
       QDate lastDate = last.committer().date().date();
@@ -322,7 +360,7 @@ public:
       QString dateStr = (lastDate == firstDate)
                             ? lastDateStr
                             : kDateRangeFmt.arg(lastDateStr, firstDateStr);
-      mAuthorDate->setDate(brightText(dateStr));
+      mAuthorCommitterDate->setDate(brightText(dateStr));
 
       // Set id range.
       QUrl lastUrl;
@@ -352,10 +390,14 @@ public:
     // Populate details.
     git::Commit commit = commits.first();
     git::Signature author = commit.author();
+    git::Signature committer = commit.committer();
     QDateTime date = commit.committer().date();
     mHash->setText(brightText(tr("Id:")) + " " + commit.shortId());
-    mAuthorDate->setDate(brightText(date.toString(Qt::DefaultLocaleLongDate)));
-    mAuthorDate->setAuthor(kAuthorFmt.arg(author.name(), author.email()));
+    mAuthorCommitterDate->setDate(
+        brightText(date.toString(Qt::DefaultLocaleLongDate)));
+    mAuthorCommitterDate->setAuthorCommitter(
+        kAuthorFmt.arg(author.name(), author.email()),
+        kAuthorFmt.arg(committer.name(), committer.email()));
 
     QStringList parents;
     foreach (const git::Commit &parent, commit.parents()) {
@@ -429,7 +471,7 @@ private:
   QLabel *mPicture;
   QFrame *mSeparator;
   QTextEdit *mMessage;
-  AuthorDate *mAuthorDate;
+  AuthorCommitterDate *mAuthorCommitterDate;
 
   QString mId;
   QNetworkAccessManager mMgr;

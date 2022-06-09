@@ -145,6 +145,9 @@ public:
                 bool *fakeSignature = nullptr,
                 const QString &overrideUser = QString(),
                 const QString &overrideEmail = QString());
+  Commit commit(const Signature &author, const Signature &commiter,
+                const QString &message,
+                const AnnotatedCommit &mergeHead = AnnotatedCommit());
 
   QList<Commit> starredCommits() const;
   bool isCommitStarred(const Id &commit) const;

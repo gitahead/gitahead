@@ -37,6 +37,7 @@
 #include "git/Index.h"
 #include "git/Rebase.h"
 #include "git/RevWalk.h"
+#include "git/Signature.h"
 #include "git/TagRef.h"
 #include "git/Tree.h"
 #include "git2/merge.h"
@@ -1515,6 +1516,9 @@ void RepoView::revert(const git::Commit &commit) {
   if (checkForConflicts(parent, tr("revert")))
     return;
 
+  git::Signature committer = mRepo.defaultSignature(
+      nullptr, mDetails->overrideUser(), mDetails->overrideEmail());
+
   QString id = commit.id().toString();
   QString summary = commit.summary();
   QString msg = tr("Revert \"%1\"\n\nThis reverts commit %2.").arg(summary, id);
@@ -1527,9 +1531,11 @@ void RepoView::revert(const git::Commit &commit) {
       mergeAbort(parent);
     });
     connect(dialog, &QDialog::accepted, this,
-            [this, dialog, parent, suspended] {
+            [this, dialog, parent, suspended, commit, committer] {
               resumeLogTimer(suspended);
-              this->commit(dialog->message(), git::AnnotatedCommit(), parent);
+              // TODO: or doing it differently
+              this->commit(commit.author(), committer, dialog->message(),
+                           git::AnnotatedCommit(), parent);
             });
 
     dialog->open();
@@ -1537,7 +1543,7 @@ void RepoView::revert(const git::Commit &commit) {
   }
 
   // Automatically commit with the default message.
-  this->commit(msg, git::AnnotatedCommit(), parent);
+  this->commit(commit.author(), committer, msg, git::AnnotatedCommit(), parent);
 }
 
 void RepoView::cherryPick(const git::Commit &commit) {
@@ -1560,6 +1566,9 @@ void RepoView::cherryPick(const git::Commit &commit) {
   if (checkForConflicts(parent, tr("cherry-pick")))
     return;
 
+  git::Signature committer = mRepo.defaultSignature(
+      nullptr, mDetails->overrideUser(), mDetails->overrideEmail());
+
   QString msg = commit.message();
   if (Settings::instance()->prompt(Settings::PromptCherryPick)) {
     // Prompt to edit message.
@@ -1571,9 +1580,10 @@ void RepoView::cherryPick(const git::Commit &commit) {
       mergeAbort(parent);
     });
     connect(dialog, &QDialog::accepted, this,
-            [this, dialog, parent, suspended] {
+            [this, dialog, parent, suspended, commit, committer] {
               resumeLogTimer(suspended);
-              this->commit(dialog->message(), git::AnnotatedCommit(), parent);
+              this->commit(commit.author(), committer, dialog->message(),
+                           git::AnnotatedCommit(), parent);
             });
 
     dialog->open();
@@ -1581,7 +1591,7 @@ void RepoView::cherryPick(const git::Commit &commit) {
   }
 
   // Automatically commit with the default message.
-  this->commit(msg, git::AnnotatedCommit(), parent);
+  this->commit(commit.author(), committer, msg, git::AnnotatedCommit(), parent);
 }
 
 void RepoView::promptToForcePush(const git::Remote &remote,
@@ -1772,6 +1782,18 @@ void RepoView::push(const git::Remote &rmt, const git::Reference &src,
 bool RepoView::commit(const QString &message,
                       const git::AnnotatedCommit &upstream, LogEntry *parent,
                       bool force) {
+
+  bool fakeSignature = false;
+  git::Signature signature = mRepo.defaultSignature(
+      &fakeSignature, mDetails->overrideUser(), mDetails->overrideEmail());
+  return commit(signature, signature, message, upstream, parent, force,
+                fakeSignature);
+}
+
+bool RepoView::commit(const git::Signature &author,
+                      const git::Signature &commiter, const QString &message,
+                      const git::AnnotatedCommit &upstream, LogEntry *parent,
+                      bool force, bool fakeSignature) {
   // Check for detached head.
   git::Reference head = mRepo.head();
   if (!force && head.isValid() && !head.isLocalBranch()) {
@@ -1800,10 +1822,7 @@ bool RepoView::commit(const QString &message,
   QString text = tr("<i>no commit</i>");
   LogEntry *entry = addLogEntry(text, tr("Commit"), parent);
 
-  bool fakeSignature = false;
-  git::Commit commit =
-      mRepo.commit(message, upstream, &fakeSignature, mDetails->overrideUser(),
-                   mDetails->overrideEmail());
+  git::Commit commit = mRepo.commit(author, commiter, message, upstream);
 
   if (!commit.isValid()) {
     error(entry, tr("commit"));

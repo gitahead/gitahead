@@ -544,7 +544,13 @@ Commit Repository::commit(const QString &message,
   Signature signature =
       defaultSignature(fakeSignature, overrideUser, overrideEmail);
 
-  if (!signature.isValid())
+  return commit(signature, signature, message, mergeHead);
+}
+
+Commit Repository::commit(const Signature &author, const Signature &committer,
+                          const QString &message,
+                          const AnnotatedCommit &mergeHead) {
+  if (!author.isValid() || !committer.isValid())
     return Commit();
 
   // Write the index tree.
@@ -569,7 +575,7 @@ Commit Repository::commit(const QString &message,
 
   // Create the commit.
   git_oid id;
-  if (git_commit_create(&id, d->repo, "HEAD", signature, signature, 0,
+  if (git_commit_create(&id, d->repo, "HEAD", author, committer, 0,
                         message.toUtf8(), tree, parents.size(), parents.data()))
     return Commit();
 
