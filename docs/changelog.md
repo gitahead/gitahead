@@ -14,7 +14,6 @@ Bug fix release
 * Fix line staging with windows new lines
 * Show first change in the diff view when loading
 * Improved windows icon
-* Update openssl, libssh, scintilla, cmark and git
 
 ----
 
