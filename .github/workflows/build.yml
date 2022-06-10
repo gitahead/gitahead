@@ -6,6 +6,8 @@ on:
   push:
     branches:
     - master
+    tags:
+    - 'gittyup_v*'
   pull_request:
   page_build:
   workflow_dispatch:
