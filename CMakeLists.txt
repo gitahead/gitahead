@@ -84,6 +84,8 @@ if(DEBUG_FLATPAK)
   add_compile_definitions(DEBUG_FLATPAK)
 endif()
 
+include(GNUInstallDirs) # Defines some variables as BINDIR, LIBDIR, ...
+
 set(QT_TRANSLATIONS_DIR "${Qt5_DIR}/../../../translations")
 set(QT_TRANSLATIONS_DIR "/usr/share/qt/translations")
 
