@@ -39,7 +39,7 @@ const QString kGraphQlUrl = QStringLiteral("https://api.github.com/graphql");
 
 GitHub::GitHub(const QString &username) : Account(username) {
   QObject::connect(
-      &mMgr, &QNetworkAccessManager::finished, this,
+      mMgr, &QNetworkAccessManager::finished, this,
       [this](QNetworkReply *reply) {
         QString password = reply->property(kPasswordProperty).toString();
         if (password.isEmpty())
@@ -48,7 +48,7 @@ GitHub::GitHub(const QString &username) : Account(username) {
         reply->deleteLater();
 
         if (reply->error() != QNetworkReply::NoError) {
-          mError->setText(tr("Connection failed"), reply->errorString());
+          setErrorReply(*reply);
           mProgress->finish();
           return;
         }
@@ -94,7 +94,7 @@ GitHub::GitHub(const QString &username) : Account(username) {
         // Request next page.
         QNetworkRequest request(next);
         if (setHeaders(request, password)) {
-          QNetworkReply *reply = mMgr.get(request);
+          QNetworkReply *reply = mMgr->get(request);
           reply->setProperty(kPasswordProperty, password);
           startProgress();
         }
@@ -113,7 +113,7 @@ void GitHub::connect(const QString &password) {
   QString suffix = hasCustomUrl() ? "/api/v3" : QString();
   QNetworkRequest request(url() + suffix + "/user/repos");
   if (setHeaders(request, password)) {
-    QNetworkReply *reply = mMgr.get(request);
+    QNetworkReply *reply = mMgr->get(request);
     reply->setProperty(kPasswordProperty,
                        !password.isEmpty() ? password : this->password());
     startProgress();
@@ -288,7 +288,7 @@ void GitHub::graphql(const QString &query, const Callback &callback) {
   request.setRawHeader("Authorization",
                        QString("bearer %1").arg(mAccessToken).toUtf8());
 
-  QNetworkReply *reply = mMgr.post(request, doc.toJson());
+  QNetworkReply *reply = mMgr->post(request, doc.toJson());
   QObject::connect(reply, &QNetworkReply::finished, [reply, callback] {
     QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
     callback(doc.object().value("data").toObject());
@@ -309,9 +309,9 @@ void GitHub::rest(const QUrl &url, const QJsonDocument &doc,
 
   QNetworkReply *reply;
   if (doc.isEmpty()) {
-    reply = mMgr.get(request);
+    reply = mMgr->get(request);
   } else {
-    reply = mMgr.post(request, doc.toJson());
+    reply = mMgr->post(request, doc.toJson());
   }
 
   QObject::connect(reply, &QNetworkReply::finished, [reply, callback] {

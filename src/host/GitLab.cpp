@@ -27,12 +27,12 @@ const QString kProjectsFmt = "/projects?membership=true&private_token=%1";
 
 GitLab::GitLab(const QString &username) : Account(username) {
   QObject::connect(
-      &mMgr, &QNetworkAccessManager::finished, this,
+      mMgr, &QNetworkAccessManager::finished, this,
       [this](QNetworkReply *reply) {
         reply->deleteLater();
 
         if (reply->error() != QNetworkReply::NoError) {
-          mError->setText(tr("Connection failed"), reply->errorString());
+          setErrorReply(*reply);
           mProgress->finish();
           return;
         }
@@ -75,7 +75,7 @@ GitLab::GitLab(const QString &username) : Account(username) {
         // Request next page.
         QNetworkRequest request(next);
         request.setHeader(QNetworkRequest::ContentTypeHeader, kContentType);
-        mMgr.get(request);
+        mMgr->get(request);
         startProgress();
       });
 }
@@ -100,7 +100,7 @@ void GitLab::connect(const QString &defaultPassword) {
 
   QNetworkRequest request(url() + kProjectsFmt.arg(token));
   request.setHeader(QNetworkRequest::ContentTypeHeader, kContentType);
-  mMgr.get(request);
+  mMgr->get(request);
   startProgress();
 }
 

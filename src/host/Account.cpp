@@ -19,6 +19,7 @@
 #include <QNetworkRequest>
 #include <QPalette>
 #include <QSettings>
+#include <qnetworkaccessmanager.h>
 
 namespace {
 
@@ -28,10 +29,16 @@ const QString kThemeIconFmt = ":/%1_%2.png";
 } // namespace
 
 Account::Account(const QString &username)
-    : mUsername(username), mError(new AccountError(this)),
-      mProgress(new AccountProgress(this)) {}
+    : mMgr(new QNetworkAccessManager()), mUsername(username),
+      mError(new AccountError(this)), mProgress(new AccountProgress(this)) {
+  QObject::connect(
+      mMgr, &QNetworkAccessManager::sslErrors,
+      [this](QNetworkReply *reply, const QList<QSslError> &errors) {
+        sslErrors = errors;
+      });
+}
 
-Account::~Account() {}
+Account::~Account() { mMgr->deleteLater(); }
 
 QString Account::password() const {
   QUrl url;
@@ -107,6 +114,16 @@ void Account::setRepositoryPath(int index, const QString &path) {
   settings.endGroup();
 
   emit repositoryPathChanged(index, path);
+}
+
+void Account::setErrorReply(const QNetworkReply &reply) {
+  QString details = reply.errorString();
+
+  for (auto error : sslErrors) {
+    details += "\n" + error.errorString();
+  }
+
+  mError->setText(tr("Connection failed"), details);
 }
 
 void Account::authorize() { Q_ASSERT(false); }

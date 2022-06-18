@@ -19,7 +19,7 @@
 
 Beanstalk::Beanstalk(const QString &username) : Account(username) {
   QObject::connect(
-      &mMgr, &QNetworkAccessManager::finished, this,
+      mMgr, &QNetworkAccessManager::finished, this,
       [this](QNetworkReply *reply) {
         reply->deleteLater();
 
@@ -41,7 +41,7 @@ Beanstalk::Beanstalk(const QString &username) : Account(username) {
             repo->setUrl(Repository::Ssh, sshUrl);
           }
         } else {
-          mError->setText(tr("Connection failed"), reply->errorString());
+          setErrorReply(*reply);
         }
 
         mProgress->finish();
@@ -61,7 +61,7 @@ void Beanstalk::connect(const QString &password) {
 
   QNetworkRequest request(url() + "/api/repositories.json");
   if (setHeaders(request, password)) {
-    mMgr.get(request);
+    mMgr->get(request);
     startProgress();
   }
 }
