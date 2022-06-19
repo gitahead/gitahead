@@ -5,8 +5,8 @@
 Gittyup
 ==================================
 
-Gittyup is a graphical Git client designed to help you understand and manage your source code history. The [pre-release](https://github.com/Murmele/Gittyup/releases)
-is available either as pre-built [flatpak for Linux](https://github.com/Murmele/Gittyup/releases/download/latest/Gittyup.flatpak), [32](https://github.com/Murmele/Gittyup/releases/download/latest/Gittyup-win32-1.1.0-dev.exe) / [64](https://github.com/Murmele/Gittyup/releases/download/latest/Gittyup-win64-1.1.0-dev.exe) binary for Windows, [macOS](https://github.com/Murmele/Gittyup/releases/download/latest/Gittyup-1.1.0-dev.dmg),
+Gittyup is a graphical Git client designed to help you understand and manage your source code history. The [latest release](https://github.com/Murmele/Gittyup/releases/latest)
+is available either as pre-built flatpak for Linux, 32 / 64 binary for Windows, macOS,
 or can be built from source by following the directions [below](https://github.com/Murmele/Gittyup#how-to-build).
 
 Gittyup is a continuation of the [GitAhead](https://github.com/gitahead/gitahead) client.
