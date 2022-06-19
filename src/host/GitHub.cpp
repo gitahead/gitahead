@@ -25,7 +25,6 @@
 
 namespace {
 
-const quint16 kPort = 40080;
 const char *kPasswordProperty = "password";
 
 const QString kScope = "repo";
@@ -100,86 +99,6 @@ GitHub::GitHub(const QString &username) : Account(username) {
           startProgress();
         }
       });
-
-  QObject::connect(&mRedirectServer, &QTcpServer::newConnection, [this] {
-    QTcpSocket *socket = mRedirectServer.nextPendingConnection();
-    QObject::connect(socket, &QTcpSocket::readyRead, [this, socket] {
-      // Read URL.
-      QString code;
-      QString status = tr("Failed to authenticate with GitHub!");
-      QList<QByteArray> tokens = socket->readAll().split(' ');
-      if (!tokens.isEmpty() && tokens.takeFirst() == "GET") {
-        if (!tokens.isEmpty() && tokens.first().startsWith('/')) {
-          QUrlQuery query(tokens.first().mid(2));
-          if (mState == query.queryItemValue("state")) {
-            code = query.queryItemValue("code");
-            status = tr("Successfully authenticated with GitHub!");
-          }
-        }
-      }
-
-      // Read images.
-      QString icon;
-      QFile iconFile(":/Gittyup.iconset/icon_64x64.png");
-      if (iconFile.open(QFile::ReadOnly))
-        icon = iconFile.readAll().toBase64();
-
-      QString name;
-      QFile nameFile(":/logo-type_light@2x.png");
-      if (nameFile.open(QFile::ReadOnly))
-        name = nameFile.readAll().toBase64();
-
-      // Write HTML.
-      QString content =
-          QString(
-              "<html><head><style>img { display: inline }</style></head>"
-              "<body style=\"text-align: center\">"
-              "<div style=\"display: inline-block; padding: 20px\">"
-              "<img src=\"data:image/png;base64,%1\" />"
-              "<img src=\"data:image/png;base64,%2\" style=\"padding: 10px\" />"
-              "<p>%3</p><p>Close this window to continue.</p></div>"
-              "</body></html>")
-              .arg(icon, name, status);
-
-      QString message = QString("HTTP/1.0 200 OK \r\n"
-                                "Content-Type: text/html; "
-                                "charset=\"utf-8\"\r\n"
-                                "Content-Length: %1\r\n\r\n%2")
-                            .arg(content.size())
-                            .arg(content);
-
-      socket->write(message.toUtf8());
-      socket->disconnectFromHost();
-
-      if (code.isEmpty())
-        return;
-
-      // Request access token.
-      QNetworkRequest request(kAccessUrl);
-      request.setHeader(QNetworkRequest::ContentTypeHeader,
-                        "application/x-www-form-urlencoded");
-
-      QUrlQuery query;
-      query.addQueryItem("client_id", GITHUB_CLIENT_ID);
-      query.addQueryItem("client_secret", GITHUB_CLIENT_SECRET);
-      query.addQueryItem("code", code);
-      query.addQueryItem("state", mState);
-
-      QNetworkReply *reply = mMgr.post(request, query.toString().toUtf8());
-      QObject::connect(reply, &QNetworkReply::finished, [this, reply] {
-        QUrlQuery query(reply->readAll());
-        mAccessToken = query.queryItemValue("access_token");
-        reply->deleteLater();
-      });
-    });
-
-    QObject::connect(socket, &QTcpSocket::disconnected, socket,
-                     &QTcpSocket::deleteLater);
-  });
-
-  // Start listening for redirect.
-  // FIXME: Close server after some timeout?
-  mRedirectServer.listen(QHostAddress::Any, kPort);
 }
 
 Account::Kind GitHub::kind() const { return Account::GitHub; }

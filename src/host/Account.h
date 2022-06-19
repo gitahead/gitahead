@@ -15,7 +15,6 @@
 #include <QObject>
 #include <QSharedPointer>
 #include <QString>
-#include <QTcpServer>
 #include <QTimer>
 
 class AccountError;
@@ -109,7 +108,6 @@ protected:
   AccountError *mError;
   AccountProgress *mProgress;
   QNetworkAccessManager mMgr;
-  QTcpServer mRedirectServer;
 };
 
 class AccountError : public QObject {
