@@ -29,7 +29,7 @@
 #include <QVersionNumber>
 
 #if defined(Q_OS_MAC)
-#define PLATFORM "mac"
+#define PLATFORM "macos"
 #elif defined(Q_OS_WIN)
 #if defined(Q_OS_WIN64)
 #define PLATFORM "win64"
@@ -163,7 +163,7 @@ void Updater::update(bool spontaneous) {
     // The bundle does not have any version in its filename
     QString link = kLinkFmt.arg(platformArg, "", extension);
 #else
-	if (platform == "mac") {
+	if (platform == "macos") {
 	  extension = "dmg";
 	} else if (platform.startsWith("win")) {
 	  platformArg = QString("-%1").arg(platform);

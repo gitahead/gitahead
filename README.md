@@ -76,12 +76,12 @@ How to Build
     # Start from root of gittyup repo.
     cd dep/openssl/openssl
 
-Win:
+Windows:
 
     perl Configure VC-WIN64A
     nmake
 
-Mac:
+macOS:
 
     ./Configure darwin64-x86_64-cc no-shared
     make

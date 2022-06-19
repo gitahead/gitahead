@@ -200,7 +200,7 @@ if(NOT APPLE)
   endif()
 endif()
 
-# Sign bundle on Mac.
+# Sign bundle on macOS.
 if(APPLE AND CODESIGN_IDENTITY)
   install(
     CODE "execute_process(COMMAND

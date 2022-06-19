@@ -187,7 +187,7 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
 
   // Do platform-specific initialization.
 #if defined(Q_OS_MAC)
-  // Register service on Mac.
+  // Register service on macOS.
   registerService();
 
   // Load SF Mono font from Terminal.app.
@@ -198,7 +198,7 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
   foreach (const QString &name, dir.entryList({"SF*Mono-*.otf"}, QDir::Files))
     QFontDatabase::addApplicationFont(dir.filePath(name));
 
-  // Create shared menu bar on Mac.
+  // Create shared menu bar on macOS.
   (void)MenuBar::instance(nullptr);
 
 #elif defined(Q_OS_WIN)

@@ -168,7 +168,7 @@ void ScintillaQt::paintEvent(QPaintEvent *event) {
 
   if (paintState == paintAbandoned) {
     // FIXME: Failure to paint the requested rectangle in each
-    // paint event causes flicker on some platforms (Mac?)
+    // paint event causes flicker on some platforms (macOS?)
     // Paint rect immediately.
     paintState = painting;
     paintingAllText = true;
@@ -318,9 +318,9 @@ void ScintillaQt::keyPressEvent(QKeyEvent *event) {
     // it was pressed in conjunction with alt for AltGr emulation.
     bool input = (!ctrl || alt);
 
-    // Additionally, on non-mac platforms, don't insert text
+    // Additionally, on non-macOS platforms, don't insert text
     // if the alt key was pressed unless control is also present.
-    // On mac alt can be used to insert special characters.
+    // On macOS alt can be used to insert special characters.
 #ifndef Q_OS_MAC
     input &= (!alt || ctrl);
 #endif
