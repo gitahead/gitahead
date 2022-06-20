@@ -5,13 +5,27 @@
 Gittyup
 ==================================
 
-Gittyup is a graphical Git client designed to help you understand and manage your source code history. The [pre-release](https://github.com/Murmele/Gittyup/releases)
-is available either as pre-built [flatpak for Linux](https://github.com/Murmele/Gittyup/releases/download/latest/Gittyup.flatpak), [32](https://github.com/Murmele/Gittyup/releases/download/latest/Gittyup-win32-1.1.0-dev.exe) / [64](https://github.com/Murmele/Gittyup/releases/download/latest/Gittyup-win64-1.1.0-dev.exe) binary for Windows, [macOS](https://github.com/Murmele/Gittyup/releases/download/latest/Gittyup-1.1.0-dev.dmg),
+Gittyup is a graphical Git client designed to help you understand and manage your source code history. The [latest release](https://github.com/Murmele/Gittyup/releases/latest)
+is available either as pre-built flatpak for Linux, 32 / 64 binary for Windows, macOS,
 or can be built from source by following the directions [below](https://github.com/Murmele/Gittyup#how-to-build).
 
 Gittyup is a continuation of the [GitAhead](https://github.com/gitahead/gitahead) client.
 
 ![Gittyup](https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/screenshots/main_dark_orig.png)
+
+Table of contents
+=================
+<!--ts-->
+   * [Features](#features)
+   * [How to Get Help](#how-to-get-help)
+   * [Build Environment](#build-environment)
+   * [Dependencies](#dependencies)
+   * [How to Build](#how-to-build)
+   * [How to Install](#how-to-install)
+      * [Flatpak from terminal](#flatpak-from-terminal)
+   * [How to Contribute](#how-to-contribute)
+   * [License](#license)
+<!--te-->
 
 Features
 ---------------
@@ -123,6 +137,24 @@ Install the `gittyup` package from the Arch User Repository.
 
 Or use an AUR helper.
 Install `gittyup-git` for the VCS build.
+
+### Flatpak from terminal
+
+If you want a more pure console use, this script run flatpak version disowning the process and silence the output pushing it to /dev/null.
+Just save the script somewhere in your path, for example `/usr/bin` (or `~/.local/bin` if you have exported it), give execution permissions `chmod +x`, and run `gittyup` from your terminal.
+
+```bash
+#!/bin/bash
+DIR=$(dirname "${BASH_SOURCE[0]}")
+function run_disown() {
+    "$@" & disown
+}
+function run_disown_silence(){
+    run_disown "$@" 1>/dev/null 2>/dev/null
+}
+run_disown_silence flatpak run com.github.Murmele.Gittyup
+```
+
 
 How to Contribute
 -----------------
