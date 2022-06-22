@@ -5,12 +5,12 @@ Gittyup is a graphical Git client designed to help you understand and manage you
 The [stable version](https://github.com/Murmele/Gittyup/releases/stable) is available for
 - flatpak for Linux
 - 32 / 64 binary for Windows or
-- macOS X
+- macOS
 
 The [latest version](https://github.com/Murmele/Gittyup/releases/latest) is available either as pre-built for
 - flatpak for Linux,
 - 32 / 64 binary for Windows,
-- macOS X
+- macOS
 
 or, can be built from source by following the directions in the [Gittyup Repository](https://github.com/Murmele/Gittyup#how-to-build).
 

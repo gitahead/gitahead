@@ -58,7 +58,7 @@ void TestEditor::copyPaste() {
 }
 
 void TestEditor::find() {
-  // It's difficult to trigger the shortcut on Mac.
+  // It's difficult to trigger the shortcut on macOS.
   MenuBar *menuBar = MenuBar::instance(mWindow);
   QAction *findAction = menuBar->findChild<QAction *>("Find");
   QVERIFY(findAction);
