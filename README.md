@@ -95,11 +95,16 @@ Windows:
     perl Configure VC-WIN64A
     nmake
 
-macOS:
+macOS (Intel):
 
     ./Configure darwin64-x86_64-cc no-shared
     make
+    
+macOS (Apple Silicon)
 
+    ./Configure darwin64-arm64-cc no-shared
+    make
+    
 Linux:
 
     ./config -fPIC
