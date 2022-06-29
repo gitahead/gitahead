@@ -64,6 +64,7 @@ public:
 
   QString file() const;
 
+  QString commitMessage() const;
   void setCommitMessage(const QString &message);
   void setDiff(const git::Diff &diff, const QString &file = QString(),
                const QString &pathspec = QString());

@@ -16,7 +16,7 @@ class RebaseConflictDialog : public QDialog {
   Q_OBJECT
 
 public:
-  enum class ChosenAction { Unset, Abort, Leave };
+  enum class ChosenAction { Unset, Abort, Fix };
 
   RebaseConflictDialog(QWidget *parent = nullptr);
 

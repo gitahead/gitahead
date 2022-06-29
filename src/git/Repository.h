@@ -16,6 +16,7 @@
 #include "Commit.h"
 #include "Diff.h"
 #include "Index.h"
+#include "Rebase.h"
 #include "git2/checkout.h"
 #include "git2/errors.h"
 #include "git2/revwalk.h"
@@ -28,6 +29,7 @@
 
 struct git_repository;
 class QProcess;
+class LogEntry;
 
 namespace git {
 
@@ -184,9 +186,24 @@ public:
   // merge/rebase
   Commit mergeBase(const Commit &lhs, const Commit &rhs) const;
   bool merge(const AnnotatedCommit &mergeHead);
-  Rebase rebase(const AnnotatedCommit &mergeHead,
+  enum class RebaseStatus {
+      Init,
+      InitError,
+      OngoingStatus,
+      CommitInvalid,
+      Conflict,
+      PatchSuccess,
+      Error, // Error during status
+      FinishedSuccessfully // successfully finished
+  };
+
+  void rebase(const AnnotatedCommit &mergeHead,
                 const QString &overrideUser = QString(),
-                const QString &overrideEmail = QString());
+                const QString &overrideEmail = QString(), LogEntry *parent = nullptr);
+  Rebase rebaseOpen();
+  void rebaseAbort();
+  void rebaseContinue(const QString &commitMessage, LogEntry *parent);
+  bool rebaseOngoing();
 
   // cherry-pick
   bool cherryPick(const Commit &commit);
@@ -307,6 +324,13 @@ signals:
   void largeFileAboutToBeStaged(const QString &path, int size, bool &allow);
   void indexChanged(const QStringList &paths, bool yieldFocus = true);
   void indexStageError(const QString &path);
+
+  void rebaseInitError(LogEntry* parent);
+  void rebaseCommitInvalid(const Rebase rebase, LogEntry* parent);
+  void rebaseAboutToRebase(const Rebase rebase, const Commit before, int count, LogEntry* parent);
+  void rebaseFinished(const Rebase rebase, LogEntry* parent);
+  void rebaseCommitSuccess(const Rebase rebase, const Commit before, const Commit after, int counter, LogEntry* parent);
+  void rebaseConflict(const Rebase rebase, LogEntry* parent);
 
   void lfsNotFound();
   void lfsLocksChanged();

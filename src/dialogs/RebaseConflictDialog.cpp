@@ -24,18 +24,16 @@ RebaseConflictDialog::RebaseConflictDialog(QWidget *parent) : QDialog(parent) {
             accept();
           });
 
-  connect(buttons->addButton(tr("Keep rebase"), QDialogButtonBox::AcceptRole),
+  connect(buttons->addButton(tr("Fix merge conflicts"), QDialogButtonBox::AcceptRole),
           &QPushButton::clicked, [this](bool checked) {
-            mUserChoice = ChosenAction::Leave;
+            mUserChoice = ChosenAction::Fix;
             accept();
           });
 
   QFormLayout *layout = new QFormLayout(this);
   layout->addRow(new QLabel(
       tr("The rebase caused a merge conflict. \n"
-         "As Gittyup currently doesn't support working on rebase conflicts, \n"
-         "you have the option to continue solving the conflict using the "
-         "command line"),
+         "Would you like to fix the merge conflict and continue?"),
       this));
   layout->addRow(buttons);
 }

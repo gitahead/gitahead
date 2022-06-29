@@ -956,7 +956,7 @@ public:
     // Check for a merge head.
     git::AnnotatedCommit upstream;
     RepoView *view = RepoView::parentView(this);
-    if (git::Reference mergeHead = view->repo().lookupRef("MERGE_HEAD"))
+    if (git::Reference mergeHead = view->repo().lookupRef("MERGE_HEAD")) // TODO: is it possible to use instead of the string GIT_MERGE_HEAD_FILE?
       upstream = mergeHead.annotatedCommit();
 
     if (view->commit(mMessage->toPlainText(), upstream))
@@ -976,6 +976,10 @@ public:
   void setMessage(const QString &message) {
     mMessage->setPlainText(message);
     mMessage->selectAll();
+  }
+
+  QString message() const {
+    return mMessage->toPlainText();
   }
 
   void setDiff(const git::Diff &diff) {
@@ -1076,7 +1080,6 @@ private:
     int total = staged + partial + conflicted;
     mStage->setEnabled(count > staged);
     mUnstage->setEnabled(total);
-    mCommit->setEnabled(total && !mMessage->document()->isEmpty());
 
     // Set status text.
     QString status = tr("Nothing staged");
@@ -1107,8 +1110,25 @@ private:
 
     // Change commit button text for committing a merge.
     git::Repository repo = RepoView::parentView(this)->repo();
-    bool merging = (repo.state() == GIT_REPOSITORY_STATE_MERGE);
-    mCommit->setText(merging ? tr("Commit Merge") : tr("Commit"));
+    auto state = repo.state();
+
+
+    switch(repo.state()) {
+    case GIT_REPOSITORY_STATE_MERGE:
+        mCommit->setText(tr("Commit Merge"));
+        mCommit->setEnabled(total && !mMessage->document()->isEmpty());
+        break;
+    case GIT_REPOSITORY_STATE_REBASE:
+    case GIT_REPOSITORY_STATE_REBASE_MERGE:
+    case GIT_REPOSITORY_STATE_REBASE_INTERACTIVE:
+        mCommit->setText(tr("Commit Rebase"));
+        mCommit->setEnabled(total && conflicted == 0 && !mMessage->document()->isEmpty());
+        break;
+    default:
+        mCommit->setText(tr("Commit"));
+        mCommit->setEnabled(total && !mMessage->document()->isEmpty());
+        break;
+    }
 
     // Update menu actions.
     MenuBar::instance(this)->updateRepository();
@@ -1224,6 +1244,10 @@ QString DetailView::file() const {
 void DetailView::setCommitMessage(const QString &message) {
   static_cast<CommitEditor *>(mDetail->widget(EditorIndex))
       ->setMessage(message);
+}
+
+QString DetailView::commitMessage() const {
+    return static_cast<CommitEditor *>(mDetail->widget(EditorIndex))->message();
 }
 
 void DetailView::setDiff(const git::Diff &diff, const QString &file,

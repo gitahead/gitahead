@@ -19,6 +19,7 @@
 #include "git/Remote.h"
 #include "git/Repository.h"
 #include "git/Submodule.h"
+#include "git/Rebase.h"
 #include "host/Account.h"
 #include <QFuture>
 #include <QFutureWatcher>
@@ -198,8 +199,13 @@ public:
   void mergeAbort(LogEntry *parent = nullptr);
 
   // rebase
-  void rebase(const git::AnnotatedCommit &upstream, LogEntry *parent,
-              const std::function<void()> &callback = std::function<void()>());
+  void rebase(const git::AnnotatedCommit &upstream, LogEntry *parent);
+
+  // Aborting the current ongoing rebase
+  void abortRebase();
+
+  // Continuouing the current ongoing rebase
+  void continueRebase();
 
   // squash
   void squash(const git::AnnotatedCommit &upstream, LogEntry *parent);
@@ -335,6 +341,14 @@ public:
 public slots:
   void diffSelected(const git::Diff diff, const QString &file,
                     bool spontaneous);
+
+private slots:
+  void rebaseInitError(LogEntry* parent);
+  void rebaseCommitInvalid(const git::Rebase rebase, LogEntry *parent);
+  void rebaseAboutToRebase(const git::Rebase rebase, const git::Commit before, int currIndex, LogEntry *parent);
+  void rebaseFinished(const git::Rebase rebase, LogEntry *parent);
+  void rebaseCommitSuccess(const git::Rebase rebase, const git::Commit before, const git::Commit after, int currIndex, LogEntry *parent);
+  void rebaseConflict(const git::Rebase rebase, LogEntry *parent);
 
 signals:
   void statusChanged(bool dirty);
