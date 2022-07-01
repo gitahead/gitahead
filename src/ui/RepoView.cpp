@@ -439,7 +439,7 @@ void RepoView::diffSelected(const git::Diff diff, const QString &file,
                             bool spontaneous) {
   git::Diff diff2 = diff;
   mHistory->update(diff.isValid() ? location() : Location(),
-                   spontaneous); // why this changes diff?
+				   spontaneous); // TODO: why this changes diff?
   mDetails->setDiff(diff2, file, mPathspec->pathspec());
 }
 
