@@ -1391,6 +1391,7 @@ void RepoView::mergeAbort(LogEntry *parent) {
 
 void RepoView::abortRebase() {
     mRepo.rebaseAbort();
+    refresh();
 }
 
 void RepoView::continueRebase() {
