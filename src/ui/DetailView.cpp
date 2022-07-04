@@ -943,6 +943,12 @@ public:
     mRebaseContinue = new QPushButton(tr("Continue rebasing"), this);
     connect(mRebaseContinue, &QPushButton::clicked, this, &CommitEditor::continueRebase);
 
+    mMergeAbort = new QPushButton(tr("Abort Merge"), this);
+    connect(mMergeAbort, &QPushButton::clicked, [this] {
+        RepoView *view = RepoView::parentView(this);
+        view->mergeAbort();
+    });
+
     // Update buttons on index change.
     connect(repo.notifier(), &git::RepositoryNotifier::indexChanged,
             [this](const QStringList &paths, bool yieldFocus) {
@@ -957,6 +963,7 @@ public:
     buttonLayout->addWidget(mCommit);
     buttonLayout->addWidget(mRebaseContinue);
     buttonLayout->addWidget(mRebaseAbort);
+    buttonLayout->addWidget(mMergeAbort);
 
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 12);
@@ -1038,6 +1045,42 @@ private:
          mRebaseContinue->setVisible(rebaseOngoing);
          mRebaseAbort->setVisible(rebaseOngoing);
      }
+
+     // TODO: copied from menubar
+     bool merging = false;
+     QString text = tr("Merge");
+     if (view) {
+       switch (view->repo().state()) {
+         case GIT_REPOSITORY_STATE_MERGE:
+           merging = true;
+           break;
+
+         case GIT_REPOSITORY_STATE_REVERT:
+         case GIT_REPOSITORY_STATE_REVERT_SEQUENCE:
+           merging = true;
+           text = tr("Revert");
+           break;
+
+         case GIT_REPOSITORY_STATE_CHERRYPICK:
+         case GIT_REPOSITORY_STATE_CHERRYPICK_SEQUENCE:
+           merging = true;
+           text = tr("Cherry-pick");
+           break;
+
+         case GIT_REPOSITORY_STATE_REBASE:
+         case GIT_REPOSITORY_STATE_REBASE_INTERACTIVE:
+         case GIT_REPOSITORY_STATE_REBASE_MERGE:
+           text = tr("Rebase");
+           break;
+       }
+     }
+
+     git::Reference head = view ? view->repo().head() : git::Reference();
+     git::Branch headBranch = head;
+
+     mMergeAbort->setText(tr("Abort %1").arg(text));
+     mMergeAbort->setVisible(headBranch.isValid() && merging);
+
 
     if (!mDiff.isValid()) {
       mStage->setEnabled(false);
@@ -1176,6 +1219,7 @@ private:
   QPushButton *mCommit;
   QPushButton* mRebaseAbort;
   QPushButton* mRebaseContinue;
+  QPushButton* mMergeAbort;
 
   bool mEditorEmpty = true;
   bool mPopulate = true;
