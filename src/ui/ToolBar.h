@@ -32,7 +32,6 @@ private:
   void updateRemote(int ahead, int behind);
   void updateHistory();
   void updateStash();
-  void updateRebase();
   void updateView();
   void updateSearch();
 

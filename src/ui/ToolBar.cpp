@@ -397,114 +397,6 @@ public:
   }
 };
 
-class RebaseContinueButton : public Button {
-  Q_OBJECT
-
-public:
-  RebaseContinueButton(QWidget *parent = nullptr) : Button(parent) {
-    setObjectName("RebaseContinueButton");
-    setToolTip(tr("Continue Rebasing"));
-  }
-
-  void paintEvent(QPaintEvent *event) override { // TODO: change icon!
-    Button::paintEvent(event);
-
-    QStyleOptionToolButton opt;
-    initStyleOption(&opt);
-
-    QPainter painter(this);
-    painter.setPen(QPen(opt.palette.buttonText(), 1.5));
-    painter.setRenderHint(QPainter::Antialiasing);
-
-    //painter.drawText();
-
-    qreal x = width() / 2.0;
-    qreal y = height() / 2.0;
-
-    // Subtract a diagonal rectangle from the clip area.
-    QPainterPath clip;
-    clip.addRect(rect());
-
-    QPainterPath path;
-    path.moveTo(x - 8, y);
-    path.lineTo(x + 8, y - 4);
-    path.lineTo(x + 8, y);
-    path.lineTo(x - 8, y + 4);
-    path.closeSubpath();
-
-    painter.setClipPath(clip.subtracted(path));
-    painter.drawEllipse(QPointF(x, y), 6, 6);
-    painter.setClipping(false);
-
-    QPainterPath path1;
-    path1.moveTo(x - 9, y - 1);
-    path1.lineTo(x - 6, y + 2);
-    path1.lineTo(x - 3, y - 1);
-    path1.closeSubpath();
-    painter.fillPath(path1, opt.palette.buttonText());
-
-    QPainterPath path2;
-    path2.moveTo(x + 9, y + 1);
-    path2.lineTo(x + 6, y - 2);
-    path2.lineTo(x + 3, y + 1);
-    path2.closeSubpath();
-    painter.fillPath(path2, opt.palette.buttonText());
-  }
-};
-
-class RebaseAbortButton : public Button {
-  Q_OBJECT
-
-public:
-  RebaseAbortButton(QWidget *parent = nullptr) : Button(parent) { // TODO: change icon!
-    setObjectName("RebaseAbortButton");
-    setToolTip(tr("Abort Rebasing"));
-  }
-
-  void paintEvent(QPaintEvent *event) override {
-    Button::paintEvent(event);
-
-    QStyleOptionToolButton opt;
-    initStyleOption(&opt);
-
-    QPainter painter(this);
-    painter.setPen(QPen(opt.palette.buttonText(), 1.5));
-    painter.setRenderHint(QPainter::Antialiasing);
-
-    qreal x = width() / 2.0;
-    qreal y = height() / 2.0;
-
-    // Subtract a diagonal rectangle from the clip area.
-    QPainterPath clip;
-    clip.addRect(rect());
-
-    QPainterPath path;
-    path.moveTo(x - 8, y);
-    path.lineTo(x + 8, y - 4);
-    path.lineTo(x + 8, y);
-    path.lineTo(x - 8, y + 4);
-    path.closeSubpath();
-
-    painter.setClipPath(clip.subtracted(path));
-    painter.drawEllipse(QPointF(x, y), 6, 6);
-    painter.setClipping(false);
-
-    QPainterPath path1;
-    path1.moveTo(x - 9, y - 1);
-    path1.lineTo(x - 6, y + 2);
-    path1.lineTo(x - 3, y - 1);
-    path1.closeSubpath();
-    painter.fillPath(path1, opt.palette.buttonText());
-
-    QPainterPath path2;
-    path2.moveTo(x + 9, y + 1);
-    path2.lineTo(x + 6, y - 2);
-    path2.lineTo(x + 3, y + 1);
-    path2.closeSubpath();
-    painter.fillPath(path2, opt.palette.buttonText());
-  }
-};
-
 class PullRequestButton : public Button {
   Q_OBJECT
 
@@ -929,16 +821,6 @@ ToolBar::ToolBar(MainWindow *parent) : QToolBar(parent) {
   connect(mRefreshButton, &Button::clicked,
           [this] { currentView()->refresh(); });
 
-  mRebaseContinueButton = new RebaseContinueButton(this);
-  mRebaseContinueButton->setEnabled(false); // TODO: why using visible does not work?
-  addWidget(mRebaseContinueButton);
-  connect(mRebaseContinueButton, &Button::clicked, [this] {currentView()->continueRebase();});
-
-  mRebaseAbortButton = new RebaseAbortButton(this);
-  mRebaseAbortButton->setEnabled(false);  // TODO: why using visible does not work?
-  addWidget(mRebaseAbortButton);
-  connect(mRebaseAbortButton, &Button::clicked, [this] {currentView()->abortRebase();});
-
   if (!qgetenv("GITTYUP_OAUTH").isEmpty()) {
     addWidget(new Spacer(4, this));
 
@@ -1066,7 +948,6 @@ void ToolBar::updateButtons(int ahead, int behind) {
   updateRemote(ahead, behind);
   updateHistory();
   updateStash();
-  updateRebase();
   updateView();
   updateSearch();
 
@@ -1103,19 +984,6 @@ void ToolBar::updateStash() {
   RepoView *view = currentView();
   mStashButton->setEnabled(view && view->isWorkingDirectoryDirty());
   mStashPopButton->setEnabled(view && view->repo().stashRef().isValid());
-}
-
-void ToolBar::updateRebase() {
-    MainWindow *win = qobject_cast<MainWindow *>(window());
-    RepoView *view = win ? win->currentView() : nullptr;
-    if (!view || !view->repo().isValid()) {
-        mRebaseContinueButton->setEnabled(false);
-        mRebaseAbortButton->setEnabled(false);
-    } else {
-        const bool rebaseOngoing = view->repo().rebaseOngoing();
-        mRebaseContinueButton->setEnabled(rebaseOngoing);
-        mRebaseAbortButton->setEnabled(rebaseOngoing);
-    }
 }
 
 void ToolBar::updateView() {

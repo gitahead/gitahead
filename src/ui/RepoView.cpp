@@ -162,7 +162,6 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
 
   ToolBar *toolBar = parent->toolBar();
   connect(this, &RepoView::statusChanged, toolBar, &ToolBar::updateStash);
-  connect(this, &RepoView::statusChanged, toolBar, &ToolBar::updateRebase);
 
   // Initialize index.
   mIndex = new Index(repo, this);

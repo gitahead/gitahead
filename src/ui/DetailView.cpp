@@ -709,6 +709,7 @@ private:
  * \brief The CommitEditor class
  * This widget contains the textedit element for entering the commit message,
  * the buttons for commiting, staging all and unstage all
+ * If a rebase is ongoing, the rebase continue and rebase abort button is shown
  */
 class CommitEditor : public QFrame {
   Q_OBJECT
@@ -936,6 +937,12 @@ public:
     mCommit->setDefault(true);
     connect(mCommit, &QPushButton::clicked, this, &CommitEditor::commit);
 
+    mRebaseAbort = new QPushButton(tr("Abort rebasing"), this);
+    connect(mRebaseAbort, &QPushButton::clicked, this, &CommitEditor::abortRebase);
+
+    mRebaseContinue = new QPushButton(tr("Continue rebasing"), this);
+    connect(mRebaseContinue, &QPushButton::clicked, this, &CommitEditor::continueRebase);
+
     // Update buttons on index change.
     connect(repo.notifier(), &git::RepositoryNotifier::indexChanged,
             [this](const QStringList &paths, bool yieldFocus) {
@@ -948,6 +955,8 @@ public:
     buttonLayout->addWidget(mStage);
     buttonLayout->addWidget(mUnstage);
     buttonLayout->addWidget(mCommit);
+    buttonLayout->addWidget(mRebaseContinue);
+    buttonLayout->addWidget(mRebaseAbort);
 
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 12);
@@ -964,6 +973,16 @@ public:
 
     if (view->commit(mMessage->toPlainText(), upstream))
       mMessage->clear(); // Clear the message field.
+  }
+
+  void abortRebase() {
+    RepoView *view = RepoView::parentView(this);
+    view->abortRebase();
+  }
+
+  void continueRebase() {
+    RepoView *view = RepoView::parentView(this);
+    view->continueRebase();
   }
 
   bool isCommitEnabled() const { return mCommit->isEnabled(); }
@@ -1010,6 +1029,16 @@ public slots:
 
 private:
   void updateButtons(bool yieldFocus = true) {
+     RepoView *view = RepoView::parentView(this);
+     if (!view || !view->repo().isValid()) {
+         mRebaseContinue->setVisible(false);
+         mRebaseAbort->setVisible(false);
+     } else {
+         const bool rebaseOngoing = view->repo().rebaseOngoing();
+         mRebaseContinue->setVisible(rebaseOngoing);
+         mRebaseAbort->setVisible(rebaseOngoing);
+     }
+
     if (!mDiff.isValid()) {
       mStage->setEnabled(false);
       mUnstage->setEnabled(false);
@@ -1145,6 +1174,8 @@ private:
   QPushButton *mStage;
   QPushButton *mUnstage;
   QPushButton *mCommit;
+  QPushButton* mRebaseAbort;
+  QPushButton* mRebaseContinue;
 
   bool mEditorEmpty = true;
   bool mPopulate = true;
