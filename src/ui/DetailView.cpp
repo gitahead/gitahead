@@ -992,6 +992,10 @@ public:
     view->continueRebase();
   }
 
+  bool isRebaseAbortVisible() const { return mRebaseAbort->isVisible(); }
+
+   bool isRebaseContinueVisible() const { return mRebaseContinue->isVisible(); }
+
   bool isCommitEnabled() const { return mCommit->isEnabled(); }
 
   void stage() { mDiff.setAllStaged(true); }
@@ -1276,6 +1280,18 @@ bool DetailView::isCommitEnabled() const {
   QWidget *widget = mDetail->currentWidget();
   return (mDetail->currentIndex() == EditorIndex &&
           static_cast<CommitEditor *>(widget)->isCommitEnabled());
+}
+
+bool DetailView::isRebaseContinueVisible() const {
+  QWidget *widget = mDetail->currentWidget();
+  return (mDetail->currentIndex() == EditorIndex &&
+          static_cast<CommitEditor *>(widget)->isRebaseContinueVisible());
+}
+
+bool DetailView::isRebaseAbortVisible() const {
+  QWidget *widget = mDetail->currentWidget();
+  return (mDetail->currentIndex() == EditorIndex &&
+          static_cast<CommitEditor *>(widget)->isRebaseAbortVisible());
 }
 
 void DetailView::stage() {

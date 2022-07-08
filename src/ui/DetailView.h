@@ -51,6 +51,8 @@ public:
   // commit
   void commit();
   bool isCommitEnabled() const;
+  bool isRebaseContinueVisible() const;
+  bool isRebaseAbortVisible() const;
 
   // stage / unstage
   void stage();
