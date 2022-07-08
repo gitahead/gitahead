@@ -27,14 +27,15 @@
   QVERIFY(!path.isEmpty());                                                    \
   mRepo = git::Repository::open(path);                                         \
   QVERIFY(mRepo.isValid());                                                    \
-  auto window = new MainWindow(mRepo);                                         \
+  MainWindow window(mRepo);                                                    \
+  window.show();                                                               \
+  QVERIFY(QTest::qWaitForWindowExposed(&window));                              \
                                                                                \
   git::Reference head = mRepo.head();                                          \
   git::Commit commit = head.target();                                          \
   git::Diff stagedDiff = mRepo.diffTreeToIndex(commit.tree()); /* correct */   \
                                                                                \
-  RepoView *repoView = window->currentView();                                  \
-  Test::refresh(repoView);                                                     \
+  RepoView *repoView = window.currentView();                                   \
   DiffView diffView = DiffView(mRepo, repoView);                               \
   auto diff = mRepo.status(mRepo.index(), nullptr, false);
 
