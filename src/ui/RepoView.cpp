@@ -1391,19 +1391,23 @@ void RepoView::mergeAbort(LogEntry *parent) {
 
 void RepoView::abortRebase() {
     mRepo.rebaseAbort();
+    mRebaseLogEntry = nullptr;
     refresh();
 }
 
 void RepoView::continueRebase() {
-    mRepo.rebaseContinue(mDetails->commitMessage(), nullptr); // TODO: replace nullptr!!!!!!!!!!!
+    Q_ASSERT(mRebaseLogEntry);
+    mRepo.rebaseContinue(mDetails->commitMessage(), mRebaseLogEntry);
 }
 
 void RepoView::rebase(const git::AnnotatedCommit &upstream, LogEntry *parent) {
   git::Branch head = mRepo.head();
   Q_ASSERT(head.isValid());
 
+  mRebaseLogEntry = parent;
   mRepo.rebase(upstream, mDetails->overrideUser(),
                                     mDetails->overrideEmail(), parent);
+
 }
 
 void RepoView::rebaseInitError(LogEntry *parent) {
@@ -1435,35 +1439,7 @@ void RepoView::rebaseAboutToRebase(const git::Rebase rebase, const git::Commit b
 }
 
 void RepoView::rebaseConflict(const git::Rebase rebase, LogEntry* parent) {
-    // TODO: remove rebaseConflict dialog, because the button will appear next to the commit button,
-    // so this additional step is only waste of time
     refresh();
-//    RebaseConflictDialog *dialog = new RebaseConflictDialog(this);
-
-//    connect(dialog, &QDialog::finished,
-//            [this, dialog, rebase, parent](int code) {
-//              switch (dialog->userChoice()) {
-//                case RebaseConflictDialog::ChosenAction::Fix: {
-//                  auto commit = rebase.commitToRebase();
-//                  // Set original commit message as initial
-//                  if (commit.isValid())
-//                    mDetails->setCommitMessage(commit.message());
-//                  refresh();
-//                  break;
-
-//                } case RebaseConflictDialog::ChosenAction::Abort:
-//                default:
-//                  parent->addEntry(LogEntry::Error,
-//                                  tr("There was a merge conflict. The rebase "
-//                                     "has been aborted"));
-//                  git::Rebase(rebase).abort(); // de-const the capture // TODO: is this really correct? Because first parameter is the repo
-//                  break;
-//              }
-//            });
-
-//    dialog->setModal(true);
-//    dialog->setAttribute(Qt::WA_DeleteOnClose);
-//    dialog->open();
 }
 
 void RepoView::rebaseCommitSuccess(const git::Rebase rebase, const git::Commit before, const git::Commit after, int currIndex, LogEntry* parent) {
@@ -1476,6 +1452,7 @@ void RepoView::rebaseCommitSuccess(const git::Rebase rebase, const git::Commit b
 }
 
 void RepoView::rebaseFinished(const git::Rebase rebase, LogEntry* parent) {
+    mRebaseLogEntry = nullptr;
     // TODO: needed?
 //      if (callback)
 //        callback();

@@ -434,6 +434,8 @@ private:
    * false: all widgets are sized normaly and visible
    */
   bool mMaximized{false};
+
+  LogEntry* mRebaseLogEntry = nullptr;
 };
 
 #endif

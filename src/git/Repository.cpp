@@ -884,9 +884,8 @@ void Repository::rebaseContinue(const QString& commitMessage, LogEntry* parent) 
             emit d->notifier->rebaseConflict(r, parent);
             return;
         } else {
-
-            // TODO:
-            //emit d->notifier->rebaseCommitSuccess(r, after, before, currCommit, parent);
+            emit d->notifier->rebaseCommitSuccess(r, c, r.commitToRebase(), r.currentIndex() + 1, parent);
+            // Go on with the next rebase operation below
         }
 
     }
