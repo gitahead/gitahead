@@ -592,30 +592,10 @@ void TestRebase::abortMR() {
     QCOMPARE(rebaseFinished, 0);
     QCOMPARE(rebaseConflict, 1);
 
-
     // Check that buttons are visible
     QTest::qWait(100);
     QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), true);
     QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), true);
-
-    // Resolve conflicts
-    diff = mRepo.status(mRepo.index(), nullptr, false);
-    QCOMPARE(diff.count(), 1);
-    QCOMPARE(diff.patch(0).isConflicted(), true);
-    QFile f(mRepo.workdir().filePath(diff.patch(0).name()));
-    QCOMPARE(f.open(QIODevice::WriteOnly), true);
-    QVERIFY(f.write("Test123") != -1); // just write something to resolve the conflict
-    f.close();
-
-    Test::refresh(repoView); // TODO: check if they are not triggered automatically
-
-    // Staging the file
-    auto cw = static_cast<ContentWidget*>(repoView->mDetails->mContent->currentWidget());
-    auto dtw = dynamic_cast<DoubleTreeWidget*>(cw);
-    QVERIFY(dtw);
-    dtw->mDiffView->mFiles.at(0)->stageStateChanged(dtw->mDiffView->mFiles.at(0)->modelIndex(), git::Index::StagedState::Staged);
-
-    repoView->mDetails->setCommitMessage("Test message");
 
     refreshTriggered = 0;
     rebaseConflict = 0;
