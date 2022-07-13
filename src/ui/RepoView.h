@@ -90,7 +90,7 @@ public:
   bool lfsSetLocked(const QStringList &paths, bool locked);
 
   // commit
-  void commit();
+  void commit(bool force = false);
   bool isCommitEnabled() const;
 
   // stage / unstage

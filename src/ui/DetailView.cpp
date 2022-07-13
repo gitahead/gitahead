@@ -971,14 +971,14 @@ public:
     layout->addLayout(buttonLayout);
   }
 
-  void commit() {
+  void commit(bool force = false) {
     // Check for a merge head.
     git::AnnotatedCommit upstream;
     RepoView *view = RepoView::parentView(this);
     if (git::Reference mergeHead = view->repo().lookupRef("MERGE_HEAD")) // TODO: is it possible to use instead of the string GIT_MERGE_HEAD_FILE?
       upstream = mergeHead.annotatedCommit();
 
-    if (view->commit(mMessage->toPlainText(), upstream))
+    if (view->commit(mMessage->toPlainText(), upstream, nullptr, force))
       mMessage->clear(); // Clear the message field.
   }
 
@@ -1271,9 +1271,9 @@ DetailView::DetailView(const git::Repository &repo, QWidget *parent)
 
 DetailView::~DetailView() {}
 
-void DetailView::commit() {
+void DetailView::commit(bool force) {
   Q_ASSERT(isCommitEnabled());
-  static_cast<CommitEditor *>(mDetail->currentWidget())->commit();
+  static_cast<CommitEditor *>(mDetail->currentWidget())->commit(force);
 }
 
 bool DetailView::isCommitEnabled() const {

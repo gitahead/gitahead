@@ -702,7 +702,8 @@ void TestRebase::commitDuringRebase() {
 
     // Do commit before going on
     // So the user can commit between the rebase to split up the changes
-    repoView->commit();
+    bool force = true;
+    repoView->commit(force);
 
     refreshTriggered = 0;
     rebaseConflict = 0;

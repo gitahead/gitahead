@@ -475,7 +475,7 @@ void RepoView::selectHead() { mRefs->select(mRepo.head()); }
 
 void RepoView::selectFirstCommit() { mCommits->selectFirstCommit(); }
 
-void RepoView::commit() { mDetails->commit(); }
+void RepoView::commit(bool force) { mDetails->commit(force); }
 
 bool RepoView::isCommitEnabled() const { return mDetails->isCommitEnabled(); }
 

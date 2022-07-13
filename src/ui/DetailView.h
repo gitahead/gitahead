@@ -49,7 +49,7 @@ public:
   virtual ~DetailView();
 
   // commit
-  void commit();
+  void commit(bool force = false);
   bool isCommitEnabled() const;
   bool isRebaseContinueVisible() const;
   bool isRebaseAbortVisible() const;
