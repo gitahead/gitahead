@@ -129,7 +129,6 @@ void TestRebase::withoutConflicts() {
 
     // Checkout correct branch
     QCOMPARE(mRepo.checkout(c), true);
-    //Test::refresh(repoView, false);
 
     // Rebase on main
     git::Reference mainBranch = mRepo.lookupRef(QString("refs/heads/main"));
@@ -201,9 +200,7 @@ void TestRebase::conflictingRebase() {
     auto c = branch.annotatedCommit().commit();
 
     // Checkout correct branch
-    //QCOMPARE(mRepo.checkout(c), true);
     repoView->checkout(branch);
-    //Test::refresh(repoView);
 
     // Rebase on main
     git::Reference mainBranch = mRepo.lookupRef(QString("refs/heads/main"));
@@ -405,9 +402,7 @@ void TestRebase::startRebaseContinueInCLI() {
     auto c = branch.annotatedCommit().commit();
 
     // Checkout correct branch
-    //QCOMPARE(mRepo.checkout(c), true);
     repoView->checkout(branch);
-    //Test::refresh(repoView);
 
     // Rebase on main
     git::Reference mainBranch = mRepo.lookupRef(QString("refs/heads/main"));
@@ -492,9 +487,7 @@ void TestRebase::startRebaseContinueInCLIContinueGUI() {
     auto c = branch.annotatedCommit().commit();
 
     // Checkout correct branch
-    //QCOMPARE(mRepo.checkout(c), true);
     repoView->checkout(branch);
-    //Test::refresh(repoView);
 
     // Rebase on main
     git::Reference mainBranch = mRepo.lookupRef(QString("refs/heads/main"));
@@ -575,9 +568,7 @@ void TestRebase::abortMR() {
     auto c = branch.annotatedCommit().commit();
 
     // Checkout correct branch
-    //QCOMPARE(mRepo.checkout(c), true);
     repoView->checkout(branch);
-    //Test::refresh(repoView);
 
     // Rebase on main
     git::Reference mainBranch = mRepo.lookupRef(QString("refs/heads/main"));
@@ -668,9 +659,7 @@ void TestRebase::commitDuringRebase() {
     auto c = branch.annotatedCommit().commit();
 
     // Checkout correct branch
-    //QCOMPARE(mRepo.checkout(c), true);
     repoView->checkout(branch);
-    //Test::refresh(repoView);
 
     // Rebase on main
     git::Reference mainBranch = mRepo.lookupRef(QString("refs/heads/main"));
