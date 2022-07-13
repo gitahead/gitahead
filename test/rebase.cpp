@@ -95,232 +95,204 @@ private:
 //###################################################################################################
 
 void TestRebase::withoutConflicts() {
-//    INIT_REPO("rebaseConflicts.zip", false);
+    INIT_REPO("rebaseConflicts.zip", false);
 
-//    int rebaseFinished = 0;
-//    int rebaseAboutToRebase = 0;
-//    int rebaseCommitSuccess = 0;
-//    int rebaseConflict = 0;
+    int rebaseFinished = 0;
+    int rebaseAboutToRebase = 0;
+    int rebaseCommitSuccess = 0;
+    int rebaseConflict = 0;
 
-//    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseInitError, [=](){QVERIFY(false);});  // Should not be called
-//    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseAboutToRebase, [=, &rebaseAboutToRebase](const Rebase rebase, const Commit before, int count, LogEntry* parent){
-//        QVERIFY(rebase.isValid());
-//        QCOMPARE(count, 1);
-//        QCOMPARE(before.message(), "File2.txt added");
-//        rebaseAboutToRebase++;
-//    });
-//    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseCommitInvalid, [=](){QVERIFY(false);}); // Should not be called
-//    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseFinished, [=, &rebaseFinished](){rebaseFinished++;});
-//    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseCommitSuccess, [=, &rebaseCommitSuccess](const Rebase rebase, const Commit before, const Commit after, int counter, LogEntry* parent) {
-//        QVERIFY(rebase.isValid());
-//        rebaseCommitSuccess++;
-//    });
-//    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseConflict, [=, &rebaseConflict](){
-//        rebaseConflict++;
-//    });
+    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseInitError, [=](){QVERIFY(false);});  // Should not be called
+    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseAboutToRebase, [=, &rebaseAboutToRebase](const Rebase rebase, const Commit before, int count, LogEntry* parent){
+        QVERIFY(rebase.isValid());
+        QCOMPARE(count, 1);
+        QCOMPARE(before.message(), "File2.txt added");
+        rebaseAboutToRebase++;
+    });
+    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseCommitInvalid, [=](){QVERIFY(false);}); // Should not be called
+    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseFinished, [=, &rebaseFinished](){rebaseFinished++;});
+    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseCommitSuccess, [=, &rebaseCommitSuccess](const Rebase rebase, const Commit before, const Commit after, int counter, LogEntry* parent) {
+        QVERIFY(rebase.isValid());
+        rebaseCommitSuccess++;
+    });
+    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseConflict, [=, &rebaseConflict](){
+        rebaseConflict++;
+    });
 
-//    const QString rebaseBranchName = "refs/heads/noConflict";
+    const QString rebaseBranchName = "refs/heads/noConflict";
 
-//    git::Reference branch = mRepo.lookupRef(rebaseBranchName);
-//    QVERIFY(branch.isValid());
-//    auto c = branch.annotatedCommit().commit();
+    git::Reference branch = mRepo.lookupRef(rebaseBranchName);
+    QVERIFY(branch.isValid());
+    auto c = branch.annotatedCommit().commit();
 
-//    LogEntry *entry = repoView->addLogEntry("Rebase", "Rebase", nullptr);
+    LogEntry *entry = repoView->addLogEntry("Rebase", "Rebase", nullptr);
 
-//    // Checkout correct branch
-//    QCOMPARE(mRepo.checkout(c), true);
-//    //Test::refresh(repoView, false);
+    // Checkout correct branch
+    QCOMPARE(mRepo.checkout(c), true);
+    //Test::refresh(repoView, false);
 
-//    // Rebase on main
-//    git::Reference mainBranch = mRepo.lookupRef(QString("refs/heads/main"));
-//    QVERIFY(mainBranch.isValid());
-//    auto ac = mainBranch.annotatedCommit();
-//    repoView->rebase(ac, entry);
+    // Rebase on main
+    git::Reference mainBranch = mRepo.lookupRef(QString("refs/heads/main"));
+    QVERIFY(mainBranch.isValid());
+    auto ac = mainBranch.annotatedCommit();
+    repoView->rebase(ac, entry);
 
-//    // Check that branch is based on "main" now
-//    branch = mRepo.lookupRef(rebaseBranchName);
-//    QVERIFY(branch.isValid());
-//    QList<Commit> parents = branch.annotatedCommit().commit().parents();
-//    QCOMPARE(parents.count(), 1);
-//    QCOMPARE(parents.at(0).id(), ac.commit().id());
+    // Check that branch is based on "main" now
+    branch = mRepo.lookupRef(rebaseBranchName);
+    QVERIFY(branch.isValid());
+    QList<Commit> parents = branch.annotatedCommit().commit().parents();
+    QCOMPARE(parents.count(), 1);
+    QCOMPARE(parents.at(0).id(), ac.commit().id());
 
-//    // Check that rebase was really finished
-//    QCOMPARE(mRepo.rebaseOngoing(), false);
+    // Check that rebase was really finished
+    QCOMPARE(mRepo.rebaseOngoing(), false);
 
-//    // Check call counters
-//    QCOMPARE(rebaseFinished, 1);
-//    QCOMPARE(rebaseAboutToRebase, 1);
-//    QCOMPARE(rebaseCommitSuccess, 1);
-//    QCOMPARE(rebaseConflict, 0);
+    // Check call counters
+    QCOMPARE(rebaseFinished, 1);
+    QCOMPARE(rebaseAboutToRebase, 1);
+    QCOMPARE(rebaseCommitSuccess, 1);
+    QCOMPARE(rebaseConflict, 0);
 
-//    QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
-//    QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
+    QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
+    QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
 }
 
 void TestRebase::conflictingRebase() {
-//    INIT_REPO("rebaseConflicts.zip", false);
+    INIT_REPO("rebaseConflicts.zip", false);
 
-//    QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
-//    QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
+    QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
+    QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
 
-//    int rebaseFinished = 0;
-//    int rebaseAboutToRebase = 0;
-//    int rebaseCommitSuccess = 0;
-//    int rebaseConflict = 0;
-//    int refreshTriggered = 0;
+    int rebaseFinished = 0;
+    int rebaseAboutToRebase = 0;
+    int rebaseCommitSuccess = 0;
+    int rebaseConflict = 0;
+    int refreshTriggered = 0;
 
-//    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseInitError, [=](){QVERIFY(false);});  // Should not be called
-//    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseAboutToRebase, [=, &rebaseAboutToRebase](const Rebase rebase, const Commit before, int count, LogEntry* parent){
-//        QVERIFY(rebase.isValid());
-//        QCOMPARE(count, 1);
-//        QCOMPARE(before.message(), "File.txt changed by second branch\n");
-//        rebaseAboutToRebase++;
-//    });
-//    // TODO: = needed?
-//    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseCommitInvalid, [=](){QVERIFY(false);}); // Should not be called
-//    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseFinished, [=, &rebaseFinished](){rebaseFinished++;});
-//    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseCommitSuccess, [=, &rebaseCommitSuccess](const Rebase rebase, const Commit before, const Commit after, int counter, LogEntry* parent) {
-//        QVERIFY(rebase.isValid());
-//        rebaseCommitSuccess++;
-//    });
-//    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseConflict, [=, &rebaseConflict, &rebaseCommitSuccess](){
-//        QCOMPARE(rebaseCommitSuccess, 0); // was not called yet
-//        rebaseConflict++;
-//    });
+    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseInitError, [=](){QVERIFY(false);});  // Should not be called
+    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseAboutToRebase, [=, &rebaseAboutToRebase](const Rebase rebase, const Commit before, int count, LogEntry* parent){
+        QVERIFY(rebase.isValid());
+        QCOMPARE(count, 1);
+        QCOMPARE(before.message(), "File.txt changed by second branch\n");
+        rebaseAboutToRebase++;
+    });
+    // TODO: = needed?
+    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseCommitInvalid, [=](){QVERIFY(false);}); // Should not be called
+    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseFinished, [=, &rebaseFinished](){rebaseFinished++;});
+    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseCommitSuccess, [=, &rebaseCommitSuccess](const Rebase rebase, const Commit before, const Commit after, int counter, LogEntry* parent) {
+        QVERIFY(rebase.isValid());
+        rebaseCommitSuccess++;
+    });
+    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseConflict, [=, &rebaseConflict, &rebaseCommitSuccess](){
+        QCOMPARE(rebaseCommitSuccess, 0); // was not called yet
+        rebaseConflict++;
+    });
 
-//    connect(mRepo.notifier(), &RepositoryNotifier::referenceUpdated, [this, &refreshTriggered](const Reference &ref) {
-//        // TODO: enable
-//        //QCOMPARE(ref, mRepo.head());
-//        refreshTriggered++;
-//    });
+    connect(mRepo.notifier(), &RepositoryNotifier::referenceUpdated, [this, &refreshTriggered](const Reference &ref) {
+        // TODO: enable
+        //QCOMPARE(ref, mRepo.head());
+        refreshTriggered++;
+    });
 
-//    const QString rebaseBranchName = "refs/heads/singleCommitConflict";
+    const QString rebaseBranchName = "refs/heads/singleCommitConflict";
 
-//    git::Reference branch = mRepo.lookupRef(rebaseBranchName);
-//    QVERIFY(branch.isValid());
-//    auto c = branch.annotatedCommit().commit();
+    git::Reference branch = mRepo.lookupRef(rebaseBranchName);
+    QVERIFY(branch.isValid());
+    auto c = branch.annotatedCommit().commit();
 
-//    // Checkout correct branch
-//    //QCOMPARE(mRepo.checkout(c), true);
-//    repoView->checkout(branch);
-//    //Test::refresh(repoView);
+    // Checkout correct branch
+    //QCOMPARE(mRepo.checkout(c), true);
+    repoView->checkout(branch);
+    //Test::refresh(repoView);
 
-//    // Rebase on main
-//    git::Reference mainBranch = mRepo.lookupRef(QString("refs/heads/main"));
-//    QVERIFY(mainBranch.isValid());
-//    auto ac = mainBranch.annotatedCommit();
-//    refreshTriggered = 0;
-//    LogEntry *entry = repoView->addLogEntry("Rebase", "Rebase", nullptr);
-//    repoView->rebase(ac, entry);
-//    QCOMPARE(refreshTriggered, 1); // Check that refresh was triggered
+    // Rebase on main
+    git::Reference mainBranch = mRepo.lookupRef(QString("refs/heads/main"));
+    QVERIFY(mainBranch.isValid());
+    auto ac = mainBranch.annotatedCommit();
+    refreshTriggered = 0;
+    LogEntry *entry = repoView->addLogEntry("Rebase", "Rebase", nullptr);
+    repoView->rebase(ac, entry);
+    QCOMPARE(refreshTriggered, 1); // Check that refresh was triggered
 
-//    QCOMPARE(mRepo.rebaseOngoing(), true);
-//    QCOMPARE(rebaseFinished, 0);
-//    QCOMPARE(rebaseConflict, 1);
-
-
-//    // Check that buttons are visible
-//    QTest::qWait(100);
-//    QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), true);
-//    QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), true);
-
-//    // Resolve conflicts
-//    diff = mRepo.status(mRepo.index(), nullptr, false);
-//    QCOMPARE(diff.count(), 1);
-//    QCOMPARE(diff.patch(0).isConflicted(), true);
-//    QFile f(mRepo.workdir().filePath(diff.patch(0).name()));
-//    QCOMPARE(f.open(QIODevice::WriteOnly), true);
-//    QVERIFY(f.write("Test123") != -1); // just write something to resolve the conflict
-//    f.close();
-
-//    Test::refresh(repoView);
-
-//    repoView->continueRebase(); // should fail
-//    QCOMPARE(rebaseConflict, 2); // User tries to continue without staging
-
-//    Test::refresh(repoView);
-
-//    // Staging the file
-//    auto cw = static_cast<ContentWidget*>(repoView->mDetails->mContent->currentWidget());
-//    auto dtw = dynamic_cast<DoubleTreeWidget*>(cw);
-//    QVERIFY(dtw);
-//    dtw->mDiffView->mFiles.at(0)->stageStateChanged(dtw->mDiffView->mFiles.at(0)->modelIndex(), git::Index::StagedState::Staged);
-
-//// Does not work, because for some reason the diffView is not updated as the dtw->DiffView
-////    // stage file otherwise it is not possible to continue
-////    {
-////        auto stagedDiff = mRepo.diffTreeToIndex(commit.tree()); /* correct */
-////        auto diff = mRepo.status(mRepo.index(), nullptr, false);
-////        auto stagedPatch = stagedDiff.patch(0);
-////        auto name = diff.patch(0).name();
-////        bool submodule = mRepo.lookupSubmodule(name).isValid();
+    QCOMPARE(mRepo.rebaseOngoing(), true);
+    QCOMPARE(rebaseFinished, 0);
+    QCOMPARE(rebaseConflict, 1);
 
 
-////        FileWidget fw(&diffView, diff, diff.patch(0), stagedPatch, QModelIndex(), name,
-////                      path, submodule);
-////        auto hunks = fw.hunks();
-////        QVERIFY(hunks.count() == 1);
-////        hunks[0]->load();
+    // Check that buttons are visible
+    QTest::qWait(100);
+    QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), true);
+    QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), true);
 
-////        fw.stageHunks(nullptr, git::Index::StagedState::Staged, true, true);
-////    }
+    // Resolve conflicts
+    diff = mRepo.status(mRepo.index(), nullptr, false);
+    QCOMPARE(diff.count(), 1);
+    QCOMPARE(diff.patch(0).isConflicted(), true);
+    QFile f(mRepo.workdir().filePath(diff.patch(0).name()));
+    QCOMPARE(f.open(QIODevice::WriteOnly), true);
+    QVERIFY(f.write("Test123") != -1); // just write something to resolve the conflict
+    f.close();
 
-//    repoView->mDetails->setCommitMessage("Test message");
+    Test::refresh(repoView);
 
-//    refreshTriggered = 0;
-//    rebaseConflict = 0;
-//    repoView->continueRebase();
-//    QCOMPARE(refreshTriggered, 1);
+    repoView->continueRebase(); // should fail
+    QCOMPARE(rebaseConflict, 2); // User tries to continue without staging
 
-//    // Check that branch is based on "main" now
-//    branch = mRepo.lookupRef(rebaseBranchName);
-//    QVERIFY(branch.isValid());
-//    QList<Commit> parents = branch.annotatedCommit().commit().parents();
-//    QCOMPARE(parents.count(), 1);
-//    QCOMPARE(parents.at(0).id(), ac.commit().id());
-//    QCOMPARE(branch.annotatedCommit().commit().message(), "Test message"); // custom message was used instead of the original one
+    Test::refresh(repoView);
 
-//    // Check that rebase was really finished
-//    QCOMPARE(mRepo.rebaseOngoing(), false);
+    // Staging the file
+    auto cw = static_cast<ContentWidget*>(repoView->mDetails->mContent->currentWidget());
+    auto dtw = dynamic_cast<DoubleTreeWidget*>(cw);
+    QVERIFY(dtw);
+    dtw->mDiffView->mFiles.at(0)->stageStateChanged(dtw->mDiffView->mFiles.at(0)->modelIndex(), git::Index::StagedState::Staged);
 
-//    // Check that buttons are visible
-//    QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
-//    QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
+// Does not work, because for some reason the diffView is not updated as the dtw->DiffView
+//    // stage file otherwise it is not possible to continue
+//    {
+//        auto stagedDiff = mRepo.diffTreeToIndex(commit.tree()); /* correct */
+//        auto diff = mRepo.status(mRepo.index(), nullptr, false);
+//        auto stagedPatch = stagedDiff.patch(0);
+//        auto name = diff.patch(0).name();
+//        bool submodule = mRepo.lookupSubmodule(name).isValid();
 
-//    // Check call counters
-//    QCOMPARE(rebaseFinished, 1);
-//    QCOMPARE(rebaseAboutToRebase, 1);
-//    QCOMPARE(rebaseCommitSuccess, 1);
-//    QCOMPARE(rebaseConflict, 0);
+
+//        FileWidget fw(&diffView, diff, diff.patch(0), stagedPatch, QModelIndex(), name,
+//                      path, submodule);
+//        auto hunks = fw.hunks();
+//        QVERIFY(hunks.count() == 1);
+//        hunks[0]->load();
+
+//        fw.stageHunks(nullptr, git::Index::StagedState::Staged, true, true);
+//    }
+
+    repoView->mDetails->setCommitMessage("Test message");
+
+    refreshTriggered = 0;
+    rebaseConflict = 0;
+    repoView->continueRebase();
+    QCOMPARE(refreshTriggered, 1);
+
+    // Check that branch is based on "main" now
+    branch = mRepo.lookupRef(rebaseBranchName);
+    QVERIFY(branch.isValid());
+    QList<Commit> parents = branch.annotatedCommit().commit().parents();
+    QCOMPARE(parents.count(), 1);
+    QCOMPARE(parents.at(0).id(), ac.commit().id());
+    QCOMPARE(branch.annotatedCommit().commit().message(), "Test message"); // custom message was used instead of the original one
+
+    // Check that rebase was really finished
+    QCOMPARE(mRepo.rebaseOngoing(), false);
+
+    // Check that buttons are visible
+    QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
+    QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
+
+    // Check call counters
+    QCOMPARE(rebaseFinished, 1);
+    QCOMPARE(rebaseAboutToRebase, 1);
+    QCOMPARE(rebaseCommitSuccess, 1);
+    QCOMPARE(rebaseConflict, 0);
 }
-
-// TODO: delete
-//    QProcess* p = new QProcess(this);
-//    p->setWorkingDirectory(path);
-
-//    QString bash = git::Command::bashPath();
-//    QVERIFY(!bash.isEmpty());
-//    bool shell = false;
-//    QString command = QString(GIT_EXECUTABLE) + " " + "checkout singleCommitConflict";
-//    QStringList arguments = {"-c", command};
-//    p->start(bash, arguments);
-//    p->waitForStarted();
-//    p->waitForFinished();
-
-//    auto error = p->error();
-//    //QCOMPARE(p->waitForReadyRead(), true);
-//    QString sa = p->readAll();
-
-//    QString se = p->readAllStandardError();
-//    QString so = p->readAllStandardOutput();
-
-//    QString es = p->errorString();
-
-//    auto state2 = p->state();
-
-//    auto status = p->exitStatus();
-//    QCOMPARE(p->exitCode(), 1);
-
 
 void TestRebase::continueExternalStartedRebase() {
     INIT_REPO("rebaseConflicts.zip", false);
@@ -672,6 +644,122 @@ void TestRebase::commitDuringRebase() {
      * Commit instead of continue rebase
      * Commit something else too
      * Continue rebase */
+
+    INIT_REPO("rebaseConflicts.zip", false);
+
+    QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
+    QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
+
+    int rebaseFinished = 0;
+    int rebaseAboutToRebase = 0;
+    int rebaseCommitSuccess = 0;
+    int rebaseConflict = 0;
+    int refreshTriggered = 0;
+
+    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseInitError, [=](){QVERIFY(false);});  // Should not be called
+    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseAboutToRebase, [=, &rebaseAboutToRebase](const Rebase rebase, const Commit before, int count, LogEntry* parent){
+        QVERIFY(rebase.isValid());
+        QCOMPARE(count, 1);
+        QCOMPARE(before.message(), "File.txt changed by second branch\n");
+        rebaseAboutToRebase++;
+    });
+    // TODO: = needed?
+    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseCommitInvalid, [=](){QVERIFY(false);}); // Should not be called
+    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseFinished, [=, &rebaseFinished](){rebaseFinished++;});
+    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseCommitSuccess, [=, &rebaseCommitSuccess](const Rebase rebase, const Commit before, const Commit after, int counter, LogEntry* parent) {
+        QVERIFY(rebase.isValid());
+        rebaseCommitSuccess++;
+    });
+    connect(mRepo.notifier(), &git::RepositoryNotifier::rebaseConflict, [=, &rebaseConflict, &rebaseCommitSuccess](){
+        QCOMPARE(rebaseCommitSuccess, 0); // was not called yet
+        rebaseConflict++;
+    });
+
+    connect(mRepo.notifier(), &RepositoryNotifier::referenceUpdated, [this, &refreshTriggered](const Reference &ref) {
+        // TODO: enable
+        //QCOMPARE(ref, mRepo.head());
+        refreshTriggered++;
+    });
+
+    const QString rebaseBranchName = "refs/heads/singleCommitConflict";
+
+    git::Reference branch = mRepo.lookupRef(rebaseBranchName);
+    QVERIFY(branch.isValid());
+    auto c = branch.annotatedCommit().commit();
+
+    // Checkout correct branch
+    //QCOMPARE(mRepo.checkout(c), true);
+    repoView->checkout(branch);
+    //Test::refresh(repoView);
+
+    // Rebase on main
+    git::Reference mainBranch = mRepo.lookupRef(QString("refs/heads/main"));
+    QVERIFY(mainBranch.isValid());
+    auto ac = mainBranch.annotatedCommit();
+    refreshTriggered = 0;
+    LogEntry *entry = repoView->addLogEntry("Rebase", "Rebase", nullptr);
+    repoView->rebase(ac, entry);
+    QCOMPARE(refreshTriggered, 1); // Check that refresh was triggered
+
+    QCOMPARE(mRepo.rebaseOngoing(), true);
+    QCOMPARE(rebaseFinished, 0);
+    QCOMPARE(rebaseConflict, 1);
+
+
+    // Check that buttons are visible
+    QTest::qWait(100);
+    QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), true);
+    QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), true);
+
+    // Resolve conflicts
+    diff = mRepo.status(mRepo.index(), nullptr, false);
+    QCOMPARE(diff.count(), 1);
+    QCOMPARE(diff.patch(0).isConflicted(), true);
+    QFile f(mRepo.workdir().filePath(diff.patch(0).name()));
+    QCOMPARE(f.open(QIODevice::WriteOnly), true);
+    QVERIFY(f.write("Test123") != -1); // just write something to resolve the conflict
+    f.close();
+
+    Test::refresh(repoView);
+
+    // Staging the file
+    auto cw = static_cast<ContentWidget*>(repoView->mDetails->mContent->currentWidget());
+    auto dtw = dynamic_cast<DoubleTreeWidget*>(cw);
+    QVERIFY(dtw);
+    dtw->mDiffView->mFiles.at(0)->stageStateChanged(dtw->mDiffView->mFiles.at(0)->modelIndex(), git::Index::StagedState::Staged);
+
+
+    repoView->mDetails->setCommitMessage("Test message");
+
+    // Do commit before going on
+    // So the user can commit between the rebase to split up the changes
+    repoView->commit();
+
+    refreshTriggered = 0;
+    rebaseConflict = 0;
+    repoView->continueRebase();
+    QCOMPARE(refreshTriggered, 1);
+
+    // Check that branch is based on "main" now
+    branch = mRepo.lookupRef(rebaseBranchName);
+    QVERIFY(branch.isValid());
+    QList<Commit> parents = branch.annotatedCommit().commit().parents();
+    QCOMPARE(parents.count(), 1);
+    QCOMPARE(parents.at(0).id(), ac.commit().id());
+    QCOMPARE(branch.annotatedCommit().commit().message(), "Test message"); // custom message was used instead of the original one
+
+    // Check that rebase was really finished
+    QCOMPARE(mRepo.rebaseOngoing(), false);
+
+    // Check that buttons are visible
+    QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
+    QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
+
+    // Check call counters
+    QCOMPARE(rebaseFinished, 1);
+    QCOMPARE(rebaseAboutToRebase, 1);
+    QCOMPARE(rebaseCommitSuccess, 1);
+    QCOMPARE(rebaseConflict, 0);
 }
 
 TEST_MAIN(TestRebase)
