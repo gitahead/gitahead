@@ -340,7 +340,7 @@ void TestRebase::continueExternalStartedRebase() {
     EXECUTE_GIT_COMMAND(path, "rebase main")
 
     workdirChangeTriggered = 0;
-    while (!workdirChangeTriggered == 0)
+    while (workdirChangeTriggered == 0)
         QTest::qWait(100);
 
     QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), true);
@@ -522,7 +522,7 @@ void TestRebase::startRebaseContinueInCLIContinueGUI() {
     EXECUTE_GIT_COMMAND(path, "rebase --continue")
 
     workdirChangeTriggered = 0;
-    while (!workdirChangeTriggered == 0)
+    while (workdirChangeTriggered == 0)
         QTest::qWait(100);
 
     // TODO: another condition is needed, because there is no change in those visible so
