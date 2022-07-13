@@ -65,8 +65,8 @@
     QStringList a = {"-c", command}; \
     p.start(bash, a); \
     p.waitForStarted(); \
-    p.waitForFinished(); \
-   /*  QCOMPARE(p.exitCode(), 1); TODO turn on */ \
+    QCOMPARE(p.waitForFinished(), true); \
+    QCOMPARE(p.exitCode(), 0);\
 }
 
 using namespace git;
