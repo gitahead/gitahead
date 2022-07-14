@@ -55,7 +55,7 @@
 #error "To execute those tests it is neccessary to have git installed on your computer. Turn off tests or exclude this test to build the project"
 #endif
 
-#define EXECUTE_GIT_COMMAND(workdir, arguments) \
+#define EXECUTE_GIT_COMMAND(workdir, arguments, expectedExitCode) \
 { \
     QProcess p(this); \
     p.setWorkingDirectory(workdir); \
@@ -66,7 +66,7 @@
     p.start(bash, a); \
     p.waitForStarted(); \
     QCOMPARE(p.waitForFinished(), true); \
-    QCOMPARE(p.exitCode(), 0);\
+    QCOMPARE(p.exitCode(), expectedExitCode); \
 }
 
 using namespace git;
@@ -333,8 +333,8 @@ void TestRebase::continueExternalStartedRebase() {
         workdirChangeTriggered++;
     });
 
-    EXECUTE_GIT_COMMAND(path, "checkout singleCommitConflict")
-    EXECUTE_GIT_COMMAND(path, "rebase main")
+    EXECUTE_GIT_COMMAND(path, "checkout singleCommitConflict", 0) // this should lead to an update of the tree
+    EXECUTE_GIT_COMMAND(path, "rebase main", 1)
 
     workdirChangeTriggered = 0;
     while (workdirChangeTriggered == 0)
@@ -426,7 +426,7 @@ void TestRebase::startRebaseContinueInCLI() {
     QVERIFY(f.write("Test123") != -1); // just write something to resolve the conflict
     f.close();
 
-    EXECUTE_GIT_COMMAND(path, "rebase --continue")
+    EXECUTE_GIT_COMMAND(path, "rebase --continue", 1)
 
     // TODO: check that GUI was updated properly
     QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
@@ -512,7 +512,7 @@ void TestRebase::startRebaseContinueInCLIContinueGUI() {
     QVERIFY(f.write("Test123") != -1); // just write something to resolve the conflict
     f.close();
 
-    EXECUTE_GIT_COMMAND(path, "rebase --continue")
+    EXECUTE_GIT_COMMAND(path, "rebase --continue", 1)
 
     workdirChangeTriggered = 0;
     while (workdirChangeTriggered == 0)
