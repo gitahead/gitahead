@@ -17,7 +17,6 @@
 
 struct git_rebase;
 struct git_repository;
-//struct git_rebase_operation;
 
 namespace git {
 

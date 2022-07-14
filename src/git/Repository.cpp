@@ -915,6 +915,7 @@ void Repository::rebaseContinue(const QString& commitMessage, LogEntry* parent) 
 
     if (r.finish())
         emit d->notifier->rebaseFinished(r, parent);
+    // TODO: implement
     //else
         // emit error
 }

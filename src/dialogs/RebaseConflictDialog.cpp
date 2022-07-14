@@ -24,7 +24,7 @@ RebaseConflictDialog::RebaseConflictDialog(QWidget *parent) : QDialog(parent) {
             accept();
           });
 
-  connect(buttons->addButton(tr("Fix merge conflicts"), QDialogButtonBox::AcceptRole),
+  connect(buttons->addButton(tr("Continue"), QDialogButtonBox::AcceptRole),
           &QPushButton::clicked, [this](bool checked) {
             mUserChoice = ChosenAction::Fix;
             accept();
