@@ -36,7 +36,6 @@ if(GIT_FOUND)
             --format=%h HEAD
     OUTPUT_VARIABLE GITTYUP_BUILD_REVISION
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-    add_compile_definitions(GIT_EXECUTABLE="${GIT_EXECUTABLE}") # To be able to access git cli for testing purpose
 else()
   set(GITTYUP_BUILD_REVISION "unknown")
 endif()
