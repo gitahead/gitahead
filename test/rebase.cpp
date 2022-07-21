@@ -436,6 +436,9 @@ void TestRebase::startRebaseContinueInCLI() {
 
     EXECUTE_GIT_COMMAND(path, "rebase --continue", 1)
 
+    Test::refresh(repoView);  // TODO: must be called, because when changing externally the repoView will not be notified.
+    QTest::qWait(1000);
+
     QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
     QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
 
