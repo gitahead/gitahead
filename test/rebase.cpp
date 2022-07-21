@@ -425,10 +425,16 @@ void TestRebase::startRebaseContinueInCLI() {
     QCOMPARE(rebaseFinished, 0);
     QCOMPARE(rebaseConflict, 1);
 
+    QTest::qWait(100); // Needed otherwise it is not refreshed and therefore the buttons are not updated
     QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), true);
     QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), true);
 
+    //Test::refresh(repoView); // TODO: should not be needed!
+
     // Solve conflict
+    diff = mRepo.status(mRepo.index(), nullptr, false);
+    QCOMPARE(diff.count(), 1);
+    QCOMPARE(diff.patch(0).isConflicted(), true);
     QFile f(mRepo.workdir().filePath(diff.patch(0).name()));
     QCOMPARE(f.open(QIODevice::WriteOnly), true);
     QVERIFY(f.write("Test123") != -1); // just write something to resolve the conflict
@@ -439,6 +445,7 @@ void TestRebase::startRebaseContinueInCLI() {
     Test::refresh(repoView);  // TODO: must be called, because when changing externally the repoView will not be notified.
     QTest::qWait(1000);
 
+    // Does not work, because libgit2 does not detect interactive rebases
     QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
     QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
 
