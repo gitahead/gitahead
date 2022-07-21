@@ -131,7 +131,6 @@ bool MergeTool::start() {
     return false;
   }
 
-  // TODO: why executing second time?
   if (!process->waitForStarted())
     return false;
 #endif
