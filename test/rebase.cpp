@@ -619,7 +619,7 @@ void TestRebase::abortMR() {
     // Check call counters
     QCOMPARE(rebaseFinished, 0);
     QCOMPARE(rebaseAboutToRebase, 1);
-    QCOMPARE(rebaseCommitSuccess, 1);
+    QCOMPARE(rebaseCommitSuccess, 0);
     QCOMPARE(rebaseConflict, 0);
 }
 
