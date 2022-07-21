@@ -17,6 +17,8 @@ class Reference;
 class Repository;
 } // namespace git
 
+class QAbstractItemModel;
+
 class ReferenceView : public QTreeView {
   Q_OBJECT
 
@@ -41,6 +43,9 @@ public:
   void resetTabIndex();
 
   git::Reference currentReference() const;
+  QModelIndex firstBranch();
+  QModelIndex firstTag();
+  QModelIndex firstRemote();
 
   bool eventFilter(QObject *watched, QEvent *event) override;
 
@@ -52,6 +57,7 @@ protected:
 
 private:
   bool mPopup;
+  QAbstractItemModel* mSource;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ReferenceView::Kinds);
