@@ -199,10 +199,10 @@ public:
 
   void rebase(const AnnotatedCommit &mergeHead,
                 const QString &overrideUser = QString(),
-                const QString &overrideEmail = QString(), LogEntry *parent = nullptr);
+                const QString &overrideEmail = QString());
   Rebase rebaseOpen();
   void rebaseAbort();
-  void rebaseContinue(const QString &commitMessage, LogEntry *parent);
+  void rebaseContinue(const QString &commitMessage);
   bool rebaseOngoing();
 
   // cherry-pick
@@ -325,12 +325,12 @@ signals:
   void indexChanged(const QStringList &paths, bool yieldFocus = true);
   void indexStageError(const QString &path);
 
-  void rebaseInitError(LogEntry* parent);
-  void rebaseCommitInvalid(const Rebase rebase, LogEntry* parent);
-  void rebaseAboutToRebase(const Rebase rebase, const Commit before, int count, LogEntry* parent);
-  void rebaseFinished(const Rebase rebase, LogEntry* parent);
-  void rebaseCommitSuccess(const Rebase rebase, const Commit before, const Commit after, int counter, LogEntry* parent);
-  void rebaseConflict(const Rebase rebase, LogEntry* parent);
+  void rebaseInitError();
+  void rebaseCommitInvalid(const Rebase rebase);
+  void rebaseAboutToRebase(const Rebase rebase, const Commit before, int count);
+  void rebaseFinished(const Rebase rebase);
+  void rebaseCommitSuccess(const Rebase rebase, const Commit before, const Commit after, int counter);
+  void rebaseConflict(const Rebase rebase);
 
   void lfsNotFound();
   void lfsLocksChanged();

@@ -343,12 +343,12 @@ public slots:
                     bool spontaneous);
 
 private slots:
-  void rebaseInitError(LogEntry* parent);
-  void rebaseCommitInvalid(const git::Rebase rebase, LogEntry *parent);
-  void rebaseAboutToRebase(const git::Rebase rebase, const git::Commit before, int currIndex, LogEntry *parent);
-  void rebaseFinished(const git::Rebase rebase, LogEntry *parent);
-  void rebaseCommitSuccess(const git::Rebase rebase, const git::Commit before, const git::Commit after, int currIndex, LogEntry *parent);
-  void rebaseConflict(const git::Rebase rebase, LogEntry *parent);
+  void rebaseInitError();
+  void rebaseCommitInvalid(const git::Rebase rebase);
+  void rebaseAboutToRebase(const git::Rebase rebase, const git::Commit before, int currIndex);
+  void rebaseFinished(const git::Rebase rebase);
+  void rebaseCommitSuccess(const git::Rebase rebase, const git::Commit before, const git::Commit after, int currIndex);
+  void rebaseConflict(const git::Rebase rebase);
 
 signals:
   void statusChanged(bool dirty);
@@ -408,6 +408,7 @@ private:
   QWidget *mSideBar;
 
   LogEntry *mLogRoot;
+  LogEntry* mRebase{nullptr};
   LogView *mLogView;
   QTimer mLogTimer;
   bool mIsLogVisible = false;
@@ -434,8 +435,6 @@ private:
    * false: all widgets are sized normaly and visible
    */
   bool mMaximized{false};
-
-  LogEntry* mRebaseLogEntry = nullptr;
 };
 
 #endif

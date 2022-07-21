@@ -26,7 +26,6 @@
 #include "Submodule.h"
 #include "TagRef.h"
 #include "Tree.h"
-#include "log/LogEntry.h"
 #include "git2/buffer.h"
 #include "git2/branch.h"
 #include "git2/checkout.h"
@@ -853,20 +852,20 @@ void Repository::rebaseAbort() {
 // TODO: check that all arguments passed to the signals are valid when the RepoView gets the notification! (Using sharedpointer?)
 void Repository::rebase(const AnnotatedCommit &mergeHead,
                           const QString &overrideUser,
-                          const QString &overrideEmail, LogEntry* parent) {
+                          const QString &overrideEmail) {
   git_rebase *r = nullptr;
   git_rebase_options opts = GIT_REBASE_OPTIONS_INIT;
   git_rebase_init(&r, d->repo, nullptr, mergeHead, nullptr, &opts);
   auto rebase = git::Rebase(d->repo, r, overrideUser, overrideEmail);
 
   if (!rebase.isValid())
-      emit d->notifier->rebaseInitError(parent);
+      emit d->notifier->rebaseInitError();
 
     // start rebasing
-   rebaseContinue(QStringLiteral(""), parent);
+   rebaseContinue(QStringLiteral(""));
 }
 
-void Repository::rebaseContinue(const QString& commitMessage, LogEntry* parent) {
+void Repository::rebaseContinue(const QString& commitMessage) {
 
     Rebase r = rebaseOpen();
     if (!r.isValid()) {
@@ -881,40 +880,38 @@ void Repository::rebaseContinue(const QString& commitMessage, LogEntry* parent) 
         // Check if it can be committed
         git::Commit c = r.commit(commitMessage);
         if (!c.isValid()) {
-            emit d->notifier->rebaseConflict(r, parent);
+            emit d->notifier->rebaseConflict(r);
             return;
         } else {
-            emit d->notifier->rebaseCommitSuccess(r, c, r.commitToRebase(), r.currentIndex() + 1, parent);
+            emit d->notifier->rebaseCommitSuccess(r, c, r.commitToRebase(), r.currentIndex() + 1);
             // Go on with the next rebase operation below
         }
 
     }
-
-    // TODO: don't like to have LogEntry* here
     // Loop over rebase operations.
     int count = r.count();
     while (r.hasNext()) {
       git::Commit before = r.next();
       if (!before.isValid()) {
-        emit d->notifier->rebaseCommitInvalid(r, parent);
+        emit d->notifier->rebaseCommitInvalid(r);
         rebaseAbort();
         return;
       }
       int currCommit = r.currentIndex() + 1; // for showing to user it makes more sense starting from 1
-      emit d->notifier->rebaseAboutToRebase(r, before, currCommit, parent);
+      emit d->notifier->rebaseAboutToRebase(r, before, currCommit);
 
       QString message = before.message(); // use original message
       git::Commit after = r.commit(message);
       if (!after.isValid()) {
-          emit d->notifier->rebaseConflict(r, parent);
+          emit d->notifier->rebaseConflict(r);
           return; // before ongoing, the user has to fix the conflicts.
       }
 
-      emit d->notifier->rebaseCommitSuccess(r, after, before, currCommit, parent);
+      emit d->notifier->rebaseCommitSuccess(r, after, before, currCommit);
     }
 
     if (r.finish())
-        emit d->notifier->rebaseFinished(r, parent);
+        emit d->notifier->rebaseFinished(r);
     // TODO: implement
     //else
         // emit error
