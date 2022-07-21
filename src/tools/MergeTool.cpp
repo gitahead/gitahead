@@ -132,7 +132,6 @@ bool MergeTool::start() {
   }
 
   // TODO: why executing second time?
-  //process->start(bash, {"-c", command});
   if (!process->waitForStarted())
     return false;
 #endif
