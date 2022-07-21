@@ -610,7 +610,7 @@ void TestRebase::abortMR() {
     QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
 
     // Check call counters
-    QCOMPARE(rebaseFinished, 1);
+    QCOMPARE(rebaseFinished, 0);
     QCOMPARE(rebaseAboutToRebase, 1);
     QCOMPARE(rebaseCommitSuccess, 1);
     QCOMPARE(rebaseConflict, 0);
