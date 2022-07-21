@@ -1461,9 +1461,6 @@ void RepoView::rebaseFinished(const git::Rebase rebase) {
     QString text = tr("Rebase finished");
     mRebase->addEntry(text, tr("Rebase"));
     mRebase = nullptr;
-    // TODO: needed?
-//      if (callback)
-//        callback();
 }
 
 void RepoView::squash(const git::AnnotatedCommit &upstream, LogEntry *parent) {
