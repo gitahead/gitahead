@@ -229,8 +229,10 @@ void TestRebase::conflictingRebase() {
 
     QTest::qWait(1000);
 
+    refreshTriggered = 0;
     repoView->continueRebase(); // should fail
     QCOMPARE(rebaseConflict, 2); // User tries to continue without staging
+    QCOMPARE(refreshTriggered, 1);
 
     QTest::qWait(1000); // Wait until refresh is done
 
