@@ -227,12 +227,12 @@ void TestRebase::conflictingRebase() {
     QVERIFY(f.write("Test123") != -1); // just write something to resolve the conflict
     f.close();
 
-    Test::refresh(repoView); // TODO: should not be needed!
+    QTest::qWait(1000);
 
     repoView->continueRebase(); // should fail
     QCOMPARE(rebaseConflict, 2); // User tries to continue without staging
 
-    Test::refresh(repoView); // TODO: should not be needed!
+    QTest::qWait(1000); // Wait until refresh is done
 
     // Staging the file
     auto cw = static_cast<ContentWidget*>(repoView->mDetails->mContent->currentWidget());
