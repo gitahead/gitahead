@@ -2,6 +2,13 @@
 [![Matrix](https://img.shields.io/matrix/Gittyup:matrix.org?label=Matrix%20Chat)](https://matrix.to/#/#Gittyup:matrix.org)
 [![Donate Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/Gittyup/donate)
 
+<a href="https://flathub.org/apps/details/com.github.Murmele.Gittyup">
+<img
+    src="https://flathub.org/assets/badges/flathub-badge-i-en.png"
+    alt="Download Gittyup on Flathub"
+    width="240px"/>
+</a>
+
 Gittyup
 ==================================
 
