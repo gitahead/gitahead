@@ -92,7 +92,7 @@ private:
 //###################################################################################################
 
 void TestRebase::withoutConflicts() {
-    INIT_REPO("rebaseConflicts.zip", false);
+    INIT_REPO("rebaseConflicts.zip", true);
 
     int rebaseFinished = 0;
     int rebaseAboutToRebase = 0;
@@ -154,7 +154,7 @@ void TestRebase::withoutConflicts() {
 }
 
 void TestRebase::conflictingRebase() {
-    INIT_REPO("rebaseConflicts.zip", false);
+    INIT_REPO("rebaseConflicts.zip", true);
 
     QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
     QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
@@ -291,7 +291,7 @@ void TestRebase::conflictingRebase() {
 }
 
 void TestRebase::continueExternalStartedRebase() {
-//    INIT_REPO("rebaseConflicts.zip", false);
+//    INIT_REPO("rebaseConflicts.zip", true);
 
 //    QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
 //    QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
@@ -373,7 +373,7 @@ void TestRebase::continueExternalStartedRebase() {
 
 void TestRebase::startRebaseContinueInCLI() {
 //    // Check that GUI is updated correctly
-//    INIT_REPO("rebaseConflicts.zip", false);
+//    INIT_REPO("rebaseConflicts.zip", true);
 
 //    int rebaseFinished = 0;
 //    int rebaseAboutToRebase = 0;
@@ -458,7 +458,7 @@ void TestRebase::startRebaseContinueInCLI() {
 void TestRebase::startRebaseContinueInCLIContinueGUI() {
 //    // Check that GUI is updated correctly
 
-//    INIT_REPO("rebaseConflicts.zip", false);
+//    INIT_REPO("rebaseConflicts.zip", true);
 
 //    QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
 //    QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
@@ -544,7 +544,7 @@ void TestRebase::startRebaseContinueInCLIContinueGUI() {
 }
 
 void TestRebase::abortMR() {
-    INIT_REPO("rebaseConflicts.zip", false);
+    INIT_REPO("rebaseConflicts.zip", true);
 
     QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
     QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
@@ -633,7 +633,7 @@ void TestRebase::commitDuringRebase() {
      * Commit something else too
      * Continue rebase */
 
-    INIT_REPO("rebaseConflicts.zip", false);
+    INIT_REPO("rebaseConflicts.zip", true);
 
     QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
     QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
