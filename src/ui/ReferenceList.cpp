@@ -92,9 +92,6 @@ git::Reference ReferenceList::currentReference() const {
 
 void ReferenceList::setCommit(const git::Commit &commit) {
   mCommit = commit;
-// If this is on, by default the commit id is shown and used in the merge commit message
-//  if (commit.isValid())
-//    setCurrentIndex(-1);
 }
 
 void ReferenceList::select(const git::Reference &ref, bool spontaneous) {
