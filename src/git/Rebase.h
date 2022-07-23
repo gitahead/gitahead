@@ -28,7 +28,7 @@ public:
 
   int count() const;
   size_t currentIndex() const;
-  const git_rebase_operation* operation(size_t index);
+  const git_rebase_operation *operation(size_t index);
   Commit commitToRebase() const;
   bool hasNext() const;
   Commit next() const;

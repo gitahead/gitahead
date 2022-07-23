@@ -414,10 +414,10 @@ public:
     QString msg = commit.message(git::Commit::SubstituteEmoji).trimmed();
     mMessage->setPlainText(msg);
 
-	auto w = window();
-	auto w_handler = w->windowHandle();
+    auto w = window();
+    auto w_handler = w->windowHandle();
 
-	int size = kSize * w_handler->devicePixelRatio();
+    int size = kSize * w_handler->devicePixelRatio();
     QByteArray email = commit.author().email().trimmed().toLower().toUtf8();
     QByteArray hash = QCryptographicHash::hash(email, QCryptographicHash::Md5);
 
@@ -938,15 +938,17 @@ public:
     connect(mCommit, &QPushButton::clicked, this, &CommitEditor::commit);
 
     mRebaseAbort = new QPushButton(tr("Abort rebasing"), this);
-    connect(mRebaseAbort, &QPushButton::clicked, this, &CommitEditor::abortRebase);
+    connect(mRebaseAbort, &QPushButton::clicked, this,
+            &CommitEditor::abortRebase);
 
     mRebaseContinue = new QPushButton(tr("Continue rebasing"), this);
-    connect(mRebaseContinue, &QPushButton::clicked, this, &CommitEditor::continueRebase);
+    connect(mRebaseContinue, &QPushButton::clicked, this,
+            &CommitEditor::continueRebase);
 
     mMergeAbort = new QPushButton(tr("Abort Merge"), this);
     connect(mMergeAbort, &QPushButton::clicked, [this] {
-        RepoView *view = RepoView::parentView(this);
-        view->mergeAbort();
+      RepoView *view = RepoView::parentView(this);
+      view->mergeAbort();
     });
 
     // Update buttons on index change.
@@ -975,7 +977,9 @@ public:
     // Check for a merge head.
     git::AnnotatedCommit upstream;
     RepoView *view = RepoView::parentView(this);
-    if (git::Reference mergeHead = view->repo().lookupRef("MERGE_HEAD")) // TODO: is it possible to use instead of the string GIT_MERGE_HEAD_FILE?
+    if (git::Reference mergeHead = view->repo().lookupRef(
+            "MERGE_HEAD")) // TODO: is it possible to use instead of the string
+                           // GIT_MERGE_HEAD_FILE?
       upstream = mergeHead.annotatedCommit();
 
     if (view->commit(mMessage->toPlainText(), upstream, nullptr, force))
@@ -994,7 +998,7 @@ public:
 
   bool isRebaseAbortVisible() const { return mRebaseAbort->isVisible(); }
 
-   bool isRebaseContinueVisible() const { return mRebaseContinue->isVisible(); }
+  bool isRebaseContinueVisible() const { return mRebaseContinue->isVisible(); }
 
   bool isCommitEnabled() const { return mCommit->isEnabled(); }
 
@@ -1011,9 +1015,7 @@ public:
     mMessage->selectAll();
   }
 
-  QString message() const {
-    return mMessage->toPlainText();
-  }
+  QString message() const { return mMessage->toPlainText(); }
 
   void setDiff(const git::Diff &diff) {
     mDiff = diff;
@@ -1040,51 +1042,50 @@ public slots:
 
 private:
   void updateButtons(bool yieldFocus = true) {
-     RepoView *view = RepoView::parentView(this);
-     if (!view || !view->repo().isValid()) {
-         mRebaseContinue->setVisible(false);
-         mRebaseAbort->setVisible(false);
-     } else {
-         const bool rebaseOngoing = view->repo().rebaseOngoing();
-         mRebaseContinue->setVisible(rebaseOngoing);
-         mRebaseAbort->setVisible(rebaseOngoing);
-     }
+    RepoView *view = RepoView::parentView(this);
+    if (!view || !view->repo().isValid()) {
+      mRebaseContinue->setVisible(false);
+      mRebaseAbort->setVisible(false);
+    } else {
+      const bool rebaseOngoing = view->repo().rebaseOngoing();
+      mRebaseContinue->setVisible(rebaseOngoing);
+      mRebaseAbort->setVisible(rebaseOngoing);
+    }
 
-     // TODO: copied from menubar
-     bool merging = false;
-     QString text = tr("Merge");
-     if (view) {
-       switch (view->repo().state()) {
-         case GIT_REPOSITORY_STATE_MERGE:
-           merging = true;
-           break;
+    // TODO: copied from menubar
+    bool merging = false;
+    QString text = tr("Merge");
+    if (view) {
+      switch (view->repo().state()) {
+        case GIT_REPOSITORY_STATE_MERGE:
+          merging = true;
+          break;
 
-         case GIT_REPOSITORY_STATE_REVERT:
-         case GIT_REPOSITORY_STATE_REVERT_SEQUENCE:
-           merging = true;
-           text = tr("Revert");
-           break;
+        case GIT_REPOSITORY_STATE_REVERT:
+        case GIT_REPOSITORY_STATE_REVERT_SEQUENCE:
+          merging = true;
+          text = tr("Revert");
+          break;
 
-         case GIT_REPOSITORY_STATE_CHERRYPICK:
-         case GIT_REPOSITORY_STATE_CHERRYPICK_SEQUENCE:
-           merging = true;
-           text = tr("Cherry-pick");
-           break;
+        case GIT_REPOSITORY_STATE_CHERRYPICK:
+        case GIT_REPOSITORY_STATE_CHERRYPICK_SEQUENCE:
+          merging = true;
+          text = tr("Cherry-pick");
+          break;
 
-         case GIT_REPOSITORY_STATE_REBASE:
-         case GIT_REPOSITORY_STATE_REBASE_INTERACTIVE:
-         case GIT_REPOSITORY_STATE_REBASE_MERGE:
-           text = tr("Rebase");
-           break;
-       }
-     }
+        case GIT_REPOSITORY_STATE_REBASE:
+        case GIT_REPOSITORY_STATE_REBASE_INTERACTIVE:
+        case GIT_REPOSITORY_STATE_REBASE_MERGE:
+          text = tr("Rebase");
+          break;
+      }
+    }
 
-     git::Reference head = view ? view->repo().head() : git::Reference();
-     git::Branch headBranch = head;
+    git::Reference head = view ? view->repo().head() : git::Reference();
+    git::Branch headBranch = head;
 
-     mMergeAbort->setText(tr("Abort %1").arg(text));
-     mMergeAbort->setVisible(headBranch.isValid() && merging);
-
+    mMergeAbort->setText(tr("Abort %1").arg(text));
+    mMergeAbort->setVisible(headBranch.isValid() && merging);
 
     if (!mDiff.isValid()) {
       mStage->setEnabled(false);
@@ -1191,19 +1192,19 @@ private:
     git::Repository repo = RepoView::parentView(this)->repo();
     auto state = repo.state();
 
-
-    switch(repo.state()) {
-    case GIT_REPOSITORY_STATE_MERGE:
+    switch (repo.state()) {
+      case GIT_REPOSITORY_STATE_MERGE:
         mCommit->setText(tr("Commit Merge"));
         mCommit->setEnabled(total && !mMessage->document()->isEmpty());
         break;
-    case GIT_REPOSITORY_STATE_REBASE:
-    case GIT_REPOSITORY_STATE_REBASE_MERGE:
-    case GIT_REPOSITORY_STATE_REBASE_INTERACTIVE:
+      case GIT_REPOSITORY_STATE_REBASE:
+      case GIT_REPOSITORY_STATE_REBASE_MERGE:
+      case GIT_REPOSITORY_STATE_REBASE_INTERACTIVE:
         mCommit->setText(tr("Commit Rebase"));
-        mCommit->setEnabled(total && conflicted == 0 && !mMessage->document()->isEmpty());
+        mCommit->setEnabled(total && conflicted == 0 &&
+                            !mMessage->document()->isEmpty());
         break;
-    default:
+      default:
         mCommit->setText(tr("Commit"));
         mCommit->setEnabled(total && !mMessage->document()->isEmpty());
         break;
@@ -1221,9 +1222,9 @@ private:
   QPushButton *mStage;
   QPushButton *mUnstage;
   QPushButton *mCommit;
-  QPushButton* mRebaseAbort;
-  QPushButton* mRebaseContinue;
-  QPushButton* mMergeAbort;
+  QPushButton *mRebaseAbort;
+  QPushButton *mRebaseContinue;
+  QPushButton *mMergeAbort;
 
   bool mEditorEmpty = true;
   bool mPopulate = true;
@@ -1341,7 +1342,7 @@ void DetailView::setCommitMessage(const QString &message) {
 }
 
 QString DetailView::commitMessage() const {
-    return static_cast<CommitEditor *>(mDetail->widget(EditorIndex))->message();
+  return static_cast<CommitEditor *>(mDetail->widget(EditorIndex))->message();
 }
 
 void DetailView::setDiff(const git::Diff &diff, const QString &file,

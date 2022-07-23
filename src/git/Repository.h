@@ -187,19 +187,19 @@ public:
   Commit mergeBase(const Commit &lhs, const Commit &rhs) const;
   bool merge(const AnnotatedCommit &mergeHead);
   enum class RebaseStatus {
-      Init,
-      InitError,
-      OngoingStatus,
-      CommitInvalid,
-      Conflict,
-      PatchSuccess,
-      Error, // Error during status
-      FinishedSuccessfully // successfully finished
+    Init,
+    InitError,
+    OngoingStatus,
+    CommitInvalid,
+    Conflict,
+    PatchSuccess,
+    Error,               // Error during status
+    FinishedSuccessfully // successfully finished
   };
 
   void rebase(const AnnotatedCommit &mergeHead,
-                const QString &overrideUser = QString(),
-                const QString &overrideEmail = QString());
+              const QString &overrideUser = QString(),
+              const QString &overrideEmail = QString());
   Rebase rebaseOpen();
   void rebaseAbort();
   void rebaseContinue(const QString &commitMessage);
@@ -329,7 +329,8 @@ signals:
   void rebaseCommitInvalid(const Rebase rebase);
   void rebaseAboutToRebase(const Rebase rebase, const Commit before, int count);
   void rebaseFinished(const Rebase rebase);
-  void rebaseCommitSuccess(const Rebase rebase, const Commit before, const Commit after, int counter);
+  void rebaseCommitSuccess(const Rebase rebase, const Commit before,
+                           const Commit after, int counter);
   void rebaseConflict(const Rebase rebase);
 
   void lfsNotFound();

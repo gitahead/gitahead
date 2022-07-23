@@ -345,9 +345,11 @@ public slots:
 private slots:
   void rebaseInitError();
   void rebaseCommitInvalid(const git::Rebase rebase);
-  void rebaseAboutToRebase(const git::Rebase rebase, const git::Commit before, int currIndex);
+  void rebaseAboutToRebase(const git::Rebase rebase, const git::Commit before,
+                           int currIndex);
   void rebaseFinished(const git::Rebase rebase);
-  void rebaseCommitSuccess(const git::Rebase rebase, const git::Commit before, const git::Commit after, int currIndex);
+  void rebaseCommitSuccess(const git::Rebase rebase, const git::Commit before,
+                           const git::Commit after, int currIndex);
   void rebaseConflict(const git::Rebase rebase);
 
 signals:
@@ -408,7 +410,7 @@ private:
   QWidget *mSideBar;
 
   LogEntry *mLogRoot;
-  LogEntry* mRebase{nullptr};
+  LogEntry *mRebase{nullptr};
   LogView *mLogView;
   QTimer mLogTimer;
   bool mIsLogVisible = false;

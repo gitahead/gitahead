@@ -153,12 +153,18 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   connect(this, &RepoView::statusChanged, menuBar, &MenuBar::updateStash);
   connect(notifier, &git::RepositoryNotifier::stateChanged, menuBar,
           &MenuBar::updateBranch);
-  connect(notifier, &git::RepositoryNotifier::rebaseInitError, this, &RepoView::rebaseInitError);
-  connect(notifier, &git::RepositoryNotifier::rebaseAboutToRebase, this, &RepoView::rebaseAboutToRebase);
-  connect(notifier, &git::RepositoryNotifier::rebaseCommitInvalid, this, &RepoView::rebaseCommitInvalid);
-  connect(notifier, &git::RepositoryNotifier::rebaseFinished, this, &RepoView::rebaseFinished);
-  connect(notifier, &git::RepositoryNotifier::rebaseCommitSuccess, this, &RepoView::rebaseCommitSuccess);
-  connect(notifier, &git::RepositoryNotifier::rebaseConflict, this, &RepoView::rebaseConflict);
+  connect(notifier, &git::RepositoryNotifier::rebaseInitError, this,
+          &RepoView::rebaseInitError);
+  connect(notifier, &git::RepositoryNotifier::rebaseAboutToRebase, this,
+          &RepoView::rebaseAboutToRebase);
+  connect(notifier, &git::RepositoryNotifier::rebaseCommitInvalid, this,
+          &RepoView::rebaseCommitInvalid);
+  connect(notifier, &git::RepositoryNotifier::rebaseFinished, this,
+          &RepoView::rebaseFinished);
+  connect(notifier, &git::RepositoryNotifier::rebaseCommitSuccess, this,
+          &RepoView::rebaseCommitSuccess);
+  connect(notifier, &git::RepositoryNotifier::rebaseConflict, this,
+          &RepoView::rebaseConflict);
 
   ToolBar *toolBar = parent->toolBar();
   connect(this, &RepoView::statusChanged, toolBar, &ToolBar::updateStash);
@@ -438,7 +444,7 @@ void RepoView::diffSelected(const git::Diff diff, const QString &file,
                             bool spontaneous) {
   git::Diff diff2 = diff;
   mHistory->update(diff.isValid() ? location() : Location(),
-				   spontaneous); // TODO: why this changes diff?
+                   spontaneous); // TODO: why this changes diff?
   mDetails->setDiff(diff2, file, mPathspec->pathspec());
 }
 
@@ -1390,18 +1396,18 @@ void RepoView::mergeAbort(LogEntry *parent) {
 }
 
 void RepoView::abortRebase() {
-    mRepo.rebaseAbort();
-    mRebase = nullptr;
-    refresh();
+  mRepo.rebaseAbort();
+  mRebase = nullptr;
+  refresh();
 }
 
 void RepoView::continueRebase() {
-    if (!mRebase) {
-        // Rebase operation was started externally so before going on with rebasing,
-        // create a log entry
-        mRebase = addLogEntry(tr(""), tr("Continue ongoing rebase"));
-    }
-    mRepo.rebaseContinue(mDetails->commitMessage());
+  if (!mRebase) {
+    // Rebase operation was started externally so before going on with rebasing,
+    // create a log entry
+    mRebase = addLogEntry(tr(""), tr("Continue ongoing rebase"));
+  }
+  mRepo.rebaseContinue(mDetails->commitMessage());
 }
 
 void RepoView::rebase(const git::AnnotatedCommit &upstream, LogEntry *parent) {
@@ -1410,57 +1416,56 @@ void RepoView::rebase(const git::AnnotatedCommit &upstream, LogEntry *parent) {
 
   mRebase = parent;
 
-  mRepo.rebase(upstream, mDetails->overrideUser(),
-                                    mDetails->overrideEmail());
-
+  mRepo.rebase(upstream, mDetails->overrideUser(), mDetails->overrideEmail());
 }
 
 void RepoView::rebaseInitError() {
-    const git::Branch head = mRepo.head();
-    Q_ASSERT(head.isValid());
-    LogEntry *err = error(mRebase, tr("rebase"), head.name());
-    // Add stash hint if the failure was because of uncommitted changes.
-    QString msg = git::Repository::lastError();
-    int kind = git::Repository::lastErrorKind();
-    if (kind == GIT_ERROR_REBASE && msg.contains("changes exist")) {
-      QString text =
-          tr("You may be able to rebase by <a href='action:stash'>stashing</a> "
-             "before trying to <a href='action:rebase'>rebase</a>. Then "
-             "<a href='action:unstash'>unstash</a> to restore your changes.");
-      err->addEntry(LogEntry::Hint, text);
-    }
-    mRebase = nullptr;
+  const git::Branch head = mRepo.head();
+  Q_ASSERT(head.isValid());
+  LogEntry *err = error(mRebase, tr("rebase"), head.name());
+  // Add stash hint if the failure was because of uncommitted changes.
+  QString msg = git::Repository::lastError();
+  int kind = git::Repository::lastErrorKind();
+  if (kind == GIT_ERROR_REBASE && msg.contains("changes exist")) {
+    QString text =
+        tr("You may be able to rebase by <a href='action:stash'>stashing</a> "
+           "before trying to <a href='action:rebase'>rebase</a>. Then "
+           "<a href='action:unstash'>unstash</a> to restore your changes.");
+    err->addEntry(LogEntry::Hint, text);
+  }
+  mRebase = nullptr;
 }
 
 void RepoView::rebaseCommitInvalid(const git::Rebase rebase) {
-    const git::Branch head = mRepo.head();
-    error(mRebase, tr("rebase"), head.name());
+  const git::Branch head = mRepo.head();
+  error(mRebase, tr("rebase"), head.name());
 }
 
-void RepoView::rebaseAboutToRebase(const git::Rebase rebase, const git::Commit before, int currIndex) {
-    QString beforeText = before.link();
-    QString step = tr("%1/%2").arg(currIndex).arg(rebase.count());
-    QString text = tr("%1 - %2").arg(step, beforeText);
-    LogEntry *entry = mRebase->addEntry(text, tr("Apply"));
+void RepoView::rebaseAboutToRebase(const git::Rebase rebase,
+                                   const git::Commit before, int currIndex) {
+  QString beforeText = before.link();
+  QString step = tr("%1/%2").arg(currIndex).arg(rebase.count());
+  QString text = tr("%1 - %2").arg(step, beforeText);
+  LogEntry *entry = mRebase->addEntry(text, tr("Apply"));
 }
 
-void RepoView::rebaseConflict(const git::Rebase rebase) {
-    refresh();
-}
+void RepoView::rebaseConflict(const git::Rebase rebase) { refresh(); }
 
-void RepoView::rebaseCommitSuccess(const git::Rebase rebase, const git::Commit before, const git::Commit after, int currIndex) {
-    QString beforeText = before.link();
-    QString step = tr("%1/%2").arg(currIndex).arg(rebase.count());
-    mRebase->setText(
-        (after == before)
-            ? tr("%1 - %2 <i>already applied</i>").arg(step, beforeText)
-            : tr("%1 - %2 as %3").arg(step, beforeText, msg(after)));
+void RepoView::rebaseCommitSuccess(const git::Rebase rebase,
+                                   const git::Commit before,
+                                   const git::Commit after, int currIndex) {
+  QString beforeText = before.link();
+  QString step = tr("%1/%2").arg(currIndex).arg(rebase.count());
+  mRebase->setText(
+      (after == before)
+          ? tr("%1 - %2 <i>already applied</i>").arg(step, beforeText)
+          : tr("%1 - %2 as %3").arg(step, beforeText, msg(after)));
 }
 
 void RepoView::rebaseFinished(const git::Rebase rebase) {
-    QString text = tr("Rebase finished");
-    mRebase->addEntry(text, tr("Rebase"));
-    mRebase = nullptr;
+  QString text = tr("Rebase finished");
+  mRebase->addEntry(text, tr("Rebase"));
+  mRebase = nullptr;
 }
 
 void RepoView::squash(const git::AnnotatedCommit &upstream, LogEntry *parent) {

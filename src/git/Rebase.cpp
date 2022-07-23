@@ -18,7 +18,7 @@
 
 namespace git {
 
-Rebase::Rebase(): d(nullptr) {}
+Rebase::Rebase() : d(nullptr) {}
 
 Rebase::Rebase(git_repository *repo, git_rebase *rebase,
                const QString &overrideUser, const QString &overrideEmail)
@@ -27,13 +27,12 @@ Rebase::Rebase(git_repository *repo, git_rebase *rebase,
 
 int Rebase::count() const { return git_rebase_operation_entrycount(d.data()); }
 
-
 size_t Rebase::currentIndex() const {
-    return git_rebase_operation_current(d.data());
+  return git_rebase_operation_current(d.data());
 }
 
-const git_rebase_operation* Rebase::operation(size_t index) {
-    return git_rebase_operation_byindex(d.data(), index);
+const git_rebase_operation *Rebase::operation(size_t index) {
+  return git_rebase_operation_byindex(d.data(), index);
 }
 
 bool Rebase::hasNext() const {
@@ -43,13 +42,14 @@ bool Rebase::hasNext() const {
 }
 
 Commit Rebase::commitToRebase() const {
-    git_rebase_operation* op = git_rebase_operation_byindex(d.data(), currentIndex());
-    if (!op)
-        return Commit();
+  git_rebase_operation *op =
+      git_rebase_operation_byindex(d.data(), currentIndex());
+  if (!op)
+    return Commit();
 
-    git_commit* commit = nullptr;
-    git_commit_lookup(&commit, mRepo, &op->id);
-    return Commit(commit);
+  git_commit *commit = nullptr;
+  git_commit_lookup(&commit, mRepo, &op->id);
+  return Commit(commit);
 }
 
 Commit Rebase::next() const {
@@ -67,14 +67,15 @@ Commit Rebase::next() const {
  * perform commit
  * \return
  */
-Commit Rebase::commit(const QString& message) {
+Commit Rebase::commit(const QString &message) {
   git_oid id;
   git_rebase *ptr = d.data();
 
   Signature sig = Repository(mRepo).defaultSignature(nullptr, mOverrideUser,
                                                      mOverrideEmail);
 
-  if (int err = git_rebase_commit(&id, ptr, nullptr, sig, nullptr, message.toUtf8())) {
+  if (int err = git_rebase_commit(&id, ptr, nullptr, sig, nullptr,
+                                  message.toUtf8())) {
     if (err != GIT_EAPPLIED)
       return Commit();
 
