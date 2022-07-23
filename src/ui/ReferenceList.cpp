@@ -48,14 +48,14 @@ ReferenceList::ReferenceList(const git::Repository &repo,
   // Select index. Priority: Branch --> Tag --> Remote --> Commit ID
   QModelIndex idx;
   if ((idx = view->firstBranch()).isValid())
-		setRootModelIndex(model->index(0, 0));
+    setRootModelIndex(model->index(0, 0));
   else if ((idx = view->firstTag()).isValid())
-      setRootModelIndex(model->index(2, 0));
+    setRootModelIndex(model->index(2, 0));
   else if ((idx = view->firstRemote()).isValid())
-      setRootModelIndex(model->index(1, 0));
+    setRootModelIndex(model->index(1, 0));
   else {
-      setRootModelIndex(model->index(0, 0));
-      idx = model->index(0, 0);
+    setRootModelIndex(model->index(0, 0));
+    idx = model->index(0, 0);
   }
   setCurrentIndex(idx.row());
 
@@ -90,9 +90,7 @@ git::Reference ReferenceList::currentReference() const {
   return currentData(Qt::UserRole).value<git::Reference>();
 }
 
-void ReferenceList::setCommit(const git::Commit &commit) {
-  mCommit = commit;
-}
+void ReferenceList::setCommit(const git::Commit &commit) { mCommit = commit; }
 
 void ReferenceList::select(const git::Reference &ref, bool spontaneous) {
   if (!ref.isValid()) {

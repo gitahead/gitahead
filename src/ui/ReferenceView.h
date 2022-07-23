@@ -57,7 +57,7 @@ protected:
 
 private:
   bool mPopup;
-  QAbstractItemModel* mSource;
+  QAbstractItemModel *mSource;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(ReferenceView::Kinds);
