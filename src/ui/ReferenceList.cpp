@@ -45,12 +45,12 @@ ReferenceList::ReferenceList(const git::Repository &repo,
   setModel(model);
   setView(view);
 
-  // Select index. Priority: Tag --> Branch --> Remote --> First index
+  // Select index. Priority: Branch --> Tag --> Remote --> Commit ID
   QModelIndex idx;
-  if ((idx = view->firstTag()).isValid())
+  if ((idx = view->firstBranch()).isValid())
+		setRootModelIndex(model->index(0, 0));
+  else if ((idx = view->firstTag()).isValid())
       setRootModelIndex(model->index(2, 0));
-  else if ((idx = view->firstBranch()).isValid())
-      setRootModelIndex(model->index(0, 0));
   else if ((idx = view->firstRemote()).isValid())
       setRootModelIndex(model->index(1, 0));
   else {
