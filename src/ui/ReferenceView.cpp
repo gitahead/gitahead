@@ -43,6 +43,8 @@ bool refComparator(const git::Reference &lhs, const git::Reference &rhs) {
           lhsCommit.committer().date() > rhsCommit.committer().date());
 }
 
+enum ReferenceType { Branches = 0, Remotes = 1, Tags = 2 };
+
 class ReferenceModel : public QAbstractItemModel {
   Q_OBJECT
 
@@ -99,7 +101,7 @@ public:
           branches.append(stash);
       }
 
-      mRefs.append({tr("Branches"), branches});
+      mRefs.append({tr("Branches"), branches}); // First element in mRefs
     }
 
     // Add remote branches.
@@ -114,7 +116,7 @@ public:
       std::sort(remotes.begin(), remotes.end(), refComparator);
       if (mKinds & ReferenceView::InvalidRef)
         remotes.prepend(git::Reference());
-      mRefs.append({tr("Remotes"), remotes});
+      mRefs.append({tr("Remotes"), remotes}); // Second element in mRefs
     }
 
     // Add tags.
@@ -124,10 +126,42 @@ public:
         tags.append(tag);
 
       std::sort(tags.begin(), tags.end(), refComparator);
-      mRefs.append({tr("Tags"), tags});
+      mRefs.append({tr("Tags"), tags}); // Third element in mRefs
     }
 
     endResetModel();
+  }
+
+  QModelIndex firstRemote() {
+    // Return first remote if available, otherwise an invalid modelIndex
+    for (auto &ref : mRefs) {
+      if (ref.name == tr("Remotes") && ref.refs.count() > 0)
+        return createIndex(0, 0, ReferenceType::Remotes);
+    }
+    return QModelIndex();
+  }
+
+  QModelIndex firstBranch() {
+    // Return first branch if available, otherwise an invalid modelIndex
+    for (auto &ref : mRefs) {
+      if (ref.name == tr("Branches") && ref.refs.count() > 0) {
+        if (mKinds & ReferenceView::InvalidRef && ref.refs.count() > 1)
+          return createIndex(0 + 1, 0, ReferenceType::Branches);
+        else
+          return createIndex(0, 0, ReferenceType::Branches);
+      }
+    }
+    return QModelIndex();
+  }
+
+  QModelIndex firstTag() {
+    // Return first tag if available, otherwise an invalid modelIndex
+
+    for (auto &ref : mRefs) {
+      if (ref.name == tr("Tags") && ref.refs.count() > 0)
+        return createIndex(0, 0, ReferenceType::Tags);
+    }
+    return QModelIndex();
   }
 
   QModelIndex index(int row, int column,
@@ -135,6 +169,7 @@ public:
     if (!hasIndex(row, column, parent))
       return QModelIndex();
 
+    // only true for ref elements, not for elements of mRefs
     bool id = (!parent.isValid() || parent.internalId());
     return createIndex(row, column, !id ? parent.row() + 1 : 0);
   }
@@ -143,8 +178,14 @@ public:
     if (!index.isValid())
       return QModelIndex();
 
+    // The sections (Branches, Remotes, Tags) (Elements of mRefs) do not have an
+    // internalId() Those sections don't have any parents, only the refs in each
+    // mRefs element
     quintptr id = index.internalId();
-    return !id ? QModelIndex() : createIndex(id - 1, 0);
+    if (!id)
+      return QModelIndex();
+    auto refType = static_cast<ReferenceType>(id - 1);
+    return createIndex(refType, 0);
   }
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const override {
@@ -169,8 +210,10 @@ public:
     if (!id)
       return (role == Qt::DisplayRole) ? mRefs.at(row).name : QVariant();
 
+    auto refType = static_cast<ReferenceType>(id - 1);
+
     // refs
-    git::Reference ref = mRefs.at(id - 1).refs.at(row);
+    git::Reference ref = mRefs.at(refType).refs.at(row);
     switch (role) {
       case Qt::DisplayRole:
         return ref.isValid() ? ref.name() : QString();
@@ -343,8 +386,8 @@ ReferenceView::ReferenceView(const git::Repository &repo, Kinds kinds,
 
   // Set model.
   FilterProxyModel *model = new FilterProxyModel(this);
-  ReferenceModel *source = new ReferenceModel(repo, kinds, this);
-  model->setSourceModel(source);
+  mSource = new ReferenceModel(repo, kinds, this);
+  model->setSourceModel(mSource);
   setModel(model);
 
   connect(field, &QLineEdit::textChanged, [this, model](const QString &text) {
@@ -382,7 +425,7 @@ ReferenceView::ReferenceView(const git::Repository &repo, Kinds kinds,
   setFocusProxy(field);
 
   // Update model last.
-  source->update();
+  static_cast<ReferenceModel *>(mSource)->update();
 }
 
 void ReferenceView::resetTabIndex() {
@@ -391,6 +434,30 @@ void ReferenceView::resetTabIndex() {
     root = root.parent();
 
   static_cast<Header *>(header())->tabs()->setCurrentIndex(root.row());
+}
+
+QModelIndex ReferenceView::firstBranch() {
+  auto index = static_cast<ReferenceModel *>(mSource)->firstBranch();
+  index = static_cast<FilterProxyModel *>(model())->mapFromSource(index);
+  if (!index.isValid())
+    return QModelIndex();
+  return index;
+}
+
+QModelIndex ReferenceView::firstTag() {
+  auto index = static_cast<ReferenceModel *>(mSource)->firstTag();
+  index = static_cast<FilterProxyModel *>(model())->mapFromSource(index);
+  if (!index.isValid())
+    return QModelIndex();
+  return index;
+}
+
+QModelIndex ReferenceView::firstRemote() {
+  auto index = static_cast<ReferenceModel *>(mSource)->firstRemote();
+  index = static_cast<FilterProxyModel *>(model())->mapFromSource(index);
+  if (!index.isValid())
+    return QModelIndex();
+  return index;
 }
 
 git::Reference ReferenceView::currentReference() const {
