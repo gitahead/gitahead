@@ -27,7 +27,7 @@ const char *kPasswordProperty = "password";
 
 Bitbucket::Bitbucket(const QString &username) : Account(username) {
   QObject::connect(
-      &mMgr, &QNetworkAccessManager::finished, this,
+      mMgr, &QNetworkAccessManager::finished, this,
       [this](QNetworkReply *reply) {
         QString password = reply->property(kPasswordProperty).toString();
         if (password.isEmpty())
@@ -36,7 +36,7 @@ Bitbucket::Bitbucket(const QString &username) : Account(username) {
         reply->deleteLater();
 
         if (reply->error() != QNetworkReply::NoError) {
-          mError->setText(tr("Connection failed"), reply->errorString());
+          setErrorReply(*reply);
           mProgress->finish();
           return;
         }
@@ -71,7 +71,7 @@ Bitbucket::Bitbucket(const QString &username) : Account(username) {
         // Request next page.
         QNetworkRequest request(next);
         if (setHeaders(request, password)) {
-          QNetworkReply *reply = mMgr.get(request);
+          QNetworkReply *reply = mMgr->get(request);
           reply->setProperty(kPasswordProperty, password);
           startProgress();
         }
@@ -93,8 +93,7 @@ void Bitbucket::connect(const QString &password) {
   request.setHeader(QNetworkRequest::ContentTypeHeader, kContentType);
 
   if (setHeaders(request, password)) {
-    mMgr.get(request);
-    QNetworkReply *reply = mMgr.get(request);
+    QNetworkReply *reply = mMgr->get(request);
     reply->setProperty(kPasswordProperty,
                        !password.isEmpty() ? password : this->password());
     startProgress();

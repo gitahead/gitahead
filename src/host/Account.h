@@ -16,6 +16,7 @@
 #include <QSharedPointer>
 #include <QString>
 #include <QTimer>
+#include <qnetworkreply.h>
 
 class AccountError;
 class AccountProgress;
@@ -59,6 +60,8 @@ public:
 
   QString repositoryPath(int index) const;
   void setRepositoryPath(int index, const QString &path);
+
+  void setErrorReply(const QNetworkReply &reply);
 
   virtual Kind kind() const = 0;
   virtual QString name() const = 0;
@@ -107,7 +110,10 @@ protected:
 
   AccountError *mError;
   AccountProgress *mProgress;
-  QNetworkAccessManager mMgr;
+  QNetworkAccessManager *mMgr;
+
+private:
+  QList<QSslError> sslErrors;
 };
 
 class AccountError : public QObject {
