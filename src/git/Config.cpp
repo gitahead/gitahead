@@ -26,18 +26,22 @@ QString Config::Entry::name() const { return d->name; }
 
 template <> bool Config::Entry::value<bool>() const {
   int value = 0;
-  git_config_parse_bool(&value, d.data()->value);
+  if (isValid()) {
+    git_config_parse_bool(&value, d.data()->value);
+  }
   return value;
 }
 
 template <> int Config::Entry::value<int>() const {
   int value = 0;
-  git_config_parse_int32(&value, d.data()->value);
+  if (isValid()) {
+    git_config_parse_int32(&value, d.data()->value);
+  }
   return value;
 }
 
 template <> QString Config::Entry::value<QString>() const {
-  return d.data()->value ? d.data()->value : QString();
+  return (isValid() && d.data()->value) ? d.data()->value : QString();
 }
 
 Config::Iterator::Iterator(git_config_iterator *iterator)
@@ -45,7 +49,7 @@ Config::Iterator::Iterator(git_config_iterator *iterator)
 
 Config::Entry Config::Iterator::next() const {
   git_config_entry *entry = nullptr;
-  if (git_config_next(&entry, d.data()))
+  if (!isValid() || git_config_next(&entry, d.data()))
     return Config::Entry();
 
   return Entry(entry);
@@ -64,28 +68,40 @@ bool Config::addFile(const QString &path, git_config_level_t level,
 template <>
 bool Config::value<bool>(const QString &key, const bool &defaultValue) const {
   int value = defaultValue;
-  git_config_get_bool(&value, d.data(), key.toUtf8());
+  if (isValid()) {
+    git_config_get_bool(&value, d.data(), key.toUtf8());
+  }
   return value;
 }
 
 template <> void Config::setValue<bool>(const QString &key, const bool &value) {
-  git_config_set_bool(d.data(), key.toUtf8(), value);
+  if (isValid()) {
+    git_config_set_bool(d.data(), key.toUtf8(), value);
+  }
 }
 
 template <>
 int Config::value<int>(const QString &key, const int &defaultValue) const {
   int value = defaultValue;
-  git_config_get_int32(&value, d.data(), key.toUtf8());
+  if (isValid()) {
+    git_config_get_int32(&value, d.data(), key.toUtf8());
+  }
   return value;
 }
 
 template <> void Config::setValue<int>(const QString &key, const int &value) {
-  git_config_set_int32(d.data(), key.toUtf8(), value);
+  if (isValid()) {
+    git_config_set_int32(d.data(), key.toUtf8(), value);
+  }
 }
 
 template <>
 QString Config::value<QString>(const QString &key,
                                const QString &defaultValue) const {
+  if (!isValid()) {
+    return defaultValue;
+  }
+
   git_buf buf = GIT_BUF_INIT_CONST(nullptr, 0);
   git_config_get_string_buf(&buf, d.data(), key.toUtf8());
   QString value = QString::fromUtf8(buf.ptr, buf.size);
@@ -95,15 +111,20 @@ QString Config::value<QString>(const QString &key,
 
 template <>
 void Config::setValue<QString>(const QString &key, const QString &value) {
-  git_config_set_string(d.data(), key.toUtf8(), value.toUtf8());
+  if (isValid()) {
+    git_config_set_string(d.data(), key.toUtf8(), value.toUtf8());
+  }
 }
 
 bool Config::remove(const QString &key) {
-  return !git_config_delete_entry(d.data(), key.toUtf8());
+  return isValid() && !git_config_delete_entry(d.data(), key.toUtf8());
 }
 
 QStringList Config::value(const QString &key, const QString &regexp,
                           const QStringList &defaultValue) const {
+  if (!isValid()) {
+    return defaultValue;
+  }
 
   git_config_iterator *iter;
   git_config_entry *entry;
@@ -127,18 +148,22 @@ QStringList Config::value(const QString &key, const QString &regexp,
 
 void Config::setValue(const QString &key, const QString regexp,
                       const QString &value) {
-  git_config_set_multivar(d.data(), key.toUtf8(), regexp.toUtf8(),
-                          value.toUtf8());
+  if (isValid()) {
+    git_config_set_multivar(d.data(), key.toUtf8(), regexp.toUtf8(),
+                            value.toUtf8());
+  }
 }
 
 bool Config::remove(const QString &key, const QString regexp) {
-  return git_config_delete_multivar(d.data(), key.toUtf8(), regexp.toUtf8()) >=
-         0;
+  return isValid() && git_config_delete_multivar(d.data(), key.toUtf8(),
+                                                 regexp.toUtf8()) >= 0;
 }
 
 Config::Iterator Config::glob(const QString &pattern) const {
   git_config_iterator *iterator = nullptr;
-  git_config_iterator_glob_new(&iterator, d.data(), pattern.toUtf8());
+  if (isValid()) {
+    git_config_iterator_glob_new(&iterator, d.data(), pattern.toUtf8());
+  }
   return Iterator(iterator);
 }
 
@@ -149,13 +174,13 @@ Config Config::global() {
 }
 
 QString Config::globalPath() {
-  // Ensure that the global file exists.
   Config config = global();
-  if (!config.isValid())
-    return QString();
-
-  config.setValue("global.force", true);
-  config.remove("global.force");
+  if (config.isValid()) {
+    // Ensure that the global file exists.
+    // If the config object is invalid, the file exists but has errors
+    config.setValue("global.force", true);
+    config.remove("global.force");
+  }
 
   git_buf buf = GIT_BUF_INIT_CONST(nullptr, 0);
   git_config_find_global(&buf);
