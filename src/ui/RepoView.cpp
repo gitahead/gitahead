@@ -1412,7 +1412,10 @@ void RepoView::continueRebase() {
 
 void RepoView::rebase(const git::AnnotatedCommit &upstream, LogEntry *parent) {
   git::Branch head = mRepo.head();
-  Q_ASSERT(head.isValid());
+  if (!head.isValid()) {
+	  addLogEntry(tr("Invalid head."), tr("Abort"), parent);
+	  return;
+  }
 
   mRebase = parent;
 
