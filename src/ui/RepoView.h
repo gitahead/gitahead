@@ -338,6 +338,14 @@ public:
       bool maximized,
       DetailSplitterWidgets maximizeWidget = DetailSplitterWidgets::NotDefined);
 
+private:
+  // For testing purpose
+  bool isRebaseContinueVisible();
+  bool isRebaseAbortVisible();
+  void setCommitMessage(const QString&);
+
+  friend class TestRebase;
+
 public slots:
   void diffSelected(const git::Diff diff, const QString &file,
                     bool spontaneous);

@@ -160,15 +160,15 @@ void TestRebase::withoutConflicts() {
   QCOMPARE(rebaseCommitSuccess, 1);
   QCOMPARE(rebaseConflict, 0);
 
-  QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
-  QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
+  QCOMPARE(repoView->isRebaseContinueVisible(), false);
+  QCOMPARE(repoView->isRebaseAbortVisible(), false);
 }
 
 void TestRebase::conflictingRebase() {
   INIT_REPO("rebaseConflicts.zip", true);
 
-  QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
-  QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
+  QCOMPARE(repoView->isRebaseContinueVisible(), false);
+  QCOMPARE(repoView->isRebaseAbortVisible(), false);
 
   int rebaseFinished = 0;
   int rebaseAboutToRebase = 0;
@@ -234,8 +234,8 @@ void TestRebase::conflictingRebase() {
 
   // Check that buttons are visible
   QTest::qWait(100);
-  QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), true);
-  QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), true);
+  QCOMPARE(repoView->isRebaseContinueVisible(), true);
+  QCOMPARE(repoView->isRebaseAbortVisible(), true);
 
   // Resolve conflicts
   diff = mRepo.status(mRepo.index(), nullptr, false);
@@ -284,7 +284,7 @@ void TestRebase::conflictingRebase() {
   //        fw.stageHunks(nullptr, git::Index::StagedState::Staged, true, true);
   //    }
 
-  repoView->mDetails->setCommitMessage("Test message");
+  repoView->setCommitMessage("Test message");
 
   refreshTriggered = 0;
   rebaseConflict = 0;
@@ -305,8 +305,8 @@ void TestRebase::conflictingRebase() {
   QCOMPARE(mRepo.rebaseOngoing(), false);
 
   // Check that buttons are visible
-  QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
-  QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
+  QCOMPARE(repoView->isRebaseContinueVisible(), false);
+  QCOMPARE(repoView->isRebaseAbortVisible(), false);
 
   // Check call counters
   QCOMPARE(rebaseFinished, 1);
@@ -318,8 +318,8 @@ void TestRebase::conflictingRebase() {
 void TestRebase::continueExternalStartedRebase() {
   //    INIT_REPO("rebaseConflicts.zip", true);
 
-  //    QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
-  //    QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
+  //    QCOMPARE(repoView->isRebaseContinueVisible(), false);
+  //    QCOMPARE(repoView->isRebaseAbortVisible(), false);
 
   //    int rebaseFinished = 0;
   //    int rebaseAboutToRebase = 0;
@@ -390,8 +390,8 @@ void TestRebase::continueExternalStartedRebase() {
   //    https://github.com/libgit2/libgit2/pull/6334
   //    // So update of libgit2 is needed
   //    // TODO: turn on again
-  //    //QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), true);
-  //    //QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), true);
+  //    //QCOMPARE(repoView->isRebaseContinueVisible(), true);
+  //    //QCOMPARE(repoView->isRebaseAbortVisible(), true);
 
   //    diff = mRepo.status(mRepo.index(), nullptr, false);
   //    QCOMPARE(diff.count(), 1);
@@ -478,8 +478,8 @@ void TestRebase::startRebaseContinueInCLI() {
 
   //    QTest::qWait(100); // Needed otherwise it is not refreshed and therefore
   //    the buttons are not updated
-  //    QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), true);
-  //    QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), true);
+  //    QCOMPARE(repoView->isRebaseContinueVisible(), true);
+  //    QCOMPARE(repoView->isRebaseAbortVisible(), true);
 
   //    //Test::refresh(repoView); // TODO: should not be needed!
 
@@ -498,8 +498,8 @@ void TestRebase::startRebaseContinueInCLI() {
   //    externally the repoView will not be notified. QTest::qWait(1000);
 
   //    // Does not work, because libgit2 does not detect interactive rebases
-  //    QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
-  //    QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
+  //    QCOMPARE(repoView->isRebaseContinueVisible(), false);
+  //    QCOMPARE(repoView->isRebaseAbortVisible(), false);
 
   //    // Check that rebase was really finished
   //    QCOMPARE(mRepo.rebaseOngoing(), false);
@@ -510,8 +510,8 @@ void TestRebase::startRebaseContinueInCLIContinueGUI() {
 
   //    INIT_REPO("rebaseConflicts.zip", true);
 
-  //    QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
-  //    QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
+  //    QCOMPARE(repoView->isRebaseContinueVisible(), false);
+  //    QCOMPARE(repoView->isRebaseAbortVisible(), false);
 
   //    int rebaseFinished = 0;
   //    int rebaseAboutToRebase = 0;
@@ -582,8 +582,8 @@ void TestRebase::startRebaseContinueInCLIContinueGUI() {
   //    QCOMPARE(rebaseConflict, 1);
 
   //    // Gui updated
-  //    QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), true);
-  //    QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), true);
+  //    QCOMPARE(repoView->isRebaseContinueVisible(), true);
+  //    QCOMPARE(repoView->isRebaseAbortVisible(), true);
 
   //    // Solve conflict
   //    QFile f(mRepo.workdir().filePath(diff.patch(0).name()));
@@ -600,15 +600,15 @@ void TestRebase::startRebaseContinueInCLIContinueGUI() {
   //    // TODO: another condition is needed, because there is no change in
   //    those visible so
   //    // it is not enough
-  //    QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), true);
-  //    QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), true);
+  //    QCOMPARE(repoView->isRebaseContinueVisible(), true);
+  //    QCOMPARE(repoView->isRebaseAbortVisible(), true);
 }
 
 void TestRebase::abortMR() {
   INIT_REPO("rebaseConflicts.zip", true);
 
-  QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
-  QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
+  QCOMPARE(repoView->isRebaseContinueVisible(), false);
+  QCOMPARE(repoView->isRebaseAbortVisible(), false);
 
   int rebaseFinished = 0;
   int rebaseAboutToRebase = 0;
@@ -673,8 +673,8 @@ void TestRebase::abortMR() {
 
   // Check that buttons are visible
   QTest::qWait(100);
-  QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), true);
-  QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), true);
+  QCOMPARE(repoView->isRebaseContinueVisible(), true);
+  QCOMPARE(repoView->isRebaseAbortVisible(), true);
 
   refreshTriggered = 0;
   rebaseConflict = 0;
@@ -685,8 +685,8 @@ void TestRebase::abortMR() {
   QCOMPARE(mRepo.rebaseOngoing(), false);
 
   // Check that buttons are visible
-  QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
-  QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
+  QCOMPARE(repoView->isRebaseContinueVisible(), false);
+  QCOMPARE(repoView->isRebaseAbortVisible(), false);
 
   // Check call counters
   QCOMPARE(rebaseFinished, 0);
@@ -705,8 +705,8 @@ void TestRebase::commitDuringRebase() {
 
   INIT_REPO("rebaseConflicts.zip", true);
 
-  QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
-  QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
+  QCOMPARE(repoView->isRebaseContinueVisible(), false);
+  QCOMPARE(repoView->isRebaseAbortVisible(), false);
 
   int rebaseFinished = 0;
   int rebaseAboutToRebase = 0;
@@ -771,8 +771,8 @@ void TestRebase::commitDuringRebase() {
 
   // Check that buttons are visible
   QTest::qWait(100);
-  QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), true);
-  QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), true);
+  QCOMPARE(repoView->isRebaseContinueVisible(), true);
+  QCOMPARE(repoView->isRebaseAbortVisible(), true);
 
   // Resolve conflicts
   diff = mRepo.status(mRepo.index(), nullptr, false);
@@ -795,7 +795,7 @@ void TestRebase::commitDuringRebase() {
       dtw->mDiffView->mFiles.at(0)->modelIndex(),
       git::Index::StagedState::Staged);
 
-  repoView->mDetails->setCommitMessage("Test message");
+  repoView->setCommitMessage("Test message");
 
   // Do commit before going on
   // So the user can commit between the rebase to split up the changes
@@ -821,8 +821,8 @@ void TestRebase::commitDuringRebase() {
   QCOMPARE(mRepo.rebaseOngoing(), false);
 
   // Check that buttons are visible
-  QCOMPARE(repoView->mDetails->isRebaseContinueVisible(), false);
-  QCOMPARE(repoView->mDetails->isRebaseAbortVisible(), false);
+  QCOMPARE(repoView->isRebaseContinueVisible(), false);
+  QCOMPARE(repoView->isRebaseAbortVisible(), false);
 
   // Check call counters
   QCOMPARE(rebaseFinished, 1);
