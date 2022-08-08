@@ -2954,17 +2954,4 @@ RepoView::detailSplitterMaximize(bool maximized,
 
   return newMaximized;
 }
-
-bool RepoView::isRebaseContinueVisible() {
-	return mDetails->isRebaseContinueVisible();
-}
-
-bool RepoView::isRebaseAbortVisible() {
-	return mDetails->isRebaseAbortVisible();
-}
-
-void RepoView::setCommitMessage(const QString& message) {
-	mDetails->setCommitMessage(message);
-}
-
 #include "RepoView.moc"

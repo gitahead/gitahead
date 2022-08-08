@@ -938,10 +938,12 @@ public:
     connect(mCommit, &QPushButton::clicked, this, &CommitEditor::commit);
 
     mRebaseAbort = new QPushButton(tr("Abort rebasing"), this);
+	mRebaseAbort->setObjectName("AbortRebase");
     connect(mRebaseAbort, &QPushButton::clicked, this,
             &CommitEditor::abortRebase);
 
     mRebaseContinue = new QPushButton(tr("Continue rebasing"), this);
+	mRebaseContinue->setObjectName("ContinueRebase");
     connect(mRebaseContinue, &QPushButton::clicked, this,
             &CommitEditor::continueRebase);
 
