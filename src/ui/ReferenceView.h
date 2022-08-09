@@ -11,6 +11,7 @@
 #define REFERENCEVIEW_H
 
 #include <QTreeView>
+#include "git/Commit.h"
 
 namespace git {
 class Reference;
@@ -37,7 +38,8 @@ public:
   Q_DECLARE_FLAGS(Kinds, Kind);
 
   ReferenceView(const git::Repository &repo, Kinds kinds = AllRefs,
-                bool popup = false, QWidget *parent = nullptr);
+                bool popup = false, bool filterCurrentCommit = false,
+                QWidget *parent = nullptr);
 
   bool isPopup() const { return mPopup; }
   void resetTabIndex();
@@ -50,6 +52,8 @@ public:
   bool eventFilter(QObject *watched, QEvent *event) override;
 
   static QString kindString(const git::Reference &ref);
+
+  void setCommit(const git::Commit &commit);
 
 protected:
   void showEvent(QShowEvent *event) override;

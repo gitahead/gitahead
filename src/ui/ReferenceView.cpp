@@ -55,8 +55,9 @@ public:
   };
 
   ReferenceModel(const git::Repository &repo, ReferenceView::Kinds kinds,
-                 QObject *parent = nullptr)
-      : QAbstractItemModel(parent), mRepo(repo), mKinds(kinds) {
+                 bool filterCurrentCommit = false, QObject *parent = nullptr)
+      : QAbstractItemModel(parent), mRepo(repo), mKinds(kinds),
+        mFilterCurrentCommit(filterCurrentCommit) {
     git::RepositoryNotifier *notifier = repo.notifier();
     connect(notifier, &git::RepositoryNotifier::referenceAdded, this,
             &ReferenceModel::update);
@@ -64,6 +65,11 @@ public:
             &ReferenceModel::update);
     connect(notifier, &git::RepositoryNotifier::referenceUpdated, this,
             &ReferenceModel::update);
+  }
+
+  void setCommit(const git::Commit &commit) {
+    mCommit = commit;
+    update();
   }
 
   void update() {
@@ -83,7 +89,10 @@ public:
     if (mKinds & ReferenceView::LocalBranches) {
       QList<git::Reference> branches;
       foreach (const git::Branch &branch, mRepo.branches(GIT_BRANCH_LOCAL)) {
-        if (!(mKinds & ReferenceView::ExcludeHead) || !branch.isHead())
+        const bool branchOnCommit =
+            !mCommit.isValid() || branch.annotatedCommit().commit() == mCommit;
+        if ((!(mKinds & ReferenceView::ExcludeHead) || !branch.isHead()) &&
+            (branchOnCommit || !mFilterCurrentCommit))
           branches.append(branch);
       }
 
@@ -109,7 +118,10 @@ public:
       QList<git::Reference> remotes;
       foreach (const git::Branch &branch, mRepo.branches(GIT_BRANCH_REMOTE)) {
         // Filter remote HEAD branches.
-        if (!branch.name().endsWith("HEAD"))
+        const bool remoteOnCommit =
+            !mCommit.isValid() || branch.annotatedCommit().commit() == mCommit;
+        if (!branch.name().endsWith("HEAD") &&
+            (remoteOnCommit || !mFilterCurrentCommit))
           remotes.append(branch);
       }
 
@@ -122,8 +134,12 @@ public:
     // Add tags.
     if (mKinds & ReferenceView::Tags) {
       QList<git::Reference> tags;
-      foreach (const git::TagRef &tag, mRepo.tags())
-        tags.append(tag);
+      foreach (const git::TagRef &tag, mRepo.tags()) {
+        const bool tagOnCommit =
+            !mCommit.isValid() || tag.annotatedCommit().commit() == mCommit;
+        if (tagOnCommit || !mFilterCurrentCommit)
+          tags.append(tag);
+      }
 
       std::sort(tags.begin(), tags.end(), refComparator);
       mRefs.append({tr("Tags"), tags}); // Third element in mRefs
@@ -265,7 +281,10 @@ public:
 private:
   git::Repository mRepo;
   ReferenceView::Kinds mKinds;
+  bool mFilterCurrentCommit; // Filter out all branches, remotes, tags which are
+                             // related to the commit mCommit
   QList<ReferenceList> mRefs;
+  git::Commit mCommit;
 };
 
 class FilterProxyModel : public QSortFilterProxyModel {
@@ -364,7 +383,8 @@ private:
 } // namespace
 
 ReferenceView::ReferenceView(const git::Repository &repo, Kinds kinds,
-                             bool popup, QWidget *parent)
+                             bool popup, bool filterCurrentCommit,
+                             QWidget *parent)
     : QTreeView(parent), mPopup(popup) {
   // Constrain height.
   setMinimumHeight(kHeight);
@@ -386,7 +406,7 @@ ReferenceView::ReferenceView(const git::Repository &repo, Kinds kinds,
 
   // Set model.
   FilterProxyModel *model = new FilterProxyModel(this);
-  mSource = new ReferenceModel(repo, kinds, this);
+  mSource = new ReferenceModel(repo, kinds, filterCurrentCommit, this);
   model->setSourceModel(mSource);
   setModel(model);
 
@@ -426,6 +446,10 @@ ReferenceView::ReferenceView(const git::Repository &repo, Kinds kinds,
 
   // Update model last.
   static_cast<ReferenceModel *>(mSource)->update();
+}
+
+void ReferenceView::setCommit(const git::Commit &commit) {
+  static_cast<ReferenceModel *>(mSource)->setCommit(commit);
 }
 
 void ReferenceView::resetTabIndex() {

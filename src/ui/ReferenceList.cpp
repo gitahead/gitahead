@@ -34,30 +34,19 @@ QModelIndex findReference(QAbstractItemModel *model,
 } // namespace
 
 ReferenceList::ReferenceList(const git::Repository &repo,
-                             ReferenceView::Kinds kinds, QWidget *parent)
+                             ReferenceView::Kinds kinds,
+                             bool filterCurrentCommit, QWidget *parent)
     : QComboBox(parent), mRepo(repo) {
   setStyleSheet(kStyleSheet);
   setMaxVisibleItems(0); // disable
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-  ReferenceView *view = new ReferenceView(repo, kinds, true, this);
-  QAbstractItemModel *model = view->model();
+  mView = new ReferenceView(repo, kinds, true, filterCurrentCommit, this);
+  QAbstractItemModel *model = mView->model();
   setModel(model);
-  setView(view);
+  setView(mView);
 
-  // Select index. Priority: Branch --> Tag --> Remote --> Commit ID
-  QModelIndex idx;
-  if ((idx = view->firstBranch()).isValid())
-    setRootModelIndex(model->index(0, 0));
-  else if ((idx = view->firstTag()).isValid())
-    setRootModelIndex(model->index(2, 0));
-  else if ((idx = view->firstRemote()).isValid())
-    setRootModelIndex(model->index(1, 0));
-  else {
-    setRootModelIndex(model->index(0, 0));
-    idx = model->index(0, 0);
-  }
-  setCurrentIndex(idx.row());
+  initIndex();
 
   connect(this, QOverload<int>::of(&QComboBox::currentIndexChanged),
           [this](int index) {
@@ -90,7 +79,27 @@ git::Reference ReferenceList::currentReference() const {
   return currentData(Qt::UserRole).value<git::Reference>();
 }
 
-void ReferenceList::setCommit(const git::Commit &commit) { mCommit = commit; }
+void ReferenceList::initIndex() {
+  // Select index. Priority: Branch --> Tag --> Remote --> Commit ID
+  QModelIndex idx;
+  if ((idx = mView->firstBranch()).isValid())
+    setRootModelIndex(model()->index(0, 0));
+  else if ((idx = mView->firstTag()).isValid())
+    setRootModelIndex(model()->index(2, 0));
+  else if ((idx = mView->firstRemote()).isValid())
+    setRootModelIndex(model()->index(1, 0));
+  else {
+    setRootModelIndex(model()->index(0, 0));
+    idx = model()->index(0, 0);
+  }
+  setCurrentIndex(idx.row());
+}
+
+void ReferenceList::setCommit(const git::Commit &commit) {
+  mCommit = commit;
+  mView->setCommit(commit);
+  initIndex();
+}
 
 void ReferenceList::select(const git::Reference &ref, bool spontaneous) {
   if (!ref.isValid()) {
