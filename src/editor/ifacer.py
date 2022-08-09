@@ -17,8 +17,8 @@ ptype_lookup = {
 	"textrange": "Sci_TextRange *",
 }
 
-def Contains(s,sub):
-	return string.find(s, sub) != -1
+def Contains(s, sub):
+	return sub in s
 
 def pType(s):
 	return ptype_lookup(s, "")
