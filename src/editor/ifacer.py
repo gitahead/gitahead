@@ -21,7 +21,7 @@ def Contains(s, sub):
 	return sub in s
 
 def pType(s):
-	return ptype_lookup(s, "")
+	return ptype_lookup.get(s, "")
 
 def printDefines(f, out):
 	for name in f.order:
