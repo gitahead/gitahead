@@ -159,11 +159,12 @@ void TestRebase::withoutConflicts() {
   QCOMPARE(rebaseCommitSuccess, 1);
   QCOMPARE(rebaseConflict, 0);
 
-  auto* detailview = repoView->findChild<DetailView*>();
+  auto *detailview = repoView->findChild<DetailView *>();
   QVERIFY(detailview);
-  auto* abortRebaseButton = detailview->findChild<QPushButton*>("AbortRebase");
+  auto *abortRebaseButton = detailview->findChild<QPushButton *>("AbortRebase");
   QVERIFY(abortRebaseButton);
-  auto* continueRebaseButton = detailview->findChild<QPushButton*>("ContinueRebase");
+  auto *continueRebaseButton =
+      detailview->findChild<QPushButton *>("ContinueRebase");
   QVERIFY(continueRebaseButton);
   QCOMPARE(continueRebaseButton->isVisible(), false);
   QCOMPARE(abortRebaseButton->isVisible(), false);
@@ -172,11 +173,12 @@ void TestRebase::withoutConflicts() {
 void TestRebase::conflictingRebase() {
   INIT_REPO("rebaseConflicts.zip", true);
 
-  auto* detailview = repoView->findChild<DetailView*>();
+  auto *detailview = repoView->findChild<DetailView *>();
   QVERIFY(detailview);
-  auto* abortRebaseButton = detailview->findChild<QPushButton*>("AbortRebase");
+  auto *abortRebaseButton = detailview->findChild<QPushButton *>("AbortRebase");
   QVERIFY(abortRebaseButton);
-  auto* continueRebaseButton = detailview->findChild<QPushButton*>("ContinueRebase");
+  auto *continueRebaseButton =
+      detailview->findChild<QPushButton *>("ContinueRebase");
   QVERIFY(continueRebaseButton);
   QCOMPARE(continueRebaseButton->isVisible(), false);
   QCOMPARE(abortRebaseButton->isVisible(), false);
@@ -268,9 +270,10 @@ void TestRebase::conflictingRebase() {
   QTest::qWait(1000); // Wait until refresh is done
 
   // Staging the file
-  auto filewidgets = repoView->findChildren<FileWidget*>();
+  auto filewidgets = repoView->findChildren<FileWidget *>();
   QCOMPARE(filewidgets.length(), 1);
-  filewidgets.at(0)->stageStateChanged(filewidgets.at(0)->modelIndex(), git::Index::StagedState::Staged);
+  filewidgets.at(0)->stageStateChanged(filewidgets.at(0)->modelIndex(),
+                                       git::Index::StagedState::Staged);
 
   QTextEdit *editor = repoView->findChild<QTextEdit *>("MessageEditor");
   QVERIFY(editor);
@@ -597,11 +600,12 @@ void TestRebase::startRebaseContinueInCLIContinueGUI() {
 void TestRebase::abortMR() {
   INIT_REPO("rebaseConflicts.zip", true);
 
-  auto* detailview = repoView->findChild<DetailView*>();
+  auto *detailview = repoView->findChild<DetailView *>();
   QVERIFY(detailview);
-  auto* abortRebaseButton = detailview->findChild<QPushButton*>("AbortRebase");
+  auto *abortRebaseButton = detailview->findChild<QPushButton *>("AbortRebase");
   QVERIFY(abortRebaseButton);
-  auto* continueRebaseButton = detailview->findChild<QPushButton*>("ContinueRebase");
+  auto *continueRebaseButton =
+      detailview->findChild<QPushButton *>("ContinueRebase");
   QVERIFY(continueRebaseButton);
   QCOMPARE(continueRebaseButton->isVisible(), false);
   QCOMPARE(abortRebaseButton->isVisible(), false);
@@ -701,11 +705,12 @@ void TestRebase::commitDuringRebase() {
 
   INIT_REPO("rebaseConflicts.zip", true);
 
-  auto* detailview = repoView->findChild<DetailView*>();
+  auto *detailview = repoView->findChild<DetailView *>();
   QVERIFY(detailview);
-  auto* abortRebaseButton = detailview->findChild<QPushButton*>("AbortRebase");
+  auto *abortRebaseButton = detailview->findChild<QPushButton *>("AbortRebase");
   QVERIFY(abortRebaseButton);
-  auto* continueRebaseButton = detailview->findChild<QPushButton*>("ContinueRebase");
+  auto *continueRebaseButton =
+      detailview->findChild<QPushButton *>("ContinueRebase");
   QVERIFY(continueRebaseButton);
   QCOMPARE(continueRebaseButton->isVisible(), false);
   QCOMPARE(abortRebaseButton->isVisible(), false);
@@ -789,9 +794,10 @@ void TestRebase::commitDuringRebase() {
   Test::refresh(repoView);
 
   // stage file otherwise it is not possible to continue
-  auto filewidgets = repoView->findChildren<FileWidget*>();
+  auto filewidgets = repoView->findChildren<FileWidget *>();
   QCOMPARE(filewidgets.length(), 1);
-  filewidgets.at(0)->stageStateChanged(filewidgets.at(0)->modelIndex(), git::Index::StagedState::Staged);
+  filewidgets.at(0)->stageStateChanged(filewidgets.at(0)->modelIndex(),
+                                       git::Index::StagedState::Staged);
 
   QTextEdit *editor = repoView->findChild<QTextEdit *>("MessageEditor");
   QVERIFY(editor);
