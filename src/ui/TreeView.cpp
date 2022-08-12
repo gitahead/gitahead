@@ -153,6 +153,12 @@ bool TreeView::eventFilter(QObject *obj, QEvent *event) {
   return false;
 }
 
+/*!
+ * \brief TreeView::keyPressEvent
+ * Implemented, because for some reason a segfault in the binaries (probably qt)
+ * happens: https://github.com/Murmele/Gittyup/issues/109 Can be removed in a
+ * later version if it can be proved that the problem is solved. \param event
+ */
 void TreeView::keyPressEvent(QKeyEvent *event) {
   auto index = currentIndex();
   if (index.isValid() && event->key() == Qt::Key_Space) {
