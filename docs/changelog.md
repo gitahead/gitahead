@@ -6,6 +6,8 @@ Bug fix release
 
 * Fix bundled OpenSSL version incompatibility
 
+----
+
 ### v1.1.1 - 2022-06-09
 
 Bug fix release
