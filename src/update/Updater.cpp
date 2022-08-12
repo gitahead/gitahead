@@ -42,6 +42,7 @@
 
 namespace {
 
+const QString kDownloadPlatform = "Github";
 const QString kTemplateFmt = "%1-XXXXXX.%2";
 const QString kLinkFmt = "https://github.com/Murmele/gittyup/releases/download/"
                          "stable/Gittyup%1%2.%3";
@@ -231,9 +232,11 @@ void Updater::install(const DownloadRef &download) {
   bool rejected = (!qApp->notify(qApp, &event) || !event.isAccepted());
   QGuiApplication::setQuitOnLastWindowClosed(quitOnClose);
   if (rejected) {
-    emit updateError(errorText, tr("Some windows failed to close. You can "
-                                   "download the binary manually from: %1")
-                                    .arg(download->url()));
+    emit updateError(errorText,
+                     tr("Some windows failed to close. You can "
+                        "download the binary manually from %1")
+                         .arg(QString("<a href=\"%1\">%2</a>")
+                                  .arg(download->url(), kDownloadPlatform)));
     return;
   }
 
