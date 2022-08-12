@@ -1,3 +1,13 @@
+### v1.1.2 - 2022-08-12
+
+Bug fix release
+
+#### Changed
+
+* Fix bundled OpenSSL version incompatibility
+
+----
+
 ### v1.1.1 - 2022-06-09
 
 Bug fix release
