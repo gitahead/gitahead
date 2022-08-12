@@ -96,11 +96,6 @@ UpdateDialog::UpdateDialog(const QString &platform, const QString &version,
   buttons->addButton(tr("Install Update"), QDialogButtonBox::AcceptRole);
   buttons->addButton(tr("Remind Me Later"), QDialogButtonBox::RejectRole);
   connect(buttons, &QDialogButtonBox::accepted, this, &UpdateDialog::accept);
-#else
-  buttons->addButton(tr("OK"), QDialogButtonBox::RejectRole);
-#endif
-
-  connect(buttons, &QDialogButtonBox::rejected, this, &UpdateDialog::reject);
 
   QPushButton *skip =
       buttons->addButton(tr("Skip This Version"), QDialogButtonBox::ResetRole);
@@ -114,6 +109,11 @@ UpdateDialog::UpdateDialog(const QString &platform, const QString &version,
     settings->endGroup();
     reject();
   });
+#else
+  buttons->addButton(tr("OK"), QDialogButtonBox::RejectRole);
+#endif
+
+  connect(buttons, &QDialogButtonBox::rejected, this, &UpdateDialog::reject);
 
   QHBoxLayout *l = new QHBoxLayout();
   QPushButton *supportButton =
