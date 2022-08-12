@@ -97,6 +97,7 @@ public:
     }
 
     layout->addWidget(addSeparator());
+    // TODO: uncomment as soon as we have videos
     // layout->addWidget(addLink(tr("View getting started videos"),
     // kVideoLink));
     layout->addWidget(addLink(tr("Contact us for support"), kSupportLink));
