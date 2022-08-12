@@ -97,7 +97,8 @@ public:
     }
 
     layout->addWidget(addSeparator());
-    layout->addWidget(addLink(tr("View getting started videos"), kVideoLink));
+    // layout->addWidget(addLink(tr("View getting started videos"),
+    // kVideoLink));
     layout->addWidget(addLink(tr("Contact us for support"), kSupportLink));
   }
 
