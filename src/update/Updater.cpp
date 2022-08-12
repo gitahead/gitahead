@@ -158,7 +158,7 @@ void Updater::update(bool spontaneous) {
     QString platformArg;
     QString extension = "sh";
 #ifdef FLATPAK
-    extension = ".flatpak";
+    extension = "flatpak";
     platformArg = "";
     // The bundle does not have any version in its filename
     QString link = kLinkFmt.arg(platformArg, "", extension);
