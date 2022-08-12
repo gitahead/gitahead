@@ -50,9 +50,8 @@ const QString kChangelogUrl =
 
 } // namespace
 
-Updater::Download::Download(const QString &link)
-    : mName(QUrl(link).fileName()) {
-  QFileInfo info(mName);
+Updater::Download::Download(const QString &link) : mUrl(link) {
+  QFileInfo info(name());
   QString name = kTemplateFmt.arg(info.completeBaseName(), info.suffix());
   mFile = new QTemporaryFile(QDir::temp().filePath(name));
 }
@@ -232,7 +231,9 @@ void Updater::install(const DownloadRef &download) {
   bool rejected = (!qApp->notify(qApp, &event) || !event.isAccepted());
   QGuiApplication::setQuitOnLastWindowClosed(quitOnClose);
   if (rejected) {
-    emit updateError(errorText, tr("Some windows failed to close"));
+    emit updateError(errorText, tr("Some windows failed to close. You can "
+                                   "download the binary manually from: %1")
+                                    .arg(download->url()));
     return;
   }
 
