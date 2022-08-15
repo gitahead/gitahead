@@ -8,6 +8,9 @@
 #include "HunkWidget.h"
 #include "Images.h"
 #include "conf/Settings.h"
+#include "git/Commit.h"
+#include "git/Patch.h"
+#include "git2/checkout.h"
 #include "ui/RepoView.h"
 #include "ui/Badge.h"
 #include "ui/FileContextMenu.h"
@@ -119,6 +122,52 @@ _FileWidget::Header::Header(const git::Diff &diff, const git::Patch &patch,
   mDisclosureButton->setVisible(disclosure);
   buttons->addWidget(mDisclosureButton);
 
+  mSave = new QToolButton(this);
+  mSave->setObjectName("ConflictSave");
+  mSave->setText(HunkWidget::tr("Save"));
+
+  mUndo = new QToolButton(this);
+  mUndo->setObjectName("ConflictUndo");
+  mUndo->setText(HunkWidget::tr("Undo"));
+  connect(mUndo, &QToolButton::clicked, [this] {
+    mSave->setVisible(false);
+    mUndo->setVisible(false);
+    mOurs->setEnabled(true);
+    mTheirs->setEnabled(true);
+    mResolution = git::Patch::ConflictResolution::Unresolved;
+  });
+
+  mOurs = new QToolButton(this);
+  mOurs->setObjectName("ConflictOurs");
+  mOurs->setStyleSheet(
+      Application::theme()->diffButtonStyle(Theme::Diff::Ours));
+  mOurs->setText(HunkWidget::tr("Use Ours"));
+  connect(mOurs, &QToolButton::clicked, [this] {
+    mSave->setVisible(true);
+    mUndo->setVisible(true);
+    mOurs->setEnabled(false);
+    mTheirs->setEnabled(false);
+    mResolution = git::Patch::ConflictResolution::Ours;
+  });
+
+  mTheirs = new QToolButton(this);
+  mTheirs->setObjectName("ConflictTheirs");
+  mTheirs->setStyleSheet(
+      Application::theme()->diffButtonStyle(Theme::Diff::Theirs));
+  mTheirs->setText(HunkWidget::tr("Use Theirs"));
+  connect(mTheirs, &QToolButton::clicked, [this] {
+    mSave->setVisible(true);
+    mUndo->setVisible(true);
+    mOurs->setEnabled(false);
+    mTheirs->setEnabled(false);
+    mResolution = git::Patch::ConflictResolution::Theirs;
+  });
+
+  buttons->addWidget(mSave);
+  buttons->addWidget(mUndo);
+  buttons->addWidget(mOurs);
+  buttons->addWidget(mTheirs);
+
   updatePatch(patch);
 
   if (!diff.isStatusDiff())
@@ -150,8 +199,19 @@ void _FileWidget::Header::updatePatch(const git::Patch &patch) {
 
   mEdit->updatePatch(patch, -1);
 
+  auto isConflicted = patch.isConflicted();
+
+  mOurs->setVisible(isConflicted);
+  mTheirs->setVisible(isConflicted);
+
+  mSave->setVisible(mResolution != git::Patch::ConflictResolution::Unresolved);
+  mUndo->setVisible(mResolution != git::Patch::ConflictResolution::Unresolved);
+  mOurs->setEnabled(mResolution == git::Patch::ConflictResolution::Unresolved);
+  mTheirs->setEnabled(mResolution ==
+                      git::Patch::ConflictResolution::Unresolved);
+
   mDiscardButton->setVisible(mDiff.isStatusDiff() && !mSubmodule &&
-                             !patch.isConflicted());
+                             !isConflicted);
 }
 QCheckBox *_FileWidget::Header::check() const { return mCheck; }
 
@@ -322,6 +382,44 @@ FileWidget::FileWidget(DiffView *view, const git::Diff &diff,
     expand = false;
 
   disclosureButton->setChecked(expand);
+
+  // Handle conflict resolution.
+  if (QToolButton *save = mHeader->saveButton()) {
+    connect(save, &QToolButton::clicked, [this] {
+      git::Repository repo = mPatch.repo();
+
+      auto resolution = mHeader->resolution();
+      if (resolution == git::Patch::ConflictResolution::Unresolved) {
+        return;
+      }
+
+      auto conflict = repo.index().conflict(mPatch.name());
+      auto id = resolution == git::Patch::ConflictResolution::Ours
+                    ? conflict.ours
+                    : conflict.theirs;
+
+      if (!id.isValid() || id.isNull()) {
+        return;
+      }
+
+      auto blob = repo.lookupBlob(id);
+      if (!blob.isValid()) {
+        return;
+      }
+
+      // Write file to disk.
+      QSaveFile file(repo.workdir().filePath(mPatch.name()));
+      if (!file.open(QFile::WriteOnly))
+        return;
+
+      file.write(blob.content());
+      file.commit();
+
+      repo.index().setStaged(QStringList{mPatch.name()}, true);
+
+      RepoView::parentView(this)->refresh();
+    });
+  }
 }
 
 void FileWidget::updateHunks(git::Patch stagedPatch) {
@@ -339,6 +437,18 @@ void FileWidget::setStageState(git::Index::StagedState state) {
 }
 
 QModelIndex FileWidget::modelIndex() { return mModelIndex; }
+
+QToolButton *_FileWidget::Header::saveButton() const { return mSave; }
+
+QToolButton *_FileWidget::Header::undoButton() const { return mUndo; }
+
+QToolButton *_FileWidget::Header::oursButton() const { return mOurs; }
+
+QToolButton *_FileWidget::Header::theirsButton() const { return mTheirs; }
+
+git::Patch::ConflictResolution _FileWidget::Header::resolution() const {
+  return mResolution;
+}
 
 void FileWidget::updatePatch(const git::Patch &patch, const git::Patch &staged,
                              const QString &name, const QString &path,

@@ -12,6 +12,7 @@
 
 #include "Diff.h"
 #include "FilterList.h"
+#include "git/Commit.h"
 #include "git2/patch.h"
 #include <QBitArray>
 #include <QSharedPointer>
