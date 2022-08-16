@@ -65,7 +65,8 @@ _HunkWidget::Header::Header(const git::Diff &diff, const git::Patch &patch,
 
     mOurs = new QToolButton(this);
     mOurs->setObjectName("ConflictOurs");
-    mOurs->setStyleSheet(Application::theme()->diffButtonStyle(Theme::Diff::Ours));
+    mOurs->setStyleSheet(
+        Application::theme()->diffButtonStyle(Theme::Diff::Ours));
     mOurs->setText(HunkWidget::tr("Use Ours"));
     connect(mOurs, &QToolButton::clicked, [this] {
       mSave->setVisible(true);
@@ -76,7 +77,8 @@ _HunkWidget::Header::Header(const git::Diff &diff, const git::Patch &patch,
 
     mTheirs = new QToolButton(this);
     mTheirs->setObjectName("ConflictTheirs");
-    mTheirs->setStyleSheet(Application::theme()->diffButtonStyle(Theme::Diff::Theirs));
+    mTheirs->setStyleSheet(
+        Application::theme()->diffButtonStyle(Theme::Diff::Theirs));
     mTheirs->setText(HunkWidget::tr("Use Theirs"));
     connect(mTheirs, &QToolButton::clicked, [this] {
       mSave->setVisible(true);

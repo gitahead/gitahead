@@ -72,7 +72,8 @@ private:
   QToolButton *mUndo = nullptr;
   QToolButton *mOurs = nullptr;
   QToolButton *mTheirs = nullptr;
-  git::Patch::ConflictResolution mResolution = git::Patch::ConflictResolution::Unresolved;
+  git::Patch::ConflictResolution mResolution =
+      git::Patch::ConflictResolution::Unresolved;
 };
 
 } // namespace _FileWidget
