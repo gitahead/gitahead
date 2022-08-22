@@ -217,8 +217,9 @@ static void interactiveCallback(const char *name, int name_len,
   QVector<QString> responsesVector(num_prompts);
 
   for (int i = 0; i < num_prompts; ++i) {
-    promptsVector[i] = {QString::fromUtf8(prompts[i].text, prompts[i].length),
-                        (bool)prompts[i].echo};
+    promptsVector[i] = {
+        QString::fromUtf8((const char *)prompts[i].text, prompts[i].length),
+        (bool)prompts[i].echo};
   }
 
   cbs->interactiveAuth(QString::fromUtf8(name, name_len),
