@@ -42,6 +42,7 @@
 
 namespace {
 
+const QString kDownloadPlatform = "Github";
 const QString kTemplateFmt = "%1-XXXXXX.%2";
 const QString kLinkFmt = "https://github.com/Murmele/gittyup/releases/download/"
                          "stable/Gittyup%1%2.%3";
@@ -50,9 +51,8 @@ const QString kChangelogUrl =
 
 } // namespace
 
-Updater::Download::Download(const QString &link)
-    : mName(QUrl(link).fileName()) {
-  QFileInfo info(mName);
+Updater::Download::Download(const QString &link) : mUrl(link) {
+  QFileInfo info(name());
   QString name = kTemplateFmt.arg(info.completeBaseName(), info.suffix());
   mFile = new QTemporaryFile(QDir::temp().filePath(name));
 }
@@ -158,7 +158,7 @@ void Updater::update(bool spontaneous) {
     QString platformArg;
     QString extension = "sh";
 #ifdef FLATPAK
-    extension = ".flatpak";
+    extension = "flatpak";
     platformArg = "";
     // The bundle does not have any version in its filename
     QString link = kLinkFmt.arg(platformArg, "", extension);
@@ -232,7 +232,11 @@ void Updater::install(const DownloadRef &download) {
   bool rejected = (!qApp->notify(qApp, &event) || !event.isAccepted());
   QGuiApplication::setQuitOnLastWindowClosed(quitOnClose);
   if (rejected) {
-    emit updateError(errorText, tr("Some windows failed to close"));
+    emit updateError(errorText,
+                     tr("Some windows failed to close. You can "
+                        "download the binary manually from %1")
+                         .arg(QString("<a href=\"%1\">%2</a>")
+                                  .arg(download->url(), kDownloadPlatform)));
     return;
   }
 

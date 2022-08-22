@@ -25,7 +25,7 @@ public:
     Download(const QString &link);
     ~Download();
 
-    QString name() const { return mName; }
+    QString name() const { return QUrl(url()).fileName(); }
 
     QTemporaryFile *file() { return mFile; }
     void setFile(QTemporaryFile *file) { mFile = file; }
@@ -33,8 +33,10 @@ public:
     QNetworkReply *reply() const { return mReply; }
     void setReply(QNetworkReply *reply) { mReply = reply; }
 
+    QString url() const { return mUrl; }
+
   private:
-    QString mName;
+    QString mUrl;
     QTemporaryFile *mFile = nullptr;
     QNetworkReply *mReply = nullptr;
   };
