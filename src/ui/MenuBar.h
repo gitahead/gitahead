@@ -35,6 +35,7 @@ public:
   void updateBranch();
   void updateSubmodules();
   void updateStash();
+  void updateRebase();
   void updateHistory();
   void updateWindow();
 

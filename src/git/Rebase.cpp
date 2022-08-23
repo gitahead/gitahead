@@ -15,9 +15,10 @@
 #include "git2/checkout.h"
 #include "git2/errors.h"
 #include "git2/merge.h"
-#include "git2/rebase.h"
 
 namespace git {
+
+Rebase::Rebase() : d(nullptr) {}
 
 Rebase::Rebase(git_repository *repo, git_rebase *rebase,
                const QString &overrideUser, const QString &overrideEmail)
@@ -26,13 +27,32 @@ Rebase::Rebase(git_repository *repo, git_rebase *rebase,
 
 int Rebase::count() const { return git_rebase_operation_entrycount(d.data()); }
 
+size_t Rebase::currentIndex() const {
+  return git_rebase_operation_current(d.data());
+}
+
+const git_rebase_operation *Rebase::operation(size_t index) {
+  return git_rebase_operation_byindex(d.data(), index);
+}
+
 bool Rebase::hasNext() const {
-  int index = git_rebase_operation_current(d.data());
+  int index = currentIndex();
   int count = git_rebase_operation_entrycount(d.data());
   return (count > 0 && (index == GIT_REBASE_NO_OPERATION || index < count - 1));
 }
 
-Commit Rebase::next() {
+Commit Rebase::commitToRebase() const {
+  git_rebase_operation *op =
+      git_rebase_operation_byindex(d.data(), currentIndex());
+  if (!op)
+    return Commit();
+
+  git_commit *commit = nullptr;
+  git_commit_lookup(&commit, mRepo, &op->id);
+  return Commit(commit);
+}
+
+Commit Rebase::next() const {
   git_rebase_operation *op = nullptr;
   if (git_rebase_next(&op, d.data()))
     return Commit();
@@ -42,14 +62,20 @@ Commit Rebase::next() {
   return Commit(commit);
 }
 
-Commit Rebase::commit() {
+/*!
+ * \brief Rebase::commit
+ * perform commit
+ * \return
+ */
+Commit Rebase::commit(const QString &message) {
   git_oid id;
   git_rebase *ptr = d.data();
 
   Signature sig = Repository(mRepo).defaultSignature(nullptr, mOverrideUser,
                                                      mOverrideEmail);
 
-  if (int err = git_rebase_commit(&id, ptr, nullptr, sig, nullptr, nullptr)) {
+  if (int err = git_rebase_commit(&id, ptr, nullptr, sig, nullptr,
+                                  message.toUtf8())) {
     if (err != GIT_EAPPLIED)
       return Commit();
 

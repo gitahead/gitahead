@@ -51,6 +51,9 @@ private:
 
   QToolButton *mRefreshButton;
 
+  QToolButton *mRebaseContinueButton;
+  QToolButton *mRebaseAbortButton;
+
   QToolButton *mPullRequestButton = nullptr;
 
   QToolButton *mTerminalButton;

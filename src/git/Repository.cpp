@@ -455,8 +455,9 @@ QList<TagRef> Repository::tags() const {
 }
 
 TagRef Repository::lookupTag(const QString &name) const {
-  // FIXME: Add tag lookup function to libgit2?
-  return lookupRef(QString("refs/tags/%1").arg(name));
+  return lookupRef(QString("refs/tags/%1")
+                       .arg(name)); // TODO: check if possible to use
+                                    // GIT_REFS_TAGS_DIR instead of refs/tags
 }
 
 QStringList Repository::existingTags() const {
@@ -830,13 +831,100 @@ bool Repository::merge(const AnnotatedCommit &mergeHead) {
   return !error;
 }
 
-Rebase Repository::rebase(const AnnotatedCommit &mergeHead,
-                          const QString &overrideUser,
-                          const QString &overrideEmail) {
+/*!
+ * \brief Repository::rebaseOpen
+ * Open current rebase and return a Rebase object.
+ * If no current rebase is ongoing an invalid Rebase object is returned
+ * \return
+ */
+Rebase Repository::rebaseOpen() {
   git_rebase *rebase = nullptr;
+  git_rebase_options opts = GIT_REBASE_OPTIONS_INIT; // TODO: check quite option
+  git_rebase_open(&rebase, d->repo, &opts);
+  return Rebase(d->repo, rebase);
+}
+
+void Repository::rebaseAbort() {
+
+  Rebase r = rebaseOpen();
+  if (r.isValid())
+    r.abort();
+}
+
+// TODO: check that all arguments passed to the signals are valid when the
+// RepoView gets the notification! (Using sharedpointer?)
+void Repository::rebase(const AnnotatedCommit &mergeHead,
+                        const QString &overrideUser,
+                        const QString &overrideEmail) {
+  git_rebase *r = nullptr;
   git_rebase_options opts = GIT_REBASE_OPTIONS_INIT;
-  git_rebase_init(&rebase, d->repo, nullptr, mergeHead, nullptr, &opts);
-  return Rebase(d->repo, rebase, overrideUser, overrideEmail);
+  git_rebase_init(&r, d->repo, nullptr, mergeHead, nullptr, &opts);
+  auto rebase = git::Rebase(d->repo, r, overrideUser, overrideEmail);
+
+  if (!rebase.isValid())
+    emit d->notifier->rebaseInitError();
+
+  // start rebasing
+  rebaseContinue(QStringLiteral(""));
+}
+
+void Repository::rebaseContinue(const QString &commitMessage) {
+
+  Rebase r = rebaseOpen();
+  if (!r.isValid()) {
+    // rebase anymore available. maybe rebased externally
+    return;
+  }
+
+  if (r.currentIndex() != GIT_REBASE_NO_OPERATION) {
+    // Rebase::next() was already called at leas once
+    // externally or by a previous call of rebaseContinue
+
+    // Check if it can be committed
+    git::Commit c = r.commit(commitMessage);
+    if (!c.isValid()) {
+      emit d->notifier->rebaseConflict(r);
+      return;
+    } else {
+      emit d->notifier->rebaseCommitSuccess(r, c, r.commitToRebase(),
+                                            r.currentIndex() + 1);
+      // Go on with the next rebase operation below
+    }
+  }
+  // Loop over rebase operations.
+  int count = r.count();
+  while (r.hasNext()) {
+    git::Commit before = r.next();
+    if (!before.isValid()) {
+      emit d->notifier->rebaseCommitInvalid(r);
+      rebaseAbort();
+      return;
+    }
+    int currCommit =
+        r.currentIndex() +
+        1; // for showing to user it makes more sense starting from 1
+    emit d->notifier->rebaseAboutToRebase(r, before, currCommit);
+
+    QString message = before.message(); // use original message
+    git::Commit after = r.commit(message);
+    if (!after.isValid()) {
+      emit d->notifier->rebaseConflict(r);
+      return; // before ongoing, the user has to fix the conflicts.
+    }
+
+    emit d->notifier->rebaseCommitSuccess(r, after, before, currCommit);
+  }
+
+  if (r.finish())
+    emit d->notifier->rebaseFinished(r);
+  // TODO: implement
+  // else
+  // emit error
+}
+
+bool Repository::rebaseOngoing() {
+  Rebase r = rebaseOpen();
+  return r.isValid();
 }
 
 bool Repository::cherryPick(const Commit &commit) {

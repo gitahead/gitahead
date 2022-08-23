@@ -414,7 +414,10 @@ public:
     QString msg = commit.message(git::Commit::SubstituteEmoji).trimmed();
     mMessage->setPlainText(msg);
 
-    int size = kSize * window()->windowHandle()->devicePixelRatio();
+    auto w = window();
+    auto w_handler = w->windowHandle();
+
+    int size = kSize * w_handler->devicePixelRatio();
     QByteArray email = commit.author().email().trimmed().toLower().toUtf8();
     QByteArray hash = QCryptographicHash::hash(email, QCryptographicHash::Md5);
 
@@ -706,6 +709,7 @@ private:
  * \brief The CommitEditor class
  * This widget contains the textedit element for entering the commit message,
  * the buttons for commiting, staging all and unstage all
+ * If a rebase is ongoing, the rebase continue and rebase abort button is shown
  */
 class CommitEditor : public QFrame {
   Q_OBJECT
@@ -933,6 +937,22 @@ public:
     mCommit->setDefault(true);
     connect(mCommit, &QPushButton::clicked, this, &CommitEditor::commit);
 
+    mRebaseAbort = new QPushButton(tr("Abort rebasing"), this);
+    mRebaseAbort->setObjectName("AbortRebase");
+    connect(mRebaseAbort, &QPushButton::clicked, this,
+            &CommitEditor::abortRebase);
+
+    mRebaseContinue = new QPushButton(tr("Continue rebasing"), this);
+    mRebaseContinue->setObjectName("ContinueRebase");
+    connect(mRebaseContinue, &QPushButton::clicked, this,
+            &CommitEditor::continueRebase);
+
+    mMergeAbort = new QPushButton(tr("Abort Merge"), this);
+    connect(mMergeAbort, &QPushButton::clicked, [this] {
+      RepoView *view = RepoView::parentView(this);
+      view->mergeAbort();
+    });
+
     // Update buttons on index change.
     connect(repo.notifier(), &git::RepositoryNotifier::indexChanged,
             [this](const QStringList &paths, bool yieldFocus) {
@@ -945,6 +965,9 @@ public:
     buttonLayout->addWidget(mStage);
     buttonLayout->addWidget(mUnstage);
     buttonLayout->addWidget(mCommit);
+    buttonLayout->addWidget(mRebaseContinue);
+    buttonLayout->addWidget(mRebaseAbort);
+    buttonLayout->addWidget(mMergeAbort);
 
     QHBoxLayout *layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 12);
@@ -952,16 +975,32 @@ public:
     layout->addLayout(buttonLayout);
   }
 
-  void commit() {
+  void commit(bool force = false) {
     // Check for a merge head.
     git::AnnotatedCommit upstream;
     RepoView *view = RepoView::parentView(this);
-    if (git::Reference mergeHead = view->repo().lookupRef("MERGE_HEAD"))
+    if (git::Reference mergeHead = view->repo().lookupRef(
+            "MERGE_HEAD")) // TODO: is it possible to use instead of the string
+                           // GIT_MERGE_HEAD_FILE?
       upstream = mergeHead.annotatedCommit();
 
-    if (view->commit(mMessage->toPlainText(), upstream))
+    if (view->commit(mMessage->toPlainText(), upstream, nullptr, force))
       mMessage->clear(); // Clear the message field.
   }
+
+  void abortRebase() {
+    RepoView *view = RepoView::parentView(this);
+    view->abortRebase();
+  }
+
+  void continueRebase() {
+    RepoView *view = RepoView::parentView(this);
+    view->continueRebase();
+  }
+
+  bool isRebaseAbortVisible() const { return mRebaseAbort->isVisible(); }
+
+  bool isRebaseContinueVisible() const { return mRebaseContinue->isVisible(); }
 
   bool isCommitEnabled() const { return mCommit->isEnabled(); }
 
@@ -977,6 +1016,8 @@ public:
     mMessage->setPlainText(message);
     mMessage->selectAll();
   }
+
+  QString message() const { return mMessage->toPlainText(); }
 
   void setDiff(const git::Diff &diff) {
     mDiff = diff;
@@ -1003,6 +1044,51 @@ public slots:
 
 private:
   void updateButtons(bool yieldFocus = true) {
+    RepoView *view = RepoView::parentView(this);
+    if (!view || !view->repo().isValid()) {
+      mRebaseContinue->setVisible(false);
+      mRebaseAbort->setVisible(false);
+    } else {
+      const bool rebaseOngoing = view->repo().rebaseOngoing();
+      mRebaseContinue->setVisible(rebaseOngoing);
+      mRebaseAbort->setVisible(rebaseOngoing);
+    }
+
+    // TODO: copied from menubar
+    bool merging = false;
+    QString text = tr("Merge");
+    if (view) {
+      switch (view->repo().state()) {
+        case GIT_REPOSITORY_STATE_MERGE:
+          merging = true;
+          break;
+
+        case GIT_REPOSITORY_STATE_REVERT:
+        case GIT_REPOSITORY_STATE_REVERT_SEQUENCE:
+          merging = true;
+          text = tr("Revert");
+          break;
+
+        case GIT_REPOSITORY_STATE_CHERRYPICK:
+        case GIT_REPOSITORY_STATE_CHERRYPICK_SEQUENCE:
+          merging = true;
+          text = tr("Cherry-pick");
+          break;
+
+        case GIT_REPOSITORY_STATE_REBASE:
+        case GIT_REPOSITORY_STATE_REBASE_INTERACTIVE:
+        case GIT_REPOSITORY_STATE_REBASE_MERGE:
+          text = tr("Rebase");
+          break;
+      }
+    }
+
+    git::Reference head = view ? view->repo().head() : git::Reference();
+    git::Branch headBranch = head;
+
+    mMergeAbort->setText(tr("Abort %1").arg(text));
+    mMergeAbort->setVisible(headBranch.isValid() && merging);
+
     if (!mDiff.isValid()) {
       mStage->setEnabled(false);
       mUnstage->setEnabled(false);
@@ -1076,7 +1162,6 @@ private:
     int total = staged + partial + conflicted;
     mStage->setEnabled(count > staged);
     mUnstage->setEnabled(total);
-    mCommit->setEnabled(total && !mMessage->document()->isEmpty());
 
     // Set status text.
     QString status = tr("Nothing staged");
@@ -1107,8 +1192,25 @@ private:
 
     // Change commit button text for committing a merge.
     git::Repository repo = RepoView::parentView(this)->repo();
-    bool merging = (repo.state() == GIT_REPOSITORY_STATE_MERGE);
-    mCommit->setText(merging ? tr("Commit Merge") : tr("Commit"));
+    auto state = repo.state();
+
+    switch (repo.state()) {
+      case GIT_REPOSITORY_STATE_MERGE:
+        mCommit->setText(tr("Commit Merge"));
+        mCommit->setEnabled(total && !mMessage->document()->isEmpty());
+        break;
+      case GIT_REPOSITORY_STATE_REBASE:
+      case GIT_REPOSITORY_STATE_REBASE_MERGE:
+      case GIT_REPOSITORY_STATE_REBASE_INTERACTIVE:
+        mCommit->setText(tr("Commit Rebase"));
+        mCommit->setEnabled(total && conflicted == 0 &&
+                            !mMessage->document()->isEmpty());
+        break;
+      default:
+        mCommit->setText(tr("Commit"));
+        mCommit->setEnabled(total && !mMessage->document()->isEmpty());
+        break;
+    }
 
     // Update menu actions.
     MenuBar::instance(this)->updateRepository();
@@ -1122,6 +1224,9 @@ private:
   QPushButton *mStage;
   QPushButton *mUnstage;
   QPushButton *mCommit;
+  QPushButton *mRebaseAbort;
+  QPushButton *mRebaseContinue;
+  QPushButton *mMergeAbort;
 
   bool mEditorEmpty = true;
   bool mPopulate = true;
@@ -1169,15 +1274,27 @@ DetailView::DetailView(const git::Repository &repo, QWidget *parent)
 
 DetailView::~DetailView() {}
 
-void DetailView::commit() {
+void DetailView::commit(bool force) {
   Q_ASSERT(isCommitEnabled());
-  static_cast<CommitEditor *>(mDetail->currentWidget())->commit();
+  static_cast<CommitEditor *>(mDetail->currentWidget())->commit(force);
 }
 
 bool DetailView::isCommitEnabled() const {
   QWidget *widget = mDetail->currentWidget();
   return (mDetail->currentIndex() == EditorIndex &&
           static_cast<CommitEditor *>(widget)->isCommitEnabled());
+}
+
+bool DetailView::isRebaseContinueVisible() const {
+  QWidget *widget = mDetail->currentWidget();
+  return (mDetail->currentIndex() == EditorIndex &&
+          static_cast<CommitEditor *>(widget)->isRebaseContinueVisible());
+}
+
+bool DetailView::isRebaseAbortVisible() const {
+  QWidget *widget = mDetail->currentWidget();
+  return (mDetail->currentIndex() == EditorIndex &&
+          static_cast<CommitEditor *>(widget)->isRebaseAbortVisible());
 }
 
 void DetailView::stage() {
@@ -1224,6 +1341,10 @@ QString DetailView::file() const {
 void DetailView::setCommitMessage(const QString &message) {
   static_cast<CommitEditor *>(mDetail->widget(EditorIndex))
       ->setMessage(message);
+}
+
+QString DetailView::commitMessage() const {
+  return static_cast<CommitEditor *>(mDetail->widget(EditorIndex))->message();
 }
 
 void DetailView::setDiff(const git::Diff &diff, const QString &file,

@@ -49,8 +49,10 @@ public:
   virtual ~DetailView();
 
   // commit
-  void commit();
+  void commit(bool force = false);
   bool isCommitEnabled() const;
+  bool isRebaseContinueVisible() const;
+  bool isRebaseAbortVisible() const;
 
   // stage / unstage
   void stage();
@@ -64,6 +66,7 @@ public:
 
   QString file() const;
 
+  QString commitMessage() const;
   void setCommitMessage(const QString &message);
   void setDiff(const git::Diff &diff, const QString &file = QString(),
                const QString &pathspec = QString());
