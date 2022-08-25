@@ -169,6 +169,11 @@ void TreeView::keyPressEvent(QKeyEvent *event) {
     else
       checkState = Qt::Checked;
     model()->setData(index, checkState, Qt::CheckStateRole);
+
+    // Select next item.
+    QKeyEvent *down =
+        new QKeyEvent(event->type(), Qt::Key_Down, event->modifiers());
+    QTreeView::keyPressEvent(down);
   } else
     QTreeView::keyPressEvent(event);
 }
