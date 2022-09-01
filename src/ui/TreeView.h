@@ -92,7 +92,7 @@ private:
   void handleSelectionChange(const QItemSelection &selected,
                              const QItemSelection &deselected);
   bool suppressDeselectionHandling{false};
-  int mCollapseCount;
+  int mCollapseCount; // Counts the number of collapsed folders.
   bool mSupressItemExpandStateChanged{false};
 
   QItemDelegate *mSharedDelegate;
