@@ -95,7 +95,9 @@ void TestBareRepo::checkDir() {
 }
 
 void TestBareRepo::cleanupTestCase() {
-  mWindow->close();
+  if (mWindow) {
+    mWindow->close();
+  }
   QDir dir = QDir::temp();
   QVERIFY(dir.cd("test_bare_repo"));
   QVERIFY(dir.removeRecursively());

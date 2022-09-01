@@ -192,7 +192,9 @@ void TestInitRepo::editFile() {
 }
 
 void TestInitRepo::cleanupTestCase() {
-  mWindow->close();
+  if (mWindow) {
+    mWindow->close();
+  }
   QDir dir = QDir::temp();
   QVERIFY(dir.cd("test_init_repo"));
   QVERIFY(dir.removeRecursively());
