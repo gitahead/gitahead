@@ -200,9 +200,10 @@ void _FileWidget::Header::updatePatch(const git::Patch &patch) {
   mEdit->updatePatch(patch, -1);
 
   auto isConflicted = patch.isConflicted();
+  auto hasMultipleHunks = patch.count() > 1;
 
-  mOurs->setVisible(isConflicted);
-  mTheirs->setVisible(isConflicted);
+  mOurs->setVisible(isConflicted && hasMultipleHunks);
+  mTheirs->setVisible(isConflicted && hasMultipleHunks);
 
   mSave->setVisible(mResolution != git::Patch::ConflictResolution::Unresolved);
   mUndo->setVisible(mResolution != git::Patch::ConflictResolution::Unresolved);
