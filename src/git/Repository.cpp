@@ -532,7 +532,7 @@ Commit Repository::lookupCommit(const QString &prefix) const {
 
 Commit Repository::lookupCommit(const Id &id) const {
   git_commit *commit = nullptr;
-  git_commit_lookup(&commit, d->repo, &id.d);
+  git_commit_lookup(&commit, d->repo, id);
   return Commit(commit);
 }
 
