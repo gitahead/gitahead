@@ -26,6 +26,7 @@
 #include "Submodule.h"
 #include "TagRef.h"
 #include "Tree.h"
+#include "util/Path.h"
 #include "git2/buffer.h"
 #include "git2/branch.h"
 #include "git2/checkout.h"
@@ -1105,14 +1106,15 @@ QDir Repository::appDir(const QDir &dir) {
 
 Repository Repository::init(const QString &path, bool bare) {
   git_repository *repo = nullptr;
-  git_repository_init(&repo, path.toUtf8(), bare);
+  git_repository_init(&repo, util::canonicalizePath(path).toUtf8(), bare);
   return Repository(repo);
 }
 
 Repository Repository::open(const QString &path, bool searchParents) {
   git_repository *repo = nullptr;
   int flags = searchParents ? 0 : GIT_REPOSITORY_OPEN_NO_SEARCH;
-  git_repository_open_ext(&repo, path.toUtf8(), flags, nullptr);
+  git_repository_open_ext(&repo, util::canonicalizePath(path).toUtf8(), flags,
+                          nullptr);
   return Repository(repo);
 }
 
