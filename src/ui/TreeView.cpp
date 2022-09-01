@@ -216,6 +216,7 @@ int TreeView::countCollapsed(QModelIndex parent, bool recursive) {
     QModelIndex idx = model->index(i, 0, parent);
     auto data = idx.data();
     if (model->hasChildren(idx) && !this->isExpanded(idx)) {
+      // It is a folder but is not expanded
       count++;
     } else if (this->isExpanded(idx) && recursive) {
       // Count only if the item is expanded and if recursive is on
@@ -242,6 +243,7 @@ void TreeView::collapseAll() {
   mSupressItemExpandStateChanged = false;
 
   // Count only folders not files, because they are not able to expand/collapse
+  // Everything is collapsed so only the top items must be checked
   int count = 0;
   for (int i = 0; i < model()->rowCount(); i++) {
     auto child = model()->index(i, 0);
@@ -256,7 +258,7 @@ void TreeView::itemExpanded(const QModelIndex &index) {
   if (mSupressItemExpandStateChanged)
     return;
   qDebug() << "Name: " << mName << ", Index data: " << index.data().toString();
-  setCollapseCount(mCollapseCount + countCollapsed(index, false));
+  setCollapseCount(mCollapseCount - 1 + countCollapsed(index, false));
 }
 
 void TreeView::itemCollapsed(const QModelIndex &index) {
@@ -264,7 +266,9 @@ void TreeView::itemCollapsed(const QModelIndex &index) {
     return;
 
   qDebug() << "Name: " << mName << ", Index data: " << index.data().toString();
-  setCollapseCount(mCollapseCount - countCollapsed(index, false));
+  // one item was collapsed, but all collapsed items below this item must be
+  // subtracted
+  setCollapseCount(mCollapseCount + 1 - countCollapsed(index, false));
 }
 
 void TreeView::deselectAll() {
