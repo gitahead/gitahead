@@ -24,7 +24,7 @@ public:
 
   void clear();
   void remove(int index);
-  void add(const QString &path);
+  void add(QString path);
 
   static RecentRepositories *instance();
 

@@ -1,7 +1,7 @@
 add_library(conf ConfFile.cpp Settings.cpp RecentRepositories.cpp
                  RecentRepository.cpp)
 
-target_link_libraries(conf lua Qt5::Core)
+target_link_libraries(conf lua Qt5::Core util)
 
 target_compile_definitions(
   conf PRIVATE SCINTILLUA_LEXERS_DIR="${SCINTILLUA_LEXERS_DIR}")

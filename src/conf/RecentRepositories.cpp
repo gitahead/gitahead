@@ -9,6 +9,7 @@
 
 #include "RecentRepositories.h"
 #include "RecentRepository.h"
+#include "util/Path.h"
 #include <QCoreApplication>
 #include <QFileInfo>
 #include <QSettings>
@@ -49,13 +50,17 @@ void RecentRepositories::remove(int index) {
   emit repositoryRemoved();
 }
 
-void RecentRepositories::add(const QString &path) {
+void RecentRepositories::add(QString path) {
   emit repositoryAboutToBeAdded();
 
   auto end = mRepos.end();
   RecentRepository *repo = new RecentRepository(path, this);
   auto it = std::remove_if(mRepos.begin(), end, [repo](RecentRepository *rhs) {
+#ifdef Q_OS_WIN
+    return repo->path().compare(rhs->path(), Qt::CaseInsensitive) == 0;
+#else
     return (repo->path() == rhs->path());
+#endif
   });
 
   if (it != end)
@@ -99,6 +104,14 @@ void RecentRepositories::load() {
 
     if (it != end)
       paths.erase(it, end);
+
+#ifdef Q_OS_WIN
+    for (QString &path : paths) {
+      path = util::canonicalizePath(path);
+    }
+
+    paths.removeDuplicates();
+#endif
   }
 
   // Store filtered list.
