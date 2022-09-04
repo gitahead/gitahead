@@ -150,6 +150,14 @@ Install the `gittyup` package from the Arch User Repository.
 Or use an AUR helper.
 Install `gittyup-git` for the VCS build.
 
+### Mac OS
+
+**Homebrew**
+
+Install the `gittyup` cask from [Homebrew](https://brew.sh/).
+
+    brew install gittyup
+
 ### Flatpak from terminal
 
 If you want a more pure console use, this script run flatpak version disowning the process and silence the output pushing it to /dev/null.
