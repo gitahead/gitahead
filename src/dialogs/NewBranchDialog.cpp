@@ -28,9 +28,9 @@ NewBranchDialog::NewBranchDialog(const git::Repository &repo,
   mName = new QLineEdit(this);
 
   auto kinds = ReferenceView::InvalidRef | ReferenceView::RemoteBranches;
-  mUpstream = new ReferenceList(repo, kinds, this);
+  mUpstream = new ReferenceList(repo, kinds, false, this);
 
-  mRefs = new ReferenceList(repo, ReferenceView::AllRefs, this);
+  mRefs = new ReferenceList(repo, ReferenceView::AllRefs, true, this);
   mRefs->select(repo.head());
   mRefs->setCommit(commit);
 
