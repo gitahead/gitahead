@@ -38,6 +38,12 @@ public:
   QToolButton *lfsButton() const;
   void setStageState(git::Index::StagedState state);
 
+  QToolButton *saveButton() const;
+  QToolButton *undoButton() const;
+  QToolButton *oursButton() const;
+  QToolButton *theirsButton() const;
+  git::Patch::ConflictResolution resolution() const;
+
 signals:
   void stageStateChanged(int stageState);
   void discard();
@@ -61,6 +67,13 @@ private:
   LineStats *mStats{nullptr};
   Badge *mStatusBadge{nullptr};
   FileLabel *mFileLabel{nullptr};
+
+  QToolButton *mSave = nullptr;
+  QToolButton *mUndo = nullptr;
+  QToolButton *mOurs = nullptr;
+  QToolButton *mTheirs = nullptr;
+  git::Patch::ConflictResolution mResolution =
+      git::Patch::ConflictResolution::Unresolved;
 };
 
 } // namespace _FileWidget
@@ -97,6 +110,7 @@ public:
                       bool submodule);
   void setStageState(git::Index::StagedState state);
   QModelIndex modelIndex();
+
 public slots:
   void headerCheckStateChanged(int state);
   /*!

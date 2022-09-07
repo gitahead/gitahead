@@ -49,6 +49,8 @@ public:
   Theme();
   virtual ~Theme() = default;
 
+  QString diffButtonStyle(Diff role);
+
   virtual QDir dir() const;
   virtual QString name() const;
   virtual QStyle *style() const;

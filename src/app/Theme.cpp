@@ -13,6 +13,7 @@
 #include "conf/ConfFile.h"
 #include "conf/Settings.h"
 #include "dialogs/ThemeDialog.h"
+#include "ui/DiffView/DiffView.h"
 #include <QProxyStyle>
 #include <QStyleOption>
 #include <QWidget>
@@ -68,6 +69,12 @@ Theme::Theme() {
   QColor base = palette.color(QPalette::Base);
   QColor text = palette.color(QPalette::Text);
   mDark = (text.lightnessF() > base.lightnessF());
+}
+
+QString Theme::diffButtonStyle(Theme::Diff role) {
+  QColor color = diff(role);
+  QString pressed = color.darker(115).name();
+  return DiffViewStyle::kButtonStyleFmt.arg(color.name(), pressed);
 }
 
 QDir Theme::dir() const { return mDir; }
