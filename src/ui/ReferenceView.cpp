@@ -81,8 +81,12 @@ public:
     git::Reference detachedHead;
     if (mKinds & ReferenceView::DetachedHead) {
       git::Reference head = mRepo.head();
-      if (head.isValid() && !head.isBranch())
-        detachedHead = head;
+      if (head.isValid() && !head.isBranch()) {
+        if (!mFilterCurrentCommit ||
+            head.annotatedCommit().commit() == mCommit) {
+          detachedHead = head;
+        }
+      }
     }
 
     // Add local branches.
