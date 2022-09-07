@@ -24,6 +24,7 @@ public:
   void setModel(QAbstractItemModel *model) override;
   void onCustomContextMenu(const QPointF &point);
   bool eventFilter(QObject *obj, QEvent *event) override;
+  void keyPressEvent(QKeyEvent *event) override;
   void deselectAll();
   /*!
    * Get the rectangle occupied by the item's checkboy.

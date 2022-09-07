@@ -153,6 +153,31 @@ bool TreeView::eventFilter(QObject *obj, QEvent *event) {
   return false;
 }
 
+/*!
+ * \brief TreeView::keyPressEvent
+ * Implemented, because for some reason a segfault in the binaries (probably qt)
+ * happens: https://github.com/Murmele/Gittyup/issues/109 Can be removed in a
+ * later version if it can be proved that the problem is solved.
+ */
+void TreeView::keyPressEvent(QKeyEvent *event) {
+  auto index = currentIndex();
+  if (index.isValid() && event->key() == Qt::Key_Space) {
+    auto checkState =
+        static_cast<Qt::CheckState>(index.data(Qt::CheckStateRole).toInt());
+    if (checkState == Qt::Checked)
+      checkState = Qt::Unchecked;
+    else
+      checkState = Qt::Checked;
+    model()->setData(index, checkState, Qt::CheckStateRole);
+
+    // Select next item.
+    QKeyEvent *down =
+        new QKeyEvent(event->type(), Qt::Key_Down, event->modifiers());
+    QTreeView::keyPressEvent(down);
+  } else
+    QTreeView::keyPressEvent(event);
+}
+
 void TreeView::handleSelectionChange(const QItemSelection &selected,
                                      const QItemSelection &deselected) {
   Q_UNUSED(selected)
