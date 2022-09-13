@@ -153,7 +153,7 @@ public:
     for (auto &ref : mRefs) {
       if (ref.name == tr("Remotes") && ref.refs.count() > 0) {
         if (mKinds & ReferenceView::InvalidRef && ref.refs.count() > 1)
-          return createIndex(0 + 1, 0, ReferenceType::Remotes);
+          return createIndex(1, 0, ReferenceType::Remotes);
         else
           return createIndex(0, 0, ReferenceType::Remotes);
       }
@@ -166,7 +166,7 @@ public:
     for (auto &ref : mRefs) {
       if (ref.name == tr("Branches") && ref.refs.count() > 0) {
         if (mKinds & ReferenceView::InvalidRef && ref.refs.count() > 1)
-          return createIndex(0 + 1, 0, ReferenceType::Branches);
+          return createIndex(1, 0, ReferenceType::Branches);
         else
           return createIndex(0, 0, ReferenceType::Branches);
       }
