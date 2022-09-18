@@ -32,8 +32,16 @@ if(APPLE)
 elseif(UNIX)
   set_target_properties(relauncher PROPERTIES INSTALL_RPATH "$ORIGIN")
 
-  install(
-    TARGETS relauncher
-    DESTINATION .
-    COMPONENT ${GITTYUP_NAME})
+  if(FLATPAK)
+    # Install application.
+    install(
+      TARGETS relauncher
+      DESTINATION ./bin # otherwise the executable will not be found by flatpak
+      COMPONENT ${GITTYUP_NAME})
+  else()
+    install(
+      TARGETS relauncher
+      DESTINATION .
+      COMPONENT ${GITTYUP_NAME})
+  endif()
 endif()

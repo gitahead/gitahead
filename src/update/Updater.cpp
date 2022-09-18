@@ -14,6 +14,7 @@
 #include "UpToDateDialog.h"
 #include "conf/Settings.h"
 #include "ui/MainWindow.h"
+#include "git/Command.h"
 #include <QApplication>
 #include <QCloseEvent>
 #include <QDialog>
@@ -158,7 +159,7 @@ void Updater::update(bool spontaneous) {
     QString platform(PLATFORM);
     QString platformArg;
     QString extension = "sh";
-#ifdef FLATPAK
+#if defined(FLATPAK) || defined(DEBUG_FLATPAK)
     extension = "flatpak";
     platformArg = "";
     // The bundle does not have any version in its filename
@@ -268,7 +269,45 @@ Updater *Updater::instance() {
   return instance;
 }
 
-#if !defined(Q_OS_MAC) && !defined(Q_OS_WIN)
+#if defined(FLATPAK) || defined(DEBUG_FLATPAK)
+bool Updater::install(const DownloadRef &download, QString &error) {
+  QString path = download->file()->fileName();
+
+  QDir dir(QCoreApplication::applicationDirPath());
+  QStringList args;
+  args.append("-c");
+  args.append(
+      QString("flatpak-spawn --host flatpak install --user -y %1").arg(path));
+  qDebug() << "Install arguments: " << args;
+  qDebug() << "Download file: " << path;
+  QProcess *p = new QProcess(this);
+
+  QString bash = git::Command::bashPath();
+  qDebug() << "Bash: " << bash;
+  p->start(bash, args);
+  if (!p->waitForFinished()) {
+    const QString es = p->errorString();
+    error = tr("Installer script failed: %1").arg(es);
+    qDebug() << "Installer script failed: " + es;
+    return false;
+  } else {
+    qDebug() << "Successfully installed bundle: " + p->readAll();
+  }
+
+  auto relauncher_cmd = dir.filePath("relauncher");
+  qDebug() << "Relauncher command: " << relauncher_cmd;
+
+  // Start the relaunch helper.
+  QString app = "flatpak-spawn --host flatpak run com.github.Murmele.Gittyup";
+  QString pid = QString::number(QCoreApplication::applicationPid());
+  if (!QProcess::startDetached(relauncher_cmd, {app, pid})) {
+    error = tr("Helper application failed to start");
+    return false;
+  }
+
+  return true;
+}
+#elif !defined(Q_OS_MAC) && !defined(Q_OS_WIN)
 bool Updater::install(const DownloadRef &download, QString &error) {
   QString path = download->file()->fileName();
   QDir dir(QCoreApplication::applicationDirPath());

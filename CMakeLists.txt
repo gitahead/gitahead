@@ -44,6 +44,7 @@ endif()
 set(BUILD_SHARED_LIBS OFF)
 
 option(FLATPAK "Building for flatpak" OFF)
+option(DEBUG_FLATPAK "Building but using flatpak urls for testing" OFF)
 
 # Require C++17.
 set(CMAKE_CXX_STANDARD 17)
@@ -77,6 +78,10 @@ if(FLATPAK)
     COMPONENTS XcbQpa
     REQUIRED)
   add_compile_definitions(FLATPAK)
+endif()
+
+if(DEBUG_FLATPAK)
+  add_compile_definitions(DEBUG_FLATPAK)
 endif()
 
 set(QT_TRANSLATIONS_DIR "${Qt5_DIR}/../../../translations")
