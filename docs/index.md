@@ -2,9 +2,9 @@
 
 Gittyup is a graphical Git client designed to help you understand and manage your source code history. Gittyup is an open source software developed by voluntiers, if you like the application please support us [![Donate Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/Gittyup/donate)
 
-The [stable version](https://github.com/Murmele/Gittyup/releases/stable) is available for
-- flatpak for Linux
-- 32 / 64 binary for Windows or
+Stable versions for different packages are available for
+- Flatpak for Linux: [![Flathub](https://img.shields.io/badge/Flathub-gray?logo=Flathub&logoColor=23FBB04)](https://flathub.org/apps/details/com.github.Murmele.Gittyup)
+- [32 / 64 binary for Windows](https://github.com/Murmele/Gittyup/releases/stable) or
 - macOS [![homebrew](https://img.shields.io/badge/Homebrew-gray?logo=Homebrew&logoColor=%23FBB040)](https://formulae.brew.sh/cask/gittyup)
 
 The [latest version](https://github.com/Murmele/Gittyup/releases/latest) is available either as pre-built for
