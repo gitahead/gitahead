@@ -1,3 +1,31 @@
+### v1.1.3 - 2022-XX-XX
+
+Bug fix release
+
+#### Added
+* Add support for solving merge conflicts for whole files
+* Support rebasing with conflict solving
+
+#### Changed
+* Fix Segmentation fault when using space to stage files
+* Fix menubar color in dark theme
+* Accelerate ifacer.py ????
+* Filter only branches, tags, remotes attached to selected commit
+* Fix crash when global GIT config is invalid
+* Fix crash when having errors while adding a remote account
+
+----
+
+### v1.1.2 - 2022-08-12
+
+Bug fix release
+
+#### Changed
+
+* Fix bundled OpenSSL version incompatibility
+
+----
+
 ### v1.1.1 - 2022-06-09
 
 Bug fix release
