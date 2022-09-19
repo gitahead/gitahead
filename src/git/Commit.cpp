@@ -20,6 +20,7 @@
 #include "git2/diff.h"
 #include "git2/refs.h"
 #include "git2/revert.h"
+#include "git2/commit.h"
 #include <QDateTime>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -238,6 +239,15 @@ bool Commit::revert() const {
     emit repo.notifier()->stateChanged();
 
   return !error;
+}
+
+bool Commit::amend(const Signature& author, const Signature& committer, const QString& commitMessage) const {
+	Repository repo = this->repo();
+	git_tree* tree = nullptr;
+	git_oid* oid;
+	int error = git_commit_amend(oid, *this, NULL, &*author, &*committer, NULL, commitMessage.toUtf8(), tree);
+	emit repo.notifier()->referenceUpdated(repo.head());
+	return !error;
 }
 
 bool Commit::reset(git_reset_t type, const QStringList &paths) const {

@@ -3,6 +3,7 @@ add_library(
   AboutDialog.cpp
   AccountDialog.cpp
   AddRemoteDialog.cpp
+  AmendDialog.cpp
   BranchDelegate.cpp
   BranchTableModel.cpp
   CheckoutDialog.cpp

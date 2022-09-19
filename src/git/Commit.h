@@ -65,6 +65,8 @@ public:
   // Revert this commit in the index and workdir.
   bool revert() const;
 
+  bool amend(const Signature &author, const Signature &committer, const QString& commitMessage) const;
+
   // Reset HEAD to this commit.
   bool reset(git_reset_t type = GIT_RESET_MIXED,
              const QStringList &paths = QStringList()) const;
