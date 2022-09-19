@@ -2187,18 +2187,17 @@ void RepoView::amend(const git::Commit &commit, const git::Commit &commitToAmend
 	  error(entry, tr("amend"), head.name());
 }
 
-void RepoView::promptToReset(const git::Commit &commit, git_reset_t type,
-                             const git::Commit &commitToAmend) {
+void RepoView::promptToReset(const git::Commit &commit, git_reset_t type) {
   git::Branch head = mRepo.head();
   if (!head.isValid()) {
-    QString title = commitToAmend ? tr("Amend") : tr("Reset");
+	QString title = tr("Reset");
     LogEntry *entry = addLogEntry(tr("<i>no branch</i>"), title);
     entry->addEntry(LogEntry::Error, tr("You are not currently on a branch."));
     return;
   }
 
-  QString id = commitToAmend ? commitToAmend.shortId() : commit.shortId();
-  QString title = commitToAmend ? tr("Amend") : tr("Reset");
+  QString id = commit.shortId();
+  QString title = tr("Reset");
   switch (type) {
     case GIT_RESET_SOFT:
       title += " Soft";
@@ -2212,10 +2211,7 @@ void RepoView::promptToReset(const git::Commit &commit, git_reset_t type,
   }
   title += "?";
 
-  QString text = commitToAmend
-                     ? tr("Are you sure you want to amend '%1'?").arg(id)
-                     : tr("Are you sure you want to reset '%1' to '%2'?")
-                           .arg(head.name(), id);
+  QString text = tr("Are you sure you want to reset '%1' to '%2'?").arg(head.name(), id);
   QMessageBox *dialog = new QMessageBox(QMessageBox::Warning, title, text,
                                         QMessageBox::Cancel, this);
   dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -2239,15 +2235,11 @@ void RepoView::promptToReset(const git::Commit &commit, git_reset_t type,
 
   dialog->setInformativeText(info);
 
-  QString buttonText = commitToAmend ? tr("Amend") : tr("Reset");
+  QString buttonText = tr("Reset");
   QPushButton *accept = dialog->addButton(buttonText, QMessageBox::AcceptRole);
   connect(accept, &QPushButton::clicked, this,
-          [this, commit, type, commitToAmend] {
-            reset(commit, type, commitToAmend);
-
-            // Pre-populate the commit message editor.
-            if (commitToAmend)
-              mDetails->setCommitMessage(commitToAmend.message());
+		  [this, commit, type] {
+			reset(commit, type);
           });
 
   dialog->open();
