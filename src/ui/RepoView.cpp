@@ -2167,10 +2167,9 @@ void RepoView::promptToAmend(const git::Commit &commit,
                             commitToAmend.message(), this);
   d->setAttribute(Qt::WA_DeleteOnClose);
   connect(d, &QDialog::accepted, [this, d, commit, commitToAmend]() {
-    git::Signature author = mRepo.signature(commitToAmend.author(),
-                                            d->authorName(), d->authorEmail());
-    git::Signature committer = mRepo.signature(
-        commitToAmend.committer(), d->committerName(), d->committerEmail());
+    git::Signature author = mRepo.signature(d->authorName(), d->authorEmail());
+    git::Signature committer =
+        mRepo.signature(d->committerName(), d->committerEmail());
 
     amend(commit, commitToAmend, author, committer, d->commitMessage());
   });

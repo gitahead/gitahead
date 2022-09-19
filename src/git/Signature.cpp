@@ -17,13 +17,10 @@ Signature::Signature(git_signature *signature, bool owned)
     : d(
           signature, owned ? git_signature_free : [](git_signature *) {}) {}
 
-Signature::Signature(const Signature &sigb, const QString &name,
-                     const QString &email) {
-
+Signature::Signature(const QString &name, const QString &email) {
   git_signature *signature = nullptr;
 
-  git_signature_new(&signature, name.toUtf8(), email.toUtf8(),
-                    sigb.gitDate().time, sigb.gitDate().offset);
+  git_signature_now(&signature, name.toUtf8(), email.toUtf8());
   d = QSharedPointer<git_signature>(signature, git_signature_free);
 }
 

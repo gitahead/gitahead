@@ -32,10 +32,9 @@ void TestAmend::testAmend() {
 
   const QString commitMessage = "New commit message";
 
-  auto authorSignature =
-      repo.signature(c.author(), "New Author", "New Author Email");
+  auto authorSignature = repo.signature("New Author", "New Author Email");
   auto committerSignature =
-      repo.signature(c.committer(), "New Committer", "New Committer Email");
+      repo.signature("New Committer", "New Committer Email");
 
   c.amend(authorSignature, committerSignature, commitMessage);
 

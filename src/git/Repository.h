@@ -92,8 +92,7 @@ public:
                              const QString &overrideUser = QString(),
                              const QString &overrideEmail = QString()) const;
 
-  Signature signature(const Signature &sigb, const QString &name,
-                      const QString &email);
+  Signature signature(const QString &name, const QString &email);
 
   // ignore
   bool isIgnored(const QString &path) const;
