@@ -1890,7 +1890,7 @@ void RepoView::amendCommit() {
       break;
 
     case 1:
-	  promptToAmend(parents.first(), commit);
+      promptToAmend(parents.first(), commit);
       break;
 
     default:
@@ -2160,36 +2160,44 @@ void RepoView::promptToDeleteTag(const git::Reference &ref) {
   dialog->open();
 }
 
-void RepoView::promptToAmend(const git::Commit &commit, const git::Commit &commitToAmend) {
-	// TODO: maybe also editing date...
-	auto* d = new AmendDialog(commitToAmend.author(), commitToAmend.committer(), commitToAmend.message(), this);
-	d->setAttribute(Qt::WA_DeleteOnClose);
-	connect(d, &QDialog::accepted, [this, d, commit, commitToAmend]() {
-		git::Signature author = mRepo.signature(commitToAmend.author(), d->authorName(), d->authorEmail());
-		git::Signature committer = mRepo.signature(commitToAmend.committer(), d->committerName(), d->committerEmail());
+void RepoView::promptToAmend(const git::Commit &commit,
+                             const git::Commit &commitToAmend) {
+  // TODO: maybe also editing date...
+  auto *d = new AmendDialog(commitToAmend.author(), commitToAmend.committer(),
+                            commitToAmend.message(), this);
+  d->setAttribute(Qt::WA_DeleteOnClose);
+  connect(d, &QDialog::accepted, [this, d, commit, commitToAmend]() {
+    git::Signature author = mRepo.signature(commitToAmend.author(),
+                                            d->authorName(), d->authorEmail());
+    git::Signature committer = mRepo.signature(
+        commitToAmend.committer(), d->committerName(), d->committerEmail());
 
-		amend(commit, commitToAmend, author, committer, d->commitMessage());
-	});
+    amend(commit, commitToAmend, author, committer, d->commitMessage());
+  });
 
-	d->show();
+  d->show();
 }
 
-void RepoView::amend(const git::Commit &commit, const git::Commit &commitToAmend, const git::Signature& author, const git::Signature& committer, const QString& commitMessage) {
-	git::Reference head = mRepo.head();
-	Q_ASSERT(head.isValid());
+void RepoView::amend(const git::Commit &commit,
+                     const git::Commit &commitToAmend,
+                     const git::Signature &author,
+                     const git::Signature &committer,
+                     const QString &commitMessage) {
+  git::Reference head = mRepo.head();
+  Q_ASSERT(head.isValid());
 
-	QString title = tr("Amend");
-	QString text = tr("%1 to %2").arg(head.name(), commit.link());
-	LogEntry *entry = addLogEntry(text, title);
+  QString title = tr("Amend");
+  QString text = tr("%1 to %2").arg(head.name(), commit.link());
+  LogEntry *entry = addLogEntry(text, title);
 
-	if (!commitToAmend.amend(author, committer, commitMessage))
-	  error(entry, tr("amend"), head.name());
+  if (!commitToAmend.amend(author, committer, commitMessage))
+    error(entry, tr("amend"), head.name());
 }
 
 void RepoView::promptToReset(const git::Commit &commit, git_reset_t type) {
   git::Branch head = mRepo.head();
   if (!head.isValid()) {
-	QString title = tr("Reset");
+    QString title = tr("Reset");
     LogEntry *entry = addLogEntry(tr("<i>no branch</i>"), title);
     entry->addEntry(LogEntry::Error, tr("You are not currently on a branch."));
     return;
@@ -2210,7 +2218,8 @@ void RepoView::promptToReset(const git::Commit &commit, git_reset_t type) {
   }
   title += "?";
 
-  QString text = tr("Are you sure you want to reset '%1' to '%2'?").arg(head.name(), id);
+  QString text =
+      tr("Are you sure you want to reset '%1' to '%2'?").arg(head.name(), id);
   QMessageBox *dialog = new QMessageBox(QMessageBox::Warning, title, text,
                                         QMessageBox::Cancel, this);
   dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -2237,9 +2246,7 @@ void RepoView::promptToReset(const git::Commit &commit, git_reset_t type) {
   QString buttonText = tr("Reset");
   QPushButton *accept = dialog->addButton(buttonText, QMessageBox::AcceptRole);
   connect(accept, &QPushButton::clicked, this,
-		  [this, commit, type] {
-			reset(commit, type);
-          });
+          [this, commit, type] { reset(commit, type); });
 
   dialog->open();
 }

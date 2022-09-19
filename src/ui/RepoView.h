@@ -262,8 +262,11 @@ public:
   void promptToAddTag(const git::Commit &commit);
   void promptToDeleteTag(const git::Reference &ref);
 
-  void promptToAmend(const git::Commit &commit, const git::Commit &commitToAmend);
-  void amend(const git::Commit &commit, const git::Commit &commitToAmend, const git::Signature &author, const git::Signature &committer, const QString& commitMessage);
+  void promptToAmend(const git::Commit &commit,
+                     const git::Commit &commitToAmend);
+  void amend(const git::Commit &commit, const git::Commit &commitToAmend,
+             const git::Signature &author, const git::Signature &committer,
+             const QString &commitMessage);
 
   // reset
   void promptToReset(const git::Commit &commit, git_reset_t type);

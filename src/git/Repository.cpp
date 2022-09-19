@@ -188,8 +188,9 @@ Config Repository::appConfig() const {
 
 bool Repository::isBare() const { return git_repository_is_bare(d->repo); }
 
-Signature Repository::signature(const Signature& sigb, const QString& name, const QString& email) {
-	return Signature(sigb, name, email);
+Signature Repository::signature(const Signature &sigb, const QString &name,
+                                const QString &email) {
+  return Signature(sigb, name, email);
 }
 
 Signature Repository::defaultSignature(bool *fake, const QString &overrideUser,
