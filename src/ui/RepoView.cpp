@@ -2164,7 +2164,6 @@ void RepoView::promptToAmend(const git::Commit &commit, const git::Commit &commi
 	// TODO: maybe also editing date...
 	auto* d = new AmendDialog(commitToAmend.author(), commitToAmend.committer(), commitToAmend.message(), this);
 	d->setAttribute(Qt::WA_DeleteOnClose);
-	// Do not use references for commit and commitToAmend!
 	connect(d, &QDialog::accepted, [this, d, commit, commitToAmend]() {
 		git::Signature author = mRepo.signature(commitToAmend.author(), d->authorName(), d->authorEmail());
 		git::Signature committer = mRepo.signature(commitToAmend.committer(), d->committerName(), d->committerEmail());
