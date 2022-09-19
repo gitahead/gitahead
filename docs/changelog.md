@@ -1,4 +1,4 @@
-### v1.1.3 - 2022-XX-XX
+### v1.2.0 - 2022-XX-XX
 
 Bug fix release
 
