@@ -245,8 +245,8 @@ bool Commit::amend(const Signature &author, const Signature &committer,
                    const QString &commitMessage) const {
   Repository repo = this->repo();
   git_tree *tree = nullptr;
-  git_oid *oid;
-  int error = git_commit_amend(oid, *this, "HEAD", &*author, &*committer, NULL,
+  git_oid oid;
+  int error = git_commit_amend(&oid, *this, "HEAD", &*author, &*committer, NULL,
                                commitMessage.toUtf8(), tree);
   emit repo.notifier()->referenceUpdated(repo.head());
   return !error;
