@@ -13,6 +13,7 @@ Bug fix release
 * Filter only branches, tags, remotes attached to selected commit
 * Fix crash when global GIT config is invalid
 * Fix crash when having errors while adding a remote account
+* Fix updater
 
 ----
 
