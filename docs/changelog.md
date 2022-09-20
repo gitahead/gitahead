@@ -14,6 +14,7 @@ Bug fix release
 * Fix crash when global GIT config is invalid
 * Fix crash when having errors while adding a remote account
 * Fix updater
+* Instead of using a soft reset instead of amend, show a dialog to change commit properties and amend changes then
 
 ----
 
