@@ -68,11 +68,8 @@ ReferenceList::ReferenceList(const git::Repository &repo,
 }
 
 git::Commit ReferenceList::target() const {
-  if (currentIndex() == -1 && mCommit.isValid())
-    return mCommit;
-
   git::Reference ref = currentReference();
-  return ref.isValid() ? ref.target() : git::Commit();
+  return ref.isValid() ? ref.target() : mCommit;
 }
 
 git::Reference ReferenceList::currentReference() const {
