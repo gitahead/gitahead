@@ -76,19 +76,18 @@ Updater::Updater(QObject *parent) : QObject(parent) {
             QVersionNumber appVersion = QVersionNumber::fromString(
                 QCoreApplication::applicationVersion());
             QVersionNumber newVersion = QVersionNumber::fromString(version);
-            if (newVersion.majorVersion() > appVersion.majorVersion() ||
-                !Settings::instance()->value("update/download").toBool()) {
+
+            if (Settings::instance()->value("update/download").toBool()) {
+              // Skip the update dialog and just start downloading.
+              if (Updater::DownloadRef download = this->download(link)) {
+                DownloadDialog *dialog = new DownloadDialog(download);
+                dialog->show();
+              }
+            } else {
               UpdateDialog *dialog =
                   new UpdateDialog(platform, version, log, link);
               connect(dialog, &UpdateDialog::rejected, this,
                       &Updater::updateCanceled);
-              dialog->show();
-              return;
-            }
-
-            // Skip the update dialog and just start downloading.
-            if (Updater::DownloadRef download = this->download(link)) {
-              DownloadDialog *dialog = new DownloadDialog(download);
               dialog->show();
             }
           });
