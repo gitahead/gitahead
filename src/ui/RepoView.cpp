@@ -2162,7 +2162,6 @@ void RepoView::promptToDeleteTag(const git::Reference &ref) {
 
 void RepoView::promptToAmend(const git::Commit &commit,
                              const git::Commit &commitToAmend) {
-  // TODO: maybe also editing date...
   auto *d = new AmendDialog(commitToAmend.author(), commitToAmend.committer(),
                             commitToAmend.message(), this);
   d->setAttribute(Qt::WA_DeleteOnClose);
