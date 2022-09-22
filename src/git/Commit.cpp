@@ -242,9 +242,8 @@ bool Commit::revert() const {
 }
 
 bool Commit::amend(const Signature &author, const Signature &committer,
-                   const QString &commitMessage) const {
+                   const QString &commitMessage, const Tree &tree) const {
   Repository repo = this->repo();
-  git_tree *tree = nullptr;
   git_oid oid;
   int error = git_commit_amend(&oid, *this, "HEAD", &*author, &*committer, NULL,
                                commitMessage.toUtf8(), tree);

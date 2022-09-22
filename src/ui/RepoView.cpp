@@ -2188,7 +2188,7 @@ void RepoView::amend(const git::Commit &commit,
   QString text = tr("%1 to %2").arg(head.name(), commit.link());
   LogEntry *entry = addLogEntry(text, title);
 
-  if (!commitToAmend.amend(author, committer, commitMessage))
+  if (!mRepo.amend(commitToAmend, author, committer, commitMessage))
     error(entry, tr("amend"), head.name());
 }
 

@@ -153,6 +153,9 @@ public:
                 const QString &message,
                 const AnnotatedCommit &mergeHead = AnnotatedCommit());
 
+  bool amend(const Commit &commitToAmend, const Signature &author,
+             const Signature &committer, const QString &commitMessage);
+
   QList<Commit> starredCommits() const;
   bool isCommitStarred(const Id &commit) const;
   void setCommitStarred(const Id &commit, bool starred);

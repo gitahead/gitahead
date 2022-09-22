@@ -542,6 +542,24 @@ Commit Repository::lookupCommit(const Id &id) const {
   return Commit(commit);
 }
 
+bool Repository::amend(const git::Commit &commitToAmend,
+                       const git::Signature &author,
+                       const git::Signature &committer,
+                       const QString &commitMessage) {
+
+  // Write the index tree.
+  Index idx = index();
+  if (!idx.isValid())
+    return false;
+
+  // Add new staged files to the amended commit
+  Tree tree = idx.writeTree();
+  if (!tree.isValid())
+    return false;
+
+  return commitToAmend.amend(author, committer, commitMessage, tree);
+}
+
 Commit Repository::commit(const QString &message,
                           const AnnotatedCommit &mergeHead, bool *fakeSignature,
                           const QString &overrideUser,

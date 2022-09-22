@@ -66,7 +66,7 @@ public:
   bool revert() const;
 
   bool amend(const Signature &author, const Signature &committer,
-             const QString &commitMessage) const;
+             const QString &commitMessage, const Tree &tree) const;
 
   // Reset HEAD to this commit.
   bool reset(git_reset_t type = GIT_RESET_MIXED,
