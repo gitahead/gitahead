@@ -5,6 +5,7 @@ Bug fix release
 #### Added
 * Add support for solving merge conflicts for whole files
 * Support rebasing with conflict solving
+* implement amending commits (author, committer, commit message, adding tree to commit)
 
 #### Changed
 * Fix Segmentation fault when using space to stage files
