@@ -1879,24 +1879,7 @@ void RepoView::amendCommit() {
   if (!commit.isValid())
     return;
 
-  QList<git::Commit> parents = commit.parents();
-  switch (parents.size()) {
-    case 0:
-      // Return to the unborn HEAD state.
-      // FIXME: Prompt to reset?
-      head.remove(true);
-      mDetails->setCommitMessage(commit.message());
-      refresh();
-      break;
-
-    case 1:
-      promptToAmend(parents.first(), commit);
-      break;
-
-    default:
-      // FIXME: Return to merging state?
-      break;
-  }
+  promptToAmend(commit);
 }
 
 void RepoView::promptToCheckout() {
@@ -2160,25 +2143,22 @@ void RepoView::promptToDeleteTag(const git::Reference &ref) {
   dialog->open();
 }
 
-void RepoView::promptToAmend(const git::Commit &commit,
-                             const git::Commit &commitToAmend) {
-  auto *d = new AmendDialog(commitToAmend.author(), commitToAmend.committer(),
-                            commitToAmend.message(), this);
+void RepoView::promptToAmend(const git::Commit &commit) {
+  auto *d = new AmendDialog(commit.author(), commit.committer(),
+                            commit.message(), this);
   d->setAttribute(Qt::WA_DeleteOnClose);
-  connect(d, &QDialog::accepted, [this, d, commit, commitToAmend]() {
+  connect(d, &QDialog::accepted, [this, d, commit]() {
     git::Signature author = mRepo.signature(d->authorName(), d->authorEmail());
     git::Signature committer =
         mRepo.signature(d->committerName(), d->committerEmail());
 
-    amend(commit, commitToAmend, author, committer, d->commitMessage());
+    amend(commit, author, committer, d->commitMessage());
   });
 
   d->show();
 }
 
-void RepoView::amend(const git::Commit &commit,
-                     const git::Commit &commitToAmend,
-                     const git::Signature &author,
+void RepoView::amend(const git::Commit &commit, const git::Signature &author,
                      const git::Signature &committer,
                      const QString &commitMessage) {
   git::Reference head = mRepo.head();
@@ -2188,7 +2168,7 @@ void RepoView::amend(const git::Commit &commit,
   QString text = tr("%1 to %2").arg(head.name(), commit.link());
   LogEntry *entry = addLogEntry(text, title);
 
-  if (!mRepo.amend(commitToAmend, author, committer, commitMessage))
+  if (!mRepo.amend(commit, author, committer, commitMessage))
     error(entry, tr("amend"), head.name());
 }
 
