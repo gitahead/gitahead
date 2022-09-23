@@ -13,6 +13,8 @@
 #include "UpdateDialog.h"
 #include "UpToDateDialog.h"
 #include "conf/Settings.h"
+#include "ui/MainWindow.h"
+#include "git/Command.h"
 #include <QApplication>
 #include <QCloseEvent>
 #include <QDialog>
@@ -74,19 +76,18 @@ Updater::Updater(QObject *parent) : QObject(parent) {
             QVersionNumber appVersion = QVersionNumber::fromString(
                 QCoreApplication::applicationVersion());
             QVersionNumber newVersion = QVersionNumber::fromString(version);
-            if (newVersion.majorVersion() > appVersion.majorVersion() ||
-                !Settings::instance()->value("update/download").toBool()) {
+
+            if (Settings::instance()->value("update/download").toBool()) {
+              // Skip the update dialog and just start downloading.
+              if (Updater::DownloadRef download = this->download(link)) {
+                DownloadDialog *dialog = new DownloadDialog(download);
+                dialog->show();
+              }
+            } else {
               UpdateDialog *dialog =
                   new UpdateDialog(platform, version, log, link);
               connect(dialog, &UpdateDialog::rejected, this,
                       &Updater::updateCanceled);
-              dialog->show();
-              return;
-            }
-
-            // Skip the update dialog and just start downloading.
-            if (Updater::DownloadRef download = this->download(link)) {
-              DownloadDialog *dialog = new DownloadDialog(download);
               dialog->show();
             }
           });
@@ -157,7 +158,7 @@ void Updater::update(bool spontaneous) {
     QString platform(PLATFORM);
     QString platformArg;
     QString extension = "sh";
-#ifdef FLATPAK
+#if defined(FLATPAK) || defined(DEBUG_FLATPAK)
     extension = "flatpak";
     platformArg = "";
     // The bundle does not have any version in its filename
@@ -225,12 +226,20 @@ Updater::DownloadRef Updater::download(const QString &link) {
 
 void Updater::install(const DownloadRef &download) {
   // First try to close all windows. Disable quit on close.
-  QCloseEvent event;
-  QString errorText = tr("Unable to install update");
   bool quitOnClose = QGuiApplication::quitOnLastWindowClosed();
   QGuiApplication::setQuitOnLastWindowClosed(false);
-  bool rejected = (!qApp->notify(qApp, &event) || !event.isAccepted());
+
+  bool rejected = false;
+  for (MainWindow *window : MainWindow::windows()) {
+    rejected = !window->close();
+    if (rejected) {
+      break;
+    }
+  }
+
   QGuiApplication::setQuitOnLastWindowClosed(quitOnClose);
+
+  QString errorText = tr("Unable to install update");
   if (rejected) {
     emit updateError(errorText,
                      tr("Some windows failed to close. You can "
@@ -259,7 +268,45 @@ Updater *Updater::instance() {
   return instance;
 }
 
-#if !defined(Q_OS_MAC) && !defined(Q_OS_WIN)
+#if defined(FLATPAK) || defined(DEBUG_FLATPAK)
+bool Updater::install(const DownloadRef &download, QString &error) {
+  QString path = download->file()->fileName();
+
+  QDir dir(QCoreApplication::applicationDirPath());
+  QStringList args;
+  args.append("-c");
+  args.append(
+      QString("flatpak-spawn --host flatpak install --user -y %1").arg(path));
+  qDebug() << "Install arguments: " << args;
+  qDebug() << "Download file: " << path;
+  QProcess *p = new QProcess(this);
+
+  QString bash = git::Command::bashPath();
+  qDebug() << "Bash: " << bash;
+  p->start(bash, args);
+  if (!p->waitForFinished()) {
+    const QString es = p->errorString();
+    error = tr("Installer script failed: %1").arg(es);
+    qDebug() << "Installer script failed: " + es;
+    return false;
+  } else {
+    qDebug() << "Successfully installed bundle: " + p->readAll();
+  }
+
+  auto relauncher_cmd = dir.filePath("relauncher");
+  qDebug() << "Relauncher command: " << relauncher_cmd;
+
+  // Start the relaunch helper.
+  QString app = "flatpak-spawn --host flatpak run com.github.Murmele.Gittyup";
+  QString pid = QString::number(QCoreApplication::applicationPid());
+  if (!QProcess::startDetached(relauncher_cmd, {app, pid})) {
+    error = tr("Helper application failed to start");
+    return false;
+  }
+
+  return true;
+}
+#elif !defined(Q_OS_MAC) && !defined(Q_OS_WIN)
 bool Updater::install(const DownloadRef &download, QString &error) {
   QString path = download->file()->fileName();
   QDir dir(QCoreApplication::applicationDirPath());

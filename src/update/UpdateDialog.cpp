@@ -57,7 +57,7 @@ UpdateDialog::UpdateDialog(const QString &platform, const QString &version,
                      "Would you like to download it now?</p>"
                      "<b>Release Notes:</b>")
                       .arg(appName, version, appVersion);
-#elif defined(FLATPAK)
+#elif defined(FLATPAK) || defined(DEBUG_FLATPAK)
   QString label =
       tr("<h3>A new version of %1 is available!</h3>"
          "<p>%1 %2 is now available - you have %3.</p>"
@@ -82,7 +82,7 @@ UpdateDialog::UpdateDialog(const QString &platform, const QString &version,
   browser->document()->setDefaultStyleSheet(kStyleSheet);
   browser->setHtml(changelog);
 
-#if !defined(Q_OS_LINUX) || defined(FLATPAK)
+#if !defined(Q_OS_LINUX) || defined(FLATPAK) || defined(DEBUG_FLATPAK)
   QCheckBox *download =
       new QCheckBox(tr("Automatically download and install updates"), this);
   download->setChecked(Settings::instance()->value("update/download").toBool());
@@ -92,7 +92,7 @@ UpdateDialog::UpdateDialog(const QString &platform, const QString &version,
 #endif
 
   QDialogButtonBox *buttons = new QDialogButtonBox(this);
-#if !defined(Q_OS_LINUX) || defined(FLATPAK)
+#if !defined(Q_OS_LINUX) || defined(FLATPAK) || defined(DEBUG_FLATPAK)
   buttons->addButton(tr("Install Update"), QDialogButtonBox::AcceptRole);
   buttons->addButton(tr("Remind Me Later"), QDialogButtonBox::RejectRole);
   connect(buttons, &QDialogButtonBox::accepted, this, &UpdateDialog::accept);
@@ -120,7 +120,7 @@ UpdateDialog::UpdateDialog(const QString &platform, const QString &version,
       new QPushButton(QIcon(":/liberapay_icon_130890.png"), tr("Donate"), this);
   QSpacerItem *spacer =
       new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum);
-#if !defined(Q_OS_LINUX) || defined(FLATPAK)
+#if !defined(Q_OS_LINUX) || defined(FLATPAK) || defined(DEBUG_FLATPAK)
   l->addWidget(download);
 #endif
   l->addItem(spacer);

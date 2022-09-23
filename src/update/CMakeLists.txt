@@ -8,8 +8,14 @@ endif()
 add_library(update DownloadDialog.cpp UpdateDialog.cpp Updater.cpp
                    UpToDateDialog.cpp ${UPDATER_IMPL_FILE})
 
-target_link_libraries(update conf ${LIBCMARK_LIBRARIES} Qt5::Network
-                      Qt5::Widgets ${UPDATER_IMPL_LIBS})
+target_link_libraries(
+  update
+  conf
+  ${LIBCMARK_LIBRARIES}
+  git
+  Qt5::Network
+  Qt5::Widgets
+  ${UPDATER_IMPL_LIBS})
 
 set_target_properties(update PROPERTIES AUTOMOC ON)
 
@@ -26,8 +32,16 @@ if(APPLE)
 elseif(UNIX)
   set_target_properties(relauncher PROPERTIES INSTALL_RPATH "$ORIGIN")
 
-  install(
-    TARGETS relauncher
-    DESTINATION .
-    COMPONENT ${GITTYUP_NAME})
+  if(FLATPAK)
+    # Install application.
+    install(
+      TARGETS relauncher
+      DESTINATION ./bin # otherwise the executable will not be found by flatpak
+      COMPONENT ${GITTYUP_NAME})
+  else()
+    install(
+      TARGETS relauncher
+      DESTINATION .
+      COMPONENT ${GITTYUP_NAME})
+  endif()
 endif()
