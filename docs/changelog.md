@@ -1,6 +1,6 @@
-### v1.2.0 - 2022-XX-XX
+### v1.2.0 - 2022-09-25
 
-Bug fix release
+Bug fix and feature release
 
 #### Added
 * Add support for solving merge conflicts for whole files
