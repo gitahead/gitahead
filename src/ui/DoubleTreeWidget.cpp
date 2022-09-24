@@ -419,15 +419,54 @@ void DoubleTreeWidget::storeSelection() {
 
 void DoubleTreeWidget::loadSelection() {
   QModelIndex index;
+  git::Index::StagedState state;
 
-  if (mSelectedFile.filename == "") {
-    if (mDiffTreeModel->rowCount() > 0)
-      index = mDiffTreeModel->index(0, 0);
-  } else
+  if (mSelectedFile.filename != "") {
     index = mDiffTreeModel->index(mSelectedFile.filename);
+    state = static_cast<git::Index::StagedState>(mDiffTreeModel->data(index, Qt::CheckStateRole).toInt());
+  }
 
-  if (!index.isValid())
-    return;
+  if (!index.isValid() || (mSelectedFile.stagedModel && state == git::Index::StagedState::Unstaged) || (!mSelectedFile.stagedModel && state == git::Index::StagedState::Staged)) {
+      mSelectedFile.filename = "";
+      if (mDiffTreeModel->rowCount() > 0) {
+            index = mDiffTreeModel->index(0, 0);
+            git::Index::StagedState s = static_cast<git::Index::StagedState>(mDiffTreeModel->data(index, Qt::CheckStateRole).toInt());
+            mSelectedFile.stagedModel = (s == git::Index::StagedState::Staged);
+      }
+
+//      bool newIndex = false;
+//      if (mSelectedFile.stagedModel) {
+//          const auto idx = stagedFiles->selectionModel()->currentIndex();
+//          if (idx.isValid()) {
+//             TreeProxy *proxy = static_cast<TreeProxy *>(stagedFiles->model());
+//             index = proxy->mapToSource(idx);
+//             newIndex = true;
+//             mSelectedFile.stagedModel = true;
+//             mSelectedFile.filename = mDiffTreeModel->data(index, Qt::EditRole).toString(); // TODO: is it editrole?
+//          }
+//      }
+
+//      if (!newIndex) {
+//          // no staged files. Use a unstaged file
+//          const auto idx = unstagedFiles->selectionModel()->currentIndex();
+//          if (idx.isValid()) {
+//             TreeProxy *proxy = static_cast<TreeProxy *>(unstagedFiles->model());
+//             index = proxy->mapToSource(idx);
+//             newIndex = true;
+//             mSelectedFile.stagedModel = false;
+//             mSelectedFile.filename = mDiffTreeModel->data(index, Qt::EditRole).toString(); // TODO: is it editrole?
+//          }
+//      }
+
+//      // No files are in the staged and unstaged view, so nothing to select
+//      if (!newIndex) {
+//          mSelectedFile.filename = "";
+//          return;
+//      }
+  }
+
+  // TODO: problem: if file does not exist anymore, the current index cannot be
+  // restored anymore
 
   mIgnoreSelectionChange = true;
   if (mSelectedFile.stagedModel) {
