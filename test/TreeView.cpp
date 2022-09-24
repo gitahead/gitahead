@@ -29,7 +29,7 @@ private:
 };
 
 void TestTreeView::restoreStagedFileAfterCommit() {
-  INIT_REPO("TreeViewCollapseCount.zip", false);
+  INIT_REPO("TreeViewCollapseCount.zip", true);
 
   // Check for a single file called "test".
   RepoView *view = window.currentView();
