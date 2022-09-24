@@ -282,7 +282,8 @@ void TreeView::collapseAll() {
 void TreeView::itemExpanded(const QModelIndex &index) {
   if (mSupressItemExpandStateChanged)
     return;
-  qDebug() << "Expanded: Name: " << mName << ", Index data: " << index.data().toString();
+  qDebug() << "Expanded: Name: " << mName
+           << ", Index data: " << index.data().toString();
   setCollapseCount(mCollapseCount - 1 + countCollapsed(index, false));
 }
 
@@ -290,7 +291,8 @@ void TreeView::itemCollapsed(const QModelIndex &index) {
   if (mSupressItemExpandStateChanged)
     return;
 
-  qDebug() << "Collapsed: Name: " << mName << ", Index data: " << index.data().toString();
+  qDebug() << "Collapsed: Name: " << mName
+           << ", Index data: " << index.data().toString();
   // one item was collapsed, but all collapsed items below this item must be
   // subtracted
   setCollapseCount(mCollapseCount + 1 - countCollapsed(index, false));
