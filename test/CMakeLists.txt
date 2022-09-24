@@ -75,7 +75,7 @@ target_link_libraries(testlib app git ui Qt5::Test zip)
 target_include_directories(testlib PRIVATE ${CMAKE_SOURCE_DIR}/src)
 target_compile_definitions(
   testlib
-  PRIVATE TESTREPOSITORIES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/testRepos"
+  PUBLIC TESTREPOSITORIES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/testRepos"
   PUBLIC GIT_EXECUTABLE="${GIT_EXECUTABLE}")
 
 # Add tests.
@@ -98,3 +98,4 @@ test(NAME EditorLineInfos)
 test(NAME CommitAuthorCommitter)
 test(NAME rebase)
 test(NAME TreeView)
+test(NAME Submodule)
