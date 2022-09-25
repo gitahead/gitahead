@@ -12,7 +12,6 @@ Bug fix and feature release
 #### Changed
 * Fix Segmentation fault when using space to stage files
 * Fix menubar color in dark theme
-* Accelerate ifacer.py ????
 * Filter only branches, tags, remotes attached to selected commit
 * Fix crash when global GIT config is invalid
 * Fix crash when having errors while adding a remote account
