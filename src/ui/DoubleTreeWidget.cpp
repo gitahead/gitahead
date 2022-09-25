@@ -371,7 +371,8 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff, const QString &file,
   mDiffView->setDiff(diff);
 
   // Restore selection.
-  loadSelection();
+  if (diff.isValid())
+    loadSelection();
 }
 
 void DoubleTreeWidget::find() { mEditor->find(); }
@@ -419,15 +420,30 @@ void DoubleTreeWidget::storeSelection() {
 
 void DoubleTreeWidget::loadSelection() {
   QModelIndex index;
+  git::Index::StagedState state;
 
-  if (mSelectedFile.filename == "") {
-    if (mDiffTreeModel->rowCount() > 0)
-      index = mDiffTreeModel->index(0, 0);
-  } else
+  if (mSelectedFile.filename != "") {
     index = mDiffTreeModel->index(mSelectedFile.filename);
+    state = static_cast<git::Index::StagedState>(
+        mDiffTreeModel->data(index, Qt::CheckStateRole).toInt());
+  }
 
-  if (!index.isValid())
-    return;
+  if (!index.isValid() ||
+      (mSelectedFile.stagedModel &&
+       state == git::Index::StagedState::Unstaged) ||
+      (!mSelectedFile.stagedModel &&
+       state == git::Index::StagedState::Staged)) {
+    mSelectedFile.filename = "";
+    if (mDiffTreeModel->rowCount() > 0) {
+      index = mDiffTreeModel->index(0, 0);
+      git::Index::StagedState s = static_cast<git::Index::StagedState>(
+          mDiffTreeModel->data(index, Qt::CheckStateRole).toInt());
+      mSelectedFile.stagedModel = (s == git::Index::StagedState::Staged);
+    }
+  }
+
+  // TODO: problem: if file does not exist anymore, the current index cannot be
+  // restored anymore
 
   mIgnoreSelectionChange = true;
   if (mSelectedFile.stagedModel) {
