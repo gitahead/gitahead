@@ -4,9 +4,9 @@ Bug fix and feature release
 
 #### Added
 * Add support for solving merge conflicts for whole files
+* Solving binary conflicts directly in Gittyup
 * Support rebasing with conflict solving
 * implement amending commits (author, committer, commit message, adding tree to commit)
-* Solving binary conflicts
 * Possibility to init submodules after clone (Settings -> General -> Update submodules after pull and clone)
 
 #### Changed
@@ -16,7 +16,7 @@ Bug fix and feature release
 * Filter only branches, tags, remotes attached to selected commit
 * Fix crash when global GIT config is invalid
 * Fix crash when having errors while adding a remote account
-* Fix updater
+* Fix updater on windows, macos and linux (flatpak)
 * Instead of using a soft reset instead of amend, show a dialog to change commit properties and amend changes then
 * Fix discarding file leading to discarding submodule changes
 
