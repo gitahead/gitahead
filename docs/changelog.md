@@ -19,6 +19,7 @@ Bug fix and feature release
 * Fix updater on windows, macos and linux (flatpak)
 * Instead of using a soft reset instead of amend, show a dialog to change commit properties and amend changes then
 * Fix discarding file leading to discarding submodule changes
+* Fix rebase log messages during rebase
 
 ----
 
