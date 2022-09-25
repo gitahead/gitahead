@@ -71,6 +71,12 @@ LogEntry *LogEntry::insertEntry(int row, Kind kind, const QString &text,
   return entry;
 }
 
+LogEntry *LogEntry::lastEntry() const {
+  if (mEntries.isEmpty())
+    return nullptr;
+  return mEntries.last();
+}
+
 void LogEntry::setBusy(bool busy) {
   if (!busy) {
     mTimer.stop();

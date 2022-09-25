@@ -48,6 +48,7 @@ public:
   void insertEntries(int row, const QList<LogEntry *> &entries);
   LogEntry *insertEntry(int row, Kind kind, const QString &text,
                         const QString &title = QString());
+  LogEntry *lastEntry() const;
 
   int progress() const { return mProgress; }
   void setBusy(bool busy);
