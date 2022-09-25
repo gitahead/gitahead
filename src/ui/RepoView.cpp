@@ -2165,14 +2165,18 @@ void RepoView::amend(const git::Commit &commit, const git::Signature &author,
   Q_ASSERT(head.isValid());
 
   QString title = tr("Amend");
-  QString text =
-      tr("%1%2").arg(head.name(), commit.parents().count() > 0
-                                      ? " on " + commit.parents().first().link()
-                                      : "");
-  LogEntry *entry = addLogEntry(text, title);
 
-  if (!mRepo.amend(commit, author, committer, commitMessage))
-    error(entry, tr("amend"), head.name());
+  if (!mRepo.amend(commit, author, committer, commitMessage)) {
+    error(addLogEntry(tr("Amending commit %1").arg(commit.link()), title),
+          tr("amend"), head.name());
+  } else {
+    head = mRepo.head();
+    Q_ASSERT(head.isValid());
+
+    QString text =
+        tr("%1 to %2", "update ref").arg(head.name(), head.target().link());
+    addLogEntry(text, title);
+  }
 }
 
 void RepoView::promptToReset(const git::Commit &commit, git_reset_t type) {
