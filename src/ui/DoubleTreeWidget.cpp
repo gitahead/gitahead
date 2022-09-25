@@ -371,7 +371,8 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff, const QString &file,
   mDiffView->setDiff(diff);
 
   // Restore selection.
-  loadSelection();
+  if (diff.isValid())
+    loadSelection();
 }
 
 void DoubleTreeWidget::find() { mEditor->find(); }
