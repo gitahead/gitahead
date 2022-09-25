@@ -7,6 +7,7 @@ Bug fix and feature release
 * Support rebasing with conflict solving
 * implement amending commits (author, committer, commit message, adding tree to commit)
 * Solving binary conflicts
+* Possibility to init submodules after clone (Settings -> General -> Update submodules after pull and clone)
 
 #### Changed
 * Fix Segmentation fault when using space to stage files
@@ -17,6 +18,7 @@ Bug fix and feature release
 * Fix crash when having errors while adding a remote account
 * Fix updater
 * Instead of using a soft reset instead of amend, show a dialog to change commit properties and amend changes then
+* Fix discarding file leading to discarding submodule changes
 
 ----
 
