@@ -700,7 +700,7 @@ MenuBar::MenuBar(QWidget *parent) : QMenuBar(parent) {
   mUpdateSubmodules = submodule->addAction(tr("Update All"));
   updateSubmodulesHotkey.use(mUpdateSubmodules);
   connect(mUpdateSubmodules, &QAction::triggered,
-          [this] { view()->updateSubmodules(); });
+          [this] { view()->updateSubmodules(view()->repo().submodules()); });
 
   mInitSubmodules = submodule->addAction(tr("Update..."));
   initSubmodulesHotkey.use(mInitSubmodules);

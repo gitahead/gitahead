@@ -133,7 +133,7 @@ void TestSubmodule::noUpdateSubmoduleClone() {
 
 void TestSubmodule::discardFile() {
   // Discarding a file should not reset the submodule
-  INIT_REPO("SubmoduleTest.zip", false);
+  INIT_REPO("SubmoduleTest.zip", true);
   repoView->updateSubmodules(repo.submodules(), true, true);
 
   qWait(1000); // Not needed if the test is long enough and the fetch operation
@@ -194,7 +194,7 @@ void TestSubmodule::discardFile() {
 
   QFile file(repo.workdir().filePath("Gittyup-Test-Module/README.md"));
   QVERIFY(file.open(QFile::ReadOnly));
-  QCOMPARE(file.readAll(), "Changing content of submodule readme");
+  QCOMPARE(file.readAll(), "Changing content of submodule readme\n");
 }
 
 TEST_MAIN(TestSubmodule)
