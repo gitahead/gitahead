@@ -13,7 +13,7 @@
 #include "ui/MainWindow.h"
 #include "ui/RepoView.h"
 #include "ui/RepoView.h"
-
+#include "conf/Settings.h"
 #include "git/Submodule.h"
 
 #include <QToolButton>
@@ -55,6 +55,8 @@ void TestSubmodule::updateSubmoduleClone() {
     QString remote = Test::extractRepository("SubmoduleTest.zip", true);
     QCOMPARE(remote.isEmpty(), false);
 
+    Settings *settings = Settings::instance();
+    settings->setValue("global/autoupdate/enable", true);
     CloneDialog* d = new CloneDialog(CloneDialog::Kind::Clone);
 
     RepoView* view = nullptr;
@@ -94,6 +96,8 @@ void TestSubmodule::noUpdateSubmoduleClone() {
     QString remote = Test::extractRepository("SubmoduleTest.zip", true);
     QCOMPARE(remote.isEmpty(), false);
 
+    Settings *settings = Settings::instance();
+    settings->setValue("global/autoupdate/enable", false);
     CloneDialog* d = new CloneDialog(CloneDialog::Kind::Clone);
 
     RepoView* view = nullptr;
