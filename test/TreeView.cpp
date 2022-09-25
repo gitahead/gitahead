@@ -62,6 +62,8 @@ void TestTreeView::restoreStagedFileAfterCommit() {
   refresh(view, true);
 
   auto stagedTree = doubleTree->findChild<TreeView *>("Staged");
+  stagedTree->expandAll();
+
   QAbstractItemModel *stagedModel = stagedTree->model();
   QVERIFY(stagedTree);
   {
@@ -72,6 +74,7 @@ void TestTreeView::restoreStagedFileAfterCommit() {
     QCOMPARE(stagedModel->data(file_txt).toString(), QString("file.txt"));
 
     // Select file
+    stagedTree->selectionModel()->clearSelection();
     stagedTree->selectionModel()->select(file_txt, QItemSelectionModel::Select);
   }
 
