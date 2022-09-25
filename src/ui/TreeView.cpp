@@ -63,7 +63,7 @@ void TreeView::setModel(QAbstractItemModel *model) {
   //      setCollapseCount(countCollapsed());});
 }
 
-void TreeView::discard(const QModelIndex &index) {
+void TreeView::discard(const QModelIndex &index, const bool force) {
   auto p = qobject_cast<QSortFilterProxyModel *>(this->model());
   assert(p);
   auto m = qobject_cast<DiffTreeModel *>(p->sourceModel());
@@ -72,30 +72,37 @@ void TreeView::discard(const QModelIndex &index) {
   int patchIndex = sIndex.data(DiffTreeModel::Role::PatchIndexRole).toInt();
   QString name = sIndex.data(Qt::DisplayRole).toString();
 
-  QString arg = patchIndex < 0 ? tr("Directory") : tr("File");
-  QString title = tr("Remove or discard %1?").arg(name);
-  QString text =
-      tr("Are you sure you want to remove or discard all changes in '%1'?")
-          .arg(name);
-  QMessageBox *dialog = new QMessageBox(
-      QMessageBox::Warning, title, text.arg(name), QMessageBox::Cancel, this);
-  dialog->setAttribute(Qt::WA_DeleteOnClose);
-  dialog->setInformativeText(tr("This action cannot be undone."));
+  if (force)
+    this->discard(m, sIndex);
+  else {
+    QString arg = patchIndex < 0 ? tr("Directory") : tr("File");
+    QString title = tr("Remove or discard %1?").arg(name);
+    QString text =
+        tr("Are you sure you want to remove or discard all changes in '%1'?")
+            .arg(name);
+    QMessageBox *dialog = new QMessageBox(
+        QMessageBox::Warning, title, text.arg(name), QMessageBox::Cancel, this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setInformativeText(tr("This action cannot be undone."));
 
-  QPushButton *discard =
-      dialog->addButton(tr("Discard"), QMessageBox::AcceptRole);
-  connect(discard, &QPushButton::clicked, [this, m, sIndex] {
-    RepoView *view = RepoView::parentView(this);
-    assert(view);
-    if (!m->discard(sIndex)) {
-      QString patchName = sIndex.data(Qt::DisplayRole).toString();
-      LogEntry *parent = view->addLogEntry(patchName, tr("Discard"));
-      view->error(parent, tr("discard"), patchName);
-    }
-    // FIXME: Work dir changed?
-    view->refresh();
-  });
-  dialog->exec();
+    QPushButton *discard =
+        dialog->addButton(tr("Discard"), QMessageBox::AcceptRole);
+    connect(discard, &QPushButton::clicked,
+            [this, m, sIndex] { this->discard(m, sIndex); });
+    dialog->exec();
+  }
+}
+
+void TreeView::discard(DiffTreeModel *model, const QModelIndex &index) {
+  RepoView *view = RepoView::parentView(this);
+  assert(view);
+  if (!model->discard(index)) {
+    QString patchName = index.data(Qt::DisplayRole).toString();
+    LogEntry *parent = view->addLogEntry(patchName, tr("Discard"));
+    view->error(parent, tr("discard"), patchName);
+  }
+  // FIXME: Work dir changed?
+  view->refresh();
 }
 
 void TreeView::onCustomContextMenu(const QPointF &point) {
