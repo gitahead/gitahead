@@ -13,6 +13,7 @@
 #include <QTreeView>
 
 class QItemDelegate;
+class DiffTreeModel;
 
 class TreeView : public QTreeView {
   Q_OBJECT
@@ -20,7 +21,8 @@ class TreeView : public QTreeView {
 public:
   TreeView(QWidget *parent = nullptr, const QString &name = QString());
 
-  void discard(const QModelIndex &index);
+  void discard(const QModelIndex &index, const bool force = false);
+  void discard(DiffTreeModel *model, const QModelIndex &index);
   void setModel(QAbstractItemModel *model) override;
   void onCustomContextMenu(const QPointF &point);
   bool eventFilter(QObject *obj, QEvent *event) override;

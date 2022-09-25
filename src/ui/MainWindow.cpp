@@ -19,6 +19,7 @@
 #include "conf/RecentRepositories.h"
 #include "conf/Settings.h"
 #include "git/Repository.h"
+#include "git/Config.h"
 #include "git/Submodule.h"
 #include <QApplication>
 #include <QCloseEvent>
@@ -243,6 +244,13 @@ RepoView *MainWindow::addTab(const git::Repository &repo) {
 
   emit tabs->tabAboutToBeInserted();
   tabs->setCurrentIndex(tabs->addTab(view, dir.dirName()));
+
+  Settings *settings = Settings::instance();
+  bool enable = settings->value("global/autoupdate/enable").toBool();
+  if (repo.appConfig().value<bool>("autoupdate.enable", enable)) {
+    // update submodules
+    view->updateSubmodules(repo.submodules(), true, true, false, nullptr);
+  }
 
   // Start status diff.
   view->refresh();

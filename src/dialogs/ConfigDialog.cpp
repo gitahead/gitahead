@@ -84,7 +84,8 @@ public:
     fetchLayout->addStretch();
 
     mPushCommit = new QCheckBox(tr("Push after each commit"), this);
-    mPullUpdate = new QCheckBox(tr("Update submodules after pull"), this);
+    mPullUpdate =
+        new QCheckBox(tr("Update submodules after pull and clone"), this);
     mAutoPrune = new QCheckBox(tr("Prune when fetching"), this);
 
     QFormLayout *form = new QFormLayout(this);

@@ -2373,14 +2373,12 @@ void RepoView::updateSubmodules(const QList<git::Submodule> &submodules,
     return;
   }
 
-  QList<git::Submodule> modules =
-      !submodules.isEmpty() ? submodules : mRepo.submodules();
-  if (modules.isEmpty())
+  if (submodules.isEmpty())
     return;
 
   // Start updating asynchronously.
   QList<SubmoduleInfo> infos =
-      submoduleUpdateInfoList(mRepo, modules, init, checkout_force, parent);
+      submoduleUpdateInfoList(mRepo, submodules, init, checkout_force, parent);
   updateSubmodulesAsync(infos, recursive, init, checkout_force);
 }
 
