@@ -42,6 +42,7 @@ class TestSubmodule : public QObject {
 
 private slots:
     void updateSubmoduleClone();
+    void noUpdateSubmoduleClone();
     void discardFile();
 
 
@@ -50,14 +51,9 @@ private:
 };
 
 void TestSubmodule::updateSubmoduleClone() {
-    QString remote = Test::extractRepository("SubmoduleTest.zip", true);
     // Update submodules after cloning
-
-//    git::Repository repo; // invalid repo
-//    MainWindow window(repo);
-//    window.show();
-
-//    auto mb = window.menuBar();
+    QString remote = Test::extractRepository("SubmoduleTest.zip", true);
+    QCOMPARE(remote.isEmpty(), false);
 
     CloneDialog* d = new CloneDialog(CloneDialog::Kind::Clone);
 
@@ -71,70 +67,65 @@ void TestSubmodule::updateSubmoduleClone() {
       }
     });
 
+    QTemporaryDir tempdir;
+    QVERIFY(tempdir.isValid());
     d->setField("url", remote);
     d->setField("name", "TestrepoSubmodule");
-    d->setField("path", QString(TESTREPOSITORIES_PATH));
+    d->setField("path", tempdir.path());
     d->setField("bare", "false");
     d->page(2)->initializePage(); // start clone
 
     {
-      auto timeout =
-          Timeout(2000000, "Failed to clone");
+      auto timeout = Timeout(10e3, "Failed to clone");
       while (!cloneFinished)
         qWait(300);
     }
 
     QVERIFY(view);
     QCOMPARE(view->repo().submodules().count(), 1);
-    for (auto& s: view->repo().submodules())
+    for (const auto& s: view->repo().submodules()) {
         QVERIFY(s.isValid());
+        QVERIFY(s.isInitialized());
+    }
+}
 
+void TestSubmodule::noUpdateSubmoduleClone() {
+    // Don't update submodules after cloning
+    QString remote = Test::extractRepository("SubmoduleTest.zip", true);
+    QCOMPARE(remote.isEmpty(), false);
 
-//    MainWindow *mWindow = nullptr;
+    CloneDialog* d = new CloneDialog(CloneDialog::Kind::Clone);
 
-//    QDir dir = QDir::temp();
-//    if (dir.cd("test_init_repo"))
-//      QVERIFY(dir.removeRecursively());
+    RepoView* view = nullptr;
 
-//    StartDialog *dialog = StartDialog::openSharedInstance();
-//    QVERIFY(qWaitForWindowActive(dialog));
+    bool cloneFinished = false;
+    QObject::connect(d, &CloneDialog::accepted, [d, &view, &cloneFinished] {
+       cloneFinished = true;
+      if (MainWindow *window = MainWindow::open(d->path())) {
+        view = window->currentView();
+      }
+    });
 
-//    // Find the first button in the first footer.
-//    Footer *footer = dialog->findChild<Footer *>();
-//    QToolButton *plus = footer->findChild<QToolButton *>();
+    QTemporaryDir tempdir;
+    QVERIFY(tempdir.isValid());
+    d->setField("url", remote);
+    d->setField("name", "TestrepoSubmodule");
+    d->setField("path", tempdir.path());
+    d->setField("bare", "false");
+    d->page(2)->initializePage(); // start clone
 
-//    // Set up timer to dismiss the popup.
-//    QTimer::singleShot(500, [] {
-//      QMenu *menu = qobject_cast<QMenu *>(QApplication::activePopupWidget());
-//      QVERIFY(menu);
+    {
+      auto timeout = Timeout(10e3, "Failed to clone");
+      while (!cloneFinished)
+        qWait(300);
+    }
 
-//      keyClick(menu, Qt::Key_Down);
-//      keyClick(menu, Qt::Key_Down);
-//      keyClick(menu, Qt::Key_Down);
-//      keyClick(menu, Qt::Key_Return);
-//    });
-
-//    {
-//      auto timeout = Timeout(1000, "Start dialog didn't close in time");
-
-//      // Show popup menu.
-//      mouseClick(plus, Qt::LeftButton);
-//    }
-
-//    CloneDialog *cloneDialog =
-//        qobject_cast<CloneDialog *>(QApplication::activeModalWidget());
-//    QVERIFY(cloneDialog);
-
-//    // Set fields.
-//    cloneDialog->setField("name", "test_init_repo");
-//    cloneDialog->setField("path", QDir::tempPath());
-
-//    // Click return.
-//    keyClick(cloneDialog, Qt::Key_Return);
-
-//    // Wait on the new window.
-//    mWindow = MainWindow::activeWindow();
-//    QVERIFY(mWindow && qWaitForWindowExposed(mWindow));
+    QVERIFY(view);
+    QCOMPARE(view->repo().submodules().count(), 1);
+    for (const auto& s: view->repo().submodules()) {
+        QVERIFY(s.isValid());
+        QCOMPARE(s.isInitialized(), false);
+    }
 }
 
 void TestSubmodule::discardFile() {
