@@ -11,6 +11,7 @@
 #include "git/Commit.h"
 #include "git/Patch.h"
 #include "git2/checkout.h"
+#include "git2/diff.h"
 #include "ui/RepoView.h"
 #include "ui/Badge.h"
 #include "ui/FileContextMenu.h"
@@ -141,7 +142,6 @@ _FileWidget::Header::Header(const git::Diff &diff, const git::Patch &patch,
   mOurs->setObjectName("ConflictOurs");
   mOurs->setStyleSheet(
       Application::theme()->diffButtonStyle(Theme::Diff::Ours));
-  mOurs->setText(HunkWidget::tr("Use Ours"));
   connect(mOurs, &QToolButton::clicked, [this] {
     mSave->setVisible(true);
     mUndo->setVisible(true);
@@ -154,7 +154,6 @@ _FileWidget::Header::Header(const git::Diff &diff, const git::Patch &patch,
   mTheirs->setObjectName("ConflictTheirs");
   mTheirs->setStyleSheet(
       Application::theme()->diffButtonStyle(Theme::Diff::Theirs));
-  mTheirs->setText(HunkWidget::tr("Use Theirs"));
   connect(mTheirs, &QToolButton::clicked, [this] {
     mSave->setVisible(true);
     mUndo->setVisible(true);
@@ -186,24 +185,84 @@ _FileWidget::Header::Header(const git::Diff &diff, const git::Patch &patch,
 }
 
 void _FileWidget::Header::updatePatch(const git::Patch &patch) {
-  char status = git::Diff::statusChar(patch.status());
-  mStatusBadge->setLabels({Badge::Label(QChar(status))});
+  auto status = patch.status();
+  QList<Badge::Label> labels = {
+      Badge::Label(QChar(git::Diff::statusChar(status)))};
 
   git::Patch::LineStats lineStats = patch.lineStats();
   mStats->setStats(lineStats);
   mStats->setVisible(lineStats.additions > 0 || lineStats.deletions > 0);
 
   mFileLabel->setName(patch.name());
-  if (patch.status() == GIT_DELTA_RENAMED)
+  if (status == GIT_DELTA_RENAMED)
     mFileLabel->setOldName(patch.name(git::Diff::OldFile));
 
   mEdit->updatePatch(patch, -1);
 
-  auto isConflicted = patch.isConflicted();
-  auto hasOneHunk = patch.count() == 1;
+  auto isConflicted = status == GIT_DELTA_CONFLICTED;
+  auto showFileSolverButtons = patch.count() != 1;
 
-  mOurs->setVisible(isConflicted && !hasOneHunk);
-  mTheirs->setVisible(isConflicted && !hasOneHunk);
+  if (isConflicted) {
+    auto conflict = mDiff.index().conflict(patch.name());
+    auto ours = QString();
+    auto theirs = QString();
+
+    mOurs->setText(HunkWidget::tr("Use Ours"));
+    mTheirs->setText(HunkWidget::tr("Use Theirs"));
+
+    if (conflict.ancestor.isNull()) {
+      if (!conflict.ours.isNull()) {
+        ours = "A";
+
+        if (conflict.theirs.isNull()) {
+          mTheirs->setText(tr("Delete"));
+        }
+      }
+
+      if (!conflict.theirs.isNull()) {
+        theirs = "A";
+
+        if (conflict.ours.isNull()) {
+          mOurs->setText(tr("Delete"));
+        }
+      }
+
+    } else {
+      if (conflict.ours.isNull() && conflict.theirs.isNull()) {
+        showFileSolverButtons = false;
+      }
+
+      if (conflict.ours.isNull()) {
+        ours = "D";
+        mOurs->setText(tr("Delete"));
+      } else if (conflict.ours != conflict.ancestor) {
+        ours = "M";
+      }
+
+      if (conflict.theirs.isNull()) {
+        theirs = "D";
+        mTheirs->setText(tr("Delete"));
+      } else if (conflict.theirs != conflict.ancestor) {
+        theirs = "M";
+      }
+    }
+
+    if (!ours.isEmpty() && ours == theirs) {
+      labels.append(Badge::Label(tr("both: %1").arg(ours)));
+    } else {
+      if (!ours.isEmpty()) {
+        labels.append(Badge::Label(tr("ours: %1").arg(ours)));
+      }
+      if (!theirs.isEmpty()) {
+        labels.append(Badge::Label(tr("theirs: %1").arg(theirs)));
+      }
+    }
+  }
+
+  mStatusBadge->setLabels(labels);
+
+  mOurs->setVisible(isConflicted && showFileSolverButtons);
+  mTheirs->setVisible(isConflicted && showFileSolverButtons);
 
   mSave->setVisible(mResolution != git::Patch::ConflictResolution::Unresolved);
   mUndo->setVisible(mResolution != git::Patch::ConflictResolution::Unresolved);
@@ -399,7 +458,13 @@ FileWidget::FileWidget(DiffView *view, const git::Diff &diff,
                     ? conflict.ours
                     : conflict.theirs;
 
-      if (!id.isValid() || id.isNull()) {
+      if (id.isNull()) {
+        QFile::remove(repo.workdir().filePath(mPatch.name()));
+        repo.index().setStaged(QStringList{mPatch.name()}, true);
+        return;
+      }
+
+      if (!id.isValid()) {
         return;
       }
 
