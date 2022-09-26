@@ -1,0 +1,108 @@
+//
+//          Copyright (c) 2022, Gittyup Contributors
+//
+// This software is licensed under the MIT License. The LICENSE.md file
+// describes the conditions under which this software may be distributed.
+//
+// Author: Martin Marmsoler
+//
+
+#include "Test.h"
+#include "ui/MainWindow.h"
+#include "ui/RepoView.h"
+#include "ui/ReferenceList.h"
+#include "dialogs/CloneDialog.h"
+#include <QMainWindow>
+
+using namespace Test;
+using namespace QTest;
+
+class TestReferenceList : public QObject {
+  Q_OBJECT
+
+private slots:
+  void test();
+
+private:
+};
+
+void TestReferenceList::test() {
+  CloneDialog *d = new CloneDialog(CloneDialog::Kind::Clone);
+
+  RepoView *view = nullptr;
+
+  bool cloneFinished = false;
+  QObject::connect(d, &CloneDialog::accepted, [d, &view, &cloneFinished] {
+    cloneFinished = true;
+    if (MainWindow *window = MainWindow::open(d->path())) {
+      view = window->currentView();
+    }
+  });
+
+  QTemporaryDir tempdir;
+  QVERIFY(tempdir.isValid());
+  const auto repoPath = tempdir.path();
+  d->setField("url", "https://github.com/Murmele/GittyupTestRepo.git");
+  d->setField("name", "GittyupTestRepo");
+  d->setField("path", repoPath);
+  d->setField("bare", "false");
+  d->page(2)->initializePage(); // start clone
+
+  {
+    auto timeout = Timeout(1000e3, "Failed to clone");
+    while (!cloneFinished)
+      qWait(300);
+  }
+  QVERIFY(view);
+
+  const ReferenceView::Kinds kRefKinds =
+      ReferenceView::InvalidRef | ReferenceView::LocalBranches |
+      ReferenceView::RemoteBranches | ReferenceView::Tags;
+  ReferenceList *rl = new ReferenceList(view->repo(), kRefKinds, true);
+
+  {
+    // Only one tag
+    git::Commit commit =
+        view->repo().lookupCommit("99219268e1f838b0da616761fd7a184676965a69");
+    QVERIFY(commit.isValid());
+
+    rl->setCommit(commit);
+
+    QCOMPARE(rl->currentReference().name(), "Tag");
+  }
+
+  {
+    // Only one remote
+    git::Commit commit =
+        view->repo().lookupCommit("79f4bee33320391fa99a8ef3f504b2ba229a8181");
+    QVERIFY(commit.isValid());
+
+    rl->setCommit(commit);
+
+    QCOMPARE(rl->currentReference().name(), "origin/Branch");
+  }
+
+  {
+    // Only one branch
+    git::Commit commit =
+        view->repo().lookupCommit("54ecb63965b50287ceb73095c72f344c1611d94a");
+    QVERIFY(commit.isValid());
+    rl->setCommit(commit);
+    QCOMPARE(rl->currentReference().name(), "main");
+  }
+
+  {
+    // No branch, no remote, no tag
+    git::Commit commit =
+        view->repo().lookupCommit("63460da2b069250c34506249516029f2ba7c6057");
+    QVERIFY(commit.isValid());
+
+    rl->setCommit(commit);
+
+    QCOMPARE(rl->currentReference().name(), "");
+  }
+}
+
+TEST_MAIN(TestReferenceList)
+
+#include "referencelist.moc"

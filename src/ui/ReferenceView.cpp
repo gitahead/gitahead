@@ -43,7 +43,7 @@ bool refComparator(const git::Reference &lhs, const git::Reference &rhs) {
           lhsCommit.committer().date() > rhsCommit.committer().date());
 }
 
-enum ReferenceType { Branches = 0, Remotes = 1, Tags = 2 };
+enum ReferenceType { HEADER = 0, Branches = 1, Remotes = 2, Tags = 3 };
 
 class ReferenceModel : public QAbstractItemModel {
   Q_OBJECT
@@ -66,6 +66,10 @@ public:
     connect(notifier, &git::RepositoryNotifier::referenceUpdated, this,
             &ReferenceModel::update);
   }
+
+  static int referenceTypeToIndex(ReferenceType t) { return t - 1; }
+
+  static int indexToReferenceType(int index) { return index + 1; }
 
   void setCommit(const git::Commit &commit) {
     mCommit = commit;
@@ -93,6 +97,7 @@ public:
     if (mKinds & ReferenceView::LocalBranches) {
       QList<git::Reference> branches;
       foreach (const git::Branch &branch, mRepo.branches(GIT_BRANCH_LOCAL)) {
+        qDebug() << "ReferenceView: Local branches: " << branch.name();
         const bool branchOnCommit =
             !mCommit.isValid() || branch.annotatedCommit().commit() == mCommit;
         if ((!(mKinds & ReferenceView::ExcludeHead) || !branch.isHead()) &&
@@ -122,6 +127,7 @@ public:
       QList<git::Reference> remotes;
       foreach (const git::Branch &branch, mRepo.branches(GIT_BRANCH_REMOTE)) {
         // Filter remote HEAD branches.
+        qDebug() << "ReferenceView: Remote branches: " << branch.name();
         const bool remoteOnCommit =
             !mCommit.isValid() || branch.annotatedCommit().commit() == mCommit;
         if (!branch.name().endsWith("HEAD") &&
@@ -139,6 +145,7 @@ public:
     if (mKinds & ReferenceView::Tags) {
       QList<git::Reference> tags;
       foreach (const git::TagRef &tag, mRepo.tags()) {
+        qDebug() << "ReferenceView: Tags: " << tag.name();
         const bool tagOnCommit =
             !mCommit.isValid() || tag.annotatedCommit().commit() == mCommit;
         if (tagOnCommit || !mFilterCurrentCommit)
@@ -156,10 +163,14 @@ public:
     // Return first remote if available, otherwise an invalid modelIndex
     for (auto &ref : mRefs) {
       if (ref.name == tr("Remotes") && ref.refs.count() > 0) {
-        if (mKinds & ReferenceView::InvalidRef && ref.refs.count() > 1)
-          return createIndex(1, 0, ReferenceType::Remotes);
-        else
+        if (mKinds & ReferenceView::InvalidRef) {
+          if (ref.refs.count() > 1) {
+            // use the first valid ref after the invalid ref
+            return createIndex(1, 0, ReferenceType::Remotes);
+          }
+        } else
           return createIndex(0, 0, ReferenceType::Remotes);
+        break; // Remotes are already found so no need to continue searching
       }
     }
     return QModelIndex();
@@ -169,10 +180,13 @@ public:
     // Return first branch if available, otherwise an invalid modelIndex
     for (auto &ref : mRefs) {
       if (ref.name == tr("Branches") && ref.refs.count() > 0) {
-        if (mKinds & ReferenceView::InvalidRef && ref.refs.count() > 1)
-          return createIndex(1, 0, ReferenceType::Branches);
-        else
+        if (mKinds & ReferenceView::InvalidRef) {
+          if (ref.refs.count() >
+              1) // use the first valid ref after the invalid ref
+            return createIndex(1, 0, ReferenceType::Branches);
+        } else
           return createIndex(0, 0, ReferenceType::Branches);
+        break; // Remotes are already found so no need to continue searching
       }
     }
     return QModelIndex();
@@ -193,31 +207,31 @@ public:
     if (!hasIndex(row, column, parent))
       return QModelIndex();
 
-    // only true for ref elements, not for elements of mRefs
-    bool id = (!parent.isValid() || parent.internalId());
-    return createIndex(row, column, !id ? parent.row() + 1 : 0);
+    // headers do not have a parent
+    bool header = !parent.isValid();
+    return createIndex(row, column,
+                       header ? 0 : indexToReferenceType(parent.row()));
   }
 
   QModelIndex parent(const QModelIndex &index) const override {
     if (!index.isValid())
       return QModelIndex();
 
-    // The sections (Branches, Remotes, Tags) (Elements of mRefs) do not have an
-    // internalId() Those sections don't have any parents, only the refs in each
-    // mRefs element
-    quintptr id = index.internalId();
-    if (!id)
+    // The header sections (Branches, Remotes, Tags) (Elements of mRefs)
+    // do not have any parents, only the refs in each mRefs element
+    const quintptr id = index.internalId();
+    if (id == HEADER)
       return QModelIndex();
-    auto refType = static_cast<ReferenceType>(id - 1);
-    return createIndex(refType, 0);
+    const auto row = referenceTypeToIndex(static_cast<ReferenceType>(id));
+    return createIndex(row, 0);
   }
 
   int rowCount(const QModelIndex &parent = QModelIndex()) const override {
     if (!parent.isValid())
       return mRefs.size();
 
-    if (parent.internalId())
-      return 0;
+    if (parent.internalId() != HEADER)
+      return 0; // refs it self do not have childs
 
     return mRefs.at(parent.row()).refs.size();
   }
@@ -231,13 +245,13 @@ public:
     // kinds
     int row = index.row();
     quintptr id = index.internalId();
-    if (!id)
+    if (id == HEADER)
       return (role == Qt::DisplayRole) ? mRefs.at(row).name : QVariant();
 
-    auto refType = static_cast<ReferenceType>(id - 1);
+    auto refType = static_cast<ReferenceType>(id);
 
     // refs
-    git::Reference ref = mRefs.at(refType).refs.at(row);
+    git::Reference ref = mRefs.at(referenceTypeToIndex(refType)).refs.at(row);
     switch (role) {
       case Qt::DisplayRole:
         return ref.isValid() ? ref.name() : QString();
