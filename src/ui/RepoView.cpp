@@ -1459,10 +1459,19 @@ void RepoView::rebaseCommitSuccess(const git::Rebase rebase,
                                    const git::Commit after, int currIndex) {
   QString beforeText = before.link();
   QString step = tr("%1/%2").arg(currIndex).arg(rebase.count());
-  mRebase->setText(
-      (after == before)
-          ? tr("%1 - %2 <i>already applied</i>").arg(step, beforeText)
-          : tr("%1 - %2 as %3").arg(step, beforeText, msg(after)));
+  auto *lastEntry = mRebase->lastEntry();
+  if (lastEntry) {
+    lastEntry->setText(
+        (after == before)
+            ? tr("%1 - %2 <i>already applied</i>").arg(step, beforeText)
+            : tr("%1 - %2 as %3").arg(step, beforeText, msg(after)));
+  }
+
+  // Yield to the main event loop.
+  // So the status of the rebase is shown
+  // Without it, the rebase status will be shown at the end of the
+  // rebase when the event loop will be processed
+  QCoreApplication::processEvents();
 }
 
 void RepoView::rebaseFinished(const git::Rebase rebase) {
