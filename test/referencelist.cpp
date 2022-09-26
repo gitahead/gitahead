@@ -65,9 +65,8 @@ void TestReferenceList::test() {
     git::Commit commit =
         view->repo().lookupCommit("99219268e1f838b0da616761fd7a184676965a69");
     QVERIFY(commit.isValid());
-
     rl->setCommit(commit);
-
+    QVERIFY(rl->target().isValid());
     QCOMPARE(rl->currentReference().name(), "Tag");
   }
 
@@ -76,9 +75,8 @@ void TestReferenceList::test() {
     git::Commit commit =
         view->repo().lookupCommit("79f4bee33320391fa99a8ef3f504b2ba229a8181");
     QVERIFY(commit.isValid());
-
     rl->setCommit(commit);
-
+    QVERIFY(rl->target().isValid());
     QCOMPARE(rl->currentReference().name(), "origin/Branch");
   }
 
@@ -88,6 +86,7 @@ void TestReferenceList::test() {
         view->repo().lookupCommit("54ecb63965b50287ceb73095c72f344c1611d94a");
     QVERIFY(commit.isValid());
     rl->setCommit(commit);
+    QVERIFY(rl->target().isValid());
     QCOMPARE(rl->currentReference().name(), "main");
   }
 
@@ -96,9 +95,8 @@ void TestReferenceList::test() {
     git::Commit commit =
         view->repo().lookupCommit("63460da2b069250c34506249516029f2ba7c6057");
     QVERIFY(commit.isValid());
-
     rl->setCommit(commit);
-
+    QVERIFY(rl->target().isValid());
     QCOMPARE(rl->currentReference().name(), "");
   }
 }
