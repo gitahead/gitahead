@@ -41,6 +41,7 @@ class PathspecWidget;
 class ReferenceWidget;
 class RemoteCallbacks;
 class ToolBar;
+class AmendDialog;
 
 namespace git {
 class Result;
@@ -394,6 +395,9 @@ private:
                             bool recursive, git_reset_t type);
 
   bool checkForConflicts(LogEntry *parent, const QString &action);
+
+  git::Signature getAuthorSignature(const AmendDialog* d);
+  git::Signature getCommitterSignature(const AmendDialog* d);
 
   git::Repository mRepo;
 
