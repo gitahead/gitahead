@@ -2578,11 +2578,11 @@ void RepoView::openTerminal() {
       for (const char **candidate = candidates; *candidate; ++candidate) {
         int res = QProcess::execute(
             "osascript",
-            {"-e", QString("tell Finder to get application file id \"%1\"")
+            {"-e", QString("tell application \"Finder\" to get application file id \"%1\"")
                        .arg(*candidate)});
 
         if (res == 0) {
-          detectedTerminal = QString("open -b %1").arg(*candidate) + " %1";
+          detectedTerminal = QString("open -b %1").arg(*candidate) + " .";
           break;
         }
       }
