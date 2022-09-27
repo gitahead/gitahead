@@ -36,7 +36,7 @@ public:
 private:
   Signature(git_signature *signature = nullptr, bool owned = false);
   Signature(const QString &name, const QString &email);
-  Signature(const QString &name, const QString &email, const QString &date);
+  Signature(const QString &name, const QString &email, const QDateTime &date);
   operator const git_signature *() const;
 
   QSharedPointer<git_signature> d;

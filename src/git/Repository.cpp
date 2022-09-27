@@ -192,7 +192,7 @@ Signature Repository::signature(const QString &name, const QString &email) {
   return Signature(name, email);
 }
 
-Signature Repository::signature(const QString &name, const QString &email, const QString &date) {
+Signature Repository::signature(const QString &name, const QString &email, const QDateTime &date) {
   return Signature(name, email, date);
 }
 
