@@ -6,7 +6,7 @@ Bug fix and feature release
 * Add support for solving merge conflicts for whole files
 * Solving binary conflicts directly in Gittyup
 * Support rebasing with conflict solving
-* implement amending commits (author, committer, commit message, adding tree to commit)
+* implement amending commits
 * Possibility to init submodules after clone (Settings -> General -> Update submodules after pull and clone)
 
 #### Changed
