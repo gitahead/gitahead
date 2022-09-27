@@ -215,7 +215,7 @@ void _FileWidget::Header::updatePatch(const git::Patch &patch) {
         ours = "A";
 
         if (conflict.theirs.isNull()) {
-          mTheirs->setText(tr("Delete"));
+          mTheirs->setText(tr("Use Theirs: Delete"));
         }
       }
 
@@ -223,7 +223,7 @@ void _FileWidget::Header::updatePatch(const git::Patch &patch) {
         theirs = "A";
 
         if (conflict.ours.isNull()) {
-          mOurs->setText(tr("Delete"));
+          mOurs->setText(tr("Use Ours: Delete"));
         }
       }
 
@@ -234,14 +234,14 @@ void _FileWidget::Header::updatePatch(const git::Patch &patch) {
 
       if (conflict.ours.isNull()) {
         ours = "D";
-        mOurs->setText(tr("Delete"));
+        mOurs->setText(tr("Use Ours: Delete"));
       } else if (conflict.ours != conflict.ancestor) {
         ours = "M";
       }
 
       if (conflict.theirs.isNull()) {
         theirs = "D";
-        mTheirs->setText(tr("Delete"));
+        mTheirs->setText(tr("Use Theirs: Delete"));
       } else if (conflict.theirs != conflict.ancestor) {
         theirs = "M";
       }
