@@ -4,6 +4,7 @@
 class QLineEdit;
 class QTextEdit;
 class QCheckBox;
+class QDateTimeEdit;
 
 class AmendDialog : public QDialog {
 public:
@@ -11,11 +12,11 @@ public:
               const QString &commitMessage, QWidget *parent = nullptr);
   QString authorName() const;
   QString authorEmail() const;
-  QString authorCommitDate() const;
+  QDateTime authorCommitDate() const;
   bool editAuthorCommitDate() const;
   QString committerName() const;
   QString committerEmail() const;
-  QString committerCommitDate() const;
+  QDateTime committerCommitDate() const;
   bool editCommitterCommitDate() const;
   QString commitMessage() const;
   
@@ -23,11 +24,11 @@ public:
 private:
   QLineEdit *m_authorName;
   QLineEdit *m_authorEmail;
-  QLineEdit *m_authorCommitDate;
+  QDateTimeEdit *m_authorCommitDate;
   QCheckBox *m_editAuthorCommitDate;
   QLineEdit *m_committerName;
   QLineEdit *m_committerEmail;
-  QLineEdit *m_committerCommitDate;
+  QDateTimeEdit *m_committerCommitDate;
   QCheckBox *m_editCommitterCommitDate;
   QTextEdit *m_commitMessage;
 };

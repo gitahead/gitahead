@@ -8,6 +8,7 @@
 #include <QCheckBox>
 #include <QHBoxLayout>
 #include <QDateTime>
+#include <QDateTimeEdit>
 
 enum Row {
   AuthorName = 0,
@@ -39,8 +40,7 @@ AmendDialog::AmendDialog(const git::Signature &author,
   auto *lAuthorEmail = new QLabel(tr("Author email:"), this);
   m_authorEmail = new QLineEdit(author.email(), this);
   auto *lAuthorCommitDate = new QLabel(tr("Author commit date:"), this);
-  auto d = author.date().toString(Qt::RFC2822Date);
-  m_authorCommitDate = new QLineEdit(d, this);
+  m_authorCommitDate = new QDateTimeEdit(author.date(), this);
   m_editAuthorCommitDate = new QCheckBox(tr("Manually set author commit date?"), this);
   l->addWidget(lAuthor, Row::AuthorName, 0);
   l->addWidget(m_authorName, Row::AuthorName, 1);
@@ -55,8 +55,7 @@ AmendDialog::AmendDialog(const git::Signature &author,
   auto *lCommitterEmail = new QLabel(tr("Committer email:"), this);
   m_committerEmail = new QLineEdit(committer.email(), this);
   auto *lCommitterCommitDate = new QLabel(tr("Committer commit date:"), this);
-  d = committer.date().toString(Qt::RFC2822Date);
-  m_committerCommitDate = new QLineEdit(d, this);
+  m_committerCommitDate = new QDateTimeEdit(committer.date(), this);
   m_editCommitterCommitDate = new QCheckBox(tr("Manually set committer commit date?"), this);
   l->addWidget(lCommitterName, Row::CommitterName, 0);
   l->addWidget(m_committerName, Row::CommitterName, 1);
@@ -78,7 +77,7 @@ AmendDialog::AmendDialog(const git::Signature &author,
   connect(ok, &QPushButton::clicked, this, &QDialog::accept);
   connect(cancel, &QPushButton::clicked, this, &QDialog::reject);
 
-  auto chbStateChangedHandler = [](QCheckBox* chb, QLineEdit* l){
+  auto chbStateChangedHandler = [](QCheckBox* chb, QWidget* l){
     auto enable = chb->checkState() == Qt::Checked;
     l->setEnabled(enable);
   };
@@ -107,7 +106,7 @@ QString AmendDialog::authorName() const { return m_authorName->text(); }
 
 QString AmendDialog::authorEmail() const { return m_authorEmail->text(); }
 
-QString AmendDialog::authorCommitDate() const { return m_authorCommitDate->text(); }
+QDateTime AmendDialog::authorCommitDate() const { return m_authorCommitDate->dateTime(); }
 
 bool AmendDialog::editAuthorCommitDate() const { return m_editAuthorCommitDate->checkState() == Qt::Checked; }
 
@@ -115,7 +114,7 @@ QString AmendDialog::committerName() const { return m_committerName->text(); }
 
 QString AmendDialog::committerEmail() const { return m_committerEmail->text(); }
 
-QString AmendDialog::committerCommitDate() const { return m_committerCommitDate->text(); }
+QDateTime AmendDialog::committerCommitDate() const { return m_committerCommitDate->dateTime(); }
 
 bool AmendDialog::editCommitterCommitDate() const { return m_editAuthorCommitDate->checkState() == Qt::Checked; }
 
