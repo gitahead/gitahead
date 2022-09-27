@@ -19,7 +19,6 @@ public:
   QDateTime committerCommitDate() const;
   bool editCommitterCommitDate() const;
   QString commitMessage() const;
-  
 
 private:
   QLineEdit *m_authorName;

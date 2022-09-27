@@ -35,16 +35,23 @@ void TestAmend::testAmend() {
   QCOMPARE(c.message(), "changes");
   QCOMPARE(c.author().email(), "martin.marmsoler@gmail.com");
   QCOMPARE(c.author().name(), "Martin Marmsoler");
-  QCOMPARE(c.author().date(), QDateTime::fromString("Sun May 22 10:36:26 2022 +0200", Qt::RFC2822Date));
+  QCOMPARE(
+      c.author().date(),
+      QDateTime::fromString("Sun May 22 10:36:26 2022 +0200", Qt::RFC2822Date));
   QCOMPARE(c.committer().name(), "Martin Marmsoler");
   QCOMPARE(c.committer().email(), "martin.marmsoler@gmail.com");
-  QCOMPARE(c.committer().date(), QDateTime::fromString("Sun May 22 10:36:26 2022 +0200", Qt::RFC2822Date));
+  QCOMPARE(
+      c.committer().date(),
+      QDateTime::fromString("Sun May 22 10:36:26 2022 +0200", Qt::RFC2822Date));
 
   const QString commitMessage = "New commit message";
 
-  auto authorSignature = repo.signature("New Author", "New Author Email", QDateTime::fromString("Sun May 23 10:36:26 2022 +0200", Qt::RFC2822Date));
-  auto committerSignature =
-      repo.signature("New Committer", "New Committer Email", QDateTime::fromString("Sun May 23 11:36:26 2022 +0200", Qt::RFC2822Date));
+  auto authorSignature = repo.signature(
+      "New Author", "New Author Email",
+      QDateTime::fromString("Sun May 23 10:36:26 2022 +0200", Qt::RFC2822Date));
+  auto committerSignature = repo.signature(
+      "New Committer", "New Committer Email",
+      QDateTime::fromString("Sun May 23 11:36:26 2022 +0200", Qt::RFC2822Date));
 
   Tree tree;
   c.amend(authorSignature, committerSignature, commitMessage, tree);
@@ -55,10 +62,14 @@ void TestAmend::testAmend() {
   QCOMPARE(c.message(), "New commit message");
   QCOMPARE(c.author().email(), "New Author Email");
   QCOMPARE(c.author().name(), "New Author");
-  QCOMPARE(c.author().date(), QDateTime::fromString("Sun May 23 10:36:26 2022 +0200", Qt::RFC2822Date));
+  QCOMPARE(
+      c.author().date(),
+      QDateTime::fromString("Sun May 23 10:36:26 2022 +0200", Qt::RFC2822Date));
   QCOMPARE(c.committer().name(), "New Committer");
   QCOMPARE(c.committer().email(), "New Committer Email");
-  QCOMPARE(c.committer().date(), QDateTime::fromString("Sun May 23 11:36:26 2022 +0200", Qt::RFC2822Date));
+  QCOMPARE(
+      c.committer().date(),
+      QDateTime::fromString("Sun May 23 11:36:26 2022 +0200", Qt::RFC2822Date));
 }
 
 void TestAmend::testAmendAddFile() {

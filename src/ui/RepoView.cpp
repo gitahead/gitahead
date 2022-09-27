@@ -2911,17 +2911,19 @@ bool RepoView::checkForConflicts(LogEntry *parent, const QString &action) {
   return true;
 }
 
-git::Signature RepoView::getAuthorSignature(const AmendDialog* d) {
-  if(d->editAuthorCommitDate())
-    return mRepo.signature(d->authorName(), d->authorEmail(), d->authorCommitDate());
-  
+git::Signature RepoView::getAuthorSignature(const AmendDialog *d) {
+  if (d->editAuthorCommitDate())
+    return mRepo.signature(d->authorName(), d->authorEmail(),
+                           d->authorCommitDate());
+
   return mRepo.signature(d->authorName(), d->authorEmail());
 }
 
-git::Signature RepoView::getCommitterSignature(const AmendDialog* d) {
-  if(d->editCommitterCommitDate())
-    return mRepo.signature(d->committerName(), d->committerEmail(), d->committerCommitDate());
-  
+git::Signature RepoView::getCommitterSignature(const AmendDialog *d) {
+  if (d->editCommitterCommitDate())
+    return mRepo.signature(d->committerName(), d->committerEmail(),
+                           d->committerCommitDate());
+
   return mRepo.signature(d->committerName(), d->committerEmail());
 }
 

@@ -396,8 +396,8 @@ private:
 
   bool checkForConflicts(LogEntry *parent, const QString &action);
 
-  git::Signature getAuthorSignature(const AmendDialog* d);
-  git::Signature getCommitterSignature(const AmendDialog* d);
+  git::Signature getAuthorSignature(const AmendDialog *d);
+  git::Signature getCommitterSignature(const AmendDialog *d);
 
   git::Repository mRepo;
 

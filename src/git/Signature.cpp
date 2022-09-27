@@ -24,11 +24,13 @@ Signature::Signature(const QString &name, const QString &email) {
   d = QSharedPointer<git_signature>(signature, git_signature_free);
 }
 
-Signature::Signature(const QString &name, const QString &email, const QDateTime &date) {
+Signature::Signature(const QString &name, const QString &email,
+                     const QDateTime &date) {
   git_signature *signature = nullptr;
 
   auto offset = date.offsetFromUtc() / 60;
-  git_signature_new(&signature, name.toUtf8(), email.toUtf8(), date.toSecsSinceEpoch(), offset);
+  git_signature_new(&signature, name.toUtf8(), email.toUtf8(),
+                    date.toSecsSinceEpoch(), offset);
   d = QSharedPointer<git_signature>(signature, git_signature_free);
 }
 
