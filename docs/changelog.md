@@ -6,6 +6,7 @@ Bug fix release
 * Distinguish between commit author and committer
 * Show image preview also for deleted files
 * Official macOS release
+* Show which kind of merge conflict occurred for each conflict
 
 #### Changed
 * Fix single line staging if not all hunks are loaded
