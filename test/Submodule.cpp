@@ -151,7 +151,7 @@ void TestSubmodule::discardFile() {
   }
 
   {
-    QFile file(repo.workdir().filePath("Gittyup-Test-Module/README.md"));
+    QFile file(repo.workdir().filePath("GittyupTestRepo/README.md"));
     QVERIFY(file.open(QFile::WriteOnly));
     QTextStream(&file) << "Changing content of submodule readme" << endl;
     file.close();
@@ -192,7 +192,7 @@ void TestSubmodule::discardFile() {
     unstagedTree->discard(readme, true);
   }
 
-  QFile file(repo.workdir().filePath("Gittyup-Test-Module/README.md"));
+  QFile file(repo.workdir().filePath("GittyupTestRepo/README.md"));
   QVERIFY(file.open(QFile::ReadOnly));
   QCOMPARE(file.readAll(), "Changing content of submodule readme\n");
 }
