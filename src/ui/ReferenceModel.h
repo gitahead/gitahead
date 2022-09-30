@@ -29,6 +29,7 @@ public:
   struct ReferenceList {
     QString name;
     QList<git::Reference> refs;
+    ReferenceType type;
   };
 
   ReferenceModel(const git::Repository &repo, ReferenceView::Kinds kinds,

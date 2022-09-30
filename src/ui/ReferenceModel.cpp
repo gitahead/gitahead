@@ -111,7 +111,8 @@ void ReferenceModel::update() {
         branches.append(stash);
     }
 
-    mRefs.append({tr("Branches"), branches}); // First element in mRefs
+    mRefs.append({tr("Branches"), branches,
+                  ReferenceType::Branches}); // First element in mRefs
   }
 
   // Add remote branches.
@@ -130,7 +131,8 @@ void ReferenceModel::update() {
     std::sort(remotes.begin(), remotes.end(), refComparator);
     if (mKinds & ReferenceView::InvalidRef)
       remotes.prepend(git::Reference());
-    mRefs.append({tr("Remotes"), remotes}); // Second element in mRefs
+    mRefs.append({tr("Remotes"), remotes,
+                  ReferenceType::Remotes}); // Second element in mRefs
   }
 
   // Add tags.
@@ -145,7 +147,8 @@ void ReferenceModel::update() {
     }
 
     std::sort(tags.begin(), tags.end(), refComparator);
-    mRefs.append({tr("Tags"), tags}); // Third element in mRefs
+    mRefs.append(
+        {tr("Tags"), tags, ReferenceType::Tags}); // Third element in mRefs
   }
 
   endResetModel();
@@ -154,7 +157,7 @@ void ReferenceModel::update() {
 QModelIndex ReferenceModel::firstRemote() {
   // Return first remote if available, otherwise an invalid modelIndex
   for (auto &ref : mRefs) {
-    if (ref.name == tr("Remotes") && ref.refs.count() > 0) {
+    if (ref.type == ReferenceType::Remotes && ref.refs.count() > 0) {
       if (mKinds & ReferenceView::InvalidRef) {
         if (ref.refs.count() > 1) {
           // use the first valid ref after the invalid ref
@@ -171,7 +174,7 @@ QModelIndex ReferenceModel::firstRemote() {
 QModelIndex ReferenceModel::firstBranch() {
   // Return first branch if available, otherwise an invalid modelIndex
   for (auto &ref : mRefs) {
-    if (ref.name == tr("Branches") && ref.refs.count() > 0) {
+    if (ref.type == ReferenceType::Branches && ref.refs.count() > 0) {
       if (mKinds & ReferenceView::InvalidRef) {
         if (ref.refs.count() >
             1) // use the first valid ref after the invalid ref
@@ -188,7 +191,7 @@ QModelIndex ReferenceModel::firstTag() {
   // Return first tag if available, otherwise an invalid modelIndex
 
   for (auto &ref : mRefs) {
-    if (ref.name == tr("Tags") && ref.refs.count() > 0)
+    if (ref.type == ReferenceType::Tags && ref.refs.count() > 0)
       return createIndex(0, 0, ReferenceType::Tags);
   }
   return QModelIndex();

@@ -124,11 +124,11 @@ _FileWidget::Header::Header(const git::Diff &diff, const git::Patch &patch,
   buttons->addWidget(mDisclosureButton);
 
   mSave = new QToolButton(this);
-  mSave->setObjectName("ConflictSave");
+  mSave->setObjectName("ConflictFileSave");
   mSave->setText(HunkWidget::tr("Save"));
 
   mUndo = new QToolButton(this);
-  mUndo->setObjectName("ConflictUndo");
+  mUndo->setObjectName("ConflictFileUndo");
   mUndo->setText(HunkWidget::tr("Undo"));
   connect(mUndo, &QToolButton::clicked, [this] {
     mSave->setVisible(false);
@@ -139,7 +139,7 @@ _FileWidget::Header::Header(const git::Diff &diff, const git::Patch &patch,
   });
 
   mOurs = new QToolButton(this);
-  mOurs->setObjectName("ConflictOurs");
+  mOurs->setObjectName("ConflictFileOurs");
   mOurs->setStyleSheet(
       Application::theme()->diffButtonStyle(Theme::Diff::Ours));
   connect(mOurs, &QToolButton::clicked, [this] {
@@ -151,7 +151,7 @@ _FileWidget::Header::Header(const git::Diff &diff, const git::Patch &patch,
   });
 
   mTheirs = new QToolButton(this);
-  mTheirs->setObjectName("ConflictTheirs");
+  mTheirs->setObjectName("ConflictFileTheirs");
   mTheirs->setStyleSheet(
       Application::theme()->diffButtonStyle(Theme::Diff::Theirs));
   connect(mTheirs, &QToolButton::clicked, [this] {
