@@ -33,6 +33,7 @@ add_library(
   ProgressIndicator.cpp
   ReferenceList.cpp
   ReferenceView.cpp
+  ReferenceModel.cpp
   ReferenceWidget.cpp
   RepoView.cpp
   RemoteCallbacks.cpp

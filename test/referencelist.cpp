@@ -11,6 +11,7 @@
 #include "ui/MainWindow.h"
 #include "ui/RepoView.h"
 #include "ui/ReferenceList.h"
+#include "ui/ReferenceModel.h"
 #include "dialogs/CloneDialog.h"
 #include <QMainWindow>
 
@@ -22,6 +23,7 @@ class TestReferenceList : public QObject {
 
 private slots:
   void test();
+  void testIndexCalculation();
 
 private:
 };
@@ -98,6 +100,120 @@ void TestReferenceList::test() {
     rl->setCommit(commit);
     QVERIFY(rl->target().isValid());
     QCOMPARE(rl->currentReference().name(), "");
+  }
+}
+
+void TestReferenceList::testIndexCalculation() {
+  {
+    const ReferenceView::Kinds kRefKinds =
+        ReferenceView::InvalidRef | ReferenceView::LocalBranches |
+        ReferenceView::RemoteBranches | ReferenceView::Tags;
+    ReferenceModel model(git::Repository(), kRefKinds, false);
+
+    QCOMPARE(model.indexToReferenceType(0),
+             ReferenceModel::ReferenceType::Branches);
+    QCOMPARE(
+        model.referenceTypeToIndex(ReferenceModel::ReferenceType::Branches), 0);
+
+    QCOMPARE(model.indexToReferenceType(1),
+             ReferenceModel::ReferenceType::Remotes);
+    QCOMPARE(model.referenceTypeToIndex(ReferenceModel::ReferenceType::Remotes),
+             1);
+
+    QCOMPARE(model.indexToReferenceType(2),
+             ReferenceModel::ReferenceType::Tags);
+    QCOMPARE(model.referenceTypeToIndex(ReferenceModel::ReferenceType::Tags),
+             2);
+  }
+
+  {
+    // No local branches
+    const ReferenceView::Kinds kRefKinds = ReferenceView::InvalidRef |
+                                           ReferenceView::RemoteBranches |
+                                           ReferenceView::Tags;
+    ReferenceModel model(git::Repository(), kRefKinds, false);
+
+    QCOMPARE(model.indexToReferenceType(0),
+             ReferenceModel::ReferenceType::Remotes);
+    QCOMPARE(model.referenceTypeToIndex(ReferenceModel::ReferenceType::Remotes),
+             0);
+
+    QCOMPARE(model.indexToReferenceType(1),
+             ReferenceModel::ReferenceType::Tags);
+    QCOMPARE(model.referenceTypeToIndex(ReferenceModel::ReferenceType::Tags),
+             1);
+  }
+
+  {
+    // No remote branches
+    const ReferenceView::Kinds kRefKinds = ReferenceView::InvalidRef |
+                                           ReferenceView::LocalBranches |
+                                           ReferenceView::Tags;
+    ReferenceModel model(git::Repository(), kRefKinds, false);
+
+    QCOMPARE(model.indexToReferenceType(0),
+             ReferenceModel::ReferenceType::Branches);
+    QCOMPARE(
+        model.referenceTypeToIndex(ReferenceModel::ReferenceType::Branches), 0);
+
+    QCOMPARE(model.indexToReferenceType(1),
+             ReferenceModel::ReferenceType::Tags);
+    QCOMPARE(model.referenceTypeToIndex(ReferenceModel::ReferenceType::Tags),
+             1);
+  }
+
+  {
+    // No tags
+    const ReferenceView::Kinds kRefKinds = ReferenceView::InvalidRef |
+                                           ReferenceView::LocalBranches |
+                                           ReferenceView::RemoteBranches;
+    ReferenceModel model(git::Repository(), kRefKinds, false);
+
+    QCOMPARE(model.indexToReferenceType(0),
+             ReferenceModel::ReferenceType::Branches);
+    QCOMPARE(
+        model.referenceTypeToIndex(ReferenceModel::ReferenceType::Branches), 0);
+
+    QCOMPARE(model.indexToReferenceType(1),
+             ReferenceModel::ReferenceType::Remotes);
+    QCOMPARE(model.referenceTypeToIndex(ReferenceModel::ReferenceType::Remotes),
+             1);
+  }
+
+  {
+    // Only tags. No local/remote branches
+    const ReferenceView::Kinds kRefKinds =
+        ReferenceView::InvalidRef | ReferenceView::Tags;
+    ReferenceModel model(git::Repository(), kRefKinds, false);
+
+    QCOMPARE(model.indexToReferenceType(0),
+             ReferenceModel::ReferenceType::Tags);
+    QCOMPARE(model.referenceTypeToIndex(ReferenceModel::ReferenceType::Tags),
+             0);
+  }
+
+  {
+    // Only local branches. No tag/remote
+    const ReferenceView::Kinds kRefKinds =
+        ReferenceView::InvalidRef | ReferenceView::LocalBranches;
+    ReferenceModel model(git::Repository(), kRefKinds, false);
+
+    QCOMPARE(model.indexToReferenceType(0),
+             ReferenceModel::ReferenceType::Branches);
+    QCOMPARE(
+        model.referenceTypeToIndex(ReferenceModel::ReferenceType::Branches), 0);
+  }
+
+  {
+    // Only remote branches. No tag/local
+    const ReferenceView::Kinds kRefKinds =
+        ReferenceView::InvalidRef | ReferenceView::RemoteBranches;
+    ReferenceModel model(git::Repository(), kRefKinds, false);
+
+    QCOMPARE(model.indexToReferenceType(0),
+             ReferenceModel::ReferenceType::Remotes);
+    QCOMPARE(model.referenceTypeToIndex(ReferenceModel::ReferenceType::Remotes),
+             0);
   }
 }
 
