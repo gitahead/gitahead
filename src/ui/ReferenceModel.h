@@ -19,7 +19,12 @@ class ReferenceModel : public QAbstractItemModel {
   Q_OBJECT
 
 public:
-  enum ReferenceType { HEADER = 0, Branches = 1, Remotes = 2, Tags = 3 };
+  enum ReferenceType {
+    COMBOBOX_HEADER = 0,
+    Branches = 1,
+    Remotes = 2,
+    Tags = 3
+  };
 
   struct ReferenceList {
     QString name;

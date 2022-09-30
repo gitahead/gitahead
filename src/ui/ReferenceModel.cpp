@@ -9,7 +9,6 @@
 
 namespace {
 const QString kNowrapFmt = "<span style='white-space: nowrap'>%1</span>";
-} // namespace
 
 bool refComparator(const git::Reference &lhs, const git::Reference &rhs) {
   git::Commit lhsCommit = lhs.target();
@@ -17,6 +16,7 @@ bool refComparator(const git::Reference &lhs, const git::Reference &rhs) {
   return (lhsCommit.isValid() && rhsCommit.isValid() &&
           lhsCommit.committer().date() > rhsCommit.committer().date());
 }
+} // namespace
 
 ReferenceModel::ReferenceModel(const git::Repository &repo,
                                ReferenceView::Kinds kinds,
@@ -212,7 +212,7 @@ QModelIndex ReferenceModel::parent(const QModelIndex &index) const {
   // The header sections (Branches, Remotes, Tags) (Elements of mRefs)
   // do not have any parents, only the refs in each mRefs element
   const quintptr id = index.internalId();
-  if (id == HEADER)
+  if (id == COMBOBOX_HEADER)
     return QModelIndex();
   const auto row = referenceTypeToIndex(static_cast<ReferenceType>(id));
   return createIndex(row, 0);
@@ -222,7 +222,7 @@ int ReferenceModel::rowCount(const QModelIndex &parent) const {
   if (!parent.isValid())
     return mRefs.size();
 
-  if (parent.internalId() != HEADER)
+  if (parent.internalId() != COMBOBOX_HEADER)
     return 0; // refs it self do not have childs
 
   return mRefs.at(parent.row()).refs.size();
@@ -234,7 +234,7 @@ QVariant ReferenceModel::data(const QModelIndex &index, int role) const {
   // kinds
   int row = index.row();
   quintptr id = index.internalId();
-  if (id == HEADER)
+  if (id == COMBOBOX_HEADER)
     return (role == Qt::DisplayRole) ? mRefs.at(row).name : QVariant();
 
   auto refType = static_cast<ReferenceType>(id);
