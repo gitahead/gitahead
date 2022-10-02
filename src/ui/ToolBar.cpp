@@ -17,6 +17,7 @@
 #include "git/Branch.h"
 #include "git/Commit.h"
 #include "ui/HotkeyManager.h"
+#include "dialogs/SettingsDialog.h"
 #include <QAction>
 #include <QButtonGroup>
 #include <QHBoxLayout>
@@ -729,6 +730,14 @@ ToolBar::ToolBar(MainWindow *parent) : QToolBar(parent) {
   addWidget(sidebarButton);
   connect(sidebarButton, &QAbstractButton::clicked,
           [parent] { parent->setSideBarVisible(!parent->isSideBarVisible()); });
+
+  addWidget(new Spacer(4, this));
+
+  SettingsButton *globalSettingsButton = new SettingsButton(this);
+  globalSettingsButton->setToolTip(tr("Global Settings"));
+  addWidget(globalSettingsButton);
+  connect(globalSettingsButton, &Button::clicked,
+          [] { SettingsDialog::openSharedInstance(); });
 
   addWidget(new Spacer(4, this));
 

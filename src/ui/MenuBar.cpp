@@ -243,6 +243,11 @@ static Hotkey squashHotkey = HotkeyManager::registerHotkey(
     "Ctrl+Shift+Q", "tools/preferences", "Tools/Options");
 
 MenuBar::MenuBar(QWidget *parent) : QMenuBar(parent) {
+
+  Settings *settings = Settings::instance();
+
+  setHidden(settings->value("window/view/menuBarHidden").toBool());
+
   // File
   QMenu *file = addMenu(tr("File"));
 
