@@ -97,7 +97,6 @@ MainWindow::MainWindow(const git::Repository &repo, QWidget *parent,
   mFullPath = Settings::instance()->value("window/path/full").toBool();
   connect(Settings::instance(), &Settings::settingsChanged, this,
           [this](bool refresh) {
-
             Settings *settings = Settings::instance();
 
             bool menuBarHidden =
@@ -105,8 +104,7 @@ MainWindow::MainWindow(const git::Repository &repo, QWidget *parent,
             if (mMenuBar->isHidden() != menuBarHidden)
               mMenuBar->setHidden(menuBarHidden);
 
-            bool fullPath =
-                settings->value("window/path/full").toBool();
+            bool fullPath = settings->value("window/path/full").toBool();
             if (mFullPath != fullPath) {
               mFullPath = fullPath;
               updateWindowTitle();
