@@ -10,6 +10,7 @@
 #ifndef TOOLBAR_H
 #define TOOLBAR_H
 
+#include <QAction>
 #include <QToolBar>
 
 class History;
@@ -58,12 +59,13 @@ private:
 
   QToolButton *mTerminalButton;
   QToolButton *mFileManagerButton;
-  QToolButton *mConfigButton;
   QToolButton *mLogButton;
   const QButtonGroup *mModeGroup;
 
   QToolButton *mStarButton;
   SearchField *mSearchField;
+
+  QAction *mRepoConfigAction;
 
   friend class MainWindow;
   friend class RepoView;
