@@ -8,6 +8,7 @@ Bug fix and feature release
 * Support rebasing with conflict solving
 * implement amending commits
 * Possibility to init submodules after clone (Settings -> General -> Update submodules after pull and clone)
+* Hiding menu bar (Application Settings -> Window -> Hide Menubar)
 
 #### Changed
 * Fix Segmentation fault when using space to stage files
