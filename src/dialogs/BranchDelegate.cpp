@@ -22,7 +22,7 @@ QWidget *BranchDelegate::createEditor(QWidget *parent,
     return QStyledItemDelegate::createEditor(parent, option, index);
 
   auto kinds = ReferenceView::InvalidRef | ReferenceView::RemoteBranches;
-  ReferenceList *refs = new ReferenceList(mRepo, kinds, parent);
+  ReferenceList *refs = new ReferenceList(mRepo, kinds, false, parent);
   return refs;
 }
 

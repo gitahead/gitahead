@@ -21,7 +21,7 @@ CheckoutDialog::CheckoutDialog(const git::Repository &repo,
     : QDialog(parent) {
   setAttribute(Qt::WA_DeleteOnClose);
 
-  mRefs = new ReferenceList(repo, ReferenceView::AllRefs, this);
+  mRefs = new ReferenceList(repo, ReferenceView::AllRefs, false, this);
   connect(mRefs, &ReferenceList::referenceSelected, this,
           &CheckoutDialog::update);
 
