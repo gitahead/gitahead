@@ -21,7 +21,7 @@ class ReferenceList : public QComboBox {
 public:
   ReferenceList(const git::Repository &repo,
                 ReferenceView::Kinds kinds = ReferenceView::AllRefs,
-                bool filterCurrentCommit = false, QWidget *parent = nullptr);
+                QWidget *parent = nullptr);
 
   git::Commit target() const;
   git::Reference currentReference() const;

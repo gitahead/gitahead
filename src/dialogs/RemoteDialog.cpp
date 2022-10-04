@@ -61,7 +61,7 @@ RemoteDialog::RemoteDialog(Kind kind, RepoView *parent) : QDialog(parent) {
 
   if (kind == Push) {
     auto kinds = ReferenceView::LocalBranches | ReferenceView::Tags;
-    mRefs = new ReferenceList(repo, kinds, false, this);
+    mRefs = new ReferenceList(repo, kinds, this);
     mSetUpstream = new QCheckBox(tr("Set upstream"), this);
     mForce = new QCheckBox(tr("Force"), this);
 

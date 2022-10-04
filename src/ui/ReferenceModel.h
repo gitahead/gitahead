@@ -33,7 +33,7 @@ public:
   };
 
   ReferenceModel(const git::Repository &repo, ReferenceView::Kinds kinds,
-                 bool filterCurrentCommit = false, QObject *parent = nullptr);
+                 QObject *parent = nullptr);
   int referenceTypeToIndex(ReferenceType t) const;
   int indexToReferenceType(int index) const;
   void setCommit(const git::Commit &commit);
@@ -54,8 +54,6 @@ public:
 private:
   git::Repository mRepo;
   ReferenceView::Kinds mKinds;
-  bool mFilterCurrentCommit; // Filter out all branches, remotes, tags which are
-                             // related to the commit mCommit
   QList<ReferenceList> mRefs;
   git::Commit mCommit;
 };

@@ -34,14 +34,13 @@ QModelIndex findReference(QAbstractItemModel *model,
 } // namespace
 
 ReferenceList::ReferenceList(const git::Repository &repo,
-                             ReferenceView::Kinds kinds,
-                             bool filterCurrentCommit, QWidget *parent)
+                             ReferenceView::Kinds kinds, QWidget *parent)
     : QComboBox(parent), mRepo(repo) {
   setStyleSheet(kStyleSheet);
   setMaxVisibleItems(0); // disable
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-  mView = new ReferenceView(repo, kinds, true, filterCurrentCommit, this);
+  mView = new ReferenceView(repo, kinds, true, this);
   QAbstractItemModel *model = mView->model();
   setModel(model);
   setView(mView);

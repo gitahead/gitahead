@@ -30,12 +30,11 @@ const ReferenceView::Kinds kRefKinds =
 } // namespace
 
 MergeDialog::MergeDialog(RepoView::MergeFlags flags,
-                         const git::Repository &repo, bool filterCurrentCommit,
-                         QWidget *parent)
+                         const git::Repository &repo, QWidget *parent)
     : QDialog(parent), mRepo(repo) {
   setAttribute(Qt::WA_DeleteOnClose);
 
-  mRefs = new ReferenceList(repo, kRefKinds, filterCurrentCommit, this);
+  mRefs = new ReferenceList(repo, kRefKinds, this);
   connect(mRefs, &ReferenceList::referenceSelected, this, &MergeDialog::update);
 
   auto noff = RepoView::Merge | RepoView::NoFastForward;

@@ -129,7 +129,7 @@ ReferenceWidget::ReferenceWidget(const git::Repository &repo,
   header->addWidget(mLabel);
   header->addWidget(button);
 
-  mView = new ReferenceView(repo, kinds, false, false, this);
+  mView = new ReferenceView(repo, kinds, false, this);
   mView->setSelectionModel(new SelectionModel(mView->model(), repo));
 
   QVBoxLayout *layout = new QVBoxLayout(this);
