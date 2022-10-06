@@ -137,6 +137,9 @@ static Hotkey toggleMaximizeHotkey = HotkeyManager::registerHotkey(
 static Hotkey toggleViewHotkey = HotkeyManager::registerHotkey(
     nullptr, "view/toggleView", "View/Toggle Tree View");
 
+static Hotkey toggleMenuBarHotkey = HotkeyManager::registerHotkey(
+    "Ctrl+B", "view/toggleMenuBar", "View/Toggle Menu Bar");
+
 static Hotkey configureRepositoryHotkey = HotkeyManager::registerHotkey(
     nullptr, "repository/configure", "Repository/Configure Repository");
 
@@ -517,6 +520,14 @@ MenuBar::MenuBar(QWidget *parent) : QMenuBar(parent) {
     RepoView *view = this->view();
     bool diff = (view->viewMode() == RepoView::DoubleTree);
     view->setViewMode(diff ? RepoView::Tree : RepoView::DoubleTree);
+  });
+
+  mToggleMenuBar = viewMenu->addAction(tr("Hide Menu Bar"));
+  toggleMenuBarHotkey.use(mToggleMenuBar);
+  connect(mToggleMenuBar, &QAction::triggered, [this] {
+    setHidden(!isHidden());
+    Settings::instance()->setValue("window/view/menuBarHidden", isHidden());
+    mToggleMenuBar->setText(isHidden() ? tr("Show Menu Bar") : tr("Hide Menu Bar"));
   });
 
   // Repository
@@ -986,6 +997,9 @@ void MenuBar::updateView() {
   mToggleLog->setEnabled(view);
   mToggleView->setEnabled(view);
   mToggleMaximize->setEnabled(view);
+
+  mToggleMenuBar->setText(isHidden() ? tr("Show Menu Bar")
+                                     : tr("Hide Menu Bar"));
 
   if (!view)
     return;

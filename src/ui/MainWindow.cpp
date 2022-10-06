@@ -101,8 +101,10 @@ MainWindow::MainWindow(const git::Repository &repo, QWidget *parent,
 
             bool menuBarHidden =
                 settings->value("window/view/menuBarHidden").toBool();
-            if (mMenuBar->isHidden() != menuBarHidden)
+            if (mMenuBar->isHidden() != menuBarHidden) {
               mMenuBar->setHidden(menuBarHidden);
+              mMenuBar->updateView();
+            }
 
             bool fullPath = settings->value("window/path/full").toBool();
             if (mFullPath != fullPath) {
