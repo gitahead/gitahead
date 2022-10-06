@@ -24,6 +24,10 @@ public:
   SelectedDateTimeType committerCommitDateType() const;
   QString commitMessage() const;
 
+private slots:
+  void authorDateTimeTypeChanged(const SelectedDateTimeType type);
+  void committerDateTimeTypeChanged(const SelectedDateTimeType type);
+
 private:
   QLineEdit *m_authorName;
   QLineEdit *m_authorEmail;

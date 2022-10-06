@@ -61,11 +61,11 @@ private:
 enum Row {
   AuthorName = 0,
   AuthorEmail,
-  AuthorCommitDateType,
+  AuthorDateType,
   AuthorCommitDate,
   CommitterName,
   CommitterEmail,
-  CommitterCommitDateType,
+  CommitterDateType,
   CommitterCommitDate,
   CommitMessage,
 
@@ -92,13 +92,12 @@ AmendDialog::AmendDialog(const git::Signature &author,
   m_authorCommitDateType->setObjectName("AuthorCommitDateType");
   m_authorCommitDate = new QDateTimeEdit(author.date().toLocalTime(), this);
   m_authorCommitDate->setObjectName("authorCommitDate");
-  m_authorCommitDate->setVisible(m_authorCommitDateType->type() ==
-                                 SelectedDateTimeType::Manual);
+  authorDateTimeTypeChanged(m_authorCommitDateType->type());
   l->addWidget(lAuthor, Row::AuthorName, 0);
   l->addWidget(m_authorName, Row::AuthorName, 1);
   l->addWidget(lAuthorEmail, Row::AuthorEmail, 0);
   l->addWidget(m_authorEmail, Row::AuthorEmail, 1);
-  l->addWidget(m_authorCommitDateType, Row::AuthorCommitDateType, 0, 1, 2);
+  l->addWidget(m_authorCommitDateType, Row::AuthorDateType, 0, 1, 2);
   l->addWidget(m_lAuthorCommitDate, Row::AuthorCommitDate, 0);
   l->addWidget(m_authorCommitDate, Row::AuthorCommitDate, 1);
 
@@ -112,14 +111,12 @@ AmendDialog::AmendDialog(const git::Signature &author,
   m_committerCommitDate =
       new QDateTimeEdit(committer.date().toLocalTime(), this);
   m_committerCommitDate->setObjectName("committerCommitDate");
-  m_committerCommitDate->setVisible(m_committerCommitDateType->type() ==
-                                    SelectedDateTimeType::Manual);
+  committerDateTimeTypeChanged(m_committerCommitDateType->type());
   l->addWidget(lCommitterName, Row::CommitterName, 0);
   l->addWidget(m_committerName, Row::CommitterName, 1);
   l->addWidget(lCommitterEmail, Row::CommitterEmail, 0);
   l->addWidget(m_committerEmail, Row::CommitterEmail, 1);
-  l->addWidget(m_committerCommitDateType, Row::CommitterCommitDateType, 0, 1,
-               2);
+  l->addWidget(m_committerCommitDateType, Row::CommitterDateType, 0, 1, 2);
   l->addWidget(m_lCommitterCommitDate, Row::CommitterCommitDate, 0);
   l->addWidget(m_committerCommitDate, Row::CommitterCommitDate, 1);
 
@@ -134,20 +131,10 @@ AmendDialog::AmendDialog(const git::Signature &author,
   connect(ok, &QPushButton::clicked, this, &QDialog::accept);
   connect(cancel, &QPushButton::clicked, this, &QDialog::reject);
 
-  connect(m_authorCommitDateType, &DateSelectionGroupWidget::typeChanged,
-          [this](AmendDialog::SelectedDateTimeType type) {
-            const auto enabled =
-                type == AmendDialog::SelectedDateTimeType::Manual;
-            this->m_lAuthorCommitDate->setVisible(enabled);
-            this->m_authorCommitDate->setVisible(enabled);
-          });
+  connect(m_authorCommitDateType, &DateSelectionGroupWidget::typeChanged, this,
+          &AmendDialog::authorDateTimeTypeChanged);
   connect(m_committerCommitDateType, &DateSelectionGroupWidget::typeChanged,
-          [this](AmendDialog::SelectedDateTimeType type) {
-            const auto enabled =
-                type == AmendDialog::SelectedDateTimeType::Manual;
-            this->m_lCommitterCommitDate->setVisible(enabled);
-            this->m_committerCommitDate->setVisible(enabled);
-          });
+          this, &AmendDialog::committerDateTimeTypeChanged);
 
   auto *hl = new QHBoxLayout();
   hl->addWidget(cancel);
@@ -156,6 +143,19 @@ AmendDialog::AmendDialog(const git::Signature &author,
   l->addLayout(hl, Buttons, 1);
 
   setLayout(l);
+}
+
+void AmendDialog::authorDateTimeTypeChanged(const SelectedDateTimeType type) {
+  const auto enabled = type == AmendDialog::SelectedDateTimeType::Manual;
+  this->m_lAuthorCommitDate->setVisible(enabled);
+  this->m_authorCommitDate->setVisible(enabled);
+}
+
+void AmendDialog::committerDateTimeTypeChanged(
+    const SelectedDateTimeType type) {
+  const auto enabled = type == AmendDialog::SelectedDateTimeType::Manual;
+  this->m_lCommitterCommitDate->setVisible(enabled);
+  this->m_committerCommitDate->setVisible(enabled);
 }
 
 QString AmendDialog::authorName() const { return m_authorName->text(); }
