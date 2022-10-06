@@ -221,13 +221,13 @@ void TestAmend::testAmendDialog() {
       authorCurrent->click();
       QCOMPARE(d.authorCommitDateType(),
                AmendDialog::SelectedDateTimeType::Current);
-      QCOMPARE(authorCommitDate->isEnabled(), false);
+      QCOMPARE(authorCommitDate->isVisible(), false);
 
       // original
       authorOriginal->click();
       QCOMPARE(d.authorCommitDateType(),
                AmendDialog::SelectedDateTimeType::Original);
-      QCOMPARE(authorCommitDate->isEnabled(), false);
+      QCOMPARE(authorCommitDate->isVisible(), false);
       QCOMPARE(d.authorCommitDate(),
                QDateTime::fromString("Sun May 23 10:36:26 2022 +0200",
                                      Qt::RFC2822Date));
@@ -236,7 +236,7 @@ void TestAmend::testAmendDialog() {
       authorManual->click();
       QCOMPARE(d.authorCommitDateType(),
                AmendDialog::SelectedDateTimeType::Manual);
-      QCOMPARE(authorCommitDate->isEnabled(), true);
+      QCOMPARE(authorCommitDate->isVisible(), true);
       QCOMPARE(d.authorCommitDate(),
                QDateTime(QDate(2012, 7, 6), QTime(8, 30, 5)));
     }
@@ -267,13 +267,13 @@ void TestAmend::testAmendDialog() {
       committerCurrent->click();
       QCOMPARE(d.committerCommitDateType(),
                AmendDialog::SelectedDateTimeType::Current);
-      QCOMPARE(committerCommitDate->isEnabled(), false);
+      QCOMPARE(committerCommitDate->isVisible(), false);
 
       // original
       committerOriginal->click();
       QCOMPARE(d.committerCommitDateType(),
                AmendDialog::SelectedDateTimeType::Original);
-      QCOMPARE(committerCommitDate->isEnabled(), false);
+      QCOMPARE(committerCommitDate->isVisible(), false);
       QCOMPARE(d.committerCommitDate(),
                QDateTime::fromString("Sun May 23 11:36:26 2022 +0200",
                                      Qt::RFC2822Date));
@@ -282,7 +282,7 @@ void TestAmend::testAmendDialog() {
       committerManual->click();
       QCOMPARE(d.committerCommitDateType(),
                AmendDialog::SelectedDateTimeType::Manual);
-      QCOMPARE(committerCommitDate->isEnabled(), true);
+      QCOMPARE(committerCommitDate->isVisible(), true);
       QCOMPARE(d.committerCommitDate(),
                QDateTime(QDate(2013, 5, 2), QTime(11, 22, 7)));
     }

@@ -92,7 +92,7 @@ AmendDialog::AmendDialog(const git::Signature &author,
   m_authorCommitDateType->setObjectName("AuthorCommitDateType");
   m_authorCommitDate = new QDateTimeEdit(author.date().toLocalTime(), this);
   m_authorCommitDate->setObjectName("authorCommitDate");
-  m_authorCommitDate->setEnabled(m_authorCommitDateType->type() ==
+  m_authorCommitDate->setVisible(m_authorCommitDateType->type() ==
                                  SelectedDateTimeType::Manual);
   l->addWidget(lAuthor, Row::AuthorName, 0);
   l->addWidget(m_authorName, Row::AuthorName, 1);
@@ -112,7 +112,7 @@ AmendDialog::AmendDialog(const git::Signature &author,
   m_committerCommitDate =
       new QDateTimeEdit(committer.date().toLocalTime(), this);
   m_committerCommitDate->setObjectName("committerCommitDate");
-  m_committerCommitDate->setEnabled(m_committerCommitDateType->type() ==
+  m_committerCommitDate->setVisible(m_committerCommitDateType->type() ==
                                     SelectedDateTimeType::Manual);
   l->addWidget(lCommitterName, Row::CommitterName, 0);
   l->addWidget(m_committerName, Row::CommitterName, 1);
@@ -138,15 +138,15 @@ AmendDialog::AmendDialog(const git::Signature &author,
           [this](AmendDialog::SelectedDateTimeType type) {
             const auto enabled =
                 type == AmendDialog::SelectedDateTimeType::Manual;
-            this->m_lAuthorCommitDate->setEnabled(enabled);
-            this->m_authorCommitDate->setEnabled(enabled);
+            this->m_lAuthorCommitDate->setVisible(enabled);
+            this->m_authorCommitDate->setVisible(enabled);
           });
   connect(m_committerCommitDateType, &DateSelectionGroupWidget::typeChanged,
           [this](AmendDialog::SelectedDateTimeType type) {
             const auto enabled =
                 type == AmendDialog::SelectedDateTimeType::Manual;
-            this->m_lCommitterCommitDate->setEnabled(enabled);
-            this->m_committerCommitDate->setEnabled(enabled);
+            this->m_lCommitterCommitDate->setVisible(enabled);
+            this->m_committerCommitDate->setVisible(enabled);
           });
 
   auto *hl = new QHBoxLayout();
