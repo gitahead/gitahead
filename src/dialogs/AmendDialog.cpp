@@ -29,11 +29,11 @@ public:
     current->setChecked(true);
 
     connect(current, &QRadioButton::clicked,
-            [this]() { emit this->typeChanged(this->type()); });
+            [this]() { emit typeChanged(type()); });
     connect(manual, &QRadioButton::clicked,
-            [this]() { emit this->typeChanged(this->type()); });
+            [this]() { emit typeChanged(type()); });
     connect(original, &QRadioButton::clicked,
-            [this]() { emit this->typeChanged(this->type()); });
+            [this]() { emit typeChanged(type()); });
 
     l->addWidget(current);
     l->addWidget(manual);
