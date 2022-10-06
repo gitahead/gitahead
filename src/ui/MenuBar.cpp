@@ -1160,3 +1160,7 @@ MenuBar *MenuBar::instance(QWidget *widget) {
 }
 
 bool MenuBar::isMaximized() { return mToggleMaximize->isActive(); }
+
+void MenuBar::registerActions(QWidget *parent) const {
+  parent->addActions(actions());
+}

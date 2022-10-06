@@ -72,6 +72,7 @@ MainWindow::MainWindow(const git::Repository &repo, QWidget *parent,
 
   // Create new menu bar for this window if there isn't a shared one.
   mMenuBar = MenuBar::instance(this);
+  mMenuBar->registerActions(this);
 
   // Create tool bar.
   mToolBar = new ToolBar(this);
