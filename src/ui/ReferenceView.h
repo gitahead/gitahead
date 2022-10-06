@@ -38,8 +38,7 @@ public:
   Q_DECLARE_FLAGS(Kinds, Kind);
 
   ReferenceView(const git::Repository &repo, Kinds kinds = AllRefs,
-                bool popup = false, bool filterCurrentCommit = false,
-                QWidget *parent = nullptr);
+                bool popup = false, QWidget *parent = nullptr);
 
   bool isPopup() const { return mPopup; }
   void resetTabIndex();

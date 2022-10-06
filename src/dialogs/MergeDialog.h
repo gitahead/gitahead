@@ -27,7 +27,7 @@ class MergeDialog : public QDialog {
 
 public:
   MergeDialog(RepoView::MergeFlags flags, const git::Repository &repo,
-              bool filterCurrentCommit = false, QWidget *parent = nullptr);
+              QWidget *parent = nullptr);
 
   git::Commit target() const;
   git::Reference reference() const;

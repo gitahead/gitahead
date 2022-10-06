@@ -19,10 +19,8 @@ bool refComparator(const git::Reference &lhs, const git::Reference &rhs) {
 } // namespace
 
 ReferenceModel::ReferenceModel(const git::Repository &repo,
-                               ReferenceView::Kinds kinds,
-                               bool filterCurrentCommit, QObject *parent)
-    : QAbstractItemModel(parent), mRepo(repo), mKinds(kinds),
-      mFilterCurrentCommit(filterCurrentCommit) {
+                               ReferenceView::Kinds kinds, QObject *parent)
+    : QAbstractItemModel(parent), mRepo(repo), mKinds(kinds) {
   if (repo.isValid()) {
     git::RepositoryNotifier *notifier = repo.notifier();
     connect(notifier, &git::RepositoryNotifier::referenceAdded, this,
@@ -79,7 +77,7 @@ void ReferenceModel::update() {
   if (mKinds & ReferenceView::DetachedHead) {
     git::Reference head = mRepo.head();
     if (head.isValid() && !head.isBranch()) {
-      if (!mFilterCurrentCommit || head.annotatedCommit().commit() == mCommit) {
+      if (!mCommit.isValid() || head.annotatedCommit().commit() == mCommit) {
         detachedHead = head;
       }
     }
@@ -93,7 +91,7 @@ void ReferenceModel::update() {
       const bool branchOnCommit =
           !mCommit.isValid() || branch.annotatedCommit().commit() == mCommit;
       if ((!(mKinds & ReferenceView::ExcludeHead) || !branch.isHead()) &&
-          (branchOnCommit || !mFilterCurrentCommit))
+          (branchOnCommit || !mCommit.isValid()))
         branches.append(branch);
     }
 
@@ -124,7 +122,7 @@ void ReferenceModel::update() {
       const bool remoteOnCommit =
           !mCommit.isValid() || branch.annotatedCommit().commit() == mCommit;
       if (!branch.name().endsWith("HEAD") &&
-          (remoteOnCommit || !mFilterCurrentCommit))
+          (remoteOnCommit || !mCommit.isValid()))
         remotes.append(branch);
     }
 
@@ -142,7 +140,7 @@ void ReferenceModel::update() {
       qDebug() << "ReferenceView: Tags: " << tag.name();
       const bool tagOnCommit =
           !mCommit.isValid() || tag.annotatedCommit().commit() == mCommit;
-      if (tagOnCommit || !mFilterCurrentCommit)
+      if (tagOnCommit || !mCommit.isValid())
         tags.append(tag);
     }
 
