@@ -2912,7 +2912,7 @@ bool RepoView::checkForConflicts(LogEntry *parent, const QString &action) {
 }
 
 git::Signature RepoView::getAuthorSignature(const AmendDialog *d) {
-  if (d->editAuthorCommitDate())
+  if (d->authorCommitDateType() != AmendDialog::SelectedDateTimeType::Current)
     return mRepo.signature(d->authorName(), d->authorEmail(),
                            d->authorCommitDate());
 
@@ -2920,7 +2920,8 @@ git::Signature RepoView::getAuthorSignature(const AmendDialog *d) {
 }
 
 git::Signature RepoView::getCommitterSignature(const AmendDialog *d) {
-  if (d->editCommitterCommitDate())
+  if (d->committerCommitDateType() !=
+      AmendDialog::SelectedDateTimeType::Current)
     return mRepo.signature(d->committerName(), d->committerEmail(),
                            d->committerCommitDate());
 

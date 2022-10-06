@@ -7,8 +7,11 @@
 #include "ui/DoubleTreeWidget.h"
 #include "ui/RepoView.h"
 #include "ui/TreeView.h"
+#include "dialogs/AmendDialog.h"
 
 #include <QTextEdit>
+#include <QRadioButton>
+#include <QDateTimeEdit>
 
 #define INIT_REPO(repoPath, /* bool */ useTempDir)                             \
   QString path = Test::extractRepository(repoPath, useTempDir);                \
@@ -22,6 +25,7 @@ class TestAmend : public QObject {
 private slots:
   void testAmend();
   void testAmendAddFile();
+  void testAmendDialog();
 };
 
 using namespace git;
@@ -176,6 +180,111 @@ void TestAmend::testAmendAddFile() {
       QCOMPARE(c.committer().email(), "New Committer Email");
 
       QCOMPARE(c.blob("test").content(), "Changes made\n");
+    }
+  }
+}
+
+void TestAmend::testAmendDialog() {
+  Test::ScratchRepository repo;
+  auto authorSignature = repo->signature(
+      "New Author", "New Author Email",
+      QDateTime::fromString("Sun May 23 10:36:26 2022 +0200", Qt::RFC2822Date));
+  auto committerSignature = repo->signature(
+      "New Committer", "New Committer Email",
+      QDateTime::fromString("Sun May 23 11:36:26 2022 +0200", Qt::RFC2822Date));
+
+  {
+    AmendDialog d(authorSignature, committerSignature, "Test commit message");
+
+    {
+      const auto *authorCommitDateTimeTypeSelection =
+          d.findChild<QWidget *>("AuthorCommitDateType");
+      QVERIFY(authorCommitDateTimeTypeSelection);
+      auto *authorCurrent =
+          authorCommitDateTimeTypeSelection->findChild<QRadioButton *>(
+              "Current");
+      QVERIFY(authorCurrent);
+      auto *authorOriginal =
+          authorCommitDateTimeTypeSelection->findChild<QRadioButton *>(
+              "Original");
+      QVERIFY(authorOriginal);
+      auto *authorManual =
+          authorCommitDateTimeTypeSelection->findChild<QRadioButton *>(
+              "Manual");
+      QVERIFY(authorManual);
+      auto *authorCommitDate = d.findChild<QDateTimeEdit *>("authorCommitDate");
+      QVERIFY(authorCommitDate);
+      authorCommitDate->setDateTime(
+          QDateTime(QDate(2012, 7, 6), QTime(8, 30, 5)));
+
+      // current
+      authorCurrent->click();
+      QCOMPARE(d.authorCommitDateType(),
+               AmendDialog::SelectedDateTimeType::Current);
+      QCOMPARE(authorCommitDate->isEnabled(), false);
+
+      // original
+      authorOriginal->click();
+      QCOMPARE(d.authorCommitDateType(),
+               AmendDialog::SelectedDateTimeType::Original);
+      QCOMPARE(authorCommitDate->isEnabled(), false);
+      QCOMPARE(d.authorCommitDate(),
+               QDateTime::fromString("Sun May 23 10:36:26 2022 +0200",
+                                     Qt::RFC2822Date));
+
+      // manual
+      authorManual->click();
+      QCOMPARE(d.authorCommitDateType(),
+               AmendDialog::SelectedDateTimeType::Manual);
+      QCOMPARE(authorCommitDate->isEnabled(), true);
+      QCOMPARE(d.authorCommitDate(),
+               QDateTime(QDate(2012, 7, 6), QTime(8, 30, 5)));
+    }
+
+    {
+      const auto *committerCommitDateTimeTypeSelection =
+          d.findChild<QWidget *>("CommitterCommitDateType");
+      QVERIFY(committerCommitDateTimeTypeSelection);
+      auto *committerCurrent =
+          committerCommitDateTimeTypeSelection->findChild<QRadioButton *>(
+              "Current");
+      QVERIFY(committerCurrent);
+      auto *committerOriginal =
+          committerCommitDateTimeTypeSelection->findChild<QRadioButton *>(
+              "Original");
+      QVERIFY(committerOriginal);
+      auto *committerManual =
+          committerCommitDateTimeTypeSelection->findChild<QRadioButton *>(
+              "Manual");
+      QVERIFY(committerManual);
+      auto *committerCommitDate =
+          d.findChild<QDateTimeEdit *>("committerCommitDate");
+      QVERIFY(committerCommitDate);
+      committerCommitDate->setDateTime(
+          QDateTime(QDate(2013, 5, 2), QTime(11, 22, 7)));
+
+      // current
+      committerCurrent->click();
+      QCOMPARE(d.committerCommitDateType(),
+               AmendDialog::SelectedDateTimeType::Current);
+      QCOMPARE(committerCommitDate->isEnabled(), false);
+
+      // original
+      committerOriginal->click();
+      QCOMPARE(d.committerCommitDateType(),
+               AmendDialog::SelectedDateTimeType::Original);
+      QCOMPARE(committerCommitDate->isEnabled(), false);
+      QCOMPARE(d.committerCommitDate(),
+               QDateTime::fromString("Sun May 23 11:36:26 2022 +0200",
+                                     Qt::RFC2822Date));
+
+      // manual
+      committerManual->click();
+      QCOMPARE(d.committerCommitDateType(),
+               AmendDialog::SelectedDateTimeType::Manual);
+      QCOMPARE(committerCommitDate->isEnabled(), true);
+      QCOMPARE(d.committerCommitDate(),
+               QDateTime(QDate(2013, 5, 2), QTime(11, 22, 7)));
     }
   }
 }

@@ -5,29 +5,38 @@ class QLineEdit;
 class QTextEdit;
 class QCheckBox;
 class QDateTimeEdit;
+class DateSelectionGroupWidget;
+class QLabel;
 
 class AmendDialog : public QDialog {
 public:
+  enum class SelectedDateTimeType { Current, Manual, Original };
+
   AmendDialog(const git::Signature &author, const git::Signature &committer,
               const QString &commitMessage, QWidget *parent = nullptr);
   QString authorName() const;
   QString authorEmail() const;
   QDateTime authorCommitDate() const;
-  bool editAuthorCommitDate() const;
+  SelectedDateTimeType authorCommitDateType() const;
   QString committerName() const;
   QString committerEmail() const;
   QDateTime committerCommitDate() const;
-  bool editCommitterCommitDate() const;
+  SelectedDateTimeType committerCommitDateType() const;
   QString commitMessage() const;
 
 private:
   QLineEdit *m_authorName;
   QLineEdit *m_authorEmail;
   QDateTimeEdit *m_authorCommitDate;
-  QCheckBox *m_editAuthorCommitDate;
+  QLabel *m_lAuthorCommitDate;
+  DateSelectionGroupWidget *m_authorCommitDateType;
   QLineEdit *m_committerName;
   QLineEdit *m_committerEmail;
   QDateTimeEdit *m_committerCommitDate;
-  QCheckBox *m_editCommitterCommitDate;
+  QLabel *m_lCommitterCommitDate;
+  DateSelectionGroupWidget *m_committerCommitDateType;
   QTextEdit *m_commitMessage;
+
+  git::Signature m_author;
+  git::Signature m_committer;
 };
