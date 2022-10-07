@@ -27,6 +27,8 @@
 #include <QTime>
 #include <QUrl>
 #include <QVector>
+#include <functional>
+#include <cstdint>
 
 namespace git {
 
@@ -59,14 +61,33 @@ QString keyFile(const QString &path = QString()) {
   return QString();
 }
 
-QString hostName(const QString &url) {
-  QUrl canonical(url);
-  if (canonical.scheme() == "ssh")
-    return canonical.host();
+static QRegularExpression urlRegex{"^[0-9a-zA-Z+-]+://"};
+static QRegularExpression sshRegex{"^(([^:@/\\\\]+)@)?([0-9a-zA-Z+.-]+):(.*)$"};
+QUrl parseUrl(const QString &url) {
+  QUrl res;
 
-  int end = url.indexOf(':');
-  int begin = url.indexOf('@') + 1;
-  return url.mid(begin, end - begin);
+  if (urlRegex.match(url).hasMatch()) {
+    res = QUrl(url);
+  } else {
+    QRegularExpressionMatch matches = sshRegex.match(url);
+    if (matches.hasMatch()) {
+      res.setScheme("ssh");
+
+      res.setUserName(matches.captured(2));
+      res.setHost(matches.captured(3));
+
+      QString path = matches.captured(4);
+      if (!path.startsWith('/')) {
+        path.push_front('/');
+      }
+
+      res.setPath(path);
+    } else {
+      res = QUrl::fromLocalFile(url);
+    }
+  }
+
+  return res;
 }
 
 int pack_progress(int stage, unsigned int current, unsigned int total,
@@ -116,7 +137,9 @@ public:
   struct Host {
     QString file;
     QString hostName;
+    QString user;
     QStringList patterns;
+    uint16_t port = 0;
   };
 
   ConfigFile(const QString &path) {
@@ -141,11 +164,40 @@ public:
 
   bool isValid() const { return mValid; }
 
-  QList<Host> parse() {
+  void apply(const QString &hostname,
+             std::function<void(const Host &)> handler) const {
+    for (Host host : parse()) {
+      if (host.patterns.empty()) {
+        handler(host);
+      } else {
+        bool matched = false;
+
+        for (const QString &pattern : host.patterns) {
+          QRegExp re(pattern, Qt::CaseSensitive, QRegExp::Wildcard);
+          if (re.exactMatch(hostname)) {
+            handler(host);
+            matched = true;
+            break;
+          }
+        }
+
+        if (matched) {
+          break;
+        }
+      }
+    }
+  }
+
+private:
+  bool mValid = false;
+  QScopedPointer<QFile> mFile;
+
+  QList<Host> parse() const {
     Q_ASSERT(isValid());
 
     QList<Host> hosts;
     QTextStream in(mFile.data());
+    hosts.append(Host{});
     while (!in.atEnd()) {
       // Skip comments and empty lines.
       QString line = in.readLine().trimmed();
@@ -157,27 +209,34 @@ public:
       QRegularExpression re("(\\s+|\\s*=\\s*)");
       QStringList words = line.split(re);
       QString keyword = words.takeFirst().toLower();
-      if (keyword == "match") {
-        hosts.append(Host());
-      } else if (keyword == "host") {
-        hosts.append({QString(), QString(), words});
+      if (keyword == "host") {
+        Host host;
+        host.patterns = words;
+        hosts.append(host);
       } else if (keyword == "hostname") {
         if (!hosts.isEmpty() && !words.isEmpty())
           hosts.last().hostName = words.first();
+      } else if (keyword == "user") {
+        if (!hosts.isEmpty() && !words.isEmpty())
+          hosts.last().user = words.first();
       } else if (keyword == "identityfile") {
         if (!hosts.isEmpty() && !words.isEmpty()) {
           QString file = words.first();
           hosts.last().file = file.replace('~', QDir::homePath());
+        }
+      } else if (keyword == "port") {
+        if (!hosts.isEmpty() && !words.isEmpty() && hosts.last().port == 0) {
+          bool ok;
+          uint16_t port = words.first().toUShort(&ok);
+          if (ok) {
+            hosts.last().port = port;
+          }
         }
       }
     }
 
     return hosts;
   }
-
-private:
-  bool mValid = false;
-  QScopedPointer<QFile> mFile;
 };
 
 } // namespace
@@ -272,23 +331,13 @@ int Remote::Callbacks::credentials(git_credential **out, const char *url,
     ConfigFile configFile(cbs->configFilePath());
     if (configFile.isValid()) {
       // Extract hostname from the unresolved URL.
-      QString name = hostName(cbs->url());
-      foreach (const ConfigFile::Host &host, configFile.parse()) {
-        // Skip entries that don't have an identity file or
-        if (host.file.isEmpty() || cbs->mKeyFiles.contains(host.file))
-          continue;
-
-        foreach (const QString &pattern, host.patterns) {
-          QRegExp re(pattern, Qt::CaseSensitive, QRegExp::Wildcard);
-          if (re.exactMatch(name)) {
-            key = host.file;
-            break;
-          }
-        }
-
-        if (!key.isEmpty())
-          break;
-      }
+      configFile.apply(parseUrl(cbs->url()).host(),
+                       [&key, cbs](const ConfigFile::Host &host) {
+                         if (!host.file.isEmpty() &&
+                             !cbs->mKeyFiles.contains(host.file)) {
+                           key = host.file;
+                         }
+                       });
     }
 
     if (key.isEmpty()) {
@@ -414,53 +463,34 @@ int Remote::Callbacks::url(git_buf *out, const char *url, int direction,
   if (!cbs->url(resolved))
     return -1;
 
-  // Extract hostname from SSH URL.
-  QString hostName;
-  int end = resolved.indexOf(':');
-  int begin = resolved.indexOf('@') + 1;
-  bool sshUrl = (begin >= 0 && end >= 0 && begin < end);
-  if (sshUrl) {
-    hostName = resolved.mid(begin, end - begin);
-  } else {
-    QUrl tmp(resolved);
-    if (tmp.scheme() == "ssh")
-      hostName = tmp.host();
-  }
+  QUrl resolvedUrl = parseUrl(resolved);
 
   // Find matching config entry.
-  if (!hostName.isEmpty()) {
+  if (resolvedUrl.scheme().compare("ssh", Qt::CaseInsensitive) == 0) {
     ConfigFile configFile(cbs->configFilePath());
     if (configFile.isValid()) {
-      foreach (const ConfigFile::Host &host, configFile.parse()) {
-        // Skip about entries that don't have a host name.
-        if (host.hostName.isEmpty())
-          continue;
+      bool explicitPort = resolvedUrl.port() >= 0;
+      bool explicitUser = !resolvedUrl.userName().isEmpty();
 
-        QString replacement;
-        foreach (const QString &pattern, host.patterns) {
-          QRegExp re(pattern, Qt::CaseSensitive, QRegExp::Wildcard);
-          if (re.exactMatch(hostName)) {
-            replacement = host.hostName;
-            break;
-          }
-        }
+      configFile.apply(resolvedUrl.host(),
+                       [&resolvedUrl, explicitPort,
+                        explicitUser](const ConfigFile::Host &host) {
+                         if (!host.hostName.isEmpty()) {
+                           resolvedUrl.setHost(host.hostName);
+                         }
 
-        // Replace host name.
-        if (!replacement.isEmpty()) {
-          if (sshUrl) {
-            resolved.replace(begin, end - begin, replacement);
-          } else {
-            QUrl tmp(resolved);
-            tmp.setHost(replacement);
-            resolved = tmp.toString();
-          }
+                         if (host.port != 0 && !explicitPort) {
+                           resolvedUrl.setPort(host.port);
+                         }
 
-          break;
-        }
-      }
+                         if (!host.user.isEmpty() && !explicitUser) {
+                           resolvedUrl.setUserName(host.user);
+                         }
+                       });
     }
   }
 
+  resolved = resolvedUrl.toString();
   git_buf_set(out, resolved.toUtf8(), resolved.length());
   return 0;
 }
