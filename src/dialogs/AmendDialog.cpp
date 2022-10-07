@@ -7,6 +7,7 @@
 #include <QPushButton>
 #include <QCheckBox>
 #include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QDateTimeEdit>
 #include <QRadioButton>
 #include <QGroupBox>
@@ -66,33 +67,41 @@ public:
 
   InfoBox(const QString &title, const git::Signature &signature,
           QWidget *parent = nullptr)
-      : QGroupBox(title, parent), m_signature(signature) {
+      : QGroupBox(title + ":", parent), m_signature(signature) {
 
-    auto *l = new QGridLayout();
+    auto *l = new QVBoxLayout();
 
     auto *lName = new QLabel(tr("Name:"), this);
     m_name = new QLineEdit(signature.name(), this);
+    auto *hName = new QHBoxLayout();
+    hName->addWidget(lName);
+    hName->addWidget(m_name);
 
     auto *lEmail = new QLabel(tr("Email:"), this);
     m_email = new QLineEdit(signature.email(), this);
+    auto *hEmail = new QHBoxLayout();
+    hEmail->addWidget(lEmail);
+    hEmail->addWidget(m_email);
 
     m_commitDateType = new DateSelectionGroupWidget(this);
-    m_commitDateType->setObjectName("CommitDateType");
+    m_commitDateType->setObjectName(title + "CommitDateType");
     m_lCommitDate = new QLabel(tr("Commit date:"), this);
     m_commitDate = new QDateTimeEdit(signature.date().toLocalTime(), this);
-    m_commitDate->setObjectName("CommitDate");
+    m_commitDate->setObjectName(title + "CommitDate");
+    QSizePolicy sp(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    m_commitDate->setSizePolicy(sp);
+    auto *hDate = new QHBoxLayout();
+    hDate->addWidget(m_lCommitDate);
+    hDate->addWidget(m_commitDate);
 
-    dateTimeTypeChanged(m_commitDateType->type());
-
-    l->addWidget(lName, LocalRow::Name, 0);
-    l->addWidget(m_name, LocalRow::Name, 1);
-    l->addWidget(lEmail, LocalRow::Email, 0);
-    l->addWidget(m_email, LocalRow::Email, 1);
-    l->addWidget(m_commitDateType, LocalRow::DateType, 0, 1, 2);
-    l->addWidget(m_lCommitDate, LocalRow::CommitDate, 0);
-    l->addWidget(m_commitDate, LocalRow::CommitDate, 1);
+    l->addLayout(hName);
+    l->addLayout(hEmail);
+    l->addWidget(m_commitDateType);
+    l->addLayout(hDate);
 
     setLayout(l);
+
+    dateTimeTypeChanged(m_commitDateType->type());
 
     connect(m_commitDateType, &DateSelectionGroupWidget::typeChanged, this,
             &InfoBox::dateTimeTypeChanged);
@@ -111,8 +120,8 @@ public:
 private slots:
   void dateTimeTypeChanged(const ContributorInfo::SelectedDateTimeType type) {
     const auto enabled = type == ContributorInfo::SelectedDateTimeType::Manual;
-    this->m_lCommitDate->setVisible(enabled);
-    this->m_commitDate->setVisible(enabled);
+    m_lCommitDate->setVisible(enabled);
+    m_commitDate->setVisible(enabled);
   }
 
 private:
@@ -152,10 +161,10 @@ AmendDialog::AmendDialog(const git::Signature &author,
   // committer
   // message
 
-  m_authorInfo = new InfoBox(tr("Author:"), author, this);
+  m_authorInfo = new InfoBox(tr("Author"), author, this);
   l->addWidget(m_authorInfo, Row::Author, 0, 1, 2);
 
-  m_committerInfo = new InfoBox(tr("Committer:"), committer, this);
+  m_committerInfo = new InfoBox(tr("Committer"), committer, this);
   l->addWidget(m_committerInfo, Row::Committer, 0, 1, 2);
 
   auto *lMessage = new QLabel(tr("Commit Message:"), this);
