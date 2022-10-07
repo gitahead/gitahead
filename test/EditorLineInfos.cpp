@@ -16,9 +16,9 @@
 
 #define INIT_REPO(repoPath, /* bool */ useTempDir)                             \
   QString path = Test::extractRepository(repoPath, useTempDir);                \
-  QVERIFY(!path.isEmpty());                                                    \
+  QVERIFY2(!path.isEmpty(), qPrintable("Extracting repository failed"));       \
   mRepo = git::Repository::open(path);                                         \
-  QVERIFY(mRepo.isValid());                                                    \
+  QVERIFY2(mRepo.isValid(), qPrintable("Unable to open repository"));          \
   MainWindow window(mRepo);                                                    \
   window.show();                                                               \
   QVERIFY(QTest::qWaitForWindowExposed(&window));                              \
@@ -54,24 +54,35 @@
              << BITSET(markers, TextEditor::Marker::StagedMarker) << line;     \
     if (unstagedAddition.indexOf(i) != -1) {                                   \
       /* unstaged addition */                                                  \
-      QVERIFY(BITSET(markers, TextEditor::Marker::Addition));                  \
-      QVERIFY(!BITSET(markers, TextEditor::Marker::StagedMarker));             \
+      QVERIFY2(BITSET(markers, TextEditor::Marker::Addition),                  \
+               qPrintable("Line index: " + QString::number(i)));               \
+      QVERIFY2(!BITSET(markers, TextEditor::Marker::StagedMarker),             \
+               qPrintable("Line index: " + QString::number(i)));               \
     } else if (stagedAddition.indexOf(i) != -1) {                              \
       /* staged addition */                                                    \
-      QVERIFY(BITSET(markers, TextEditor::Marker::Addition));                  \
-      QVERIFY(BITSET(markers, TextEditor::Marker::StagedMarker));              \
+      QVERIFY2(BITSET(markers, TextEditor::Marker::Addition),                  \
+               qPrintable("Line index: " + QString::number(i)));               \
+      QVERIFY2(BITSET(markers, TextEditor::Marker::StagedMarker),              \
+               qPrintable("Line index: " + QString::number(i)));               \
     } else if (unstagedDeletion.indexOf(i) != -1) {                            \
       /* unstaged deletion */                                                  \
-      QVERIFY(BITSET(markers, TextEditor::Marker::Deletion));                  \
-      QVERIFY(!BITSET(markers, TextEditor::Marker::StagedMarker));             \
+      QVERIFY2(BITSET(markers, TextEditor::Marker::Deletion),                  \
+               qPrintable("Line index: " + QString::number(i)));               \
+      QVERIFY2(!BITSET(markers, TextEditor::Marker::StagedMarker),             \
+               qPrintable("Line index: " + QString::number(i)));               \
     } else if (stagedDeletion.indexOf(i) != -1) {                              \
       /* staged deletion */                                                    \
-      QVERIFY(BITSET(markers, TextEditor::Marker::Deletion));                  \
-      QVERIFY(BITSET(markers, TextEditor::Marker::StagedMarker));              \
+      QVERIFY2(BITSET(markers, TextEditor::Marker::Deletion),                  \
+               qPrintable("Line index: " + QString::number(i)));               \
+      QVERIFY2(BITSET(markers, TextEditor::Marker::StagedMarker),              \
+               qPrintable("Line index: " + QString::number(i)));               \
     } else {                                                                   \
-      QVERIFY(!BITSET(markers, TextEditor::Marker::Deletion));                 \
-      QVERIFY(!BITSET(markers, TextEditor::Marker::Addition));                 \
-      QVERIFY(!BITSET(markers, TextEditor::Marker::StagedMarker));             \
+      QVERIFY2(!BITSET(markers, TextEditor::Marker::Deletion),                 \
+               qPrintable("Line index: " + QString::number(i)));               \
+      QVERIFY2(!BITSET(markers, TextEditor::Marker::Addition),                 \
+               qPrintable("Line index: " + QString::number(i)));               \
+      QVERIFY2(!BITSET(markers, TextEditor::Marker::StagedMarker),             \
+               qPrintable("Line index: " + QString::number(i)));               \
     }                                                                          \
   }
 
