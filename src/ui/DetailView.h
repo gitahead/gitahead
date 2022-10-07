@@ -41,6 +41,8 @@ public:
   virtual void findPrevious() {}
 };
 
+class CommitEditor;
+
 class DetailView : public QWidget {
   Q_OBJECT
 
@@ -93,6 +95,7 @@ private:
   QLabel *mAuthorLabel;
   QString mOverrideUser;
   QString mOverrideEmail;
+  CommitEditor *mCommitEditor;
 
   void authorLinkActivated(const QString &href);
   void updateAuthor();
