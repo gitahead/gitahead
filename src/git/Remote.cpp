@@ -62,7 +62,8 @@ QString keyFile(const QString &path = QString()) {
 }
 
 static QRegularExpression urlRegex{"^[0-9a-zA-Z+-]+://"};
-static QRegularExpression sshRegex{"^(([^:@/\\\\]+)@)?([0-9a-zA-Z+.-]+):(.*)$"};
+static QRegularExpression sshRegex{
+    "^(([^:@/\\\\]+)@)?([0-9a-zA-Z+.-]{2,}):(.*)$"};
 QUrl parseUrl(const QString &url) {
   QUrl res;
 
