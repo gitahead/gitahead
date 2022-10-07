@@ -68,7 +68,13 @@ template <typename T> int runTest(int argc, char *argv[]) {
 
   T testObj;
 
-  return QTest::qExec(&testObj, orig_argc, argv);
+  // disable maxwarnings
+  auto newSize = orig_argc + 2;
+  auto new_argv = new char *[newSize];
+  memcpy(new_argv, argv, sizeof(char *) * orig_argc);
+  new_argv[orig_argc] = (char *)"-maxwarnings";
+  new_argv[orig_argc + 1] = (char *)"0";
+  return QTest::qExec(&testObj, newSize, new_argv);
 }
 
 } // namespace Test
