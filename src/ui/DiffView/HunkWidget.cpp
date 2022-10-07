@@ -806,7 +806,8 @@ void HunkWidget::setEditorLineInfos(QList<Line> &lines,
                                     int width) {
   qDebug() << "Patch lines:" << lines.count();
   for (int i = 0; i < lines.count(); i++) {
-    qDebug() << i << ") " << lines[i].print();
+    qDebug() << i << ") " << lines[i].print()
+             << "Content: " << mPatch.lineContent(mIndex, i);
   }
 
   qDebug() << "Staged linesStaged:" << mStaged.count();
