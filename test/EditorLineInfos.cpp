@@ -129,7 +129,7 @@ private slots:
 
 #endif // EXECUTE_ONLY_LAST_TEST == 0
 
-  void deleteCompleteContent();
+  //  void deleteCompleteContent();
 
 private:
   int closeDelay = 0;
@@ -962,22 +962,22 @@ void TestEditorLineInfo::sameContentAddLine() {
 
 #endif
 
-void TestEditorLineInfo::deleteCompleteContent() {
-  INIT_REPO("18_deleteLinesStagedLast.zip", true)
-  QVERIFY(stagedDiff.count() > 0);
-  QVERIFY(diff.count() > 0);
-  git::Patch patch = diff.patch(0);
-  git::Patch stagedPatch = stagedDiff.patch(0);
+// void TestEditorLineInfo::deleteCompleteContent() {
+//   INIT_REPO("18_deleteLinesStagedLast.zip", true)
+//   QVERIFY(stagedDiff.count() > 0);
+//   QVERIFY(diff.count() > 0);
+//   git::Patch patch = diff.patch(0);
+//   git::Patch stagedPatch = stagedDiff.patch(0);
 
-  auto hw = HunkWidget(&diffView, diff, patch, stagedPatch, 0, false, false,
-                       repoView);
-  hw.load(stagedPatch, true);
-  checkEditorMarkers(
-      hw.editor(), QVector<int>({24}), QVector<int>({}),
-      QVector<int>({0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
-                    12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22}),
-      QVector<int>({23}));
-}
+//  auto hw = HunkWidget(&diffView, diff, patch, stagedPatch, 0, false, false,
+//                       repoView);
+//  hw.load(stagedPatch, true);
+//  checkEditorMarkers(
+//      hw.editor(), QVector<int>({24}), QVector<int>({}),
+//      QVector<int>({0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
+//                    12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22}),
+//      QVector<int>({23}));
+//}
 
 void TestEditorLineInfo::cleanupTestCase() { qWait(closeDelay); }
 
