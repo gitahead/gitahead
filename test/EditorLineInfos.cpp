@@ -112,8 +112,11 @@ private slots:
   void windowsCRLF();
 #endif // Q_OS_WIN
 
-#endif // EXECUTE_ONLY_LAST_TEST == 0
   void windowsCRLFMultiHunk();
+#endif // EXECUTE_ONLY_LAST_TEST == 0
+
+  void sameContentRemoveLine();
+  void sameContentAddLine();
 
 private:
   int closeDelay = 0;
@@ -854,8 +857,6 @@ void TestEditorLineInfo::windowsCRLF() {
 }
 #endif // Q_OS_WIN
 
-#endif
-
 void TestEditorLineInfo::windowsCRLFMultiHunk() {
   /*
    * Staging single lines in a file with CRLF instead of single LF for multiple
@@ -915,6 +916,37 @@ void TestEditorLineInfo::windowsCRLFMultiHunk() {
     checkEditorMarkers(hunks.at(1)->editor(), QVector<int>(), QVector<int>(),
                        QVector<int>({3}), QVector<int>({}));
   }
+}
+
+#endif
+
+void TestEditorLineInfo::sameContentRemoveLine() {
+  INIT_REPO("16_LinestagingLineContent.zip", true)
+  QVERIFY(stagedDiff.count() > 0);
+  QVERIFY(diff.count() > 0);
+  git::Patch patch = diff.patch(0);
+  git::Patch stagedPatch = stagedDiff.patch(0);
+
+  auto hw = HunkWidget(&diffView, diff, patch, stagedPatch, 0, false, false,
+                       repoView);
+  hw.load(stagedPatch, true);
+  checkEditorMarkers(hw.editor(), QVector<int>({3, 4, 5, 12, 13, 21, 22}),
+                     QVector<int>(), QVector<int>({11, 19, 20}),
+                     QVector<int>({10}));
+}
+
+void TestEditorLineInfo::sameContentAddLine() {
+  INIT_REPO("17_LinestagingLineContentStageAddedLine.zip", true)
+  QVERIFY(stagedDiff.count() > 0);
+  QVERIFY(diff.count() > 0);
+  git::Patch patch = diff.patch(0);
+  git::Patch stagedPatch = stagedDiff.patch(0);
+
+  auto hw = HunkWidget(&diffView, diff, patch, stagedPatch, 0, false, false,
+                       repoView);
+  hw.load(stagedPatch, true);
+  checkEditorMarkers(hw.editor(), QVector<int>({3, 4}), QVector<int>({9}),
+                     QVector<int>({}), QVector<int>({}));
 }
 
 void TestEditorLineInfo::cleanupTestCase() { qWait(closeDelay); }
