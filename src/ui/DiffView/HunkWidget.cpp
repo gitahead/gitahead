@@ -960,16 +960,16 @@ void HunkWidget::setEditorLineInfos(QList<Line> &lines,
         if (!mPatch.isConflicted() && mStaged.count() > 0 &&
             current_staged_index >= 0 &&
             current_staged_line_idx < mStaged.lineCount(current_staged_index)) {
-          auto line_origin =
+          const auto line_origin =
               mStaged.lineOrigin(current_staged_index, current_staged_line_idx);
-          auto staged_old_file =
+          const auto staged_old_file =
               mStaged.lineNumber(current_staged_index, current_staged_line_idx,
                                  git::Diff::OldFile);
-          auto patch_old_file =
+          const auto patch_old_file =
               mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile);
-          auto stagedContent = mStaged.lineContent(current_staged_index,
+          const auto stagedContent = mStaged.lineContent(current_staged_index,
                                                    current_staged_line_idx);
-          auto patchContent = mPatch.lineContent(mIndex, lidx);
+          const auto patchContent = mPatch.lineContent(mIndex, lidx);
           if (line_origin == '-' && staged_old_file == patch_old_file) {
             assert(mStaged.lineContent(current_staged_index,
                                        current_staged_line_idx) ==
