@@ -217,27 +217,29 @@ void TestAmend::testAmendDialog() {
       authorCommitDate->setDateTime(
           QDateTime(QDate(2012, 7, 6), QTime(8, 30, 5)));
 
+      auto info = d.getInfo();
+
       // current
       authorCurrent->click();
-      QCOMPARE(d.authorCommitDateType(),
-               AmendDialog::SelectedDateTimeType::Current);
+      QCOMPARE(info.authorInfo.commitDateType,
+               ContributorInfo::SelectedDateTimeType::Current);
       QCOMPARE(authorCommitDate->isVisible(), false);
 
       // original
       authorOriginal->click();
-      QCOMPARE(d.authorCommitDateType(),
-               AmendDialog::SelectedDateTimeType::Original);
+      QCOMPARE(info.authorInfo.commitDateType,
+               ContributorInfo::SelectedDateTimeType::Original);
       QCOMPARE(authorCommitDate->isVisible(), false);
-      QCOMPARE(d.authorCommitDate(),
+      QCOMPARE(info.authorInfo.commitDate,
                QDateTime::fromString("Sun May 23 10:36:26 2022 +0200",
                                      Qt::RFC2822Date));
 
       // manual
       authorManual->click();
-      QCOMPARE(d.authorCommitDateType(),
-               AmendDialog::SelectedDateTimeType::Manual);
+      QCOMPARE(info.authorInfo.commitDateType,
+               ContributorInfo::SelectedDateTimeType::Manual);
       QCOMPARE(authorCommitDate->isVisible(), true);
-      QCOMPARE(d.authorCommitDate(),
+      QCOMPARE(info.authorInfo.commitDate,
                QDateTime(QDate(2012, 7, 6), QTime(8, 30, 5)));
     }
 
@@ -263,27 +265,29 @@ void TestAmend::testAmendDialog() {
       committerCommitDate->setDateTime(
           QDateTime(QDate(2013, 5, 2), QTime(11, 22, 7)));
 
+      auto info = d.getInfo();
+
       // current
       committerCurrent->click();
-      QCOMPARE(d.committerCommitDateType(),
-               AmendDialog::SelectedDateTimeType::Current);
+      QCOMPARE(info.committerInfo.commitDateType,
+               ContributorInfo::SelectedDateTimeType::Current);
       QCOMPARE(committerCommitDate->isVisible(), false);
 
       // original
       committerOriginal->click();
-      QCOMPARE(d.committerCommitDateType(),
-               AmendDialog::SelectedDateTimeType::Original);
+      QCOMPARE(info.committerInfo.commitDateType,
+               ContributorInfo::SelectedDateTimeType::Original);
       QCOMPARE(committerCommitDate->isVisible(), false);
-      QCOMPARE(d.committerCommitDate(),
+      QCOMPARE(info.committerInfo.commitDate,
                QDateTime::fromString("Sun May 23 11:36:26 2022 +0200",
                                      Qt::RFC2822Date));
 
       // manual
       committerManual->click();
-      QCOMPARE(d.committerCommitDateType(),
-               AmendDialog::SelectedDateTimeType::Manual);
+      QCOMPARE(info.committerInfo.commitDateType,
+               ContributorInfo::SelectedDateTimeType::Manual);
       QCOMPARE(committerCommitDate->isVisible(), true);
-      QCOMPARE(d.committerCommitDate(),
+      QCOMPARE(info.committerInfo.commitDate,
                QDateTime(QDate(2013, 5, 2), QTime(11, 22, 7)));
     }
   }
