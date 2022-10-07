@@ -647,7 +647,7 @@ void TestEditorLineInfo::multipleHunks_StageSingleLines() {
         QVector<int>({}), QVector<int>({14, 19, 29}), QVector<int>());
 
     // Stage single lines
-    hunks.at(0)->stageSelected(5, 6);
+    hunks.at(0)->stageSelected(5, 6); // stage line 5
   }
 
   Test::refresh(repoView);
@@ -674,7 +674,7 @@ void TestEditorLineInfo::multipleHunks_StageSingleLines() {
         QVector<int>({3, 4, 5, 6, 7, 8, 9, 10, 15, 16, 20, 21, 22, 23, 30}),
         QVector<int>({}), QVector<int>({14, 19, 29}), QVector<int>());
 
-    hunks.at(0)->stageSelected(4, 5);
+    hunks.at(0)->stageSelected(4, 5); // stage line 4
   }
 
   Test::refresh(repoView);
