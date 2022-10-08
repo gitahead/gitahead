@@ -12,6 +12,7 @@
 #include <QTextEdit>
 #include <QRadioButton>
 #include <QDateTimeEdit>
+#include <QLineEdit>
 
 #define INIT_REPO(repoPath, /* bool */ useTempDir)                             \
   QString path = Test::extractRepository(repoPath, useTempDir);                \
@@ -26,6 +27,7 @@ private slots:
   void testAmend();
   void testAmendAddFile();
   void testAmendDialog();
+  void testAmendDialog2();
 };
 
 using namespace git;
@@ -185,6 +187,9 @@ void TestAmend::testAmendAddFile() {
 }
 
 void TestAmend::testAmendDialog() {
+  // Checking that original information is passed to the return function
+  // correctly Name and email will not be changed. Only different datetypes are
+  // tested
   Test::ScratchRepository repo;
   auto authorSignature = repo->signature(
       "New Author", "New Author Email",
@@ -292,7 +297,69 @@ void TestAmend::testAmendDialog() {
       QCOMPARE(info.committerInfo.commitDate,
                QDateTime(QDate(2013, 5, 2), QTime(11, 22, 7)));
     }
+
+    auto info = d.getInfo();
+    QCOMPARE(info.authorInfo.name, "New Author");
+    QCOMPARE(info.authorInfo.email, "New Author Email");
+    QCOMPARE(info.committerInfo.name, "New Committer");
+    QCOMPARE(info.committerInfo.email, "New Committer Email");
+    QCOMPARE(info.commitMessage, "Test commit message");
   }
+}
+
+void TestAmend::testAmendDialog2() {
+  // Test changing author name, author email, committer name, committer email
+
+  Test::ScratchRepository repo;
+  auto authorSignature = repo->signature(
+      "New Author", "New Author Email",
+      QDateTime::fromString("Sun May 23 10:36:26 2022 +0200", Qt::RFC2822Date));
+  auto committerSignature = repo->signature(
+      "New Committer", "New Committer Email",
+      QDateTime::fromString("Sun May 23 11:36:26 2022 +0200", Qt::RFC2822Date));
+
+  AmendDialog d(authorSignature, committerSignature, "Test commit message");
+
+  auto commitMessageEditor =
+      d.findChild<QTextEdit *>("Textlabel Commit Message");
+  QVERIFY(commitMessageEditor);
+  commitMessageEditor->setText("Changing the commit message");
+
+  // Author
+  {
+    const auto *author = d.findChild<QWidget *>(tr("Author"));
+    QVERIFY(author);
+
+    auto *name = author->findChild<QLineEdit *>("Name");
+    QVERIFY(name);
+    auto *email = author->findChild<QLineEdit *>("Email");
+    QVERIFY(email);
+
+    name->setText("Another author name");
+    email->setText("Another author email address");
+  }
+
+  // Committer
+  {
+    const auto *committer = d.findChild<QWidget *>(tr("Committer"));
+    QVERIFY(committer);
+
+    auto *name = committer->findChild<QLineEdit *>("Name");
+    QVERIFY(name);
+    auto *email = committer->findChild<QLineEdit *>("Email");
+    QVERIFY(email);
+
+    name->setText("Another committer name");
+    email->setText("Another committer email address");
+  }
+
+  const auto info = d.getInfo();
+
+  QCOMPARE(info.authorInfo.name, "Another author name");
+  QCOMPARE(info.authorInfo.email, "Another author email address");
+  QCOMPARE(info.committerInfo.name, "Another committer name");
+  QCOMPARE(info.committerInfo.email, "Another committer email address");
+  QCOMPARE(info.commitMessage, "Changing the commit message");
 }
 
 TEST_MAIN(TestAmend)

@@ -69,16 +69,20 @@ public:
           QWidget *parent = nullptr)
       : QGroupBox(title + ":", parent), m_signature(signature) {
 
+    setObjectName(title);
+
     auto *l = new QVBoxLayout();
 
     auto *lName = new QLabel(tr("Name:"), this);
     m_name = new QLineEdit(signature.name(), this);
+    m_name->setObjectName("Name");
     auto *hName = new QHBoxLayout();
     hName->addWidget(lName);
     hName->addWidget(m_name);
 
     auto *lEmail = new QLabel(tr("Email:"), this);
     m_email = new QLineEdit(signature.email(), this);
+    m_email->setObjectName("Email");
     auto *hEmail = new QHBoxLayout();
     hEmail->addWidget(lEmail);
     hEmail->addWidget(m_email);
@@ -169,6 +173,7 @@ AmendDialog::AmendDialog(const git::Signature &author,
 
   auto *lMessage = new QLabel(tr("Commit Message:"), this);
   m_commitMessage = new QTextEdit(commitMessage, this);
+  m_commitMessage->setObjectName("Textlabel Commit Message");
   l->addWidget(lMessage, Row::CommitMessageLabel, 0);
   l->addWidget(m_commitMessage, Row::CommitMessage, 0, 1, 2);
 
