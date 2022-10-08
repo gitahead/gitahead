@@ -200,6 +200,7 @@ void TestAmend::testAmendDialog() {
 
   {
     AmendDialog d(authorSignature, committerSignature, "Test commit message");
+    d.show();
 
     {
       const auto *authorCommitDateTimeTypeSelection =
@@ -245,7 +246,7 @@ void TestAmend::testAmendDialog() {
       info = d.getInfo();
       QCOMPARE(info.authorInfo.commitDateType,
                ContributorInfo::SelectedDateTimeType::Manual);
-      // QCOMPARE(authorCommitDate->isVisible(), true);
+      QCOMPARE(authorCommitDate->isVisible(), true);
       QCOMPARE(info.authorInfo.commitDate,
                QDateTime(QDate(2012, 7, 6), QTime(8, 30, 5)));
     }
@@ -294,7 +295,7 @@ void TestAmend::testAmendDialog() {
       info = d.getInfo();
       QCOMPARE(info.committerInfo.commitDateType,
                ContributorInfo::SelectedDateTimeType::Manual);
-      // QCOMPARE(committerCommitDate->isVisible(), true);
+      QCOMPARE(committerCommitDate->isVisible(), true);
       QCOMPARE(info.committerInfo.commitDate,
                QDateTime(QDate(2013, 5, 2), QTime(11, 22, 7)));
     }
