@@ -203,7 +203,7 @@ void TestAmend::testAmendDialog() {
 
     {
       const auto *authorCommitDateTimeTypeSelection =
-          d.findChild<QWidget *>("AuthorCommitDateType");
+          d.findChild<QWidget *>(tr("Author") + "CommitDateType");
       QVERIFY(authorCommitDateTimeTypeSelection);
       auto *authorCurrent =
           authorCommitDateTimeTypeSelection->findChild<QRadioButton *>(
@@ -217,7 +217,8 @@ void TestAmend::testAmendDialog() {
           authorCommitDateTimeTypeSelection->findChild<QRadioButton *>(
               "Manual");
       QVERIFY(authorManual);
-      auto *authorCommitDate = d.findChild<QDateTimeEdit *>("AuthorCommitDate");
+      auto *authorCommitDate =
+          d.findChild<QDateTimeEdit *>(tr("Author") + "CommitDate");
       QVERIFY(authorCommitDate);
       authorCommitDate->setDateTime(
           QDateTime(QDate(2012, 7, 6), QTime(8, 30, 5)));
@@ -251,7 +252,7 @@ void TestAmend::testAmendDialog() {
 
     {
       const auto *committerCommitDateTimeTypeSelection =
-          d.findChild<QWidget *>("CommitterCommitDateType");
+          d.findChild<QWidget *>(tr("Committer") + "CommitDateType");
       QVERIFY(committerCommitDateTimeTypeSelection);
       auto *committerCurrent =
           committerCommitDateTimeTypeSelection->findChild<QRadioButton *>(
@@ -266,7 +267,7 @@ void TestAmend::testAmendDialog() {
               "Manual");
       QVERIFY(committerManual);
       auto *committerCommitDate =
-          d.findChild<QDateTimeEdit *>("CommitterCommitDate");
+          d.findChild<QDateTimeEdit *>(tr("Committer") + "CommitDate");
       QVERIFY(committerCommitDate);
       committerCommitDate->setDateTime(
           QDateTime(QDate(2013, 5, 2), QTime(11, 22, 7)));
