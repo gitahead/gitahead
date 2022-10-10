@@ -188,6 +188,15 @@ Config Repository::appConfig() const {
 
 bool Repository::isBare() const { return git_repository_is_bare(d->repo); }
 
+Signature Repository::signature(const QString &name, const QString &email) {
+  return Signature(name, email);
+}
+
+Signature Repository::signature(const QString &name, const QString &email,
+                                const QDateTime &date) {
+  return Signature(name, email, date);
+}
+
 Signature Repository::defaultSignature(bool *fake, const QString &overrideUser,
                                        const QString &overrideEmail) const {
   QString name, email;
@@ -536,6 +545,24 @@ Commit Repository::lookupCommit(const Id &id) const {
   git_commit *commit = nullptr;
   git_commit_lookup(&commit, d->repo, id);
   return Commit(commit);
+}
+
+bool Repository::amend(const git::Commit &commitToAmend,
+                       const git::Signature &author,
+                       const git::Signature &committer,
+                       const QString &commitMessage) {
+
+  // Write the index tree.
+  Index idx = index();
+  if (!idx.isValid())
+    return false;
+
+  // Add new staged files to the amended commit
+  Tree tree = idx.writeTree();
+  if (!tree.isValid())
+    return false;
+
+  return commitToAmend.amend(author, committer, commitMessage, tree);
 }
 
 Commit Repository::commit(const QString &message,

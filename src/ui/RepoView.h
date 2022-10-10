@@ -41,6 +41,7 @@ class PathspecWidget;
 class ReferenceWidget;
 class RemoteCallbacks;
 class ToolBar;
+class ContributorInfo;
 
 namespace git {
 class Result;
@@ -262,9 +263,12 @@ public:
   void promptToAddTag(const git::Commit &commit);
   void promptToDeleteTag(const git::Reference &ref);
 
+  void promptToAmend(const git::Commit &commit);
+  void amend(const git::Commit &commit, const git::Signature &author,
+             const git::Signature &committer, const QString &commitMessage);
+
   // reset
-  void promptToReset(const git::Commit &commit, git_reset_t type,
-                     const git::Commit &commitToAmend = git::Commit());
+  void promptToReset(const git::Commit &commit, git_reset_t type);
   void reset(const git::Commit &commit, git_reset_t type,
              const git::Commit &commitToAmend = git::Commit());
 
@@ -391,6 +395,8 @@ private:
                             bool recursive, git_reset_t type);
 
   bool checkForConflicts(LogEntry *parent, const QString &action);
+
+  git::Signature getSignature(const ContributorInfo &info);
 
   git::Repository mRepo;
 

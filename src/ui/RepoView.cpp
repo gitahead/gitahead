@@ -23,6 +23,7 @@
 #include "ToolBar.h"
 #include "app/Application.h"
 #include "conf/Settings.h"
+#include "dialogs/AmendDialog.h"
 #include "dialogs/CheckoutDialog.h"
 #include "dialogs/CommitDialog.h"
 #include "dialogs/DeleteBranchDialog.h"
@@ -40,6 +41,7 @@
 #include "git/Signature.h"
 #include "git/TagRef.h"
 #include "git/Tree.h"
+#include "git/Signature.h"
 #include "git2/merge.h"
 #include "host/Accounts.h"
 #include "index/Index.h"
@@ -1877,25 +1879,7 @@ void RepoView::amendCommit() {
   if (!commit.isValid())
     return;
 
-  QList<git::Commit> parents = commit.parents();
-  switch (parents.size()) {
-    case 0:
-      // Return to the unborn HEAD state.
-      // FIXME: Prompt to reset?
-      head.remove(true);
-      mDetails->setCommitMessage(commit.message());
-      refresh();
-      break;
-
-    case 1:
-      // Reset to parent commit.
-      promptToReset(parents.first(), GIT_RESET_SOFT, commit);
-      break;
-
-    default:
-      // FIXME: Return to merging state?
-      break;
-  }
+  promptToAmend(commit);
 }
 
 void RepoView::promptToCheckout() {
@@ -2159,18 +2143,54 @@ void RepoView::promptToDeleteTag(const git::Reference &ref) {
   dialog->open();
 }
 
-void RepoView::promptToReset(const git::Commit &commit, git_reset_t type,
-                             const git::Commit &commitToAmend) {
+void RepoView::promptToAmend(const git::Commit &commit) {
+  auto *d = new AmendDialog(commit.author(), commit.committer(),
+                            commit.message(), this);
+  d->setAttribute(Qt::WA_DeleteOnClose);
+  connect(d, &QDialog::accepted, [this, d, commit]() {
+    auto info = d->getInfo();
+
+    git::Signature author = getSignature(info.authorInfo);
+    git::Signature committer = getSignature(info.committerInfo);
+
+    amend(commit, author, committer, info.commitMessage);
+  });
+
+  d->show();
+}
+
+void RepoView::amend(const git::Commit &commit, const git::Signature &author,
+                     const git::Signature &committer,
+                     const QString &commitMessage) {
+  git::Reference head = mRepo.head();
+  Q_ASSERT(head.isValid());
+
+  QString title = tr("Amend");
+
+  if (!mRepo.amend(commit, author, committer, commitMessage)) {
+    error(addLogEntry(tr("Amending commit %1").arg(commit.link()), title),
+          tr("amend"), head.name());
+  } else {
+    head = mRepo.head();
+    Q_ASSERT(head.isValid());
+
+    QString text =
+        tr("%1 to %2", "update ref").arg(head.name(), head.target().link());
+    addLogEntry(text, title);
+  }
+}
+
+void RepoView::promptToReset(const git::Commit &commit, git_reset_t type) {
   git::Branch head = mRepo.head();
   if (!head.isValid()) {
-    QString title = commitToAmend ? tr("Amend") : tr("Reset");
+    QString title = tr("Reset");
     LogEntry *entry = addLogEntry(tr("<i>no branch</i>"), title);
     entry->addEntry(LogEntry::Error, tr("You are not currently on a branch."));
     return;
   }
 
-  QString id = commitToAmend ? commitToAmend.shortId() : commit.shortId();
-  QString title = commitToAmend ? tr("Amend") : tr("Reset");
+  QString id = commit.shortId();
+  QString title = tr("Reset");
   switch (type) {
     case GIT_RESET_SOFT:
       title += " Soft";
@@ -2184,10 +2204,8 @@ void RepoView::promptToReset(const git::Commit &commit, git_reset_t type,
   }
   title += "?";
 
-  QString text = commitToAmend
-                     ? tr("Are you sure you want to amend '%1'?").arg(id)
-                     : tr("Are you sure you want to reset '%1' to '%2'?")
-                           .arg(head.name(), id);
+  QString text =
+      tr("Are you sure you want to reset '%1' to '%2'?").arg(head.name(), id);
   QMessageBox *dialog = new QMessageBox(QMessageBox::Warning, title, text,
                                         QMessageBox::Cancel, this);
   dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -2211,16 +2229,10 @@ void RepoView::promptToReset(const git::Commit &commit, git_reset_t type,
 
   dialog->setInformativeText(info);
 
-  QString buttonText = commitToAmend ? tr("Amend") : tr("Reset");
+  QString buttonText = tr("Reset");
   QPushButton *accept = dialog->addButton(buttonText, QMessageBox::AcceptRole);
   connect(accept, &QPushButton::clicked, this,
-          [this, commit, type, commitToAmend] {
-            reset(commit, type, commitToAmend);
-
-            // Pre-populate the commit message editor.
-            if (commitToAmend)
-              mDetails->setCommitMessage(commitToAmend.message());
-          });
+          [this, commit, type] { reset(commit, type); });
 
   dialog->open();
 }
@@ -2899,6 +2911,13 @@ bool RepoView::checkForConflicts(LogEntry *parent, const QString &action) {
 
   refresh();
   return true;
+}
+
+git::Signature RepoView::getSignature(const ContributorInfo &info) {
+  if (info.commitDateType != ContributorInfo::SelectedDateTimeType::Current)
+    return mRepo.signature(info.name, info.email, info.commitDate);
+
+  return mRepo.signature(info.name, info.email);
 }
 
 bool RepoView::match(QObject *search, QObject *parent) {

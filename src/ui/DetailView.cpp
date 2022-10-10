@@ -353,8 +353,8 @@ public:
                                                committer.join(", "));
 
       // Set date range.
-      QDate lastDate = last.committer().date().date();
-      QDate firstDate = first.committer().date().date();
+      QDate lastDate = last.committer().date().toLocalTime().date();
+      QDate firstDate = first.committer().date().toLocalTime().date();
       QString lastDateStr = lastDate.toString(Qt::DefaultLocaleShortDate);
       QString firstDateStr = firstDate.toString(Qt::DefaultLocaleShortDate);
       QString dateStr = (lastDate == firstDate)
@@ -391,7 +391,7 @@ public:
     git::Commit commit = commits.first();
     git::Signature author = commit.author();
     git::Signature committer = commit.committer();
-    QDateTime date = commit.committer().date();
+    QDateTime date = commit.committer().date().toLocalTime();
     mHash->setText(brightText(tr("Id:")) + " " + commit.shortId());
     mAuthorCommitterDate->setDate(
         brightText(date.toString(Qt::DefaultLocaleLongDate)));

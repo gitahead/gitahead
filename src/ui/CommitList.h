@@ -24,6 +24,8 @@ class CommitList : public QListView {
   Q_OBJECT
 
 public:
+  enum Role { DiffRole = Qt::UserRole, CommitRole, GraphRole, GraphColorRole };
+
   CommitList(Index *index, QWidget *parent = nullptr);
 
   // Get the status diff item.

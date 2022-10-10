@@ -8,8 +8,10 @@
 //
 
 #include "Test.h"
+#include "dialogs/AmendDialog.h"
 #include "dialogs/CloneDialog.h"
 #include "dialogs/StartDialog.h"
+#include "qnamespace.h"
 #include "ui/CommitList.h"
 #include "ui/DetailView.h"
 #include "ui/DiffView/DiffView.h"
@@ -22,6 +24,7 @@
 #include <QLineEdit>
 #include <QMenu>
 #include <QPushButton>
+#include <QTextEdit>
 #include <QTextStream>
 #include <QToolButton>
 
@@ -141,6 +144,13 @@ void TestInitRepo::amendCommit() {
 
   view->amendCommit();
 
+  auto dialog = view->findChild<AmendDialog *>();
+  QVERIFY(dialog);
+  dialog->findChild<QTextEdit *>()->setText("Some other commit message");
+  dialog->accept();
+
+  qWait(300);
+
   {
     auto timeout =
         Timeout(10000, "Repository didn't detect status change in time");
@@ -153,8 +163,9 @@ void TestInitRepo::amendCommit() {
   QVERIFY(commitList);
   QAbstractItemModel *commitModel = commitList->model();
   QModelIndex index = commitModel->index(0, 0);
-  QString name = commitModel->data(index, Qt::DisplayRole).toString();
-  QCOMPARE(name, QString("Uncommitted changes"));
+  auto commit = commitModel->data(index, CommitList::Role::CommitRole)
+                    .value<git::Commit>();
+  QCOMPARE(commit.message(), QString("Some other commit message"));
 }
 
 void TestInitRepo::editFile() {

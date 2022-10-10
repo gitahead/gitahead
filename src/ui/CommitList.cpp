@@ -48,8 +48,6 @@ const QString kPathspecFmt = "pathspec:%1";
 // FIXME: Use 'core.abbrev' config instead?
 const int kShortIdSize = 7;
 
-enum Role { DiffRole = Qt::UserRole, CommitRole, GraphRole, GraphColorRole };
-
 enum GraphSegment {
   Dot,
   Top,
@@ -344,7 +342,7 @@ public:
 
         return mStatus.isFinished() ? QVariant() : mProgress;
 
-      case DiffRole: {
+      case CommitList::Role::DiffRole: {
         if (status)
           return QVariant::fromValue(this->status());
 
@@ -354,10 +352,10 @@ public:
         return QVariant::fromValue(diff);
       }
 
-      case CommitRole:
+      case CommitList::Role::CommitRole:
         return status ? QVariant() : QVariant::fromValue(row.commit);
 
-      case GraphRole: {
+      case CommitList::Role::GraphRole: {
         QVariantList columns;
         foreach (const Column &column, row.columns) {
           QVariantList segments;
@@ -369,7 +367,7 @@ public:
         return columns;
       }
 
-      case GraphColorRole: {
+      case CommitList::Role::GraphColorRole: {
         QVariantList columns;
         foreach (const Column &column, row.columns) {
           QVariantList segments;
@@ -571,7 +569,7 @@ public:
   QVariant data(const QModelIndex &index,
                 int role = Qt::DisplayRole) const override {
     switch (role) {
-      case DiffRole: {
+      case CommitList::Role::DiffRole: {
         git::Commit commit = mCommits.at(index.row());
         bool ignoreWhitespace = Settings::instance()->isWhitespaceIgnored();
         git::Diff diff = commit.diff(git::Commit(), -1, ignoreWhitespace);
@@ -579,7 +577,7 @@ public:
         return QVariant::fromValue(diff);
       }
 
-      case CommitRole:
+      case CommitList::Role::CommitRole:
         return QVariant::fromValue(mCommits.at(index.row()));
     }
 
@@ -650,8 +648,9 @@ public:
 
     // Draw graph.
     painter->save();
-    QVariantList columns = index.data(GraphRole).toList();
-    QVariantList colorColumns = index.data(GraphColorRole).toList();
+    QVariantList columns = index.data(CommitList::Role::GraphRole).toList();
+    QVariantList colorColumns =
+        index.data(CommitList::Role::GraphColorRole).toList();
     for (int i = 0; i < columns.size(); ++i) {
       int x = rect.x();
       int y = rect.y();
@@ -759,7 +758,8 @@ public:
       rect.setWidth(rect.width() - constants.hMargin);
 
     // Draw content.
-    git::Commit commit = index.data(CommitRole).value<git::Commit>();
+    git::Commit commit =
+        index.data(CommitList::Role::CommitRole).value<git::Commit>();
     if (commit.isValid()) {
       const QFontMetrics &fm = opt.fontMetrics;
       QRect star = rect;

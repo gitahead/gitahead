@@ -92,6 +92,10 @@ public:
                              const QString &overrideUser = QString(),
                              const QString &overrideEmail = QString()) const;
 
+  Signature signature(const QString &name, const QString &email);
+  Signature signature(const QString &name, const QString &email,
+                      const QDateTime &date);
+
   // ignore
   bool isIgnored(const QString &path) const;
 
@@ -150,6 +154,9 @@ public:
   Commit commit(const Signature &author, const Signature &commiter,
                 const QString &message,
                 const AnnotatedCommit &mergeHead = AnnotatedCommit());
+
+  bool amend(const Commit &commitToAmend, const Signature &author,
+             const Signature &committer, const QString &commitMessage);
 
   QList<Commit> starredCommits() const;
   bool isCommitStarred(const Id &commit) const;
