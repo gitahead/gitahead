@@ -7,8 +7,8 @@ Bug fix and feature release
 * Solving binary conflicts directly in Gittyup
 * Support rebasing with conflict solving
 * implement amending commits
-* Possibility to init submodules after clone (Settings -> General -> Update submodules after pull and clone)
-* Hiding menu bar (Application Settings -> Window -> Hide Menubar)
+* Possibility to init submodules after clone (Settings - General - Update submodules after pull and clone)
+* Hiding menu bar (Application Settings - Window - Hide Menubar)
 
 #### Changed
 * Fix Segmentation fault when using space to stage files
@@ -21,6 +21,7 @@ Bug fix and feature release
 * Fix discarding file leading to discarding submodule changes
 * Fix rebase log messages during rebase
 * Improve SSH config handling
+* Application settings and repository settings can now be selected with a single settings button
 
 ----
 
