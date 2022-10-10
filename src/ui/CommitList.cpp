@@ -1417,7 +1417,7 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event) {
 
       menu.addAction(tr("Merge..."), [view, commit] {
         MergeDialog *dialog =
-            new MergeDialog(RepoView::Merge, view->repo(), true, view);
+            new MergeDialog(RepoView::Merge, view->repo(), view);
         connect(dialog, &QDialog::accepted, [view, dialog] {
           git::AnnotatedCommit upstream;
           git::Reference ref = dialog->reference();
@@ -1432,7 +1432,7 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event) {
 
       menu.addAction(tr("Rebase..."), [view, commit] {
         MergeDialog *dialog =
-            new MergeDialog(RepoView::Rebase, view->repo(), true, view);
+            new MergeDialog(RepoView::Rebase, view->repo(), view);
         connect(dialog, &QDialog::accepted, [view, dialog] {
           git::AnnotatedCommit upstream;
           git::Reference ref = dialog->reference();
@@ -1447,7 +1447,7 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event) {
 
       menu.addAction(tr("Squash..."), [view, commit] {
         MergeDialog *dialog =
-            new MergeDialog(RepoView::Squash, view->repo(), true, view);
+            new MergeDialog(RepoView::Squash, view->repo(), view);
         connect(dialog, &QDialog::accepted, [view, dialog] {
           git::AnnotatedCommit upstream;
           git::Reference ref = dialog->reference();

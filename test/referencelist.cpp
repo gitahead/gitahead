@@ -60,7 +60,7 @@ void TestReferenceList::test() {
   const ReferenceView::Kinds kRefKinds =
       ReferenceView::InvalidRef | ReferenceView::LocalBranches |
       ReferenceView::RemoteBranches | ReferenceView::Tags;
-  ReferenceList *rl = new ReferenceList(view->repo(), kRefKinds, true);
+  ReferenceList *rl = new ReferenceList(view->repo(), kRefKinds);
 
   {
     // Only one tag
@@ -108,7 +108,7 @@ void TestReferenceList::testIndexCalculation() {
     const ReferenceView::Kinds kRefKinds =
         ReferenceView::InvalidRef | ReferenceView::LocalBranches |
         ReferenceView::RemoteBranches | ReferenceView::Tags;
-    ReferenceModel model(git::Repository(), kRefKinds, false);
+    ReferenceModel model(git::Repository(), kRefKinds);
 
     QCOMPARE(model.indexToReferenceType(0),
              ReferenceModel::ReferenceType::Branches);
@@ -131,7 +131,7 @@ void TestReferenceList::testIndexCalculation() {
     const ReferenceView::Kinds kRefKinds = ReferenceView::InvalidRef |
                                            ReferenceView::RemoteBranches |
                                            ReferenceView::Tags;
-    ReferenceModel model(git::Repository(), kRefKinds, false);
+    ReferenceModel model(git::Repository(), kRefKinds);
 
     QCOMPARE(model.indexToReferenceType(0),
              ReferenceModel::ReferenceType::Remotes);
@@ -149,7 +149,7 @@ void TestReferenceList::testIndexCalculation() {
     const ReferenceView::Kinds kRefKinds = ReferenceView::InvalidRef |
                                            ReferenceView::LocalBranches |
                                            ReferenceView::Tags;
-    ReferenceModel model(git::Repository(), kRefKinds, false);
+    ReferenceModel model(git::Repository(), kRefKinds);
 
     QCOMPARE(model.indexToReferenceType(0),
              ReferenceModel::ReferenceType::Branches);
@@ -167,7 +167,7 @@ void TestReferenceList::testIndexCalculation() {
     const ReferenceView::Kinds kRefKinds = ReferenceView::InvalidRef |
                                            ReferenceView::LocalBranches |
                                            ReferenceView::RemoteBranches;
-    ReferenceModel model(git::Repository(), kRefKinds, false);
+    ReferenceModel model(git::Repository(), kRefKinds);
 
     QCOMPARE(model.indexToReferenceType(0),
              ReferenceModel::ReferenceType::Branches);
@@ -184,7 +184,7 @@ void TestReferenceList::testIndexCalculation() {
     // Only tags. No local/remote branches
     const ReferenceView::Kinds kRefKinds =
         ReferenceView::InvalidRef | ReferenceView::Tags;
-    ReferenceModel model(git::Repository(), kRefKinds, false);
+    ReferenceModel model(git::Repository(), kRefKinds);
 
     QCOMPARE(model.indexToReferenceType(0),
              ReferenceModel::ReferenceType::Tags);
@@ -196,7 +196,7 @@ void TestReferenceList::testIndexCalculation() {
     // Only local branches. No tag/remote
     const ReferenceView::Kinds kRefKinds =
         ReferenceView::InvalidRef | ReferenceView::LocalBranches;
-    ReferenceModel model(git::Repository(), kRefKinds, false);
+    ReferenceModel model(git::Repository(), kRefKinds);
 
     QCOMPARE(model.indexToReferenceType(0),
              ReferenceModel::ReferenceType::Branches);
@@ -208,7 +208,7 @@ void TestReferenceList::testIndexCalculation() {
     // Only remote branches. No tag/local
     const ReferenceView::Kinds kRefKinds =
         ReferenceView::InvalidRef | ReferenceView::RemoteBranches;
-    ReferenceModel model(git::Repository(), kRefKinds, false);
+    ReferenceModel model(git::Repository(), kRefKinds);
 
     QCOMPARE(model.indexToReferenceType(0),
              ReferenceModel::ReferenceType::Remotes);

@@ -17,6 +17,7 @@
 #include "git/Branch.h"
 #include "git/Commit.h"
 #include "ui/HotkeyManager.h"
+#include "dialogs/SettingsDialog.h"
 #include <QAction>
 #include <QButtonGroup>
 #include <QHBoxLayout>
@@ -61,6 +62,21 @@ const QString kStyleSheet = "QToolButton {"
                             "QToolButton::menu-arrow {"
                             "  image: none"
                             "}";
+
+void drawPopupChevron(qreal width, qreal height, QPainter &painter,
+                      const QBrush &brush) {
+  // Draw relative to lower right corner.
+  qreal x = width - 9.5;
+  qreal y = height - 6.5;
+
+  QPainterPath path;
+  path.moveTo(x, y);
+  path.lineTo(x + 3, y + 3);
+  path.lineTo(x + 6, y);
+
+  painter.setPen(QPen(brush, 1.5));
+  painter.drawPath(path);
+}
 
 class Spacer : public QWidget {
 public:
@@ -227,17 +243,7 @@ public:
     }
 
     if (popupMode() == QToolButton::MenuButtonPopup) {
-      // Draw relative to lower right corner.
-      qreal x = width() - 9.5;
-      qreal y = height() - 6.5;
-
-      QPainterPath path;
-      path.moveTo(x, y);
-      path.lineTo(x + 3, y + 3);
-      path.lineTo(x + 6, y);
-
-      painter.setPen(QPen(opt.palette.buttonText(), 1.5));
-      painter.drawPath(path);
+      drawPopupChevron(width(), height(), painter, opt.palette.buttonText());
     }
 
     // Draw badge.
@@ -568,6 +574,8 @@ public:
     }
 
     painter.drawPath(path);
+
+    drawPopupChevron(width(), height(), painter, opt.palette.buttonText());
   }
 };
 
@@ -732,6 +740,8 @@ ToolBar::ToolBar(MainWindow *parent) : QToolBar(parent) {
 
   addWidget(new Spacer(4, this));
 
+  addWidget(new Spacer(4, this));
+
   SegmentedButton *historyButton = new SegmentedButton(this);
   addWidget(historyButton);
 
@@ -858,11 +868,22 @@ ToolBar::ToolBar(MainWindow *parent) : QToolBar(parent) {
 
   addWidget(new Spacer(4, this));
 
-  mConfigButton = new SettingsButton(this);
-  mConfigButton->setToolTip(tr("Configure Settings"));
-  addWidget(mConfigButton);
-  connect(mConfigButton, &Button::clicked,
+  SettingsButton *configButton = new SettingsButton(this);
+  configButton->setToolTip(tr("Configure Settings"));
+  addWidget(configButton);
+
+  configButton->setPopupMode(
+      QToolButton::InstantPopup); // Add pull button menu.
+  QMenu *configMenu = new QMenu(configButton);
+  configButton->setMenu(configMenu);
+
+  mRepoConfigAction = configMenu->addAction(tr("Repository settings"));
+  connect(mRepoConfigAction, &QAction::triggered,
           [this] { currentView()->configureSettings(); });
+
+  QAction *appConfigAction = configMenu->addAction(tr("Application settings"));
+  connect(appConfigAction, &QAction::triggered,
+          [this] { SettingsDialog::openSharedInstance(); });
 
   addWidget(new Spacer(4, this));
 
@@ -873,8 +894,6 @@ ToolBar::ToolBar(MainWindow *parent) : QToolBar(parent) {
     RepoView *view = this->currentView();
     view->setLogVisible(!view->isLogVisible());
   });
-
-  addWidget(new Spacer(4, this));
 
   SegmentedButton *mode = new SegmentedButton(this);
   mModeGroup = mode->buttonGroup();
@@ -990,7 +1009,7 @@ void ToolBar::updateView() {
   RepoView *view = currentView();
   mTerminalButton->setEnabled(view);
   mFileManagerButton->setEnabled(view);
-  mConfigButton->setEnabled(view);
+  mRepoConfigAction->setEnabled(view);
   mLogButton->setEnabled(view);
   // mModeGroup->button(RepoView::Diff)->setEnabled(view);
   mModeGroup->button(RepoView::Tree)->setEnabled(view);

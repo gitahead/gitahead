@@ -16,9 +16,9 @@
 
 #define INIT_REPO(repoPath, /* bool */ useTempDir)                             \
   QString path = Test::extractRepository(repoPath, useTempDir);                \
-  QVERIFY(!path.isEmpty());                                                    \
+  QVERIFY2(!path.isEmpty(), qPrintable("Extracting repository failed"));       \
   mRepo = git::Repository::open(path);                                         \
-  QVERIFY(mRepo.isValid());                                                    \
+  QVERIFY2(mRepo.isValid(), qPrintable("Unable to open repository"));          \
   MainWindow window(mRepo);                                                    \
   window.show();                                                               \
   QVERIFY(QTest::qWaitForWindowExposed(&window));                              \
@@ -54,24 +54,35 @@
              << BITSET(markers, TextEditor::Marker::StagedMarker) << line;     \
     if (unstagedAddition.indexOf(i) != -1) {                                   \
       /* unstaged addition */                                                  \
-      QVERIFY(BITSET(markers, TextEditor::Marker::Addition));                  \
-      QVERIFY(!BITSET(markers, TextEditor::Marker::StagedMarker));             \
+      QVERIFY2(BITSET(markers, TextEditor::Marker::Addition),                  \
+               qPrintable("Line index: " + QString::number(i)));               \
+      QVERIFY2(!BITSET(markers, TextEditor::Marker::StagedMarker),             \
+               qPrintable("Line index: " + QString::number(i)));               \
     } else if (stagedAddition.indexOf(i) != -1) {                              \
       /* staged addition */                                                    \
-      QVERIFY(BITSET(markers, TextEditor::Marker::Addition));                  \
-      QVERIFY(BITSET(markers, TextEditor::Marker::StagedMarker));              \
+      QVERIFY2(BITSET(markers, TextEditor::Marker::Addition),                  \
+               qPrintable("Line index: " + QString::number(i)));               \
+      QVERIFY2(BITSET(markers, TextEditor::Marker::StagedMarker),              \
+               qPrintable("Line index: " + QString::number(i)));               \
     } else if (unstagedDeletion.indexOf(i) != -1) {                            \
       /* unstaged deletion */                                                  \
-      QVERIFY(BITSET(markers, TextEditor::Marker::Deletion));                  \
-      QVERIFY(!BITSET(markers, TextEditor::Marker::StagedMarker));             \
+      QVERIFY2(BITSET(markers, TextEditor::Marker::Deletion),                  \
+               qPrintable("Line index: " + QString::number(i)));               \
+      QVERIFY2(!BITSET(markers, TextEditor::Marker::StagedMarker),             \
+               qPrintable("Line index: " + QString::number(i)));               \
     } else if (stagedDeletion.indexOf(i) != -1) {                              \
       /* staged deletion */                                                    \
-      QVERIFY(BITSET(markers, TextEditor::Marker::Deletion));                  \
-      QVERIFY(BITSET(markers, TextEditor::Marker::StagedMarker));              \
+      QVERIFY2(BITSET(markers, TextEditor::Marker::Deletion),                  \
+               qPrintable("Line index: " + QString::number(i)));               \
+      QVERIFY2(BITSET(markers, TextEditor::Marker::StagedMarker),              \
+               qPrintable("Line index: " + QString::number(i)));               \
     } else {                                                                   \
-      QVERIFY(!BITSET(markers, TextEditor::Marker::Deletion));                 \
-      QVERIFY(!BITSET(markers, TextEditor::Marker::Addition));                 \
-      QVERIFY(!BITSET(markers, TextEditor::Marker::StagedMarker));             \
+      QVERIFY2(!BITSET(markers, TextEditor::Marker::Deletion),                 \
+               qPrintable("Line index: " + QString::number(i)));               \
+      QVERIFY2(!BITSET(markers, TextEditor::Marker::Addition),                 \
+               qPrintable("Line index: " + QString::number(i)));               \
+      QVERIFY2(!BITSET(markers, TextEditor::Marker::StagedMarker),             \
+               qPrintable("Line index: " + QString::number(i)));               \
     }                                                                          \
   }
 
@@ -112,8 +123,13 @@ private slots:
   void windowsCRLF();
 #endif // Q_OS_WIN
 
-#endif // EXECUTE_ONLY_LAST_TEST == 0
   void windowsCRLFMultiHunk();
+  void sameContentRemoveLine();
+  void sameContentAddLine();
+
+#endif // EXECUTE_ONLY_LAST_TEST == 0
+
+  //  void deleteCompleteContent();
 
 private:
   int closeDelay = 0;
@@ -644,7 +660,7 @@ void TestEditorLineInfo::multipleHunks_StageSingleLines() {
         QVector<int>({}), QVector<int>({14, 19, 29}), QVector<int>());
 
     // Stage single lines
-    hunks.at(0)->stageSelected(5, 6);
+    hunks.at(0)->stageSelected(5, 6); // stage line 5
   }
 
   Test::refresh(repoView);
@@ -671,7 +687,7 @@ void TestEditorLineInfo::multipleHunks_StageSingleLines() {
         QVector<int>({3, 4, 5, 6, 7, 8, 9, 10, 15, 16, 20, 21, 22, 23, 30}),
         QVector<int>({}), QVector<int>({14, 19, 29}), QVector<int>());
 
-    hunks.at(0)->stageSelected(4, 5);
+    hunks.at(0)->stageSelected(4, 5); // stage line 4
   }
 
   Test::refresh(repoView);
@@ -854,8 +870,6 @@ void TestEditorLineInfo::windowsCRLF() {
 }
 #endif // Q_OS_WIN
 
-#endif
-
 void TestEditorLineInfo::windowsCRLFMultiHunk() {
   /*
    * Staging single lines in a file with CRLF instead of single LF for multiple
@@ -916,6 +930,54 @@ void TestEditorLineInfo::windowsCRLFMultiHunk() {
                        QVector<int>({3}), QVector<int>({}));
   }
 }
+
+void TestEditorLineInfo::sameContentRemoveLine() {
+  INIT_REPO("16_LinestagingLineContent.zip", true)
+  QVERIFY(stagedDiff.count() > 0);
+  QVERIFY(diff.count() > 0);
+  git::Patch patch = diff.patch(0);
+  git::Patch stagedPatch = stagedDiff.patch(0);
+
+  auto hw = HunkWidget(&diffView, diff, patch, stagedPatch, 0, false, false,
+                       repoView);
+  hw.load(stagedPatch, true);
+  checkEditorMarkers(hw.editor(), QVector<int>({3, 4, 5, 12, 13, 21, 22}),
+                     QVector<int>(), QVector<int>({11, 19, 20}),
+                     QVector<int>({10}));
+}
+
+void TestEditorLineInfo::sameContentAddLine() {
+  INIT_REPO("17_LinestagingLineContentStageAddedLine.zip", true)
+  QVERIFY(stagedDiff.count() > 0);
+  QVERIFY(diff.count() > 0);
+  git::Patch patch = diff.patch(0);
+  git::Patch stagedPatch = stagedDiff.patch(0);
+
+  auto hw = HunkWidget(&diffView, diff, patch, stagedPatch, 0, false, false,
+                       repoView);
+  hw.load(stagedPatch, true);
+  checkEditorMarkers(hw.editor(), QVector<int>({3, 4}), QVector<int>({9}),
+                     QVector<int>({}), QVector<int>({}));
+}
+
+#endif
+
+// void TestEditorLineInfo::deleteCompleteContent() {
+//   INIT_REPO("18_deleteLinesStagedLast.zip", true)
+//   QVERIFY(stagedDiff.count() > 0);
+//   QVERIFY(diff.count() > 0);
+//   git::Patch patch = diff.patch(0);
+//   git::Patch stagedPatch = stagedDiff.patch(0);
+
+//  auto hw = HunkWidget(&diffView, diff, patch, stagedPatch, 0, false, false,
+//                       repoView);
+//  hw.load(stagedPatch, true);
+//  checkEditorMarkers(
+//      hw.editor(), QVector<int>({24}), QVector<int>({}),
+//      QVector<int>({0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11,
+//                    12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22}),
+//      QVector<int>({23}));
+//}
 
 void TestEditorLineInfo::cleanupTestCase() { qWait(closeDelay); }
 

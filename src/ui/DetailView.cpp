@@ -705,6 +705,8 @@ private:
   QList<QTextEdit::ExtraSelection> mSpellList;
 };
 
+} // namespace
+
 /*!
  * \brief The CommitEditor class
  * This widget contains the textedit element for entering the commit message,
@@ -1192,7 +1194,6 @@ private:
 
     // Change commit button text for committing a merge.
     git::Repository repo = RepoView::parentView(this)->repo();
-    auto state = repo.state();
 
     switch (repo.state()) {
       case GIT_REPOSITORY_STATE_MERGE:
@@ -1239,8 +1240,6 @@ private:
   QTextCharFormat mSpellIgnore;
 };
 
-} // namespace
-
 ContentWidget::ContentWidget(QWidget *parent) : QWidget(parent) {}
 
 ContentWidget::~ContentWidget() {}
@@ -1251,19 +1250,26 @@ DetailView::DetailView(const git::Repository &repo, QWidget *parent)
   layout->setContentsMargins(0, 0, 0, 0);
   layout->setSpacing(0);
 
-  mAuthorLabel = new QLabel(this);
-  mAuthorLabel->setTextFormat(Qt::TextFormat::RichText);
-  connect(mAuthorLabel, &QLabel::linkActivated, this,
-          &DetailView::authorLinkActivated);
-  updateAuthor();
-  layout->addWidget(mAuthorLabel);
-
   mDetail = new StackedWidget(this);
   mDetail->setVisible(false);
   layout->addWidget(mDetail);
 
   mDetail->addWidget(new CommitDetail(this));
-  mDetail->addWidget(new CommitEditor(repo, this));
+
+  mAuthorLabel = new QLabel(this);
+  mAuthorLabel->setTextFormat(Qt::TextFormat::RichText);
+  connect(mAuthorLabel, &QLabel::linkActivated, this,
+          &DetailView::authorLinkActivated);
+  updateAuthor();
+
+  mCommitEditor = new CommitEditor(repo, this);
+
+  auto editorFrame = new QWidget(this);
+  auto editor = new QVBoxLayout(editorFrame);
+  editor->addWidget(mAuthorLabel);
+  editor->addWidget(mCommitEditor);
+
+  mDetail->addWidget(editorFrame);
 
   mContent = new QStackedWidget(this);
   layout->addWidget(mContent, 1);
@@ -1276,47 +1282,42 @@ DetailView::~DetailView() {}
 
 void DetailView::commit(bool force) {
   Q_ASSERT(isCommitEnabled());
-  static_cast<CommitEditor *>(mDetail->currentWidget())->commit(force);
+  mCommitEditor->commit(force);
 }
 
 bool DetailView::isCommitEnabled() const {
-  QWidget *widget = mDetail->currentWidget();
   return (mDetail->currentIndex() == EditorIndex &&
-          static_cast<CommitEditor *>(widget)->isCommitEnabled());
+          mCommitEditor->isCommitEnabled());
 }
 
 bool DetailView::isRebaseContinueVisible() const {
-  QWidget *widget = mDetail->currentWidget();
   return (mDetail->currentIndex() == EditorIndex &&
-          static_cast<CommitEditor *>(widget)->isRebaseContinueVisible());
+          mCommitEditor->isRebaseContinueVisible());
 }
 
 bool DetailView::isRebaseAbortVisible() const {
-  QWidget *widget = mDetail->currentWidget();
   return (mDetail->currentIndex() == EditorIndex &&
-          static_cast<CommitEditor *>(widget)->isRebaseAbortVisible());
+          mCommitEditor->isRebaseAbortVisible());
 }
 
 void DetailView::stage() {
   Q_ASSERT(isStageEnabled());
-  static_cast<CommitEditor *>(mDetail->currentWidget())->stage();
+  mCommitEditor->stage();
 }
 
 bool DetailView::isStageEnabled() const {
-  QWidget *widget = mDetail->currentWidget();
   return (mDetail->currentIndex() == EditorIndex &&
-          static_cast<CommitEditor *>(widget)->isStageEnabled());
+          mCommitEditor->isStageEnabled());
 }
 
 void DetailView::unstage() {
   Q_ASSERT(isUnstageEnabled());
-  static_cast<CommitEditor *>(mDetail->currentWidget())->unstage();
+  mCommitEditor->unstage();
 }
 
 bool DetailView::isUnstageEnabled() const {
-  QWidget *widget = mDetail->currentWidget();
   return (mDetail->currentIndex() == EditorIndex &&
-          static_cast<CommitEditor *>(widget)->isUnstageEnabled());
+          mCommitEditor->isUnstageEnabled());
 }
 
 RepoView::ViewMode DetailView::viewMode() const {
@@ -1339,13 +1340,10 @@ QString DetailView::file() const {
 }
 
 void DetailView::setCommitMessage(const QString &message) {
-  static_cast<CommitEditor *>(mDetail->widget(EditorIndex))
-      ->setMessage(message);
+  mCommitEditor->setMessage(message);
 }
 
-QString DetailView::commitMessage() const {
-  return static_cast<CommitEditor *>(mDetail->widget(EditorIndex))->message();
-}
+QString DetailView::commitMessage() const { return mCommitEditor->message(); }
 
 void DetailView::setDiff(const git::Diff &diff, const QString &file,
                          const QString &pathspec) {
@@ -1356,7 +1354,7 @@ void DetailView::setDiff(const git::Diff &diff, const QString &file,
   mDetail->setVisible(diff.isValid());
 
   if (commits.isEmpty()) {
-    static_cast<CommitEditor *>(mDetail->currentWidget())->setDiff(diff);
+    mCommitEditor->setDiff(diff);
   } else {
     static_cast<CommitDetail *>(mDetail->currentWidget())->setCommits(commits);
   }

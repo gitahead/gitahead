@@ -484,6 +484,14 @@ public:
       Settings::instance()->setValue("window/tabs/repository", checked);
     });
     settings->endGroup(); // tabs
+
+    settings->beginGroup("view");
+    QCheckBox *hideMenuBar = new QCheckBox(tr("Hide Menubar"));
+    hideMenuBar->setChecked(settings->value("menuBarHidden").toBool());
+    connect(hideMenuBar, &QCheckBox::toggled, [](bool checked) {
+      Settings::instance()->setValue("window/view/menuBarHidden", checked);
+    });
+    settings->endGroup(); // view
     settings->endGroup(); // window
 
     QString mergeText = settings->promptDescription(Settings::PromptMerge);
@@ -537,6 +545,7 @@ public:
     layout->addRow(tr("Log:"), hideLog);
     layout->addRow(tr("Tabs:"), smTabs);
     layout->addRow(QString(), repoTabs);
+    layout->addRow(tr("View:"), hideMenuBar);
     layout->addRow(tr("Prompt:"), merge);
     layout->addRow(QString(), revert);
     layout->addRow(QString(), cherryPick);

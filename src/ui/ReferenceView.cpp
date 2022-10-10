@@ -131,8 +131,7 @@ private:
 } // namespace
 
 ReferenceView::ReferenceView(const git::Repository &repo, Kinds kinds,
-                             bool popup, bool filterCurrentCommit,
-                             QWidget *parent)
+                             bool popup, QWidget *parent)
     : QTreeView(parent), mPopup(popup) {
   // Constrain height.
   setMinimumHeight(kHeight);
@@ -154,7 +153,7 @@ ReferenceView::ReferenceView(const git::Repository &repo, Kinds kinds,
 
   // Set model.
   FilterProxyModel *model = new FilterProxyModel(this);
-  mSource = new ReferenceModel(repo, kinds, filterCurrentCommit, this);
+  mSource = new ReferenceModel(repo, kinds, this);
   model->setSourceModel(mSource);
   setModel(model);
 

@@ -806,7 +806,8 @@ void HunkWidget::setEditorLineInfos(QList<Line> &lines,
                                     int width) {
   qDebug() << "Patch lines:" << lines.count();
   for (int i = 0; i < lines.count(); i++) {
-    qDebug() << i << ") " << lines[i].print();
+    qDebug() << i << ") " << lines[i].print()
+             << "Content: " << mPatch.lineContent(mIndex, i);
   }
 
   qDebug() << "Staged linesStaged:" << mStaged.count();
@@ -879,14 +880,28 @@ void HunkWidget::setEditorLineInfos(QList<Line> &lines,
         lineOrigin != GIT_DIFF_LINE_DEL_EOFNL)
       createMarkersAndLineNumbers(line, lidx - skipPatchLines, comments, width);
 
-    // Switch to next staged patch if the line number is higher than the current
-    // staged patch contains
+    // Find matching lines if the first line of the staged patch is somewhere in
+    // the middle of the complete patch Switch to next staged patch if the line
+    // number is higher than the current staged patch contains
     if (!mPatch.isConflicted() && current_staged_index >= 0) {
       auto staged_header_struct_next =
           mStaged.header_struct(current_staged_index + 1);
       if (!first_staged_patch_match) {
-        if (mPatch.lineContent(mIndex, lidx) ==
-            mStaged.lineContent(current_staged_index, 0))
+        if ((lineOrigin == GIT_DIFF_LINE_CONTEXT ||
+             lineOrigin == GIT_DIFF_LINE_DELETION) &&
+            mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile) ==
+                mStaged.lineNumber(current_staged_index, 0,
+                                   git::Diff::OldFile)) {
+          first_staged_patch_match = true;
+          current_staged_line_idx = 0;
+        } else if (lineOrigin == GIT_DIFF_LINE_ADDITION &&
+                   /* If the staged line is not an addition, it cannot be that
+                      it will be matched */
+                   mStaged.lineOrigin(current_staged_index, 0) ==
+                       GIT_DIFF_LINE_ADDITION &&
+                   mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile) ==
+                       mStaged.lineNumber(current_staged_index, 0,
+                                          git::Diff::NewFile))
           first_staged_patch_match = true;
         current_staged_line_idx = 0;
       } else if (staged_header_struct_next &&
@@ -960,16 +975,16 @@ void HunkWidget::setEditorLineInfos(QList<Line> &lines,
         if (!mPatch.isConflicted() && mStaged.count() > 0 &&
             current_staged_index >= 0 &&
             current_staged_line_idx < mStaged.lineCount(current_staged_index)) {
-          auto line_origin =
+          const auto line_origin =
               mStaged.lineOrigin(current_staged_index, current_staged_line_idx);
-          auto staged_old_file =
+          const auto staged_old_file =
               mStaged.lineNumber(current_staged_index, current_staged_line_idx,
                                  git::Diff::OldFile);
-          auto patch_old_file =
+          const auto patch_old_file =
               mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile);
-          auto stagedContent = mStaged.lineContent(current_staged_index,
-                                                   current_staged_line_idx);
-          auto patchContent = mPatch.lineContent(mIndex, lidx);
+          const auto stagedContent = mStaged.lineContent(
+              current_staged_index, current_staged_line_idx);
+          const auto patchContent = mPatch.lineContent(mIndex, lidx);
           if (line_origin == '-' && staged_old_file == patch_old_file) {
             assert(mStaged.lineContent(current_staged_index,
                                        current_staged_line_idx) ==

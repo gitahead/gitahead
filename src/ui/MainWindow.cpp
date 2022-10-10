@@ -72,6 +72,7 @@ MainWindow::MainWindow(const git::Repository &repo, QWidget *parent,
 
   // Create new menu bar for this window if there isn't a shared one.
   mMenuBar = MenuBar::instance(this);
+  mMenuBar->registerActions(this);
 
   // Create tool bar.
   mToolBar = new ToolBar(this);
@@ -97,8 +98,14 @@ MainWindow::MainWindow(const git::Repository &repo, QWidget *parent,
   mFullPath = Settings::instance()->value("window/path/full").toBool();
   connect(Settings::instance(), &Settings::settingsChanged, this,
           [this](bool refresh) {
-            bool fullPath =
-                Settings::instance()->value("window/path/full").toBool();
+            Settings *settings = Settings::instance();
+
+            bool menuBarHidden =
+                settings->value("window/view/menuBarHidden").toBool();
+            if (mMenuBar->isHidden() != menuBarHidden)
+              mMenuBar->setHidden(menuBarHidden);
+
+            bool fullPath = settings->value("window/path/full").toBool();
             if (mFullPath != fullPath) {
               mFullPath = fullPath;
               updateWindowTitle();
