@@ -93,6 +93,8 @@ public:
                              const QString &overrideEmail = QString()) const;
 
   Signature signature(const QString &name, const QString &email);
+  Signature signature(const QString &name, const QString &email,
+                      const QDateTime &date);
 
   // ignore
   bool isIgnored(const QString &path) const;

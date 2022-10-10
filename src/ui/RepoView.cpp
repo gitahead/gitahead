@@ -2148,11 +2148,12 @@ void RepoView::promptToAmend(const git::Commit &commit) {
                             commit.message(), this);
   d->setAttribute(Qt::WA_DeleteOnClose);
   connect(d, &QDialog::accepted, [this, d, commit]() {
-    git::Signature author = mRepo.signature(d->authorName(), d->authorEmail());
-    git::Signature committer =
-        mRepo.signature(d->committerName(), d->committerEmail());
+    auto info = d->getInfo();
 
-    amend(commit, author, committer, d->commitMessage());
+    git::Signature author = getSignature(info.authorInfo);
+    git::Signature committer = getSignature(info.committerInfo);
+
+    amend(commit, author, committer, info.commitMessage);
   });
 
   d->show();
@@ -2910,6 +2911,13 @@ bool RepoView::checkForConflicts(LogEntry *parent, const QString &action) {
 
   refresh();
   return true;
+}
+
+git::Signature RepoView::getSignature(const ContributorInfo &info) {
+  if (info.commitDateType != ContributorInfo::SelectedDateTimeType::Current)
+    return mRepo.signature(info.name, info.email, info.commitDate);
+
+  return mRepo.signature(info.name, info.email);
 }
 
 bool RepoView::match(QObject *search, QObject *parent) {

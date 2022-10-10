@@ -192,6 +192,11 @@ Signature Repository::signature(const QString &name, const QString &email) {
   return Signature(name, email);
 }
 
+Signature Repository::signature(const QString &name, const QString &email,
+                                const QDateTime &date) {
+  return Signature(name, email, date);
+}
+
 Signature Repository::defaultSignature(bool *fake, const QString &overrideUser,
                                        const QString &overrideEmail) const {
   QString name, email;

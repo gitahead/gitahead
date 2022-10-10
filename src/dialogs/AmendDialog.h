@@ -1,23 +1,41 @@
 #include <QDialog>
+#include <QDateTime>
 #include "git/Signature.h"
 
 class QLineEdit;
 class QTextEdit;
+class QCheckBox;
+class QDateTimeEdit;
+class DateSelectionGroupWidget;
+class QLabel;
+class InfoBox;
+class AmendDialog;
+
+struct ContributorInfo {
+  enum class SelectedDateTimeType { Current, Manual, Original };
+  QString name;
+  QString email;
+  QDateTime commitDate;
+  SelectedDateTimeType commitDateType;
+};
+
+struct AmendInfo {
+  ContributorInfo authorInfo;
+  ContributorInfo committerInfo;
+  QString commitMessage;
+};
 
 class AmendDialog : public QDialog {
 public:
   AmendDialog(const git::Signature &author, const git::Signature &committer,
               const QString &commitMessage, QWidget *parent = nullptr);
-  QString authorName() const;
-  QString authorEmail() const;
-  QString committerName() const;
-  QString committerEmail() const;
-  QString commitMessage() const;
+
+  AmendInfo getInfo() const;
 
 private:
-  QLineEdit *m_authorName;
-  QLineEdit *m_authorEmail;
-  QLineEdit *m_committerName;
-  QLineEdit *m_committerEmail;
+  QString commitMessage() const;
+
+  InfoBox *m_authorInfo;
+  InfoBox *m_committerInfo;
   QTextEdit *m_commitMessage;
 };
