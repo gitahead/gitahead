@@ -18,6 +18,7 @@
 #include "ViewDelegate.h"
 #include "conf/Settings.h"
 #include "DiffView/DiffView.h"
+#include "git/Index.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -26,6 +27,8 @@
 #include <QSettings>
 #include <QStackedWidget>
 #include <QButtonGroup>
+#include <qnamespace.h>
+#include <qtreeview.h>
 
 namespace {
 
@@ -62,6 +65,21 @@ private:
 };
 
 } // namespace
+
+static void showFileContextMenu(const QPoint &pos, RepoView *view,
+                                QTreeView *tree) {
+  QStringList files;
+  QModelIndexList indexes = tree->selectionModel()->selectedIndexes();
+  foreach (const QModelIndex &index, indexes)
+    files.append(index.data(Qt::EditRole).toString());
+
+  if (files.isEmpty())
+    return;
+
+  auto menu = new FileContextMenu(view, files, git::Index(), tree);
+  menu->setAttribute(Qt::WA_DeleteOnClose);
+  menu->popup(tree->mapToGlobal(pos));
+}
 
 DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
     : ContentWidget(parent) {
@@ -116,15 +134,22 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
   QWidget *fileView = new QWidget(this);
   fileView->setLayout(fileViewLayout);
 
+  auto *repoView = qobject_cast<RepoView *>(parent->parent());
+
   // second column
   // staged files
   QVBoxLayout *vBoxLayout = new QVBoxLayout();
   stagedFiles = new TreeView(this, "Staged");
   stagedFiles->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
   stagedFiles->setSelectionMode(QAbstractItemView::ExtendedSelection);
+  stagedFiles->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(stagedFiles, &QWidget::customContextMenuRequested,
+          [this, repoView](const QPoint &pos) {
+            showFileContextMenu(pos, repoView, stagedFiles);
+          });
+
   mDiffTreeModel = new DiffTreeModel(repo, this);
   mDiffView->setModel(mDiffTreeModel);
-  auto *repoView = qobject_cast<RepoView *>(parent->parent());
   Q_ASSERT(repoView);
   connect(mDiffTreeModel, &DiffTreeModel::updateSubmodules,
           [repoView](const QList<git::Submodule> &submodules, bool recursive,
@@ -158,6 +183,12 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
   unstagedFiles = new TreeView(this, "Unstaged");
   unstagedFiles->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
   unstagedFiles->setSelectionMode(QAbstractItemView::ExtendedSelection);
+  unstagedFiles->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(unstagedFiles, &QWidget::customContextMenuRequested,
+          [this, repoView](const QPoint &pos) {
+            showFileContextMenu(pos, repoView, unstagedFiles);
+          });
+
   TreeProxy *treewrapperUnstaged = new TreeProxy(false, this);
   treewrapperUnstaged->setSourceModel(mDiffTreeModel);
   unstagedFiles->setModel(treewrapperUnstaged);
@@ -380,24 +411,6 @@ void DoubleTreeWidget::find() { mEditor->find(); }
 void DoubleTreeWidget::findNext() { mEditor->findNext(); }
 
 void DoubleTreeWidget::findPrevious() { mEditor->findPrevious(); }
-
-void DoubleTreeWidget::contextMenuEvent(QContextMenuEvent *event) {
-  QStringList files;
-  QModelIndexList indexes = unstagedFiles->selectionModel()->selectedIndexes();
-  foreach (const QModelIndex &index, indexes)
-    files.append(index.data(Qt::EditRole).toString());
-
-  indexes = stagedFiles->selectionModel()->selectedIndexes();
-  foreach (const QModelIndex &index, indexes)
-    files.append(index.data(Qt::EditRole).toString());
-
-  if (files.isEmpty())
-    return;
-
-  RepoView *view = RepoView::parentView(this);
-  FileContextMenu menu(view, files);
-  menu.exec(event->globalPos());
-}
 
 void DoubleTreeWidget::cancelBackgroundTasks() { mEditor->cancelBlame(); }
 
