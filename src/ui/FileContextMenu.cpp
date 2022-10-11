@@ -181,6 +181,7 @@ FileContextMenu::FileContextMenu(RepoView *view, const QStringList &files,
 
       QString text = tr("Discard Changes");
       QPushButton *discard = dialog->addButton(text, QMessageBox::AcceptRole);
+      discard->setObjectName("DiscardButton");
       connect(discard, &QPushButton::clicked, [view, modified] {
         git::Repository repo = view->repo();
         int strategy = GIT_CHECKOUT_FORCE;
