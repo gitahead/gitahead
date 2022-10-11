@@ -58,6 +58,9 @@ void TestFileContextMenu::testDiscardFile() {
   // refresh repo
   repo.notifier()->referenceUpdated(repo.head());
 
+  // let the changes settle
+  QApplication::processEvents();
+
   QStringList files = {"file.txt"};
   FileContextMenu m(repoView, files, repo.index());
 
@@ -78,16 +81,16 @@ void TestFileContextMenu::testDiscardFile() {
   button->clicked(true);
 
   // original text
-  //  {"file.txt", "File.txt"},
-  //  {"file2.txt", "file2.txt"},
-  //  {"folder1/file.txt", "file in folder1"},
-  //  {"folder1/file2.txt", "file2 in folder1"},
+  //  {"file.txt", "File.txt\n"},
+  //  {"file2.txt", "file2.txt\n"},
+  //  {"folder1/file.txt", "file in folder1\n"},
+  //  {"folder1/file2.txt", "file2 in folder1\n"},
   //  {"GittyupTestRepo/README.md",
-  //   "# GittyupTestRepo\nTest repo for Gittyup used in the unittests"},
+  //   "# GittyupTestRepo\nTest repo for Gittyup used in the unittests\n"},
 
   {
     QHash<QString, QString> fileContentRef = fileContent;
-    fileContentRef.insert("file.txt", "File.txt"); // this file was discarded
+    fileContentRef.insert("file.txt", "File.txt\n"); // this file was discarded
     QHashIterator<QString, QString> i(fileContentRef);
     while (i.hasNext()) {
       i.next();
