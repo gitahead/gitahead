@@ -170,7 +170,7 @@ FileContextMenu::FileContextMenu(RepoView *view, const QStringList &files,
       }
     }
 
-    QAction *discard = addAction(tr("Discard Changes"), [view, modified] {
+    addAction(tr("Discard Changes"), [view, modified] {
       QMessageBox *dialog = new QMessageBox(
           QMessageBox::Warning, tr("Discard Changes?"),
           tr("Are you sure you want to discard changes in the selected files?"),
@@ -387,21 +387,19 @@ FileContextMenu::FileContextMenu(RepoView *view, const QStringList &files,
 }
 
 void FileContextMenu::ignoreFile() {
-  QString ignore;
-
   if (!mFiles.count())
     return;
 
-  for (int i = 0; i < mFiles.count() - 1; i++) {
-    ignore.append(mFiles[i] + "\n");
-  }
-  ignore.append(mFiles.last());
+  auto d = new IgnoreDialog(mFiles.join('\n'), parentWidget());
+  d->setAttribute(Qt::WA_DeleteOnClose);
 
-  IgnoreDialog d(ignore, this);
-  if (d.exec()) {
+  connect(d, &QDialog::accepted, [d, this]() {
+    auto ignore = d->ignoreText();
     if (!ignore.isEmpty())
       mView->ignore(ignore);
-  }
+  });
+
+  d->open();
 }
 
 bool FileContextMenu::exportFile(const RepoView *view, const QString &folder,

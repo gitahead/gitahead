@@ -33,7 +33,7 @@ private:
                   const QString &file);
 
   RepoView *mView;
-  const QStringList &mFiles;
+  QStringList mFiles;
 };
 
 #endif

@@ -5,8 +5,8 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 
-IgnoreDialog::IgnoreDialog(QString &ignore, QWidget *parent)
-    : QDialog(parent), mIgnoreText(ignore) {
+IgnoreDialog::IgnoreDialog(const QString &ignore, QWidget *parent)
+    : QDialog(parent) {
   QLabel *lbl = new QLabel(tr("Ignore Pattern"));
   mIgnore = new QTextEdit(this);
   mIgnore->setText(ignore);
@@ -23,12 +23,8 @@ IgnoreDialog::IgnoreDialog(QString &ignore, QWidget *parent)
 
   setLayout(vBox);
 
-  connect(mButtonBox, &QDialogButtonBox::accepted, this,
-          &IgnoreDialog::applyIgnore);
+  connect(mButtonBox, &QDialogButtonBox::accepted, this, &IgnoreDialog::accept);
   connect(mButtonBox, &QDialogButtonBox::rejected, this, &IgnoreDialog::reject);
 }
 
-void IgnoreDialog::applyIgnore() {
-  mIgnoreText = mIgnore->toPlainText();
-  accept();
-}
+QString IgnoreDialog::ignoreText() const { return mIgnore->toPlainText(); }
