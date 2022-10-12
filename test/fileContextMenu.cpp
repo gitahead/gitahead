@@ -62,7 +62,7 @@ void TestFileContextMenu::testDiscardFile() {
   FileContextMenu m(repoView, files, repo.index());
 
   QAction *action = nullptr;
-  for (auto a : m.actions()) {
+  for (auto* a : m.actions()) {
     if (a->text() == tr("Discard Changes")) {
       action = a;
       break;
@@ -75,7 +75,7 @@ void TestFileContextMenu::testDiscardFile() {
   QVERIFY(msgBox);
   auto *button = msgBox->findChild<QPushButton *>("DiscardButton");
   QVERIFY(button);
-  button->clicked(true);
+  emit button->clicked(true);
 
   // original text
   //  {"file.txt", "File.txt"},
