@@ -205,6 +205,7 @@ FileContextMenu::FileContextMenu(RepoView *view, const QStringList &files,
 
     // Ignore
     QAction *ignore = addAction(tr("Ignore"));
+    ignore->setObjectName("IgnoreAction");
     connect(ignore, &QAction::triggered, this, &FileContextMenu::ignoreFile);
 
     if (!diff.isValid()) {
