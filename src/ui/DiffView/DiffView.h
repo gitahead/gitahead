@@ -122,6 +122,7 @@ private:
   void fetchMore();
   void fetchAll(int index = -1);
   void indexChanged(const QStringList &paths);
+  void loadStagedPatches();
 
   git::Diff mDiff;
   QMap<QString, int> mStagedPatches;
