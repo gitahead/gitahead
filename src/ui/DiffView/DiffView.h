@@ -124,7 +124,8 @@ private:
   void indexChanged(const QStringList &paths);
 
   git::Diff mDiff;
-  QMap<QString, git::Patch> mStagedPatches;
+  QMap<QString, int> mStagedPatches;
+  git::Diff mStagedDiff;
 
   QList<FileWidget *> mFiles;
   QList<QMetaObject::Connection> mConnections;

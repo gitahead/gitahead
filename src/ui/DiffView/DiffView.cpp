@@ -174,9 +174,9 @@ void DiffView::setDiff(const git::Diff &diff) {
   if (diff.isStatusDiff()) {
     if (git::Reference head = repo.head()) {
       if (git::Commit commit = head.target()) {
-        git::Diff stagedDiff = repo.diffTreeToIndex(commit.tree());
-        for (int i = 0; i < stagedDiff.count(); ++i)
-          mStagedPatches[stagedDiff.name(i)] = stagedDiff.patch(i);
+        mStagedDiff = repo.diffTreeToIndex(commit.tree());
+        for (int i = 0; i < mStagedDiff.count(); ++i)
+          mStagedPatches[mStagedDiff.name(i)] = i;
       }
     }
   }
@@ -265,15 +265,15 @@ void DiffView::diffTreeModelDataChanged(const QModelIndex &topLeft,
       if (mDiff.isStatusDiff()) {
         if (git::Reference head = repo.head()) {
           if (git::Commit commit = head.target()) {
-            git::Diff stagedDiff = repo.diffTreeToIndex(commit.tree());
-            for (int i = 0; i < stagedDiff.count(); ++i)
-              mStagedPatches[stagedDiff.name(i)] = stagedDiff.patch(i);
+            mStagedDiff = repo.diffTreeToIndex(commit.tree());
+            for (int i = 0; i < mStagedDiff.count(); ++i)
+              mStagedPatches[mStagedDiff.name(i)] = i;
           }
         }
       }
 
       QString filename = file->name();
-      git::Patch stagedPatch = mStagedPatches[file->name()];
+      git::Patch stagedPatch = mStagedDiff.patch(mStagedPatches[file->name()]);
       file->updateHunks(stagedPatch);
       file->setStageState(stageState);
 
@@ -397,7 +397,10 @@ void DiffView::fetchMore() {
     auto state = static_cast<git::Index::StagedState>(
         indices[i].data(Qt::CheckStateRole).toInt());
 
-    git::Patch staged = mStagedPatches.value(patch.name());
+    git::Patch staged;
+    const int index = mStagedPatches.value(patch.name(), -1);
+    if (index != -1)
+      staged = mStagedDiff.patch(index);
 
     git::Repository repo = view->repo();
     QString name = patch.name();
