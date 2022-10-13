@@ -34,6 +34,8 @@ private:
 
   RepoView *mView;
   QStringList mFiles;
+
+  friend class TestTreeView;
 };
 
 #endif
