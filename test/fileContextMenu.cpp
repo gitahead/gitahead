@@ -226,7 +226,7 @@ void TestFileContextMenu::testDiscardNothing() {
     }
   }
   QVERIFY(action);
-  action->triggered(true); // TODO: or hiding discard button?
+  QCOMPARE(action->isEnabled(), false);
 
   // original text
   //  {"file.txt", "File.txt\n"},
