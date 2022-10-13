@@ -48,6 +48,8 @@ public:
 
 private slots:
   void collapseCountChanged(int count);
+  static void showFileContextMenu(const QPoint &pos, RepoView *view,
+                                  QTreeView *tree);
 
 private:
   enum View {
@@ -101,5 +103,7 @@ private:
   bool mIgnoreSelectionChange{false};
 
   git::Diff mDiff;
+
+  friend class TestTreeView;
 };
 #endif // DOUBLETREEWIDGET_H

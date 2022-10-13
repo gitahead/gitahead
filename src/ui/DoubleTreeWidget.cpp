@@ -66,21 +66,6 @@ private:
 
 } // namespace
 
-static void showFileContextMenu(const QPoint &pos, RepoView *view,
-                                QTreeView *tree) {
-  QStringList files;
-  QModelIndexList indexes = tree->selectionModel()->selectedIndexes();
-  foreach (const QModelIndex &index, indexes)
-    files.append(index.data(Qt::EditRole).toString());
-
-  if (files.isEmpty())
-    return;
-
-  auto menu = new FileContextMenu(view, files, git::Index(), tree);
-  menu->setAttribute(Qt::WA_DeleteOnClose);
-  menu->popup(tree->mapToGlobal(pos));
-}
-
 DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
     : ContentWidget(parent) {
   // first column
@@ -307,6 +292,21 @@ QModelIndex DoubleTreeWidget::selectedIndex() const {
     return proxy->mapToSource(indexes.first());
   }
   return QModelIndex();
+}
+
+void DoubleTreeWidget::showFileContextMenu(const QPoint &pos, RepoView *view,
+                                           QTreeView *tree) {
+  QStringList files;
+  QModelIndexList indexes = tree->selectionModel()->selectedIndexes();
+  foreach (const QModelIndex &index, indexes)
+    files.append(index.data(Qt::EditRole).toString());
+
+  if (files.isEmpty())
+    return;
+
+  auto menu = new FileContextMenu(view, files, git::Index(), tree);
+  menu->setAttribute(Qt::WA_DeleteOnClose);
+  menu->popup(tree->mapToGlobal(pos));
 }
 
 QList<QModelIndex> DoubleTreeWidget::selectedIndices() const {
