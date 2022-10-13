@@ -469,6 +469,7 @@ void RepoView::clean(const QStringList &untracked) {
   mb.setDetailedText(untracked.join('\n'));
 
   QPushButton *remove = mb.addButton(tr("Remove"), QMessageBox::AcceptRole);
+  remove->setObjectName("RemoveButton");
   mb.addButton(QMessageBox::Cancel);
   mb.setDefaultButton(remove);
   mb.exec();

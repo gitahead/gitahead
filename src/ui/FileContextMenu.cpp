@@ -200,7 +200,7 @@ FileContextMenu::FileContextMenu(RepoView *view, const QStringList &files,
 
     QAction *remove = addAction(tr("Remove Untracked Files"),
                                 [view, untracked] { view->clean(untracked); });
-
+    remove->setObjectName("RemoveAction");
     remove->setEnabled(!untracked.isEmpty());
 
     // Ignore

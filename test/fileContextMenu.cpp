@@ -28,6 +28,7 @@ private slots:
   void testDiscardNothing();
   void testIgnoreFile();
   void testIgnoreFolder();
+  void testRemoveUntrackedFolder();
 };
 
 using namespace git;
@@ -362,6 +363,98 @@ void TestFileContextMenu::testIgnoreFolder() {
   QVERIFY(file.open(QFile::ReadOnly));
   const QString ignores = file.readAll();
   QCOMPARE(ignores, "folder1\n");
+}
+
+void TestFileContextMenu::testRemoveUntrackedFolder() {
+  INIT_REPO("TestRepository.zip", false);
+
+  git::Commit commit =
+      repo.lookupCommit("51198ba9b2b2b2c25ea6576cf7ca3e9f2a7c3fc7");
+  QVERIFY(commit);
+
+  // modifying all files
+  QHash<QString, QString> fileContent{
+      {"folder_new/file.txt", "Modified file"},
+      {"folder_new/file2.txt", "Modified file2"},
+  };
+
+  repo.workdir().mkdir("folder_new");
+
+  {
+    QHashIterator<QString, QString> i(fileContent);
+    while (i.hasNext()) {
+      i.next();
+      QFile file(repo.workdir().filePath(i.key()));
+      QVERIFY(file.open(QFile::WriteOnly));
+      file.write(i.value().toLatin1());
+    }
+  }
+
+  {
+    QHashIterator<QString, QString> i(fileContent);
+    while (i.hasNext()) {
+      i.next();
+      QFile file(repo.workdir().filePath(i.key()));
+      QCOMPARE(file.exists(), true);
+    }
+  }
+
+  // refresh repo
+  repo.notifier()->referenceUpdated(repo.head());
+
+  // let the changes settle
+  QApplication::processEvents();
+
+  QStringList files = {"folder_new"};
+  FileContextMenu m(repoView, files, repo.index(), repoView);
+
+  QAction *action = nullptr;
+  for (auto *a : m.actions()) {
+    if (a->objectName() == "RemoveAction") {
+      action = a;
+      break;
+    }
+  }
+  QVERIFY(action);
+  action->triggered(true);
+
+  // Click remove in dialog
+  auto *msgBox = repoView->findChild<QMessageBox *>();
+  QVERIFY(msgBox);
+  auto *button = msgBox->findChild<QPushButton *>("RemoveButton");
+  QVERIFY(button);
+  emit button->clicked(true);
+
+  // Check that files do not exist anymore
+  {
+    QHashIterator<QString, QString> i(fileContent);
+    while (i.hasNext()) {
+      i.next();
+      QFile file(repo.workdir().filePath(i.key()));
+      QCOMPARE(file.exists(), false);
+    }
+  }
+
+  // Check that other files are still available
+  {
+    // No file shall be discarded
+    QHash<QString, QString> fileContentRef = {
+        {"file.txt", "File.txt\n"},
+        {"file2.txt", "file2.txt\n"},
+        {"folder1/file.txt", "file in folder1\n"},
+        {"folder1/file2.txt", "file2 in folder1\n"},
+        {"GittyupTestRepo/README.md",
+         "# GittyupTestRepo\nTest repo for Gittyup used in the unittests\n"},
+    };
+    QHashIterator<QString, QString> i(fileContentRef);
+    while (i.hasNext()) {
+      i.next();
+      QFile file(repo.workdir().filePath(i.key()));
+      QVERIFY(file.exists());
+      QVERIFY(file.open(QFile::ReadOnly));
+      QVERIFY2(file.readAll() == i.value(), qPrintable(i.key()));
+    }
+  }
 }
 
 TEST_MAIN(TestFileContextMenu)
