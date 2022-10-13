@@ -267,7 +267,10 @@ void DiffView::diffTreeModelDataChanged(const QModelIndex &topLeft,
       loadStagedPatches();
 
       QString filename = file->name();
-      git::Patch stagedPatch = mStagedDiff.patch(mStagedPatches[file->name()]);
+      git::Patch stagedPatch;
+      const int index = mStagedPatches.value(file->name(), -1);
+      if (index != -1)
+        stagedPatch = mStagedDiff.patch(index);
       file->updateHunks(stagedPatch);
       file->setStageState(stageState);
 
