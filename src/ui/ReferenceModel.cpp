@@ -183,8 +183,6 @@ QModelIndex ReferenceModel::firstBranch() {
             ref.refs.at(1).annotatedCommit().commit() !=
                 mRepo.stashRef().annotatedCommit().commit())
           return createIndex(1, 0, ReferenceType::Branches);
-        else
-          return createIndex(0, 0, ReferenceType::Branches);
       } else if (ref.refs.count() > 0)
         return createIndex(0, 0, ReferenceType::Branches);
       break; // Remotes are already found so no need to continue searching
