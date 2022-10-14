@@ -104,7 +104,10 @@ void ReferenceModel::update() {
       branches.prepend(git::Reference());
 
     // Add bottom references.
-    if (mKinds & ReferenceView::Stash) {
+    const bool stashOnCommit =
+        !mCommit.isValid() ||
+        mRepo.stashRef().annotatedCommit().commit() == mCommit;
+    if ((mKinds & ReferenceView::Stash) || stashOnCommit) {
       if (git::Reference stash = mRepo.stashRef())
         branches.append(stash);
     }
