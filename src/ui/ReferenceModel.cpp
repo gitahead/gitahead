@@ -107,7 +107,7 @@ void ReferenceModel::update() {
     const bool stashOnCommit =
         !mCommit.isValid() ||
         mRepo.stashRef().annotatedCommit().commit() == mCommit;
-    if ((mKinds & ReferenceView::Stash) || stashOnCommit) {
+    if ((mKinds & ReferenceView::Stash) && stashOnCommit) {
       if (git::Reference stash = mRepo.stashRef())
         branches.append(stash);
     }
