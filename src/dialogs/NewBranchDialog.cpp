@@ -30,8 +30,10 @@ NewBranchDialog::NewBranchDialog(const git::Repository &repo,
   auto kinds = ReferenceView::InvalidRef | ReferenceView::RemoteBranches;
   mUpstream = new ReferenceList(repo, kinds, this);
 
-  mRefs = new ReferenceList(
-      repo, ReferenceView::AllRefs | ReferenceView::InvalidRef, this);
+  kinds = ReferenceView::AllRefs;
+  if (commit.isValid())
+    kinds |= ReferenceView::InvalidRef;
+  mRefs = new ReferenceList(repo, kinds, this);
   mRefs->select(repo.head());
   mRefs->setCommit(commit);
 
