@@ -91,7 +91,7 @@ void ReferenceModel::update() {
       const bool branchOnCommit =
           !mCommit.isValid() || branch.annotatedCommit().commit() == mCommit;
       if ((!(mKinds & ReferenceView::ExcludeHead) || !branch.isHead()) &&
-          (branchOnCommit || !mCommit.isValid()))
+          branchOnCommit)
         branches.append(branch);
     }
 
@@ -121,8 +121,7 @@ void ReferenceModel::update() {
       qDebug() << "ReferenceView: Remote branches: " << branch.name();
       const bool remoteOnCommit =
           !mCommit.isValid() || branch.annotatedCommit().commit() == mCommit;
-      if (!branch.name().endsWith("HEAD") &&
-          (remoteOnCommit || !mCommit.isValid()))
+      if (!branch.name().endsWith("HEAD") && remoteOnCommit)
         remotes.append(branch);
     }
 
@@ -140,7 +139,7 @@ void ReferenceModel::update() {
       qDebug() << "ReferenceView: Tags: " << tag.name();
       const bool tagOnCommit =
           !mCommit.isValid() || tag.annotatedCommit().commit() == mCommit;
-      if (tagOnCommit || !mCommit.isValid())
+      if (tagOnCommit)
         tags.append(tag);
     }
 
