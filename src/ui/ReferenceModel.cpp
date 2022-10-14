@@ -171,13 +171,19 @@ QModelIndex ReferenceModel::firstRemote() {
 
 QModelIndex ReferenceModel::firstBranch() {
   // Return first branch if available, otherwise an invalid modelIndex
+  // Ignore stash
   for (auto &ref : mRefs) {
     if (ref.type == ReferenceType::Branches && ref.refs.count() > 0) {
       if (mKinds & ReferenceView::InvalidRef) {
-        if (ref.refs.count() >
-            1) // use the first valid ref after the invalid ref
+        // use the first valid ref after the invalid ref but only
+        // it is not the stash
+        if (ref.refs.count() > 1 &&
+            ref.refs.at(1).annotatedCommit().commit() !=
+                mRepo.stashRef().annotatedCommit().commit())
           return createIndex(1, 0, ReferenceType::Branches);
-      } else
+        else
+          return createIndex(0, 0, ReferenceType::Branches);
+      } else if (ref.refs.count() > 0)
         return createIndex(0, 0, ReferenceType::Branches);
       break; // Remotes are already found so no need to continue searching
     }
