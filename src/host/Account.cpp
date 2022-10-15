@@ -11,6 +11,7 @@
 #include "Beanstalk.h"
 #include "Bitbucket.h"
 #include "GitHub.h"
+#include "Gitea.h"
 #include "GitLab.h"
 #include "cred/CredentialHelper.h"
 #include <QFileInfo>
@@ -136,6 +137,9 @@ QIcon Account::icon(Kind kind) {
     case Account::GitHub:
       name = "github";
       break;
+    case Account::Gitea:
+      name = "gitea";
+      break;
     case Account::Bitbucket:
       name = "bitbucket";
       break;
@@ -184,6 +188,10 @@ QString Account::helpText(Kind kind) {
           "command-line/'>personal access token</a> in the password field "
           "instead.");
 
+    case Gitea:
+      return tr(
+          "<b>Note:</b> Only Basic authentication is currently supported ");
+
     case GitLab:
       return tr("<b>Note:</b> Basic authentication is not supported. Use a "
                 "<a href='https://docs.gitlab.com/ee/user/profile/personal_"
@@ -200,6 +208,8 @@ QString Account::defaultUrl(Kind kind) {
   switch (kind) {
     case GitHub:
       return GitHub::defaultUrl();
+    case Gitea:
+      return Gitea::defaultUrl();
     case Bitbucket:
       return Bitbucket::defaultUrl();
     case Beanstalk:
