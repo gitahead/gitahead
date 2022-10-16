@@ -6,9 +6,10 @@ Bug fix and feature release
 * Add support for solving merge conflicts for whole files
 * Solving binary conflicts directly in Gittyup
 * Support rebasing with conflict solving
-* implement amending commits
+* Implement amending commits
 * Possibility to init submodules after clone (Settings - General - Update submodules after pull and clone)
 * Hiding menu bar (Application Settings - Window - Hide Menubar)
+* Implement support for Gitea instances
 
 #### Changed
 * Fix Segmentation fault when using space to stage files
@@ -22,6 +23,7 @@ Bug fix and feature release
 * Fix rebase log messages during rebase
 * Improve SSH config handling
 * Application settings and repository settings can now be selected with a single settings button
+* Use the full file context menu for the staging file list
 
 ----
 
