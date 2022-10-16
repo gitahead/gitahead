@@ -45,6 +45,23 @@ set(BUILD_SHARED_LIBS OFF)
 
 option(FLATPAK "Building for flatpak" OFF)
 option(DEBUG_FLATPAK "Building but using flatpak urls for testing" OFF)
+option(USE_SYSTEM_OPENSSL "Use the system-wide OpenSSL installation" OFF)
+option(
+  USE_SYSTEM_LIBGIT2
+  "Use the system-wide libgit2 installation (Gittyup requires the current development branch)"
+  OFF)
+option(USE_SYSTEM_LIBSSH2 "Use the system-wide libssh2 installation" OFF)
+option(USE_SYSTEM_GIT "Use the system-wide GIT installation" OFF)
+option(USE_SYSTEM_QT "Don't copy QT files into the installation directory" OFF)
+option(USE_SYSTEM_LUA "Use the system-wide Lua installation" OFF)
+option(USE_SYSTEM_HUNSPELL "Use the system-wide hunspell installation" OFF)
+option(USE_SYSTEM_CMARK "Use the system-wide cmark installation" OFF)
+
+set(LUA_MODULES_PATH
+    CACHE
+      PATH
+      "Path to the directory with native Lua modules (only relevant if system-wide Lua installation is used)"
+)
 
 # Require C++17.
 set(CMAKE_CXX_STANDARD 17)
@@ -66,6 +83,11 @@ set(QT_MODULES
 
 if(UNIX)
   set(QT_MODULES ${QT_MODULES} DBus)
+endif()
+
+option(DEBUG_OUTPUT "Print debug output" ON)
+if(NOT DEBUG_OUTPUT)
+  add_compile_definitions(QT_NO_DEBUG_OUTPUT)
 endif()
 
 find_package(
@@ -105,5 +127,5 @@ endif()
 add_subdirectory(dep)
 add_subdirectory(src)
 add_subdirectory(l10n)
-add_subdirectory(test)
 add_subdirectory(pack)
+add_subdirectory(test)

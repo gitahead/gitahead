@@ -19,7 +19,7 @@ endif()
 
 if(FLATPAK)
   qt_import_plugins(gittyup INCLUDE ${QT_PLUGINS})
-else()
+elseif(NOT USE_SYSTEM_QT)
   foreach(QT_PLUGIN ${QT_PLUGINS})
     if(NOT TARGET Qt5::${QT_PLUGIN})
       if(UNIX OR APPLE)
@@ -68,9 +68,7 @@ else()
         )" COMPONENT ${GITTYUP_NAME})
     endif()
   endforeach()
-endif()
 
-if(NOT FLATPAK)
   # Install Qt libraries.
   foreach(QT_MODULE ${QT_MODULES})
     get_target_property(QT_LIBRARY Qt5::${QT_MODULE}
@@ -122,31 +120,33 @@ if(NOT FLATPAK)
       endif()
     endif()
   endforeach()
+endif()
 
-  # Install XcbQpa library.
-  if(UNIX AND NOT APPLE)
-    set(LIB_NAME libQt5XcbQpa)
-    get_target_property(QT_CORE_LIBRARY Qt5::Core LOCATION)
-    get_filename_component(LIB_PATH ${QT_CORE_LIBRARY} PATH)
-    get_filename_component(LIB_EXT ${QT_CORE_LIBRARY} EXT)
+# Install XcbQpa library.
+if(UNIX AND NOT APPLE)
+  set(LIB_NAME libQt5XcbQpa)
+  get_target_property(QT_CORE_LIBRARY Qt5::Core LOCATION)
+  get_filename_component(LIB_PATH ${QT_CORE_LIBRARY} PATH)
+  get_filename_component(LIB_EXT ${QT_CORE_LIBRARY} EXT)
 
-    install(
-      FILES "${LIB_PATH}/${LIB_NAME}${LIB_EXT}"
-      DESTINATION .
-      PERMISSIONS
-        OWNER_READ
-        OWNER_WRITE
-        OWNER_EXECUTE
-        GROUP_READ
-        GROUP_EXECUTE
-        WORLD_READ
-        WORLD_EXECUTE
-      COMPONENT ${GITTYUP_NAME}
-      RENAME ${LIB_NAME}.so.5)
-  endif()
+  install(
+    FILES "${LIB_PATH}/${LIB_NAME}${LIB_EXT}"
+    DESTINATION .
+    PERMISSIONS
+      OWNER_READ
+      OWNER_WRITE
+      OWNER_EXECUTE
+      GROUP_READ
+      GROUP_EXECUTE
+      WORLD_READ
+      WORLD_EXECUTE
+    COMPONENT ${GITTYUP_NAME}
+    RENAME ${LIB_NAME}.so.5)
+endif()
 
-  # Install SSL libraries.
-  if(NOT APPLE)
+# Install SSL libraries.
+if(NOT APPLE)
+  if(NOT USE_SYSTEM_OPENSSL)
     if(WIN32)
       if(CMAKE_SIZEOF_VOID_P EQUAL 8)
         set(SSL_LIB_SUFFIX "-1_1-x64.dll")
@@ -192,10 +192,10 @@ if(NOT FLATPAK)
 endif()
 
 if(UNIX AND NOT APPLE)
-    install(
-      DIRECTORY ${RSRC_DIR}/Gittyup.iconset
-      DESTINATION ${CMAKE_INSTALL_DATADIR}/Gittyup/Resources
-      COMPONENT ${GITTYUP_NAME})
+  install(
+    DIRECTORY ${RSRC_DIR}/Gittyup.iconset
+    DESTINATION "Resources"
+    COMPONENT ${GITTYUP_NAME})
 endif()
 
 # Sign bundle on macOS.

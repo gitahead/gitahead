@@ -56,16 +56,19 @@ void TestReferenceList::test() {
       qWait(300);
   }
   QVERIFY(view);
+  git::Repository repo = view->repo();
+  QVERIFY(repo.isValid());
+  initRepo(repo);
 
   const ReferenceView::Kinds kRefKinds =
       ReferenceView::InvalidRef | ReferenceView::LocalBranches |
       ReferenceView::RemoteBranches | ReferenceView::Tags;
-  ReferenceList *rl = new ReferenceList(view->repo(), kRefKinds);
+  ReferenceList *rl = new ReferenceList(repo, kRefKinds);
 
   {
     // Only one tag
     git::Commit commit =
-        view->repo().lookupCommit("99219268e1f838b0da616761fd7a184676965a69");
+        repo.lookupCommit("99219268e1f838b0da616761fd7a184676965a69");
     QVERIFY(commit.isValid());
     rl->setCommit(commit);
     QVERIFY(rl->target().isValid());
@@ -75,7 +78,7 @@ void TestReferenceList::test() {
   {
     // Only one remote
     git::Commit commit =
-        view->repo().lookupCommit("79f4bee33320391fa99a8ef3f504b2ba229a8181");
+        repo.lookupCommit("79f4bee33320391fa99a8ef3f504b2ba229a8181");
     QVERIFY(commit.isValid());
     rl->setCommit(commit);
     QVERIFY(rl->target().isValid());
@@ -85,7 +88,7 @@ void TestReferenceList::test() {
   {
     // Only one branch
     git::Commit commit =
-        view->repo().lookupCommit("54ecb63965b50287ceb73095c72f344c1611d94a");
+        repo.lookupCommit("54ecb63965b50287ceb73095c72f344c1611d94a");
     QVERIFY(commit.isValid());
     rl->setCommit(commit);
     QVERIFY(rl->target().isValid());
@@ -95,7 +98,7 @@ void TestReferenceList::test() {
   {
     // No branch, no remote, no tag
     git::Commit commit =
-        view->repo().lookupCommit("63460da2b069250c34506249516029f2ba7c6057");
+        repo.lookupCommit("63460da2b069250c34506249516029f2ba7c6057");
     QVERIFY(commit.isValid());
     rl->setCommit(commit);
     QVERIFY(rl->target().isValid());

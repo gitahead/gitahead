@@ -206,7 +206,10 @@ execute_process(COMMAND
     COMPONENT ${GITTYUP_NAME})
 else()
   # must be ./ otherwise it is interpreted as absolute path
-  set(RESOURCES_INSTALL_DIR "${CMAKE_INSTALL_DATADIR}/Gittyup/Resources")
+  set(RESOURCES_INSTALL_DIR
+      "Resources"
+      CACHE STRING "The path for installing resource files")
+
   # Install config files.
   if(CHANGELOG_HTML
      AND ACKNOWLEDGMENTS_HTML
@@ -224,11 +227,21 @@ else()
     DESTINATION ${RESOURCES_INSTALL_DIR}
     COMPONENT ${GITTYUP_NAME})
 
+  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${EMOJI}
+                          ${CMAKE_BINARY_DIR}/Resources/emoji.json)
+  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MERGETOOLS}
+                          ${CMAKE_BINARY_DIR}/Resources/mergetools)
+
   foreach(CONFIG_FILE ${CONFIG_FILES})
     install(
       FILES ${CONFIG_FILE}
       DESTINATION ${RESOURCES_INSTALL_DIR}
       COMPONENT ${GITTYUP_NAME})
+
+    file(RELATIVE_PATH CONFIG_FILE_DEST ${CONF_DIR} ${CONFIG_FILE})
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CONFIG_FILE}
+              ${CMAKE_BINARY_DIR}/Resources/${CONFIG_FILE_DEST})
   endforeach()
 
   install(
@@ -236,20 +249,43 @@ else()
     DESTINATION ${RESOURCES_INSTALL_DIR}/dictionaries
     COMPONENT ${GITTYUP_NAME})
 
+  foreach(DICTIONARY ${DICTIONARIES})
+    file(RELATIVE_PATH DICTIONARY_DEST ${CONF_DIR} ${DICTIONARY})
+    execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DICTIONARY}
+                            ${CMAKE_BINARY_DIR}/Resources/${DICTIONARY_DEST})
+  endforeach()
+
   install(
     FILES ${THEMES}
     DESTINATION ${RESOURCES_INSTALL_DIR}/themes
     COMPONENT ${GITTYUP_NAME})
+
+  foreach(THEME ${THEMES})
+    file(RELATIVE_PATH THEME_DEST ${CONF_DIR} ${THEME})
+    execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${THEME}
+                            ${CMAKE_BINARY_DIR}/Resources/${THEME_DEST})
+  endforeach()
 
   install(
     FILES ${LUA_PLUGINS}
     DESTINATION ${RESOURCES_INSTALL_DIR}/plugins
     COMPONENT ${GITTYUP_NAME})
 
+  foreach(LUA_PLUGIN ${LUA_PLUGINS})
+    file(RELATIVE_PATH LUA_PLUGIN_DEST ${CONF_DIR} ${LUA_PLUGIN})
+    execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${LUA_PLUGIN}
+                            ${CMAKE_BINARY_DIR}/Resources/${LUA_PLUGIN_DEST})
+  endforeach()
+
   foreach(SCINTILLUA_LEXER ${SCINTILLUA_LEXERS})
     install(
       FILES ${SCINTILLUA_LEXER}
       DESTINATION ${RESOURCES_INSTALL_DIR}/lexers
       COMPONENT ${GITTYUP_NAME})
+
+    get_filename_component(SCINTILLUA_LEXER_DEST ${SCINTILLUA_LEXER} NAME)
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${SCINTILLUA_LEXER}
+              ${CMAKE_BINARY_DIR}/Resources/lexers/${SCINTILLUA_LEXER_DEST})
   endforeach()
 endif()

@@ -12,7 +12,8 @@
   QString path = Test::extractRepository(repoPath, useTempDir);                \
   QVERIFY(!path.isEmpty());                                                    \
   git::Repository repo = git::Repository::open(path);                          \
-  QVERIFY(repo.isValid());
+  QVERIFY(repo.isValid());                                                     \
+  Test::initRepo(repo);
 
 using namespace QTest;
 

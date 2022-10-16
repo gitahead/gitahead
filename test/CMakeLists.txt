@@ -2,7 +2,7 @@
 macro(test)
   cmake_parse_arguments(ARG "NO_WIN32_OFFSCREEN" "NAME" "" ${ARGN})
 
-  add_executable(test_${ARG_NAME} ${ARG_NAME}.cpp)
+  add_executable(test_${ARG_NAME} EXCLUDE_FROM_ALL ${ARG_NAME}.cpp)
   target_link_libraries(test_${ARG_NAME} testlib)
 
   set_target_properties(test_${ARG_NAME} PROPERTIES OUTPUT_NAME ${ARG_NAME}
@@ -69,8 +69,10 @@ add_custom_target(
 enable_testing()
 
 # Add test library.
+set(CMAKE_DISABLE_TESTING ON)
 add_subdirectory(dep/zip)
-add_library(testlib Test.cpp)
+
+add_library(testlib EXCLUDE_FROM_ALL Test.cpp)
 target_link_libraries(testlib app git ui Qt5::Test zip)
 target_include_directories(testlib PRIVATE ${CMAKE_SOURCE_DIR}/src)
 target_compile_definitions(
@@ -79,12 +81,17 @@ target_compile_definitions(
   PUBLIC SSH_CONFIG="${CMAKE_CURRENT_SOURCE_DIR}"
   PUBLIC GIT_EXECUTABLE="${GIT_EXECUTABLE}")
 
+execute_process(
+  COMMAND
+    ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_CURRENT_BINARY_DIR}/../Resources/
+    ${CMAKE_CURRENT_BINARY_DIR}/Resources)
+
 # Add tests.
 test(NAME bare_repo)
 test(NAME init_repo)
 test(NAME merge)
 test(NAME external_tools_dialog)
-test(NAME config)
 test(NAME branches_panel NO_WIN32_OFFSCREEN)
 test(NAME editor NO_WIN32_OFFSCREEN)
 test(NAME index)
@@ -93,7 +100,6 @@ test(NAME log)
 test(NAME main_window)
 test(NAME new_branch_dialog)
 test(NAME sanity)
-test(NAME HunkWidget)
 test(NAME Diff)
 test(NAME EditorLineInfos)
 test(NAME CommitAuthorCommitter)
@@ -103,3 +109,8 @@ test(NAME Submodule)
 test(NAME referencelist)
 test(NAME amend)
 test(NAME SshConfig)
+
+option(GITTYUP_CI_TESTS "Run tests that change global settings" OFF)
+if(GITTYUP_CI_TESTS)
+  test(NAME config)
+endif()
