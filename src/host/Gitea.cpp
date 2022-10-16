@@ -4,7 +4,7 @@
 // This software is licensed under the MIT License. The LICENSE.md file
 // describes the conditions under which this software may be distributed.
 //
-// Author: Jason Haslam
+// Author: Jason Haslam, Odin Vex
 //
 
 #include "Gitea.h"
@@ -169,9 +169,9 @@ void Gitea::requestForkParents(Repository *repo) {
 }
 
 void Gitea::createPullRequest(Repository *repo, const QString &ownerRepo,
-                               const QString &title, const QString &body,
-                               const QString &head, const QString &base,
-                               bool canModify) {
+                              const QString &title, const QString &body,
+                              const QString &head, const QString &base,
+                              bool canModify) {
   QJsonDocument doc;
   doc.setObject({{"title", title},
                  {"body", body},
@@ -272,9 +272,7 @@ bool Gitea::isAuthorizeSupported() {
   return (!id.isEmpty() && !secret.isEmpty() && !env.isEmpty());
 }
 
-QString Gitea::defaultUrl() {
-  return QStringLiteral("https://try.gitea.io");
-}
+QString Gitea::defaultUrl() { return QStringLiteral("https://try.gitea.io"); }
 
 void Gitea::graphql(const QString &query, const Callback &callback) {
   if (mAccessToken.isEmpty())
@@ -297,7 +295,7 @@ void Gitea::graphql(const QString &query, const Callback &callback) {
 }
 
 void Gitea::rest(const QUrl &url, const QJsonDocument &doc,
-                  const Callback &callback) {
+                 const Callback &callback) {
   if (mAccessToken.isEmpty())
     return;
 
