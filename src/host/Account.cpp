@@ -167,6 +167,8 @@ QString Account::name(Kind kind) {
   switch (kind) {
     case Account::GitHub:
       return "GitHub";
+    case Account::Gitea:
+      return "Gitea";
     case Account::Bitbucket:
       return "Bitbucket";
     case Account::Beanstalk:
