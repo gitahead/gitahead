@@ -24,6 +24,7 @@ AccountDialog::AccountDialog(Account *account, QWidget *parent)
   mHost = new QComboBox(this);
   mHost->setMinimumWidth(mHost->sizeHint().width() * 2);
   mHost->addItem("GitHub", Account::GitHub);
+  mHost->addItem("Gitea", Account::Gitea);
   mHost->addItem("Bitbucket", Account::Bitbucket);
   mHost->addItem("Beanstalk", Account::Beanstalk);
   mHost->addItem("GitLab", Account::GitLab);

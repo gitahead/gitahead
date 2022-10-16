@@ -11,6 +11,7 @@
 #include "Beanstalk.h"
 #include "Bitbucket.h"
 #include "GitHub.h"
+#include "Gitea.h"
 #include "GitLab.h"
 #include <QCoreApplication>
 #include <QSettings>
@@ -59,6 +60,9 @@ Account *Accounts::createAccount(Account::Kind kind, const QString &username,
   switch (kind) {
     case Account::GitHub:
       account = new GitHub(username);
+      break;
+    case Account::Gitea:
+      account = new Gitea(username);
       break;
     case Account::Bitbucket:
       account = new Bitbucket(username);
