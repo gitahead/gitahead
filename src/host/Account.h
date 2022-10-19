@@ -26,6 +26,7 @@ class Account : public QObject {
 
 public:
   enum Kind { GitHub, Bitbucket, Beanstalk, GitLab, Gitea };
+  static const int NUM_KINDS = 5;
 
   struct Comment {
     QString body;
