@@ -256,7 +256,7 @@ public:
 
       case Remote: {
         Accounts *accounts = Accounts::instance();
-        return accounts->count() ? accounts->count() : 4;
+        return accounts->count() ? accounts->count() : Account::NUM_KINDS;
       }
 
       default:
