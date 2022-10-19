@@ -221,6 +221,45 @@ QString Account::defaultUrl(Kind kind) {
   }
 }
 
+Account::Kind Account::kindFromString(const QString &kind, bool *ok) {
+  if (ok != nullptr) {
+    *ok = true;
+  }
+
+  if (kind == "github") {
+    return GitHub;
+  } else if (kind == "gitea") {
+    return Gitea;
+  } else if (kind == "bitbucket") {
+    return Bitbucket;
+  } else if (kind == "beanstalk") {
+    return Beanstalk;
+  } else if (kind == "gitlab") {
+    return GitLab;
+  } else {
+    if (ok != nullptr) {
+      *ok = false;
+    }
+
+    return (Kind)0;
+  }
+}
+
+QString Account::kindToString(Kind kind) {
+  switch (kind) {
+    case GitHub:
+      return "github";
+    case Gitea:
+      return "gitea";
+    case Bitbucket:
+      return "bitbucket";
+    case Beanstalk:
+      return "beanstalk";
+    case GitLab:
+      return "gitlab";
+  }
+}
+
 void Account::startProgress() {
   mError->setText(QString());
   mProgress->start();

@@ -83,7 +83,7 @@ public:
     layout->addWidget(init);
     layout->addWidget(addSeparator());
 
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < Account::NUM_KINDS; ++i) {
       Account::Kind kind = static_cast<Account::Kind>(i);
       QString text = tr("Add %1 account").arg(Account::name(kind));
       QPushButton *account = addButton(Account::icon(kind), text);
