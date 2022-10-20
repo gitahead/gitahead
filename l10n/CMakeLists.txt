@@ -32,7 +32,7 @@ add_dependencies(gittyup translations)
 if(APPLE)
   set(CONTENTS_DIR ${GITTYUP_NAME}.app/Contents)
 elseif(UNIX)
-  set(CONTENTS_DIR ${CMAKE_INSTALL_FULL_DATADIR}/gittyup)
+  set(CONTENTS_DIR ${CMAKE_INSTALL_DATADIR}/gittyup)
 endif()
 
 foreach(LANGUAGE ${LANGUAGES})

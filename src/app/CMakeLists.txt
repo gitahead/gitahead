@@ -208,7 +208,7 @@ else()
   # Windows and UNIX must be ./ otherwise it is interpreted as absolute path
   if(UNIX)
     set(RESOURCES_INSTALL_DIR
-        "${CMAKE_INSTALL_FULL_DATADIR}/gittyup/Resources"
+        "${CMAKE_INSTALL_DATADIR}/gittyup/Resources"
         CACHE STRING "The path for installing resource files")
   else()
     set(RESOURCES_INSTALL_DIR
