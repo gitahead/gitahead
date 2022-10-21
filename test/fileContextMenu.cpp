@@ -305,7 +305,12 @@ void TestFileContextMenu::testIgnoreFile() {
   QVERIFY(file.exists());
   QVERIFY(file.open(QFile::ReadOnly));
   const QString ignores = file.readAll();
+
+#ifdef Q_OS_WIN
+  QCOMPARE(ignores, "file.txt\r\n");
+#else
   QCOMPARE(ignores, "file.txt\n");
+#endif
 }
 
 void TestFileContextMenu::testIgnoreFolder() {
@@ -362,7 +367,12 @@ void TestFileContextMenu::testIgnoreFolder() {
   QVERIFY(file.exists());
   QVERIFY(file.open(QFile::ReadOnly));
   const QString ignores = file.readAll();
+
+#ifdef Q_OS_WIN
+  QCOMPARE(ignores, "folder1\r\n");
+#else
   QCOMPARE(ignores, "folder1\n");
+#endif
 }
 
 void TestFileContextMenu::testRemoveUntrackedFolder() {
