@@ -91,7 +91,7 @@ void ReferenceModel::update() {
       const bool branchOnCommit =
           !mCommit.isValid() || branch.annotatedCommit().commit() == mCommit;
       if ((!(mKinds & ReferenceView::ExcludeHead) || !branch.isHead()) &&
-          (branchOnCommit || !mCommit.isValid()))
+          branchOnCommit)
         branches.append(branch);
     }
 
@@ -104,7 +104,10 @@ void ReferenceModel::update() {
       branches.prepend(git::Reference());
 
     // Add bottom references.
-    if (mKinds & ReferenceView::Stash) {
+    const bool stashOnCommit =
+        !mCommit.isValid() ||
+        mRepo.stashRef().annotatedCommit().commit() == mCommit;
+    if ((mKinds & ReferenceView::Stash) && stashOnCommit) {
       if (git::Reference stash = mRepo.stashRef())
         branches.append(stash);
     }
@@ -121,8 +124,7 @@ void ReferenceModel::update() {
       qDebug() << "ReferenceView: Remote branches: " << branch.name();
       const bool remoteOnCommit =
           !mCommit.isValid() || branch.annotatedCommit().commit() == mCommit;
-      if (!branch.name().endsWith("HEAD") &&
-          (remoteOnCommit || !mCommit.isValid()))
+      if (!branch.name().endsWith("HEAD") && remoteOnCommit)
         remotes.append(branch);
     }
 
@@ -140,7 +142,7 @@ void ReferenceModel::update() {
       qDebug() << "ReferenceView: Tags: " << tag.name();
       const bool tagOnCommit =
           !mCommit.isValid() || tag.annotatedCommit().commit() == mCommit;
-      if (tagOnCommit || !mCommit.isValid())
+      if (tagOnCommit)
         tags.append(tag);
     }
 
@@ -171,13 +173,17 @@ QModelIndex ReferenceModel::firstRemote() {
 
 QModelIndex ReferenceModel::firstBranch() {
   // Return first branch if available, otherwise an invalid modelIndex
+  // Ignore stash
   for (auto &ref : mRefs) {
     if (ref.type == ReferenceType::Branches && ref.refs.count() > 0) {
       if (mKinds & ReferenceView::InvalidRef) {
-        if (ref.refs.count() >
-            1) // use the first valid ref after the invalid ref
+        // use the first valid ref after the invalid ref but only
+        // it is not the stash
+        if (ref.refs.count() > 1 &&
+            ref.refs.at(1).annotatedCommit().commit() !=
+                mRepo.stashRef().annotatedCommit().commit())
           return createIndex(1, 0, ReferenceType::Branches);
-      } else
+      } else if (ref.refs.count() > 0)
         return createIndex(0, 0, ReferenceType::Branches);
       break; // Remotes are already found so no need to continue searching
     }

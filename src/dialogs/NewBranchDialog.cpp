@@ -30,9 +30,13 @@ NewBranchDialog::NewBranchDialog(const git::Repository &repo,
   auto kinds = ReferenceView::InvalidRef | ReferenceView::RemoteBranches;
   mUpstream = new ReferenceList(repo, kinds, this);
 
-  mRefs = new ReferenceList(repo, ReferenceView::AllRefs, this);
+  kinds = ReferenceView::AllRefs;
+  if (commit.isValid())
+    kinds |= ReferenceView::InvalidRef;
+  mRefs = new ReferenceList(repo, kinds, this);
   mRefs->select(repo.head());
   mRefs->setCommit(commit);
+  mRefs->setVisible(!commit.isValid());
 
   mCheckout = new QCheckBox(tr("Checkout branch"), this);
   mCheckout->setVisible(qobject_cast<RepoView *>(parent));
@@ -42,7 +46,9 @@ NewBranchDialog::NewBranchDialog(const git::Repository &repo,
   QFormLayout *form = new QFormLayout;
   form->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
   form->addRow(tr("Name:"), mName);
-  form->addRow(tr("Start Point:"), mRefs);
+  if (!commit.isValid()) {
+    form->addRow(tr("Start Point:"), mRefs);
+  }
   form->addRow(QString(), mCheckout);
   form->addRow(tr("Advanced:"), expand);
 

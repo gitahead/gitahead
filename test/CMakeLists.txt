@@ -109,6 +109,7 @@ test(NAME Submodule)
 test(NAME referencelist)
 test(NAME amend)
 test(NAME SshConfig)
+test(NAME fileContextMenu NO_WIN32_OFFSCREEN)
 
 option(GITTYUP_CI_TESTS "Run tests that change global settings" OFF)
 if(GITTYUP_CI_TESTS)

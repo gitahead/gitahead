@@ -33,7 +33,9 @@ private:
                   const QString &file);
 
   RepoView *mView;
-  const QStringList &mFiles;
+  QStringList mFiles;
+
+  friend class TestTreeView;
 };
 
 #endif

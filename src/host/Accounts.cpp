@@ -11,6 +11,7 @@
 #include "Beanstalk.h"
 #include "Bitbucket.h"
 #include "GitHub.h"
+#include "Gitea.h"
 #include "GitLab.h"
 #include <QCoreApplication>
 #include <QSettings>
@@ -59,6 +60,9 @@ Account *Accounts::createAccount(Account::Kind kind, const QString &username,
   switch (kind) {
     case Account::GitHub:
       account = new GitHub(username);
+      break;
+    case Account::Gitea:
+      account = new Gitea(username);
       break;
     case Account::Bitbucket:
       account = new Bitbucket(username);
@@ -130,7 +134,26 @@ void Accounts::load() {
   int accountCount = settings.beginReadArray("accounts");
   for (int i = 0; i < accountCount; ++i) {
     settings.setArrayIndex(i);
-    auto kind = static_cast<Account::Kind>(settings.value("kind").toInt());
+
+    Account::Kind kind;
+
+    {
+      auto kindSetting = settings.value("kind");
+      bool isNum;
+      auto kindInt = kindSetting.toInt(&isNum);
+
+      if (isNum) {
+        kind = static_cast<Account::Kind>(kindInt);
+      } else {
+        bool ok;
+        kind = Account::kindFromString(kindSetting.toString(), &ok);
+
+        if (!ok) {
+          continue;
+        }
+      }
+    }
+
     QString username = settings.value("username").toString();
     QString url = settings.value("url").toString();
     Account *account = createAccount(kind, username, url);
@@ -163,7 +186,7 @@ void Accounts::store() {
   for (int i = 0; i < mAccounts.size(); ++i) {
     Account *account = mAccounts.at(i);
     settings.setArrayIndex(i);
-    settings.setValue("kind", account->kind());
+    settings.setValue("kind", Account::kindToString(account->kind()));
     settings.setValue("username", account->username());
     if (account->hasCustomUrl()) {
       settings.setValue("url", account->url());

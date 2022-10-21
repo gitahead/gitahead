@@ -25,7 +25,8 @@ class Account : public QObject {
   Q_OBJECT
 
 public:
-  enum Kind { GitHub, Bitbucket, Beanstalk, GitLab };
+  enum Kind { GitHub, Bitbucket, Beanstalk, GitLab, Gitea };
+  static const int NUM_KINDS = 5;
 
   struct Comment {
     QString body;
@@ -83,6 +84,9 @@ public:
   static QString name(Kind kind);
   static QString helpText(Kind kind);
   static QString defaultUrl(Kind kind);
+
+  static Kind kindFromString(const QString &kind, bool *ok = nullptr);
+  static QString kindToString(Kind kind);
 
 signals:
   void repositoryAboutToBeAdded();

@@ -223,6 +223,9 @@ QVariant DiffTreeModel::data(const QModelIndex &index, int role) const {
     case PatchIndexRole: {
       return node->patchIndex();
     }
+
+    case Qt::UserRole:
+      return QVariant::fromValue(node);
   }
 
   return QVariant();
@@ -369,7 +372,7 @@ Node *Node::parent() const { return mParent; }
 
 bool Node::hasChildren() const { return mChildren.length() > 0; }
 
-QList<Node *> Node::children() { return mChildren; }
+QList<Node *> Node::children() const { return mChildren; }
 
 void Node::addChild(const QStringList &pathPart, int patchIndex,
                     int indexFirstDifferent, bool listView) {
@@ -397,8 +400,8 @@ void Node::addChild(const QStringList &pathPart, int patchIndex,
     mChildren.append(node);
 }
 
-git::Index::StagedState Node::stageState(const git::Index &idx,
-                                         ParentStageState searchingState) {
+git::Index::StagedState
+Node::stageState(const git::Index &idx, ParentStageState searchingState) const {
   if (!hasChildren())
     return idx.isStaged(path(true));
 

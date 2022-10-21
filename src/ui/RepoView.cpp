@@ -462,21 +462,24 @@ void RepoView::clean(const QStringList &untracked) {
   QString singular = tr("untracked file");
   QString plural = tr("untracked files");
   QString phrase = (untracked.count() == 1) ? singular : plural;
-  QMessageBox mb(
+  QMessageBox *mb = new QMessageBox(
       QMessageBox::Warning, tr("Remove Untracked Files"),
-      tr("Remove %1 %2?").arg(QString::number(untracked.count()), phrase));
-  mb.setInformativeText(tr("This action cannot be undone."));
-  mb.setDetailedText(untracked.join('\n'));
+      tr("Remove %1 %2?").arg(QString::number(untracked.count()), phrase),
+      QMessageBox::Cancel, this);
+  mb->setAttribute(Qt::WA_DeleteOnClose);
+  mb->setInformativeText(tr("This action cannot be undone."));
+  mb->setDetailedText(untracked.join('\n'));
 
-  QPushButton *remove = mb.addButton(tr("Remove"), QMessageBox::AcceptRole);
-  mb.addButton(QMessageBox::Cancel);
-  mb.setDefaultButton(remove);
-  mb.exec();
+  QPushButton *remove = mb->addButton(tr("Remove"), QMessageBox::AcceptRole);
+  remove->setObjectName("RemoveButton");
+  mb->setDefaultButton(remove);
 
-  if (mb.clickedButton() == remove) {
-    foreach (const QString &name, untracked)
+  connect(remove, &QPushButton::clicked, [this, untracked] {
+    for (const QString &name : untracked)
       repo().clean(name);
-  }
+  });
+
+  mb->show();
 }
 
 void RepoView::selectHead() { mRefs->select(mRepo.head()); }

@@ -256,7 +256,7 @@ public:
 
       case Remote: {
         Accounts *accounts = Accounts::instance();
-        return accounts->count() ? accounts->count() : 4;
+        return accounts->count() ? accounts->count() : Account::NUM_KINDS;
       }
 
       default:
@@ -743,7 +743,7 @@ SideBar::SideBar(TabWidget *tabs, QWidget *parent) : QWidget(parent) {
 
   plusMenu->addSeparator();
 
-  for (int i = 0; i < 4; ++i) {
+  for (int i = 0; i < Account::NUM_KINDS; ++i) {
     Account::Kind kind = static_cast<Account::Kind>(i);
     QString text = tr("Add %1 Account").arg(Account::name(kind));
     QAction *add = plusMenu->addAction(text);

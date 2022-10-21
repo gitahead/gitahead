@@ -12,6 +12,7 @@
 
 #include "DiffTreeModel.h"
 #include "DetailView.h"
+#include "git/Index.h"
 #include <QModelIndexList>
 
 class QTreeView;
@@ -46,11 +47,10 @@ public:
   void findNext() override;
   void findPrevious() override;
 
-protected:
-  void contextMenuEvent(QContextMenuEvent *event) override;
-
 private slots:
   void collapseCountChanged(int count);
+  static void showFileContextMenu(const QPoint &pos, RepoView *view,
+                                  QTreeView *tree, bool staged);
 
 private:
   enum View {
@@ -104,5 +104,7 @@ private:
   bool mIgnoreSelectionChange{false};
 
   git::Diff mDiff;
+
+  friend class TestTreeView;
 };
 #endif // DOUBLETREEWIDGET_H
