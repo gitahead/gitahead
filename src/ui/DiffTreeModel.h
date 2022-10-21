@@ -18,8 +18,10 @@
 #include <QFileIconProvider>
 #include "git/Index.h"
 
-class Node // item of the model
+class Node : public QObject // item of the model
 {
+  Q_OBJECT
+
 public:
   Node(const QString &name, int patchIndex, Node *parent = nullptr);
   ~Node();
@@ -31,11 +33,11 @@ public:
 
   Node *parent() const;
   bool hasChildren() const;
-  QList<Node *> children();
+  QList<Node *> children() const;
   void addChild(const QStringList &pathPart, int patchIndex,
                 int indexFirstDifferent, bool listView);
   git::Index::StagedState stageState(const git::Index &idx,
-                                     ParentStageState searchingState);
+                                     ParentStageState searchingState) const;
   void childFiles(QStringList &files);
   /*!
    * \brief fileCount

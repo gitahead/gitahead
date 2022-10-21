@@ -12,8 +12,10 @@
 #include "IgnoreDialog.h"
 #include "conf/Settings.h"
 #include "dialogs/SettingsDialog.h"
+#include "git/Diff.h"
 #include "git/Index.h"
 #include "git/Tree.h"
+#include "host/Repository.h"
 #include "tools/EditTool.h"
 #include "tools/ShowTool.h"
 #include <QApplication>
@@ -23,6 +25,8 @@
 #include <QPushButton>
 #include <QFileDialog>
 #include <QDesktopServices>
+#include <QFileInfo>
+#include <qfileinfo.h>
 
 namespace {
 
@@ -35,6 +39,41 @@ void warnRevisionNotFound(QWidget *parent, const QString &fragment,
   QMessageBox msg(QMessageBox::Warning, title, text, QMessageBox::Ok, parent);
   msg.setInformativeText(file);
   msg.exec();
+}
+
+void handlePath(const git::Repository &repo, const QString &path,
+                const git::Diff &diff, QStringList &modified,
+                QStringList &untracked) {
+  auto fullPath = repo.workdir().absoluteFilePath(path);
+  qDebug() << "FileContextMenu handlePath()" << path;
+
+  if (QFileInfo(fullPath).isDir()) {
+    auto dir = QDir(path);
+
+    for (auto entry : QDir(fullPath).entryList(
+             QDir::NoDotAndDotDot | QDir::Hidden | QDir::Dirs | QDir::Files)) {
+      handlePath(repo, dir.filePath(entry), diff, modified, untracked);
+    }
+
+  } else {
+    int index = diff.indexOf(path);
+    if (index < 0)
+      return;
+
+    switch (diff.status(index)) {
+      case GIT_DELTA_DELETED:
+      case GIT_DELTA_MODIFIED:
+        modified.append(path);
+        break;
+
+      case GIT_DELTA_UNTRACKED:
+        untracked.append(path);
+        break;
+
+      default:
+        break;
+    }
+  }
 }
 
 } // namespace
@@ -144,43 +183,29 @@ FileContextMenu::FileContextMenu(RepoView *view, const QStringList &files,
 
       addSeparator();
     }
+  }
 
-    // Discard
-    QStringList modified;
-    QStringList untracked;
-    if (diff.isValid()) {
-      foreach (const QString &file, files) {
-        int index = diff.indexOf(file);
-        if (index < 0)
-          continue;
-
-        switch (diff.status(index)) {
-          case GIT_DELTA_DELETED:
-          case GIT_DELTA_MODIFIED:
-            modified.append(file);
-            break;
-
-          case GIT_DELTA_UNTRACKED:
-            untracked.append(file);
-            break;
-
-          default:
-            break;
-        }
-      }
+  // Discard
+  QStringList modified;
+  QStringList untracked;
+  if (diff.isValid()) {
+    foreach (const QString &file, files) {
+      handlePath(repo, file, diff, modified, untracked);
     }
 
     QAction *discard = addAction(tr("Discard Changes"), [view, modified] {
-      QMessageBox *dialog = new QMessageBox(
-          QMessageBox::Warning, tr("Discard Changes?"),
-          tr("Are you sure you want to discard changes in the selected files?"),
-          QMessageBox::Cancel, view);
+      QMessageBox *dialog =
+          new QMessageBox(QMessageBox::Warning, tr("Discard Changes?"),
+                          tr("Are you sure you want to discard changes in "
+                             "the selected files?"),
+                          QMessageBox::Cancel, view);
       dialog->setAttribute(Qt::WA_DeleteOnClose);
       dialog->setInformativeText(tr("This action cannot be undone."));
       dialog->setDetailedText(modified.join('\n'));
 
       QString text = tr("Discard Changes");
       QPushButton *discard = dialog->addButton(text, QMessageBox::AcceptRole);
+      discard->setObjectName("DiscardButton");
       connect(discard, &QPushButton::clicked, [view, modified] {
         git::Repository repo = view->repo();
         int strategy = GIT_CHECKOUT_FORCE;
@@ -196,15 +221,16 @@ FileContextMenu::FileContextMenu(RepoView *view, const QStringList &files,
 
       dialog->open();
     });
+    discard->setEnabled(!modified.isEmpty());
 
     QAction *remove = addAction(tr("Remove Untracked Files"),
                                 [view, untracked] { view->clean(untracked); });
-
-    discard->setEnabled(!modified.isEmpty());
+    remove->setObjectName("RemoveAction");
     remove->setEnabled(!untracked.isEmpty());
 
     // Ignore
     QAction *ignore = addAction(tr("Ignore"));
+    ignore->setObjectName("IgnoreAction");
     connect(ignore, &QAction::triggered, this, &FileContextMenu::ignoreFile);
 
     if (!diff.isValid()) {
@@ -271,18 +297,21 @@ FileContextMenu::FileContextMenu(RepoView *view, const QStringList &files,
 
     // should show a dialog to select an application
     // Don't forgett to uncomment "openWith->setEnabled(!isBare);" below
-    //	QAction *openWith = addAction(tr("Open this Version with ..."), [this,
-    // view, files] { 	  QString folder = QDir::tempPath(); 	  const auto&
+    //	QAction *openWith = addAction(tr("Open this Version with ..."),
+    //[this,
+    // view, files] { 	  QString folder = QDir::tempPath(); const auto&
     // file = files.first(); 	  auto filename = file.split("/").last();
 
     //	  auto logentry = view->addLogEntry(tr("Opening file with ..."),
     // tr("Open ") + filename);
 
     //	  if (exportFile(view, folder, file))
-    //		QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(folder +
+    //		QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(folder
+    //+
     //"/"
     //+ filename).absoluteFilePath())); 	  else
-    // view->error(logentry, tr("open file"), filename, tr("Blob is invalid."));
+    // view->error(logentry, tr("open file"), filename, tr("Blob is
+    // invalid."));
     //	});
 
     auto isBare = view->repo().isBare();
@@ -388,21 +417,19 @@ FileContextMenu::FileContextMenu(RepoView *view, const QStringList &files,
 }
 
 void FileContextMenu::ignoreFile() {
-  QString ignore;
-
   if (!mFiles.count())
     return;
 
-  for (int i = 0; i < mFiles.count() - 1; i++) {
-    ignore.append(mFiles[i] + "\n");
-  }
-  ignore.append(mFiles.last());
+  auto d = new IgnoreDialog(mFiles.join('\n'), parentWidget());
+  d->setAttribute(Qt::WA_DeleteOnClose);
 
-  IgnoreDialog d(ignore, this);
-  if (d.exec()) {
+  connect(d, &QDialog::accepted, [d, this]() {
+    auto ignore = d->ignoreText();
     if (!ignore.isEmpty())
       mView->ignore(ignore);
-  }
+  });
+
+  d->open();
 }
 
 bool FileContextMenu::exportFile(const RepoView *view, const QString &folder,
