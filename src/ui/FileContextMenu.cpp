@@ -203,6 +203,15 @@ FileContextMenu::FileContextMenu(RepoView *view, const QStringList &files,
       dialog->setInformativeText(tr("This action cannot be undone."));
       dialog->setDetailedText(modified.join('\n'));
 
+	// Expand the Show Details  
+    foreach (QAbstractButton *button, dialog->buttons()) {
+        if (dialog->buttonRole(button) == QMessageBox::ActionRole) {
+            button->click(); // click it to expand the text
+            break;
+        }
+    }
+
+
       QString text = tr("Discard Changes");
       QPushButton *discard = dialog->addButton(text, QMessageBox::AcceptRole);
       discard->setObjectName("DiscardButton");
