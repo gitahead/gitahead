@@ -12,6 +12,7 @@
 
 #include "DiffTreeModel.h"
 #include "DetailView.h"
+#include "git/Index.h"
 #include <QModelIndexList>
 
 class QTreeView;
@@ -49,7 +50,7 @@ public:
 private slots:
   void collapseCountChanged(int count);
   static void showFileContextMenu(const QPoint &pos, RepoView *view,
-                                  QTreeView *tree);
+                                  QTreeView *tree, bool staged);
 
 private:
   enum View {

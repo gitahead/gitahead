@@ -170,7 +170,7 @@ void TestTreeView::discardFiles() {
     stagedTree->selectionModel()->select(folder1, QItemSelectionModel::Select);
   }
 
-  doubleTree->showFileContextMenu(QPoint(), repoView, stagedTree);
+  DoubleTreeWidget::showFileContextMenu(QPoint(), repoView, stagedTree, true);
 
   auto *menu = doubleTree->findChild<FileContextMenu *>();
   QVERIFY(menu);

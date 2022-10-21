@@ -130,7 +130,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
   stagedFiles->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(stagedFiles, &QWidget::customContextMenuRequested,
           [this, repoView](const QPoint &pos) {
-            showFileContextMenu(pos, repoView, stagedFiles);
+            showFileContextMenu(pos, repoView, stagedFiles, true);
           });
 
   mDiffTreeModel = new DiffTreeModel(repo, this);
@@ -171,7 +171,7 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
   unstagedFiles->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(unstagedFiles, &QWidget::customContextMenuRequested,
           [this, repoView](const QPoint &pos) {
-            showFileContextMenu(pos, repoView, unstagedFiles);
+            showFileContextMenu(pos, repoView, unstagedFiles, false);
           });
 
   TreeProxy *treewrapperUnstaged = new TreeProxy(false, this);
@@ -294,12 +294,36 @@ QModelIndex DoubleTreeWidget::selectedIndex() const {
   return QModelIndex();
 }
 
+static void addNodeToMenu(const git::Index &index, QStringList &files,
+                          const Node *node, bool staged) {
+  qDebug() << "DoubleTreeWidgetr addNodeToMenu()" << node->name();
+
+  if (node->hasChildren()) {
+    for (auto child : node->children()) {
+      addNodeToMenu(index, files, child, staged);
+    }
+
+  } else {
+    auto path = node->path(true);
+
+    auto stageState = index.isStaged(path);
+
+    if ((staged && stageState != git::Index::Unstaged) ||
+        !staged && stageState != git::Index::Staged) {
+      files.append(path);
+    }
+  }
+}
+
 void DoubleTreeWidget::showFileContextMenu(const QPoint &pos, RepoView *view,
-                                           QTreeView *tree) {
+                                           QTreeView *tree, bool staged) {
   QStringList files;
   QModelIndexList indexes = tree->selectionModel()->selectedIndexes();
-  foreach (const QModelIndex &index, indexes)
-    files.append(index.data(Qt::EditRole).toString());
+  foreach (const QModelIndex &index, indexes) {
+    auto node = index.data(Qt::UserRole).value<Node *>();
+
+    addNodeToMenu(view->repo().index(), files, node, staged);
+  }
 
   if (files.isEmpty())
     return;
