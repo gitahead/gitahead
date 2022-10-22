@@ -81,6 +81,7 @@ QDir rootDir() {
 #ifdef Q_OS_MAC
   dir.cdUp(); // Contents
 #endif
+  qDebug() << "Root dir: " << dir;
 
   return dir;
 }
@@ -249,6 +250,7 @@ QDir Settings::confDir() {
   QDir dir = rootDir();
   if (!dir.cd("Resources"))
     dir = QDir(CONF_DIR);
+  qDebug() << "Conf dir: " << dir;
   return dir;
 }
 

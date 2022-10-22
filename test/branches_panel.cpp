@@ -44,9 +44,8 @@ void TestBranchesPanel::initTestCase() {
   mWindow = new MainWindow(mRepo);
   RepoView *view = mWindow->currentView();
 
-  QString repoPath = Test::extractRepository("gitahead-test.zip", false);
-
-  git::Remote remote = mRepo->addRemote("origin", repoPath);
+  git::Remote remote = mRepo->addRemote(
+      "origin", "https://github.com/Murmele/GittyupTestRepo.git");
   fetch(view, remote);
 
   git::Branch upstream =
@@ -70,28 +69,35 @@ void TestBranchesPanel::createBranch() {
   QWidget *panel = stack->currentWidget();
   Footer *remotesFooter = panel->findChild<Footer *>();
   QToolButton *addRemote = remotesFooter->findChild<QToolButton *>();
+  QVERIFY(addRemote);
   mouseClick(addRemote, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(),
              inputDelay);
 
   // Click upstream combobox
   QComboBox *referenceList = panel->findChild<QComboBox *>();
+  QVERIFY(referenceList);
   mouseClick(referenceList, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(),
              inputDelay);
 
   // Select upstream test_remote/master
-  QMenu *menu = qobject_cast<QMenu *>(QApplication::activePopupWidget());
+  auto *menu = qobject_cast<QFrame *>(QApplication::activePopupWidget());
+  QVERIFY(menu);
   keyClick(menu, Qt::Key_Down, Qt::NoModifier, inputDelay);
   keyClick(menu, Qt::Key_Return, Qt::NoModifier, inputDelay);
 
   // Click Accept
   QDialog *newBranchDialog = panel->findChild<QDialog *>();
+  QVERIFY(newBranchDialog);
   QList<QPushButton *> buttons = newBranchDialog->findChildren<QPushButton *>();
+  QVERIFY(buttons.count() >= 2);
   QPushButton *createBranch = buttons.at(1);
+  QVERIFY(createBranch);
   mouseClick(createBranch, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(),
              inputDelay);
 
   // Verify branch created
   QTableView *branchTable = panel->findChild<QTableView *>();
+  QVERIFY(branchTable);
   QVERIFY(branchTable->rowAt(0) != -1);
 }
 

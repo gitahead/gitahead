@@ -19,6 +19,7 @@
   QVERIFY2(!path.isEmpty(), qPrintable("Extracting repository failed"));       \
   mRepo = git::Repository::open(path);                                         \
   QVERIFY2(mRepo.isValid(), qPrintable("Unable to open repository"));          \
+  Test::initRepo(mRepo);                                                       \
   MainWindow window(mRepo);                                                    \
   window.show();                                                               \
   QVERIFY(QTest::qWaitForWindowExposed(&window));                              \

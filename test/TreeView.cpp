@@ -14,6 +14,7 @@ using namespace QTest;
   QVERIFY(!path.isEmpty());                                                    \
   auto repo = git::Repository::open(path);                                     \
   QVERIFY(repo.isValid());                                                     \
+  Test::initRepo(repo);                                                        \
   MainWindow window(repo);                                                     \
   window.show();                                                               \
   QVERIFY(QTest::qWaitForWindowExposed(&window));                              \

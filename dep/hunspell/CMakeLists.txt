@@ -5,7 +5,7 @@ if(HUNSPELL_FOUND)
   # target_compile_definitions(hunspell PUBLIC HUNSPELL_STATIC)
   target_include_directories(hunspell INTERFACE ${HUNSPELL_INCLUDE_DIRS})
   target_link_libraries(hunspell INTERFACE ${HUNSPELL_LINK_LIBRARIES})
-else()
+elseif(NOT USE_SYSTEM_HUNSPELL)
   set(HUNSPELL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/hunspell)
 
   add_library(

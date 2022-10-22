@@ -27,6 +27,7 @@
 #include <QTextEdit>
 #include <QTextStream>
 #include <QToolButton>
+#include <qtestcase.h>
 
 using namespace Test;
 using namespace QTest;
@@ -90,6 +91,12 @@ void TestInitRepo::initTestCase() {
   // Wait on the new window.
   mWindow = MainWindow::activeWindow();
   QVERIFY(mWindow && qWaitForWindowExposed(mWindow));
+
+  RepoView *view = mWindow->currentView();
+  QVERIFY(view);
+  git::Repository repo = view->repo();
+  QVERIFY(repo.isValid());
+  initRepo(repo);
 }
 
 void TestInitRepo::addFile() {

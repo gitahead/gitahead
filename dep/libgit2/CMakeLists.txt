@@ -32,6 +32,8 @@ if(WIN32)
       CACHE BOOL "" FORCE)
 endif()
 
-add_subdirectory(libgit2)
-target_include_directories(
-  git2 INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/libgit2/include)
+if(NOT USE_SYSTEM_LIBGIT2)
+  add_subdirectory(libgit2)
+  target_include_directories(
+    git2 INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/libgit2/include)
+endif()

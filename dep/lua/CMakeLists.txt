@@ -3,7 +3,7 @@ if(LUA_FOUND)
   add_library(lua INTERFACE)
   target_include_directories(lua INTERFACE ${LUA_INCLUDE_DIR})
   target_link_libraries(lua INTERFACE ${LUA_LIBRARIES})
-else()
+elseif(NOT USE_SYSTEM_LUA)
   set(LUA_DIR lua-5.4.0)
 
   add_library(

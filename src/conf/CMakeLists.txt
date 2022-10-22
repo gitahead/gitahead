@@ -6,12 +6,13 @@ target_link_libraries(conf lua Qt5::Core util)
 target_compile_definitions(
   conf PRIVATE SCINTILLUA_LEXERS_DIR="${SCINTILLUA_LEXERS_DIR}")
 
-if(FLATPAK)
-  target_compile_definitions(conf PRIVATE CONF_DIR="/app/Resources"
-                                          L10N_DIR="/app/Resources/l10n")
+if(UNIX)
+  target_compile_definitions(
+    conf
+    PRIVATE CONF_DIR="${CMAKE_INSTALL_FULL_DATADIR}/gittyup/Resources"
+            L10N_DIR="${CMAKE_INSTALL_FULL_DATADIR}/gittyup/Resources/l10n")
 else()
-  target_compile_definitions(conf PRIVATE CONF_DIR="${CMAKE_SOURCE_DIR}/conf"
-                                          L10N_DIR="${CMAKE_BINARY_DIR}/l10n")
-endif()
 
+  target_compile_definitions(conf PRIVATE CONF_DIR="" L10N_DIR="")
+endif()
 set_target_properties(conf PROPERTIES AUTOMOC ON)

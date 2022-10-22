@@ -36,6 +36,7 @@
   QVERIFY(!path.isEmpty());                                                    \
   mRepo = git::Repository::open(path);                                         \
   QVERIFY(mRepo.isValid());                                                    \
+  Test::initRepo(mRepo);                                                       \
   MainWindow window(mRepo);                                                    \
   window.show();                                                               \
   QVERIFY(QTest::qWaitForWindowExposed(&window));                              \

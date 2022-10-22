@@ -8,6 +8,7 @@
 //
 
 #include "Test.h"
+#include "git/Config.h"
 #include "ui/RepoView.h"
 //#include <JlCompress.h>
 #include <exception>
@@ -143,9 +144,16 @@ QString extractRepository(const QString &filename, bool useTempDir) {
   return exportFolder; // successfully extracted
 }
 
+void initRepo(git::Repository &repo) {
+  repo.config().setValue("user.name", QString("testuser"));
+  repo.config().setValue("user.email", QString("test@user"));
+}
+
 ScratchRepository::ScratchRepository(bool autoRemove) {
   mDir.setAutoRemove(autoRemove);
   mRepo = git::Repository::init(mDir.path());
+  QVERIFY(mRepo);
+  initRepo(mRepo);
 }
 
 ScratchRepository::operator git::Repository() { return mRepo; }

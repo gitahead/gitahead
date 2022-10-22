@@ -94,6 +94,8 @@ UpdateDialog::UpdateDialog(const QString &platform, const QString &version,
   QDialogButtonBox *buttons = new QDialogButtonBox(this);
 #if !defined(Q_OS_LINUX) || defined(FLATPAK) || defined(DEBUG_FLATPAK)
   buttons->addButton(tr("Install Update"), QDialogButtonBox::AcceptRole);
+#endif
+
   buttons->addButton(tr("Remind Me Later"), QDialogButtonBox::RejectRole);
   connect(buttons, &QDialogButtonBox::accepted, this, &UpdateDialog::accept);
 
@@ -109,9 +111,6 @@ UpdateDialog::UpdateDialog(const QString &platform, const QString &version,
     settings->endGroup();
     reject();
   });
-#else
-  buttons->addButton(tr("OK"), QDialogButtonBox::RejectRole);
-#endif
 
   connect(buttons, &QDialogButtonBox::rejected, this, &UpdateDialog::reject);
 
