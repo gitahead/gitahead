@@ -349,29 +349,14 @@ jobs:
           echo "::set-output name=VERSION::$(cat artifacts/Gittyup-VERSION/VERSION.txt)"
         id: version
 
-      - name: Determine release title
-        uses: haya14busa/action-cond@v1
-        id: release_title
-        with:
-          cond: ${{ env.IS_RELEASE }}
-          if_true: 'Gittyup Release ${{ steps.version.outputs.VERSION }}'
-          if_false: 'Latest Build (Development)'
-
-      - name: Determine release tag
-        uses: haya14busa/action-cond@v1
-        id: release_tag
-        with:
-          cond: ${{ env.IS_RELEASE }}
-          if_true: 'stable'
-          if_false: 'latest'
-
-      - name: Update GitHub release (stable / latest tag)
+      - name: Update GitHub release (latest tag)
+        if: ${{ env.IS_RELEASE == 'false'}}
         uses: marvinpinto/action-automatic-releases@latest
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          prerelease: ${{ env.IS_RELEASE == 'false' }}
-          title: ${{ steps.release_title.outputs.value }}
-          automatic_release_tag: ${{ steps.release_tag.outputs.value }}
+          prerelease: true
+          title: 'Latest Build (Development)'
+          automatic_release_tag: 'latest'
           files: |
             **/artifacts/Gittyup win64/Gittyup*.exe
             **/artifacts/Gittyup win32/Gittyup*.exe
@@ -385,7 +370,7 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           prerelease: false
-          title: ${{ steps.release_title.outputs.value }}
+          title: Gittyup Release ${{ steps.version.outputs.VERSION }}
           automatic_release_tag: ${{ steps.version.outputs.VERSION }}
           files: |
             **/artifacts/Gittyup win64/Gittyup*.exe
