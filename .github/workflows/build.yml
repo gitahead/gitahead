@@ -370,7 +370,6 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           prerelease: false
           title: Gittyup Release ${{ steps.version.outputs.VERSION }}
-          automatic_release_tag: ${{ steps.version.outputs.VERSION }}
           files: |
             **/artifacts/Gittyup win64/Gittyup*.exe
             **/artifacts/Gittyup win32/Gittyup*.exe
