@@ -154,7 +154,7 @@ Install `gittyup-git` for the VCS build.
 
 **Homebrew**
 
-Install the `gittyup` cask from [Homebrew](https://brew.sh/).
+Install the `gittyup` cask from [Homebrew](https://formulae.brew.sh/cask/gittyup/).
 
     brew install gittyup
 
