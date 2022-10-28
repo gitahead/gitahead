@@ -7,7 +7,7 @@ Stable versions for different packages are available for
 - [32 / 64 binary for Windows](https://github.com/Murmele/Gittyup/releases/stable) or
 - [macOS](https://github.com/Murmele/Gittyup/releases/stable) or from [![homebrew](https://img.shields.io/badge/Homebrew-gray?logo=Homebrew&logoColor=%23FBB040)](https://formulae.brew.sh/cask/gittyup)
 
-The [latest version](https://github.com/Murmele/Gittyup/releases/tag/latest) is available either as pre-built for
+The [latest development version](https://github.com/Murmele/Gittyup/releases/tag/latest) is available either as pre-built for
 - flatpak for Linux,
 - 32 / 64 binary for Windows,
 - macOS
