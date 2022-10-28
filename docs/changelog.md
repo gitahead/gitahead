@@ -23,6 +23,7 @@ Bug fix and feature release
 * Improve SSH config handling
 * Application settings and repository settings can now be selected with a single settings button
 * Use the full file context menu for the staging file list
+* Fix Arch Linux build
 
 ----
 
