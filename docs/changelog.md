@@ -18,7 +18,6 @@ Bug fix and feature release
 * Fix crash when global GIT config is invalid
 * Fix crash when having errors while adding a remote account
 * Fix updater on windows, macos and linux (flatpak)
-* Instead of using a soft reset instead of amend, show a dialog to change commit properties and amend changes then
 * Fix discarding file leading to discarding submodule changes
 * Fix rebase log messages during rebase
 * Improve SSH config handling
