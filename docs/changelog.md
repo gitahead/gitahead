@@ -1,4 +1,4 @@
-### v1.2.0 - 2022-10-12
+### v1.2.0 - 2022-10-28
 
 Bug fix and feature release
 
