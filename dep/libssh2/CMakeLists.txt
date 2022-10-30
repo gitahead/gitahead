@@ -4,14 +4,14 @@ if(USE_SYSTEM_LIBSSH2)
   endif()
 
 else()
-  add_subdirectory(libssh2)
-
   set(BUILD_EXAMPLES
       OFF
       CACHE BOOL "" FORCE)
   set(BUILD_TESTING
       OFF
       CACHE BOOL "" FORCE)
+
+  add_subdirectory(libssh2)
 
   set(LIBSSH2_FOUND
       TRUE
