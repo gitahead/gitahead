@@ -104,7 +104,6 @@ void DiffView::setDiff(const git::Diff &diff) {
 
   // Clear state.
   mFiles.clear();
-  mStagedPatches.clear();
   mComments = Account::CommitComments();
 
   // Set data.
@@ -171,15 +170,7 @@ void DiffView::setDiff(const git::Diff &diff) {
                                 // is not distributed over the hole diff view
 
   // Generate a diff between the head tree and index.
-  if (diff.isStatusDiff()) {
-    if (git::Reference head = repo.head()) {
-      if (git::Commit commit = head.target()) {
-        git::Diff stagedDiff = repo.diffTreeToIndex(commit.tree());
-        for (int i = 0; i < stagedDiff.count(); ++i)
-          mStagedPatches[stagedDiff.name(i)] = stagedDiff.patch(i);
-      }
-    }
-  }
+  loadStagedPatches();
 
   if (canFetchMore())
     fetchMore();
@@ -238,6 +229,22 @@ void DiffView::setModel(DiffTreeModel *model) {
           &DiffView::diffTreeModelDataChanged);
 }
 
+void DiffView::loadStagedPatches() {
+  RepoView *view = RepoView::parentView(this);
+  git::Repository repo = view->repo();
+  mStagedPatches.clear();
+  // Generate a diff between the head tree and index.
+  if (mDiff.isStatusDiff()) {
+    if (git::Reference head = repo.head()) {
+      if (git::Commit commit = head.target()) {
+        mStagedDiff = repo.diffTreeToIndex(commit.tree());
+        for (int i = 0; i < mStagedDiff.count(); ++i)
+          mStagedPatches[mStagedDiff.name(i)] = i;
+      }
+    }
+  }
+}
+
 void DiffView::diffTreeModelDataChanged(const QModelIndex &topLeft,
                                         const QModelIndex &bottomRight,
                                         const QVector<int> &roles) {
@@ -257,23 +264,13 @@ void DiffView::diffTreeModelDataChanged(const QModelIndex &topLeft,
     if (file->modelIndex().internalPointer() == topLeft.internalPointer()) {
 
       // Respond to index changes only when file is visible in the diffview
-      RepoView *view = RepoView::parentView(this);
-      git::Repository repo = view->repo();
-
-      mStagedPatches.clear();
-      // Generate a diff between the head tree and index.
-      if (mDiff.isStatusDiff()) {
-        if (git::Reference head = repo.head()) {
-          if (git::Commit commit = head.target()) {
-            git::Diff stagedDiff = repo.diffTreeToIndex(commit.tree());
-            for (int i = 0; i < stagedDiff.count(); ++i)
-              mStagedPatches[stagedDiff.name(i)] = stagedDiff.patch(i);
-          }
-        }
-      }
+      loadStagedPatches();
 
       QString filename = file->name();
-      git::Patch stagedPatch = mStagedPatches[file->name()];
+      git::Patch stagedPatch;
+      const int index = mStagedPatches.value(file->name(), -1);
+      if (index != -1)
+        stagedPatch = mStagedDiff.patch(index);
       file->updateHunks(stagedPatch);
       file->setStageState(stageState);
 
@@ -397,7 +394,10 @@ void DiffView::fetchMore() {
     auto state = static_cast<git::Index::StagedState>(
         indices[i].data(Qt::CheckStateRole).toInt());
 
-    git::Patch staged = mStagedPatches.value(patch.name());
+    git::Patch staged;
+    const int index = mStagedPatches.value(patch.name(), -1);
+    if (index != -1)
+      staged = mStagedDiff.patch(index);
 
     git::Repository repo = view->repo();
     QString name = patch.name();

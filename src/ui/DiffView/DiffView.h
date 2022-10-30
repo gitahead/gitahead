@@ -122,9 +122,11 @@ private:
   void fetchMore();
   void fetchAll(int index = -1);
   void indexChanged(const QStringList &paths);
+  void loadStagedPatches();
 
   git::Diff mDiff;
-  QMap<QString, git::Patch> mStagedPatches;
+  QMap<QString, int> mStagedPatches;
+  git::Diff mStagedDiff;
 
   QList<FileWidget *> mFiles;
   QList<QMetaObject::Connection> mConnections;
