@@ -1,3 +1,13 @@
+### v1.2.1 - 2022-10-31
+
+Bug fix release
+
+#### Changed
+
+* Fix download url for flatpak and macos
+
+----
+
 ### v1.2.0 - 2022-10-28
 
 Bug fix and feature release
