@@ -431,10 +431,11 @@ void FileContextMenu::ignoreFile() {
   auto d = new IgnoreDialog(mFiles.join('\n'), parentWidget());
   d->setAttribute(Qt::WA_DeleteOnClose);
 
-  connect(d, &QDialog::accepted, [d, this]() {
+  auto *view = mView;
+  connect(d, &QDialog::accepted, [d, view]() {
     auto ignore = d->ignoreText();
     if (!ignore.isEmpty())
-      mView->ignore(ignore);
+      view->ignore(ignore);
   });
 
   d->open();
