@@ -5,7 +5,7 @@ Bug fix release
 #### Changed
 
 * Fix download url for flatpak and macos
-
+* Fix Segmentation fault when ignoring files
 ----
 
 ### v1.2.0 - 2022-10-28
