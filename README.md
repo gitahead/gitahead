@@ -16,7 +16,7 @@ Gittyup is a graphical Git client designed to help you understand and manage you
 is available either as pre-built flatpak for Linux, 32 / 64 binary for Windows, macOS,
 or can be built from source by following the directions [below](https://github.com/Murmele/Gittyup#how-to-build).
 
-The [latest development version](https://github.com/Murmele/Gittyup/releases/tag/latest) is available pre-built as well.
+The [latest development version](https://github.com/Murmele/Gittyup/releases/tag/development) is available pre-built as well.
 
 Gittyup is a continuation of the [GitAhead](https://github.com/gitahead/gitahead) client.
 
