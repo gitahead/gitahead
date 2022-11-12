@@ -491,6 +491,11 @@ public:
     connect(hideMenuBar, &QCheckBox::toggled, [](bool checked) {
       Settings::instance()->setValue("window/view/menuBarHidden", checked);
     });
+    QCheckBox *showAvatars = new QCheckBox(tr("Show Avatars"));
+    showAvatars->setChecked(settings->value("avatarsVisible").toBool());
+    connect(showAvatars, &QCheckBox::toggled, [](bool checked) {
+      Settings::instance()->setValue("window/view/avatarsVisible", checked);
+    });
     settings->endGroup(); // view
     settings->endGroup(); // window
 
@@ -546,6 +551,7 @@ public:
     layout->addRow(tr("Tabs:"), smTabs);
     layout->addRow(QString(), repoTabs);
     layout->addRow(tr("View:"), hideMenuBar);
+    layout->addRow(QString(), showAvatars);
     layout->addRow(tr("Prompt:"), merge);
     layout->addRow(QString(), revert);
     layout->addRow(QString(), cherryPick);
