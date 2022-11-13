@@ -192,13 +192,13 @@ public:
       mCommitter->adjustSize();
       mCommitter->setVisible(true);
     }
-    updateGeometry();
+    updateLayout();
   }
 
   void setDate(const QString &date) {
     mDate->setText(date);
     mDate->adjustSize();
-    updateGeometry();
+    updateLayout();
   }
 
 private:
@@ -212,6 +212,7 @@ private:
     int y =
         wrapped ? mAuthor->height() + mCommitter->height() + 2 * mSpacing : 0;
     mDate->move(x, y);
+    updateGeometry();
   }
 
   QLabel *mAuthor;
