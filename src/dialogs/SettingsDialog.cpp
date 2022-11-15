@@ -491,13 +491,13 @@ public:
     connect(hideMenuBar, &QCheckBox::toggled, [](bool checked) {
       Settings::instance()->setValue("window/view/menuBarHidden", checked);
     });
-    QCheckBox *showAvatars = new QCheckBox(tr("Show Avatars"));
-    showAvatars->setChecked(settings->value("avatarsVisible").toBool());
-    connect(showAvatars, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setValue("window/view/avatarsVisible", checked);
-    });
     settings->endGroup(); // view
     settings->endGroup(); // window
+    QCheckBox *showAvatars = new QCheckBox(tr("Show Avatars"));
+    showAvatars->setChecked(settings->value(SettingsId::ShowAvatars).toBool());
+    connect(showAvatars, &QCheckBox::toggled, [](bool checked) {
+      Settings::instance()->setValue(SettingsId::ShowAvatars, checked);
+    });
 
     QString mergeText = settings->promptDescription(Settings::PromptMerge);
     QCheckBox *merge = new QCheckBox(mergeText, this);

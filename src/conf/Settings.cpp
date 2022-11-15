@@ -142,6 +142,14 @@ void Settings::setValue(const QString &key, const QVariant &value,
   settings.endGroup();
 }
 
+QVariant Settings::value(SettingsId::Enum id) const {
+  return value(SettingsId::key(id));
+}
+
+void Settings::setValue(SettingsId::Enum id, const QVariant& value) {
+  setValue(SettingsId::key(id), value);
+}
+
 QString Settings::lexer(const QString &filename) {
   if (filename.isEmpty())
     return "null";
