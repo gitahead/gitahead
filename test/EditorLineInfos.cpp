@@ -996,7 +996,7 @@ void TestEditorLineInfo::discardCompleteDeletedContent() {
   bool submodule = mRepo.lookupSubmodule(name).isValid();
   {
     FileWidget fw(&diffView, diff, patch, stagedPatch, QModelIndex(), name,
-                  path_, submodule);
+                  path_, submodule, repoView);
     fw.setStageState(git::Index::StagedState::Unstaged);
 
     auto hunks = fw.hunks();
