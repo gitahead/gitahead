@@ -984,7 +984,7 @@ void TestEditorLineInfo::sameContentAddLine() {
 //}
 
 void TestEditorLineInfo::discardCompleteDeletedContent() {
-  INIT_REPO("18_discardCompleteDeletedContent.zip", true)
+  INIT_REPO("19_discardCompleteDeletedContent.zip", true)
   QVERIFY(diff.count() > 0);
   git::Patch patch = diff.patch(0);
   // no staged lines yet, so no staged patch
@@ -1004,6 +1004,8 @@ void TestEditorLineInfo::discardCompleteDeletedContent() {
     for (auto *hunk : hunks)
       hunk->load();
 
+    QCOMPARE(hunks.at(0)->hunk(), QByteArray());
+
     hunks.at(0)->discardSelected(0, 1);
   }
 
@@ -1014,7 +1016,7 @@ void TestEditorLineInfo::discardCompleteDeletedContent() {
 }
 
 void TestEditorLineInfo::discardCompleteAddedContent() {
-  INIT_REPO("19_discardCompleteAddedContent.zip", true)
+  INIT_REPO("20_discardCompleteAddedContent.zip", true)
   QVERIFY(diff.count() > 0);
   git::Patch patch = diff.patch(0);
   // no staged lines yet, so no staged patch
