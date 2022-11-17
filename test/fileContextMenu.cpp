@@ -24,6 +24,7 @@ class TestFileContextMenu : public QObject {
 
 private slots:
   void testDiscardFile();
+  void testDiscardSubmodule();
   void testDiscardFolder();
   void testDiscardNothing();
   void testIgnoreFile();
@@ -107,6 +108,84 @@ void TestFileContextMenu::testDiscardFile() {
   }
 }
 
+void TestFileContextMenu::testDiscardSubmodule() {
+  INIT_REPO("TestRepository.zip", false);
+
+  git::Commit commit =
+      repo.lookupCommit("5c61b24e236310ad4a8a64f7cd1ccc968f1eec20");
+  QVERIFY(commit);
+
+  // modifying all files
+  QHash<QString, QString> fileContent{
+      {"file.txt", "Modified file"},
+      {"file2.txt", "Modified file2"},
+      {"folder1/file.txt", "Modified file in folder1"},
+      {"folder1/file2.txt", "Modified file2 in folder1"},
+      {"GittyupTestRepo/README.md", "Modified readme in submodule"},
+  };
+
+  {
+    QHashIterator<QString, QString> i(fileContent);
+    while (i.hasNext()) {
+      i.next();
+      QFile file(repo.workdir().filePath(i.key()));
+      QVERIFY(file.exists());
+      QVERIFY(file.open(QFile::WriteOnly));
+      file.write(i.value().toLatin1());
+    }
+  }
+
+  // refresh repo
+  repo.notifier()->referenceUpdated(repo.head());
+
+  // let the changes settle
+  QApplication::processEvents();
+
+  QStringList files = {"GittyupTestRepo"};
+  FileContextMenu m(repoView, files, repo.index());
+
+  QAction *action = nullptr;
+  for (auto *a : m.actions()) {
+    if (a->text() == tr("Discard Changes")) {
+      action = a;
+      break;
+    }
+  }
+  QVERIFY(action);
+  QCOMPARE(action->isEnabled(), true);
+  action->triggered(true);
+
+  auto *msgBox = repoView->findChild<QMessageBox *>();
+  QVERIFY(msgBox);
+  auto *button = msgBox->findChild<QPushButton *>("DiscardButton");
+  QVERIFY(button);
+  QVERIFY(button->isEnabled());
+  emit button->clicked(true);
+
+  // original text
+  //  {"file.txt", "File.txt\n"},
+  //  {"file2.txt", "file2.txt\n"},
+  //  {"folder1/file.txt", "file in folder1\n"},
+  //  {"folder1/file2.txt", "file2 in folder1\n"},
+  //  {"GittyupTestRepo/README.md",
+  //   "# GittyupTestRepo\nTest repo for Gittyup used in the unittests\n"},
+
+  {
+    QHash<QString, QString> fileContentRef = fileContent;
+    fileContentRef.insert("GittyupTestRepo/README.md",
+                          "# GittyupTestRepo\nTest repo for Gittyup used in "
+                          "the unittests\n"); // this submodule was discarded
+    QHashIterator<QString, QString> i(fileContentRef);
+    while (i.hasNext()) {
+      i.next();
+      QFile file(repo.workdir().filePath(i.key()));
+      QVERIFY(file.exists());
+      QVERIFY(file.open(QFile::ReadOnly));
+      QVERIFY2(file.readAll() == i.value(), qPrintable(i.key()));
+    }
+  }
+}
+
 void TestFileContextMenu::testDiscardFolder() {
   INIT_REPO("TestRepository.zip", false);
 
@@ -151,6 +230,7 @@ void TestFileContextMenu::testDiscardFolder() {
     }
   }
   QVERIFY(action);
+  QCOMPARE(action->isEnabled(), true);
   action->triggered(true);
 
   auto *msgBox = repoView->findChild<QMessageBox *>();
