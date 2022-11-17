@@ -56,6 +56,7 @@ option(USE_SYSTEM_QT "Don't copy QT files into the installation directory" OFF)
 option(USE_SYSTEM_LUA "Use the system-wide Lua installation" OFF)
 option(USE_SYSTEM_HUNSPELL "Use the system-wide hunspell installation" OFF)
 option(USE_SYSTEM_CMARK "Use the system-wide cmark installation" OFF)
+option(ENABLE_TESTS "Enable Gittyup Unittests" ON)
 
 set(LUA_MODULES_PATH
     CACHE
@@ -128,4 +129,7 @@ add_subdirectory(dep)
 add_subdirectory(src)
 add_subdirectory(l10n)
 add_subdirectory(pack)
-add_subdirectory(test)
+
+if(ENABLE_TESTS)
+  add_subdirectory(test)
+endif()
