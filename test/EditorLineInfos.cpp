@@ -131,6 +131,7 @@ private slots:
 #endif // EXECUTE_ONLY_LAST_TEST == 0
 
   void discardCompleteDeletedContent();
+  void discardCompleteAddedContent();
 
   //  void deleteCompleteContent();
 
@@ -1010,6 +1011,36 @@ void TestEditorLineInfo::discardCompleteDeletedContent() {
   QFile f(path + "/File.txt");
   QVERIFY(f.open(QIODevice::ReadOnly));
   QCOMPARE(f.readAll(), "Content");
+}
+
+void TestEditorLineInfo::discardCompleteAddedContent() {
+  INIT_REPO("19_discardCompleteAddedContent.zip", true)
+  QVERIFY(diff.count() > 0);
+  git::Patch patch = diff.patch(0);
+  // no staged lines yet, so no staged patch
+  QCOMPARE(mRepo.diffTreeToIndex(commit.tree()).count(), 0);
+  git::Patch stagedPatch = git::Patch();
+
+  QString name = patch.name();
+  QString path_ = mRepo.workdir().filePath(name);
+  bool submodule = mRepo.lookupSubmodule(name).isValid();
+  {
+    FileWidget fw(&diffView, diff, patch, stagedPatch, QModelIndex(), name,
+                  path_, submodule, repoView);
+    fw.setStageState(git::Index::StagedState::Unstaged);
+
+    auto hunks = fw.hunks();
+    QVERIFY(hunks.count() == 1);
+    for (auto *hunk : hunks)
+      hunk->load();
+
+    hunks.at(0)->discardSelected(0, 1);
+  }
+
+  // Check that discard was successfull and the application does not crash
+  QFile f(path + "/Test.txt");
+  QVERIFY(f.open(QIODevice::ReadOnly));
+  QCOMPARE(f.readAll(), "");
 }
 
 void TestEditorLineInfo::cleanupTestCase() { qWait(closeDelay); }
