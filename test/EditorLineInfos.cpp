@@ -1012,7 +1012,7 @@ void TestEditorLineInfo::discardCompleteDeletedContent() {
   // Check that discard was successfull and the application does not crash
   QFile f(path + "/File.txt");
   QVERIFY(f.open(QIODevice::ReadOnly));
-  QCOMPARE(f.readAll(), "Content");
+  QCOMPARE(f.readAll(), "Content\n");
 }
 
 void TestEditorLineInfo::discardCompleteAddedContent() {
