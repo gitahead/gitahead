@@ -182,11 +182,13 @@ void TestMerge::resolve() {
   auto doubleTree = view->findChild<DoubleTreeWidget *>();
   QVERIFY(doubleTree);
 
-  auto files = doubleTree->findChild<TreeView *>("Staged");
+  auto files = doubleTree->findChild<TreeView *>("Unstaged");
   QVERIFY(files);
 
   // Wait for refresh
   QAbstractItemModel *model = files->model();
+  qWait(1000); // Because before the merge, there is already an item in the
+               // unstaged model
   while (model->rowCount() < 1)
     qWait(300);
 
@@ -194,21 +196,25 @@ void TestMerge::resolve() {
                                   QItemSelectionModel::Select);
 
   QToolButton *theirs = diffView->findChild<QToolButton *>("ConflictTheirs");
+  QVERIFY(theirs);
   mouseClick(theirs, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(),
              inputDelay);
 
   QToolButton *undo =
       diffView->widget()->findChild<QToolButton *>("ConflictUndo");
+  QVERIFY(undo);
   mouseClick(undo, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(),
              inputDelay);
 
   QToolButton *ours =
       diffView->widget()->findChild<QToolButton *>("ConflictOurs");
+  QVERIFY(ours);
   mouseClick(ours, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(),
              inputDelay);
 
   QToolButton *save =
       diffView->widget()->findChild<QToolButton *>("ConflictSave");
+  QVERIFY(save);
   mouseClick(save, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(),
              inputDelay);
 
