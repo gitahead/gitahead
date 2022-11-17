@@ -367,6 +367,10 @@ void Patch::apply(QList<QList<QByteArray>> &image, int hidx,
                          hidx)) // returns hunk_idx hunk
     return;
 
+  if (hunk->new_start == 0 && hunk->new_lines == 0) {
+    // Complete content of the file was deleted
+  }
+
   assert(hunk->new_start - 1 + hunk->new_lines <= image.length());
 
   // delete old data
