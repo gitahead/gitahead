@@ -37,7 +37,7 @@ void TestFileContextMenu::testDiscardFile() {
   INIT_REPO("TestRepository.zip", false);
 
   git::Commit commit =
-      repo.lookupCommit("51198ba9b2b2b2c25ea6576cf7ca3e9f2a7c3fc7");
+      repo.lookupCommit("5c61b24e236310ad4a8a64f7cd1ccc968f1eec20");
   QVERIFY(commit);
 
   // modifying all files
@@ -111,7 +111,7 @@ void TestFileContextMenu::testDiscardFolder() {
   INIT_REPO("TestRepository.zip", false);
 
   git::Commit commit =
-      repo.lookupCommit("51198ba9b2b2b2c25ea6576cf7ca3e9f2a7c3fc7");
+      repo.lookupCommit("5c61b24e236310ad4a8a64f7cd1ccc968f1eec20");
   QVERIFY(commit);
 
   // modifying all files
@@ -187,7 +187,7 @@ void TestFileContextMenu::testDiscardNothing() {
   INIT_REPO("TestRepository.zip", false);
 
   git::Commit commit =
-      repo.lookupCommit("51198ba9b2b2b2c25ea6576cf7ca3e9f2a7c3fc7");
+      repo.lookupCommit("5c61b24e236310ad4a8a64f7cd1ccc968f1eec20");
   QVERIFY(commit);
 
   // modifying all files
@@ -255,7 +255,7 @@ void TestFileContextMenu::testIgnoreFile() {
   INIT_REPO("TestRepository.zip", false);
 
   git::Commit commit =
-      repo.lookupCommit("51198ba9b2b2b2c25ea6576cf7ca3e9f2a7c3fc7");
+      repo.lookupCommit("5c61b24e236310ad4a8a64f7cd1ccc968f1eec20");
   QVERIFY(commit);
 
   // modifying all files
@@ -317,7 +317,7 @@ void TestFileContextMenu::testIgnoreFolder() {
   INIT_REPO("TestRepository.zip", false);
 
   git::Commit commit =
-      repo.lookupCommit("51198ba9b2b2b2c25ea6576cf7ca3e9f2a7c3fc7");
+      repo.lookupCommit("5c61b24e236310ad4a8a64f7cd1ccc968f1eec20");
   QVERIFY(commit);
 
   // modifying all files
@@ -379,7 +379,7 @@ void TestFileContextMenu::testRemoveUntrackedFolder() {
   INIT_REPO("TestRepository.zip", false);
 
   git::Commit commit =
-      repo.lookupCommit("51198ba9b2b2b2c25ea6576cf7ca3e9f2a7c3fc7");
+      repo.lookupCommit("5c61b24e236310ad4a8a64f7cd1ccc968f1eec20");
   QVERIFY(commit);
 
   // modifying all files
