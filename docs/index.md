@@ -1,6 +1,6 @@
 <!--- Github page main file --->
 
-Gittyup is a graphical Git client designed to help you understand and manage your source code history. Gittyup is an open source software developed by voluntiers, if you like the application please support us [![Donate Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/Gittyup/donate)
+Gittyup is a graphical Git client designed to help you understand and manage your source code history. Gittyup is an open source software developed by volunteers, if you like the application please support us [![Donate Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/Gittyup/donate)
 
 Stable versions for different packages are available for
 - Flatpak for Linux [![Flathub](https://img.shields.io/badge/Flathub-gray?logo=Flathub&logoColor=23FBB04)](https://flathub.org/apps/details/com.github.Murmele.Gittyup)
@@ -70,7 +70,7 @@ Editing properties of a commit
 ![Amend Dialog](https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/screenshots/AmendDialog.png)
 
 ### Solving rebase conflicts
-Solving rebase conflicts and continuouing after conflicts are solved
+Solving rebase conflicts and continuing after conflicts are solved
 
 ![Rebase Conflicts](https://raw.githubusercontent.com/Murmele/Gittyup/master/rsrc/screenshots/RebaseConflicts.png)
 
