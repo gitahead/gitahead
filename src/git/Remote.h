@@ -67,7 +67,7 @@ public:
                                  const QVector<SshInteractivePrompt> &prompts,
                                  QVector<QString> &responses) {}
 
-    virtual bool transfer(int total, int current, int bytes) { return true; }
+    virtual bool transfer(int total, int current, size_t bytes) { return true; }
 
     virtual bool resolve(int total, int current) { return true; }
 

@@ -161,7 +161,7 @@ void RemoteCallbacks::sideband(const QString &text) {
   emit queueSideband(text, tr("remote: %1"));
 }
 
-bool RemoteCallbacks::transfer(int total, int current, int bytes) {
+bool RemoteCallbacks::transfer(int total, int current, size_t bytes) {
   int elapsed = mTimer.elapsed();
   if (current == 0 || current == total || elapsed > 100) {
     emit queueTransfer(total, current, bytes, elapsed);

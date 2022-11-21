@@ -43,7 +43,7 @@ public:
                   QVector<QString> &responses) override;
 
   void sideband(const QString &text) override;
-  bool transfer(int total, int current, int bytes) override;
+  bool transfer(int total, int current, size_t bytes) override;
   bool resolve(int total, int current) override;
   void update(const QString &name, const git::Id &a, const git::Id &b) override;
   void rejected(const QString &name, const QString &status) override;
