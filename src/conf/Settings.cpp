@@ -239,12 +239,7 @@ QDir Settings::appDir() {
   return dir;
 }
 
-QDir Settings::docDir() {
-  QDir dir = rootDir();
-  if (!dir.cd("doc"))
-    dir = confDir();
-  return dir;
-}
+QDir Settings::docDir() { return confDir(); }
 
 QDir Settings::confDir() {
   QDir dir = rootDir();
