@@ -1,4 +1,5 @@
 #include "Test.h"
+#include "ui/DiffView/DiffView.h"
 #include "ui/MainWindow.h"
 #include "ui/DoubleTreeWidget.h"
 #include "ui/TreeView.h"
@@ -27,6 +28,7 @@ class TestTreeView : public QObject {
 private slots:
   void restoreStagedFileAfterCommit();
   void discardFiles();
+  void fileMergeCrash();
 
 private:
 };
@@ -181,6 +183,81 @@ void TestTreeView::discardFiles() {
   QCOMPARE(menu->mFiles.at(0), "folder1/file.txt");
 
   // From here on everything is tested in TestFileContextMenu
+}
+
+void TestTreeView::fileMergeCrash() {
+  INIT_REPO("CrashMerge.zip", false);
+
+  git::Reference otherBranch = repo.lookupRef("refs/heads/otherBranch");
+  QVERIFY(otherBranch);
+
+  git::Reference master =
+      repo.lookupRef(QString("refs/heads/%1").arg("master"));
+  QVERIFY(master);
+
+  QCOMPARE(repo.head().name(), "master");
+
+  repoView->merge(RepoView::Merge, otherBranch);
+
+  // Diff is in a conflicted state
+  git::Diff diff = repo.diffIndexToWorkdir();
+  QVERIFY(diff.isConflicted());
+
+  auto doubleTree = repoView->findChild<DoubleTreeWidget *>();
+  QVERIFY(doubleTree);
+  auto stagedTree = doubleTree->findChild<TreeView *>("Staged");
+  QVERIFY(stagedTree);
+  auto unstagedTree = doubleTree->findChild<TreeView *>("Unstaged");
+  QVERIFY(unstagedTree);
+
+  QAbstractItemModel *stagedModel = stagedTree->model();
+
+  // Wait for refresh
+  while (stagedModel->rowCount() < 4)
+    qWait(300);
+
+  QAbstractItemModel *unstagedModel = unstagedTree->model();
+  QCOMPARE(unstagedModel->rowCount(), 1);
+
+  unstagedTree->expandAll();
+
+  QModelIndex index = unstagedModel->index(0, 0); // common
+  QVERIFY(index.isValid());
+  index = unstagedModel->index(0, 0, index); // src
+  QVERIFY(index.isValid());
+  index = unstagedModel->index(0, 0, index); // main
+  QVERIFY(index.isValid());
+  index = unstagedModel->index(0, 0, index); // java
+  QVERIFY(index.isValid());
+  index = unstagedModel->index(0, 0, index); // com
+  QVERIFY(index.isValid());
+  index = unstagedModel->index(0, 0, index); // something
+  QVERIFY(index.isValid());
+  index = unstagedModel->index(0, 0, index); // common
+  QVERIFY(index.isValid());
+  index = unstagedModel->index(0, 0, index); // configs
+  QVERIFY(index.isValid());
+  index = unstagedModel->index(0, 0, index); // security_config
+  QVERIFY(index.isValid());
+  index = unstagedModel->index(0, 0, index); // File_security_config
+  QVERIFY(index.isValid());
+
+  unstagedTree->selectionModel()->select(
+      index, QItemSelectionModel::SelectionFlag::Select);
+
+  auto diffView = doubleTree->findChild<DiffView *>();
+  QVERIFY(diffView);
+
+  QToolButton *theirs = diffView->findChild<QToolButton *>("ConflictTheirs");
+  QVERIFY(theirs);
+  mouseClick(theirs, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(), 0);
+
+  QToolButton *save =
+      diffView->widget()->findChild<QToolButton *>("ConflictSave");
+  QVERIFY(save);
+  mouseClick(save, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(), 0);
+
+  // should not crash
 }
 
 TEST_MAIN(TestTreeView)
