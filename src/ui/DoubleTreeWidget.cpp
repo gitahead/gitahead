@@ -466,10 +466,9 @@ void DoubleTreeWidget::loadSelection() {
   }
 
   if (!index.isValid() ||
-      (mSelectedFile.stagedModel &&
-       state == git::Index::StagedState::Unstaged) ||
+      (mSelectedFile.stagedModel && state != git::Index::StagedState::Staged) ||
       (!mSelectedFile.stagedModel &&
-       state == git::Index::StagedState::Staged)) {
+       state != git::Index::StagedState::Unstaged)) {
     mSelectedFile.filename = "";
     if (mDiffTreeModel->rowCount() > 0) {
       index = mDiffTreeModel->index(0, 0);
@@ -478,9 +477,6 @@ void DoubleTreeWidget::loadSelection() {
       mSelectedFile.stagedModel = (s == git::Index::StagedState::Staged);
     }
   }
-
-  // TODO: problem: if file does not exist anymore, the current index cannot be
-  // restored anymore
 
   mIgnoreSelectionChange = true;
   if (mSelectedFile.stagedModel) {
