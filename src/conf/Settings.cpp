@@ -142,11 +142,11 @@ void Settings::setValue(const QString &key, const QVariant &value,
   settings.endGroup();
 }
 
-QVariant Settings::value(SettingsId::Enum id) const {
+QVariant Settings::value(SettingsId::Id id) const {
   return value(SettingsId::key(id));
 }
 
-void Settings::setValue(SettingsId::Enum id, const QVariant& value) {
+void Settings::setValue(SettingsId::Id id, const QVariant& value) {
   setValue(SettingsId::key(id), value);
 }
 

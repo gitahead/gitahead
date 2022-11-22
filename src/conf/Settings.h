@@ -39,8 +39,8 @@ public:
   void setValue(const QString &key, const QVariant &value,
                 bool refresh = false);
 
-  QVariant value(SettingsId::Enum id) const;
-  void setValue(SettingsId::Enum id, const QVariant& value);
+  QVariant value(SettingsId::Id id) const;
+  void setValue(SettingsId::Id id, const QVariant& value);
 
   // Look up lexer name by file name.
   QString lexer(const QString &filename);

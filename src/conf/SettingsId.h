@@ -7,19 +7,19 @@ class SettingsId {
   Q_GADGET
 
 public:
-  enum Enum {
+  enum class Id {
     ShowAvatars,
   };
-  Q_ENUM(Enum)
+  Q_ENUM(Id)
 
-  static QString key(Enum id);
+  static QString key(Id id);
 
 private:
   SettingsId() {}
 
-  static QMap<Enum, QString> keys();
+  static QMap<Id, QString> keys();
 
-  static void initialize(QMap<SettingsId::Enum, QString>& keys);
+  static void initialize(QMap<Id, QString>& keys);
 };
 
 #endif
