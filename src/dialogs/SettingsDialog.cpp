@@ -499,48 +499,48 @@ public:
       Settings::instance()->setValue(Setting::Id::ShowAvatars, checked);
     });
 
-    QString mergeText = settings->promptDescription(Settings::PromptMerge);
+    QString mergeText = settings->promptDescription(Prompt::PromptKind::PromptMerge);
     QCheckBox *merge = new QCheckBox(mergeText, this);
-    merge->setChecked(settings->prompt(Settings::PromptMerge));
+    merge->setChecked(settings->prompt(Prompt::PromptKind::PromptMerge));
     connect(merge, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setPrompt(Settings::PromptMerge, checked);
+      Settings::instance()->setPrompt(Prompt::PromptKind::PromptMerge, checked);
     });
 
-    QString revertText = settings->promptDescription(Settings::PromptRevert);
+    QString revertText = settings->promptDescription(Prompt::PromptKind::PromptRevert);
     QCheckBox *revert = new QCheckBox(revertText, this);
-    revert->setChecked(settings->prompt(Settings::PromptRevert));
+    revert->setChecked(settings->prompt(Prompt::PromptKind::PromptRevert));
     connect(revert, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setPrompt(Settings::PromptRevert, checked);
+      Settings::instance()->setPrompt(Prompt::PromptKind::PromptRevert, checked);
     });
 
-    QString cpText = settings->promptDescription(Settings::PromptCherryPick);
+    QString cpText = settings->promptDescription(Prompt::PromptKind::PromptCherryPick);
     QCheckBox *cherryPick = new QCheckBox(cpText, this);
-    cherryPick->setChecked(settings->prompt(Settings::PromptCherryPick));
+    cherryPick->setChecked(settings->prompt(Prompt::PromptKind::PromptCherryPick));
     connect(cherryPick, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setPrompt(Settings::PromptCherryPick, checked);
+      Settings::instance()->setPrompt(Prompt::PromptKind::PromptCherryPick, checked);
     });
 
-    QString stashText = settings->promptDescription(Settings::PromptStash);
+    QString stashText = settings->promptDescription(Prompt::PromptKind::PromptStash);
     QCheckBox *stash = new QCheckBox(stashText, this);
-    stash->setChecked(settings->prompt(Settings::PromptStash));
+    stash->setChecked(settings->prompt(Prompt::PromptKind::PromptStash));
     connect(stash, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setPrompt(Settings::PromptStash, checked);
+      Settings::instance()->setPrompt(Prompt::PromptKind::PromptStash, checked);
     });
 
     QString largeFilesText =
-        settings->promptDescription(Settings::PromptLargeFiles);
+        settings->promptDescription(Prompt::PromptKind::PromptLargeFiles);
     QCheckBox *largeFiles = new QCheckBox(largeFilesText, this);
-    largeFiles->setChecked(settings->prompt(Settings::PromptLargeFiles));
+    largeFiles->setChecked(settings->prompt(Prompt::PromptKind::PromptLargeFiles));
     connect(largeFiles, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setPrompt(Settings::PromptLargeFiles, checked);
+      Settings::instance()->setPrompt(Prompt::PromptKind::PromptLargeFiles, checked);
     });
 
     QString directoriesText =
-        settings->promptDescription(Settings::PromptDirectories);
+        settings->promptDescription(Prompt::PromptKind::PromptDirectories);
     QCheckBox *directories = new QCheckBox(directoriesText, this);
-    directories->setChecked(settings->prompt(Settings::PromptDirectories));
+    directories->setChecked(settings->prompt(Prompt::PromptKind::PromptDirectories));
     connect(directories, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setPrompt(Settings::PromptDirectories, checked);
+      Settings::instance()->setPrompt(Prompt::PromptKind::PromptDirectories, checked);
     });
 
     QFormLayout *layout = new QFormLayout(this);

@@ -38,4 +38,20 @@ private:
   Setting() {}
 };
 
+class Prompt : public SettingsTempl<Prompt> {
+
+public:
+  enum class PromptKind {
+    PromptStash,
+    PromptMerge,
+    PromptRevert,
+    PromptCherryPick,
+    PromptDirectories,
+    PromptLargeFiles
+  };
+
+  static void initialize(QMap<PromptKind, QString>& keys);
+
+};
+
 #endif

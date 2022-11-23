@@ -20,15 +20,6 @@ class Settings : public QObject {
   Q_OBJECT
 
 public:
-  enum PromptKind {
-    PromptStash,
-    PromptMerge,
-    PromptRevert,
-    PromptCherryPick,
-    PromptDirectories,
-    PromptLargeFiles
-  };
-
   QString group() const;
   void beginGroup(const QString &prefix);
   void endGroup();
@@ -47,9 +38,9 @@ public:
   QString kind(const QString &filename);
 
   // prompt dialogs
-  bool prompt(PromptKind kind) const;
-  void setPrompt(PromptKind kind, bool prompt);
-  QString promptDescription(PromptKind kind) const;
+  bool prompt(Prompt::PromptKind kind) const;
+  void setPrompt(Prompt::PromptKind kind, bool prompt);
+  QString promptDescription(Prompt::PromptKind kind) const;
 
   // ignore whitespace
   bool isWhitespaceIgnored() const;

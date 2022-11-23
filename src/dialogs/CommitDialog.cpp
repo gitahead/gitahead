@@ -15,31 +15,31 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 
-CommitDialog::CommitDialog(const QString &message, Settings::PromptKind kind,
+CommitDialog::CommitDialog(const QString &message, Prompt::PromptKind kind,
                            QWidget *parent)
     : QDialog(parent) {
   setAttribute(Qt::WA_DeleteOnClose);
 
   QString title;
   switch (kind) {
-    case Settings::PromptMerge:
+    case Prompt::PromptKind::PromptMerge:
       title = tr("Merge commit message");
       break;
 
-    case Settings::PromptStash:
+    case Prompt::PromptKind::PromptStash:
       title = tr("Stash commit message");
       break;
 
-    case Settings::PromptRevert:
+    case Prompt::PromptKind::PromptRevert:
       title = tr("Revert commit message");
       break;
 
-    case Settings::PromptCherryPick:
+    case Prompt::PromptKind::PromptCherryPick:
       title = tr("Cherry-pick commit message");
       break;
 
-    case Settings::PromptDirectories:
-    case Settings::PromptLargeFiles:
+    case Prompt::PromptKind::PromptDirectories:
+    case Prompt::PromptKind::PromptLargeFiles:
       Q_ASSERT(false);
       break;
   }
@@ -64,28 +64,28 @@ CommitDialog::CommitDialog(const QString &message, Settings::PromptKind kind,
   connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
   switch (kind) {
-    case Settings::PromptMerge:
+    case Prompt::PromptKind::PromptMerge:
       buttons->addButton(tr("Merge"), QDialogButtonBox::AcceptRole);
       buttons->addButton(tr("Abort"), QDialogButtonBox::RejectRole);
       break;
 
-    case Settings::PromptStash:
+    case Prompt::PromptKind::PromptStash:
       buttons->addButton(tr("Stash"), QDialogButtonBox::AcceptRole);
       buttons->addButton(QDialogButtonBox::Cancel);
       break;
 
-    case Settings::PromptRevert:
+    case Prompt::PromptKind::PromptRevert:
       buttons->addButton(tr("Revert"), QDialogButtonBox::AcceptRole);
       buttons->addButton(tr("Abort"), QDialogButtonBox::RejectRole);
       break;
 
-    case Settings::PromptCherryPick:
+    case Prompt::PromptKind::PromptCherryPick:
       buttons->addButton(tr("Cherry-pick"), QDialogButtonBox::AcceptRole);
       buttons->addButton(tr("Abort"), QDialogButtonBox::RejectRole);
       break;
 
-    case Settings::PromptDirectories:
-    case Settings::PromptLargeFiles:
+    case Prompt::PromptKind::PromptDirectories:
+    case Prompt::PromptKind::PromptLargeFiles:
       Q_ASSERT(false);
       break;
   }
