@@ -415,7 +415,7 @@ public:
     QString msg = commit.message(git::Commit::SubstituteEmoji).trimmed();
     mMessage->setPlainText(msg);
 
-    const bool showAvatars = Settings::instance()->value(SettingsId::Id::ShowAvatars).toBool();
+    const bool showAvatars = Settings::instance()->value(Setting::Id::ShowAvatars).toBool();
     if (showAvatars) {
       auto w = window();
       auto w_handler = w->windowHandle();

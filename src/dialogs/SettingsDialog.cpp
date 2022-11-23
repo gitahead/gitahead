@@ -494,9 +494,9 @@ public:
     settings->endGroup(); // view
     settings->endGroup(); // window
     QCheckBox *showAvatars = new QCheckBox(tr("Show Avatars"));
-    showAvatars->setChecked(settings->value(SettingsId::Id::ShowAvatars).toBool());
+    showAvatars->setChecked(settings->value(Setting::Id::ShowAvatars).toBool());
     connect(showAvatars, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setValue(SettingsId::Id::ShowAvatars, checked);
+      Settings::instance()->setValue(Setting::Id::ShowAvatars, checked);
     });
 
     QString mergeText = settings->promptDescription(Settings::PromptMerge);

@@ -14,7 +14,7 @@
 #include <QString>
 #include <QVariant>
 
-#include "SettingsId.h"
+#include "Setting.h"
 
 class Settings : public QObject {
   Q_OBJECT
@@ -39,8 +39,8 @@ public:
   void setValue(const QString &key, const QVariant &value,
                 bool refresh = false);
 
-  QVariant value(SettingsId::Id id) const;
-  void setValue(SettingsId::Id id, const QVariant& value);
+  QVariant value(Setting::Id id) const;
+  void setValue(Setting::Id id, const QVariant& value);
 
   // Look up lexer name by file name.
   QString lexer(const QString &filename);
