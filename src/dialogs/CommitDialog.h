@@ -10,7 +10,7 @@
 #ifndef COMMITDIALOG_H
 #define COMMITDIALOG_H
 
-#include "conf/Settings.h"
+#include "conf/Setting.h"
 #include <QDialog>
 
 class QTextEdit;
