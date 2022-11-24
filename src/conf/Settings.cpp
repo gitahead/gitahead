@@ -44,9 +44,7 @@ QVariant lookup(const QVariantMap &root, const QString &key) {
   return QVariant();
 }
 
-QString promptKey(Prompt::PromptKind kind) {
-  return Prompt::key(kind);
-}
+QString promptKey(Prompt::PromptKind kind) { return Prompt::key(kind); }
 
 QDir rootDir() {
   QDir dir(QCoreApplication::applicationDirPath());
@@ -119,7 +117,7 @@ QVariant Settings::value(Setting::Id id) const {
   return value(Setting::key(id));
 }
 
-void Settings::setValue(Setting::Id id, const QVariant& value) {
+void Settings::setValue(Setting::Id id, const QVariant &value) {
   setValue(Setting::key(id), value);
 }
 

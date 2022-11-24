@@ -1,10 +1,10 @@
 #include "Setting.h"
 
-void Setting::initialize(QMap<Id, QString>& keys) {
+void Setting::initialize(QMap<Id, QString> &keys) {
   keys[Id::ShowAvatars] = "window/view/avatarsVisible";
 }
 
-void Prompt::initialize(QMap<PromptKind, QString>& keys) {
+void Prompt::initialize(QMap<PromptKind, QString> &keys) {
   const QString root("window/prompt/");
   keys[PromptKind::PromptMerge] = root + "merge";
   keys[PromptKind::PromptStash] = root + "stash";

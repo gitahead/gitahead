@@ -306,32 +306,33 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   // FIXME: This is a workaround.
   connect(notifier, &git::RepositoryNotifier::directoryStaged, this,
           &RepoView::refresh, Qt::QueuedConnection);
-  connect(
-      notifier, &git::RepositoryNotifier::directoryAboutToBeStaged, this,
-      [this](const QString &dir, int count, bool &allow) {
-        if (!Settings::instance()->prompt(Prompt::PromptKind::PromptDirectories))
-          return;
+  connect(notifier, &git::RepositoryNotifier::directoryAboutToBeStaged, this,
+          [this](const QString &dir, int count, bool &allow) {
+            if (!Settings::instance()->prompt(
+                    Prompt::PromptKind::PromptDirectories))
+              return;
 
-        QString title = tr("Stage Directory?");
-        QString text = tr("Are you sure you want to stage '%1'?");
-        QString info = tr("This will result in the addition of %1 files.");
-        QString arg =
-            (count < 0) ? tr("more than 100") : QString::number(count);
-        QMessageBox dialog(QMessageBox::Question, title, text.arg(dir),
-                           QMessageBox::Cancel, this);
-        dialog.setInformativeText(info.arg(arg));
-        QPushButton *button =
-            dialog.addButton(tr("Stage Directory"), QMessageBox::AcceptRole);
+            QString title = tr("Stage Directory?");
+            QString text = tr("Are you sure you want to stage '%1'?");
+            QString info = tr("This will result in the addition of %1 files.");
+            QString arg =
+                (count < 0) ? tr("more than 100") : QString::number(count);
+            QMessageBox dialog(QMessageBox::Question, title, text.arg(dir),
+                               QMessageBox::Cancel, this);
+            dialog.setInformativeText(info.arg(arg));
+            QPushButton *button = dialog.addButton(tr("Stage Directory"),
+                                                   QMessageBox::AcceptRole);
 
-        QString cbText = tr("Stop prompting to stage directories");
-        QCheckBox *cb = new QCheckBox(cbText, &dialog);
-        dialog.setCheckBox(cb);
+            QString cbText = tr("Stop prompting to stage directories");
+            QCheckBox *cb = new QCheckBox(cbText, &dialog);
+            dialog.setCheckBox(cb);
 
-        dialog.exec();
-        allow = (dialog.clickedButton() == button);
-        if (cb->isChecked())
-          Settings::instance()->setPrompt(Prompt::PromptKind::PromptDirectories, false);
-      });
+            dialog.exec();
+            allow = (dialog.clickedButton() == button);
+            if (cb->isChecked())
+              Settings::instance()->setPrompt(
+                  Prompt::PromptKind::PromptDirectories, false);
+          });
 
   // large file size warning
   connect(
@@ -365,7 +366,8 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
         dialog.exec();
         allow = (dialog.clickedButton() == stage);
         if (cb->isChecked())
-          Settings::instance()->setPrompt(Prompt::PromptKind::PromptLargeFiles, false);
+          Settings::instance()->setPrompt(Prompt::PromptKind::PromptLargeFiles,
+                                          false);
 
         if (dialog.clickedButton() == track)
           configureSettings(ConfigDialog::Lfs);
@@ -1312,7 +1314,8 @@ void RepoView::merge(MergeFlags flags, const git::AnnotatedCommit &upstream,
   if (Settings::instance()->prompt(Prompt::PromptKind::PromptMerge)) {
     // Prompt to edit message.
     bool suspended = suspendLogTimer();
-    CommitDialog *dialog = new CommitDialog(msg, Prompt::PromptKind::PromptMerge, this);
+    CommitDialog *dialog =
+        new CommitDialog(msg, Prompt::PromptKind::PromptMerge, this);
     connect(dialog, &QDialog::rejected, this, [this, parent, suspended] {
       resumeLogTimer(suspended);
       mergeAbort(parent);
@@ -1540,7 +1543,8 @@ void RepoView::revert(const git::Commit &commit) {
   if (Settings::instance()->prompt(Prompt::PromptKind::PromptRevert)) {
     // Prompt to edit message.
     bool suspended = suspendLogTimer();
-    CommitDialog *dialog = new CommitDialog(msg, Prompt::PromptKind::PromptRevert, this);
+    CommitDialog *dialog =
+        new CommitDialog(msg, Prompt::PromptKind::PromptRevert, this);
     connect(dialog, &QDialog::rejected, this, [this, parent, suspended] {
       resumeLogTimer(suspended);
       mergeAbort(parent);
@@ -2053,7 +2057,8 @@ void RepoView::promptToStash() {
   QString id = commit.shortId();
   QString ref = head.isBranch() ? head.name() : tr("(no branch)");
   QString msg = tr("WIP on %1: %2 %3").arg(ref, id, commit.summary());
-  CommitDialog *dialog = new CommitDialog(msg, Prompt::PromptKind::PromptStash, this);
+  CommitDialog *dialog =
+      new CommitDialog(msg, Prompt::PromptKind::PromptStash, this);
   connect(dialog, &QDialog::accepted, this, [this, msg, dialog] {
     QString userMsg = dialog->message();
     stash(msg != userMsg ? userMsg : QString());

@@ -4,17 +4,14 @@
 #include <QObject>
 #include <QMap>
 
-template<class T>
-class SettingsTempl {
+template <class T> class SettingsTempl {
 public:
-  template<typename TId>
-  static QString key(const TId id) {
+  template <typename TId> static QString key(const TId id) {
     return keys<TId>().value(id);
   }
 
 private:
-  template<typename TId>
-  static QMap<TId, QString> keys() {
+  template <typename TId> static QMap<TId, QString> keys() {
     static QMap<TId, QString> keys;
     if (keys.isEmpty()) {
       T::initialize(keys);
@@ -32,7 +29,7 @@ public:
   };
   Q_ENUM(Id)
 
-  static void initialize(QMap<Id, QString>& keys);
+  static void initialize(QMap<Id, QString> &keys);
 
 private:
   Setting() {}
@@ -50,8 +47,7 @@ public:
     PromptLargeFiles
   };
 
-  static void initialize(QMap<PromptKind, QString>& keys);
-
+  static void initialize(QMap<PromptKind, QString> &keys);
 };
 
 #endif

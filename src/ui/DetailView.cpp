@@ -415,14 +415,16 @@ public:
     QString msg = commit.message(git::Commit::SubstituteEmoji).trimmed();
     mMessage->setPlainText(msg);
 
-    const bool showAvatars = Settings::instance()->value(Setting::Id::ShowAvatars).toBool();
+    const bool showAvatars =
+        Settings::instance()->value(Setting::Id::ShowAvatars).toBool();
     if (showAvatars) {
       auto w = window();
       auto w_handler = w->windowHandle();
 
       int size = kSize * w_handler->devicePixelRatio();
       QByteArray email = commit.author().email().trimmed().toLower().toUtf8();
-      QByteArray hash = QCryptographicHash::hash(email, QCryptographicHash::Md5);
+      QByteArray hash =
+          QCryptographicHash::hash(email, QCryptographicHash::Md5);
 
       // Check the cache first.
       QByteArray key = hash.toHex() + '@' + QByteArray::number(size);
