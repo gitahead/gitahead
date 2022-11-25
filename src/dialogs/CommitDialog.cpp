@@ -8,6 +8,9 @@
 //
 
 #include "CommitDialog.h"
+
+#include "conf/Settings.h"
+
 #include <QCheckBox>
 #include <QDialogButtonBox>
 #include <QLabel>
