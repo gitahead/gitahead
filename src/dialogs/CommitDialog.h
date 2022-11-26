@@ -10,7 +10,7 @@
 #ifndef COMMITDIALOG_H
 #define COMMITDIALOG_H
 
-#include "conf/Settings.h"
+#include "conf/Setting.h"
 #include <QDialog>
 
 class QTextEdit;
@@ -19,7 +19,7 @@ class CommitDialog : public QDialog {
   Q_OBJECT
 
 public:
-  CommitDialog(const QString &message, Settings::PromptKind kind,
+  CommitDialog(const QString &message, Prompt::PromptKind kind,
                QWidget *parent = nullptr);
 
   QString message() const;

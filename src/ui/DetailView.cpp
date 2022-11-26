@@ -192,13 +192,13 @@ public:
       mCommitter->adjustSize();
       mCommitter->setVisible(true);
     }
-    updateGeometry();
+    updateLayout();
   }
 
   void setDate(const QString &date) {
     mDate->setText(date);
     mDate->adjustSize();
-    updateGeometry();
+    updateLayout();
   }
 
 private:
@@ -212,6 +212,7 @@ private:
     int y =
         wrapped ? mAuthor->height() + mCommitter->height() + 2 * mSpacing : 0;
     mDate->move(x, y);
+    updateGeometry();
   }
 
   QLabel *mAuthor;
@@ -414,23 +415,28 @@ public:
     QString msg = commit.message(git::Commit::SubstituteEmoji).trimmed();
     mMessage->setPlainText(msg);
 
-    auto w = window();
-    auto w_handler = w->windowHandle();
+    const bool showAvatars =
+        Settings::instance()->value(Setting::Id::ShowAvatars).toBool();
+    if (showAvatars) {
+      auto w = window();
+      auto w_handler = w->windowHandle();
 
-    int size = kSize * w_handler->devicePixelRatio();
-    QByteArray email = commit.author().email().trimmed().toLower().toUtf8();
-    QByteArray hash = QCryptographicHash::hash(email, QCryptographicHash::Md5);
+      int size = kSize * w_handler->devicePixelRatio();
+      QByteArray email = commit.author().email().trimmed().toLower().toUtf8();
+      QByteArray hash =
+          QCryptographicHash::hash(email, QCryptographicHash::Md5);
 
-    // Check the cache first.
-    QByteArray key = hash.toHex() + '@' + QByteArray::number(size);
-    mPicture->setPixmap(mCache.value(key));
+      // Check the cache first.
+      QByteArray key = hash.toHex() + '@' + QByteArray::number(size);
+      mPicture->setPixmap(mCache.value(key));
 
-    // Request the image from gravatar.
-    if (!mCache.contains(key)) {
-      QUrl url(
-          kUrl.arg(QString::fromUtf8(hash.toHex()), QString::number(size)));
-      QNetworkReply *reply = mMgr.get(QNetworkRequest(url));
-      reply->setProperty(kCacheKey, key);
+      // Request the image from gravatar.
+      if (!mCache.contains(key)) {
+        QUrl url(
+            kUrl.arg(QString::fromUtf8(hash.toHex()), QString::number(size)));
+        QNetworkReply *reply = mMgr.get(QNetworkRequest(url));
+        reply->setProperty(kCacheKey, key);
+      }
     }
 
     // Remember the id.

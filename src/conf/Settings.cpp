@@ -44,36 +44,7 @@ QVariant lookup(const QVariantMap &root, const QString &key) {
   return QVariant();
 }
 
-QString promptKey(Settings::PromptKind kind) {
-  QString key;
-  switch (kind) {
-    case Settings::PromptMerge:
-      key = "merge";
-      break;
-
-    case Settings::PromptStash:
-      key = "stash";
-      break;
-
-    case Settings::PromptRevert:
-      key = "revert";
-      break;
-
-    case Settings::PromptCherryPick:
-      key = "cherrypick";
-      break;
-
-    case Settings::PromptDirectories:
-      key = "directories";
-      break;
-
-    case Settings::PromptLargeFiles:
-      key = "largeFiles";
-      break;
-  }
-
-  return QString("window/prompt/%1").arg(key);
-}
+QString promptKey(Prompt::PromptKind kind) { return Prompt::key(kind); }
 
 QDir rootDir() {
   QDir dir(QCoreApplication::applicationDirPath());
@@ -142,6 +113,14 @@ void Settings::setValue(const QString &key, const QVariant &value,
   settings.endGroup();
 }
 
+QVariant Settings::value(Setting::Id id) const {
+  return value(Setting::key(id));
+}
+
+void Settings::setValue(Setting::Id id, const QVariant &value) {
+  setValue(Setting::key(id), value);
+}
+
 QString Settings::lexer(const QString &filename) {
   if (filename.isEmpty())
     return "null";
@@ -183,32 +162,32 @@ QString Settings::kind(const QString &filename) {
   return lexers.value(key).toMap().value("name").toString();
 }
 
-bool Settings::prompt(PromptKind kind) const {
+bool Settings::prompt(Prompt::PromptKind kind) const {
   return value(promptKey(kind)).toBool();
 }
 
-void Settings::setPrompt(PromptKind kind, bool prompt) {
+void Settings::setPrompt(Prompt::PromptKind kind, bool prompt) {
   setValue(promptKey(kind), prompt);
 }
 
-QString Settings::promptDescription(PromptKind kind) const {
+QString Settings::promptDescription(Prompt::PromptKind kind) const {
   switch (kind) {
-    case PromptStash:
+    case Prompt::PromptKind::PromptStash:
       return tr("Prompt to edit stash message before stashing");
 
-    case PromptMerge:
+    case Prompt::PromptKind::PromptMerge:
       return tr("Prompt to edit commit message before merging");
 
-    case PromptRevert:
+    case Prompt::PromptKind::PromptRevert:
       return tr("Prompt to edit commit message before reverting");
 
-    case PromptCherryPick:
+    case Prompt::PromptKind::PromptCherryPick:
       return tr("Prompt to edit commit message before cherry-picking");
 
-    case PromptDirectories:
+    case Prompt::PromptKind::PromptDirectories:
       return tr("Prompt to stage directories");
 
-    case PromptLargeFiles:
+    case Prompt::PromptKind::PromptLargeFiles:
       return tr("Prompt to stage large files");
   }
 }
