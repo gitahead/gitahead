@@ -385,7 +385,7 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff, const QString &file,
   model->setDiff(diff);
   // do not expand if to many files exist, it takes really long
   // So do it only when there are less than 100
-  if (diff.isValid() && diff.count() < fileCountExpandDecision)
+  if (diff.isValid() && diff.count() < fileCountExpansionThreshold)
     unstagedFiles->expandAll();
   else
     unstagedFiles->collapseAll();
@@ -408,7 +408,7 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff, const QString &file,
   // the commited files must be shown
   if (!diff.isValid() || diff.isStatusDiff()) {
     mUnstagedCommitedFiles->setText(singleTree ? kAllFiles : kUnstagedFiles);
-    if (diff.isValid() && diff.count() < fileCountExpandDecision)
+    if (diff.isValid() && diff.count() < fileCountExpansionThreshold)
       stagedFiles->expandAll();
     else
       stagedFiles->collapseAll();

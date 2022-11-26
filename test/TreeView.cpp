@@ -205,7 +205,7 @@ void TestTreeView::fileMergeCrash() {
 
   auto doubleTree = repoView->findChild<DoubleTreeWidget *>();
   QVERIFY(doubleTree);
-  doubleTree->fileCountExpandDecision = 5;
+  doubleTree->fileCountExpansionThreshold = 5;
   auto stagedTree = doubleTree->findChild<TreeView *>("Staged");
   QVERIFY(stagedTree);
   auto unstagedTree = doubleTree->findChild<TreeView *>("Unstaged");

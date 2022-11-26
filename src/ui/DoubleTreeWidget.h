@@ -105,7 +105,7 @@ private:
 
   git::Diff mDiff;
 
-  int fileCountExpandDecision{100};
+  int fileCountExpansionThreshold{100};
 
   friend class TestTreeView;
 };
