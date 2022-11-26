@@ -38,9 +38,9 @@ public:
   QString kind(const QString &filename);
 
   // prompt dialogs
-  bool prompt(Prompt::PromptKind kind) const;
-  void setPrompt(Prompt::PromptKind kind, bool prompt);
-  QString promptDescription(Prompt::PromptKind kind) const;
+  bool prompt(Prompt::Kind kind) const;
+  void setPrompt(Prompt::Kind kind, bool prompt);
+  QString promptDescription(Prompt::Kind kind) const;
 
   // ignore whitespace
   bool isWhitespaceIgnored() const;

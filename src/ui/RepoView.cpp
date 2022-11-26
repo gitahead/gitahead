@@ -309,7 +309,7 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   connect(notifier, &git::RepositoryNotifier::directoryAboutToBeStaged, this,
           [this](const QString &dir, int count, bool &allow) {
             if (!Settings::instance()->prompt(
-                    Prompt::PromptKind::PromptDirectories))
+                    Prompt::Kind::Directories))
               return;
 
             QString title = tr("Stage Directory?");
@@ -331,14 +331,14 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
             allow = (dialog.clickedButton() == button);
             if (cb->isChecked())
               Settings::instance()->setPrompt(
-                  Prompt::PromptKind::PromptDirectories, false);
+                  Prompt::Kind::Directories, false);
           });
 
   // large file size warning
   connect(
       notifier, &git::RepositoryNotifier::largeFileAboutToBeStaged, this,
       [this](const QString &file, int size, bool &allow) {
-        if (!Settings::instance()->prompt(Prompt::PromptKind::PromptLargeFiles))
+        if (!Settings::instance()->prompt(Prompt::Kind::LargeFiles))
           return;
 
         QString title = tr("Stage Large File?");
@@ -366,7 +366,7 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
         dialog.exec();
         allow = (dialog.clickedButton() == stage);
         if (cb->isChecked())
-          Settings::instance()->setPrompt(Prompt::PromptKind::PromptLargeFiles,
+          Settings::instance()->setPrompt(Prompt::Kind::LargeFiles,
                                           false);
 
         if (dialog.clickedButton() == track)
@@ -1311,11 +1311,11 @@ void RepoView::merge(MergeFlags flags, const git::AnnotatedCommit &upstream,
 
   // Read default message.
   QString msg = mRepo.message();
-  if (Settings::instance()->prompt(Prompt::PromptKind::PromptMerge)) {
+  if (Settings::instance()->prompt(Prompt::Kind::Merge)) {
     // Prompt to edit message.
     bool suspended = suspendLogTimer();
     CommitDialog *dialog =
-        new CommitDialog(msg, Prompt::PromptKind::PromptMerge, this);
+        new CommitDialog(msg, Prompt::Kind::Merge, this);
     connect(dialog, &QDialog::rejected, this, [this, parent, suspended] {
       resumeLogTimer(suspended);
       mergeAbort(parent);
@@ -1540,11 +1540,11 @@ void RepoView::revert(const git::Commit &commit) {
   QString id = commit.id().toString();
   QString summary = commit.summary();
   QString msg = tr("Revert \"%1\"\n\nThis reverts commit %2.").arg(summary, id);
-  if (Settings::instance()->prompt(Prompt::PromptKind::PromptRevert)) {
+  if (Settings::instance()->prompt(Prompt::Kind::Revert)) {
     // Prompt to edit message.
     bool suspended = suspendLogTimer();
     CommitDialog *dialog =
-        new CommitDialog(msg, Prompt::PromptKind::PromptRevert, this);
+        new CommitDialog(msg, Prompt::Kind::Revert, this);
     connect(dialog, &QDialog::rejected, this, [this, parent, suspended] {
       resumeLogTimer(suspended);
       mergeAbort(parent);
@@ -1589,11 +1589,11 @@ void RepoView::cherryPick(const git::Commit &commit) {
       nullptr, mDetails->overrideUser(), mDetails->overrideEmail());
 
   QString msg = commit.message();
-  if (Settings::instance()->prompt(Prompt::PromptKind::PromptCherryPick)) {
+  if (Settings::instance()->prompt(Prompt::Kind::CherryPick)) {
     // Prompt to edit message.
     bool suspended = suspendLogTimer();
     CommitDialog *dialog =
-        new CommitDialog(msg, Prompt::PromptKind::PromptCherryPick, this);
+        new CommitDialog(msg, Prompt::Kind::CherryPick, this);
     connect(dialog, &QDialog::rejected, this, [this, parent, suspended] {
       resumeLogTimer(suspended);
       mergeAbort(parent);
@@ -2046,7 +2046,7 @@ void RepoView::promptToDeleteBranch(const git::Reference &ref) {
 
 void RepoView::promptToStash() {
   // Prompt to edit stash commit message.
-  if (!Settings::instance()->prompt(Prompt::PromptKind::PromptStash)) {
+  if (!Settings::instance()->prompt(Prompt::Kind::Stash)) {
     stash();
     return;
   }
@@ -2058,7 +2058,7 @@ void RepoView::promptToStash() {
   QString ref = head.isBranch() ? head.name() : tr("(no branch)");
   QString msg = tr("WIP on %1: %2 %3").arg(ref, id, commit.summary());
   CommitDialog *dialog =
-      new CommitDialog(msg, Prompt::PromptKind::PromptStash, this);
+      new CommitDialog(msg, Prompt::Kind::Stash, this);
   connect(dialog, &QDialog::accepted, this, [this, msg, dialog] {
     QString userMsg = dialog->message();
     stash(msg != userMsg ? userMsg : QString());

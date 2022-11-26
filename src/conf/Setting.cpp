@@ -4,12 +4,12 @@ void Setting::initialize(QMap<Id, QString> &keys) {
   keys[Id::ShowAvatars] = "window/view/avatarsVisible";
 }
 
-void Prompt::initialize(QMap<PromptKind, QString> &keys) {
+void Prompt::initialize(QMap<Kind, QString> &keys) {
   const QString root("window/prompt/");
-  keys[PromptKind::PromptMerge] = root + "merge";
-  keys[PromptKind::PromptStash] = root + "stash";
-  keys[PromptKind::PromptRevert] = root + "revert";
-  keys[PromptKind::PromptCherryPick] = root + "cherrypick";
-  keys[PromptKind::PromptDirectories] = root + "directories";
-  keys[PromptKind::PromptLargeFiles] = root + "largeFiles";
+  keys[Kind::Merge] = root + "merge";
+  keys[Kind::Stash] = root + "stash";
+  keys[Kind::Revert] = root + "revert";
+  keys[Kind::CherryPick] = root + "cherrypick";
+  keys[Kind::Directories] = root + "directories";
+  keys[Kind::LargeFiles] = root + "largeFiles";
 }

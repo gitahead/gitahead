@@ -44,7 +44,7 @@ QVariant lookup(const QVariantMap &root, const QString &key) {
   return QVariant();
 }
 
-QString promptKey(Prompt::PromptKind kind) { return Prompt::key(kind); }
+QString promptKey(Prompt::Kind kind) { return Prompt::key(kind); }
 
 QDir rootDir() {
   QDir dir(QCoreApplication::applicationDirPath());
@@ -162,32 +162,32 @@ QString Settings::kind(const QString &filename) {
   return lexers.value(key).toMap().value("name").toString();
 }
 
-bool Settings::prompt(Prompt::PromptKind kind) const {
+bool Settings::prompt(Prompt::Kind kind) const {
   return value(promptKey(kind)).toBool();
 }
 
-void Settings::setPrompt(Prompt::PromptKind kind, bool prompt) {
+void Settings::setPrompt(Prompt::Kind kind, bool prompt) {
   setValue(promptKey(kind), prompt);
 }
 
-QString Settings::promptDescription(Prompt::PromptKind kind) const {
+QString Settings::promptDescription(Prompt::Kind kind) const {
   switch (kind) {
-    case Prompt::PromptKind::PromptStash:
+    case Prompt::Kind::Stash:
       return tr("Prompt to edit stash message before stashing");
 
-    case Prompt::PromptKind::PromptMerge:
+    case Prompt::Kind::Merge:
       return tr("Prompt to edit commit message before merging");
 
-    case Prompt::PromptKind::PromptRevert:
+    case Prompt::Kind::Revert:
       return tr("Prompt to edit commit message before reverting");
 
-    case Prompt::PromptKind::PromptCherryPick:
+    case Prompt::Kind::CherryPick:
       return tr("Prompt to edit commit message before cherry-picking");
 
-    case Prompt::PromptKind::PromptDirectories:
+    case Prompt::Kind::Directories:
       return tr("Prompt to stage directories");
 
-    case Prompt::PromptKind::PromptLargeFiles:
+    case Prompt::Kind::LargeFiles:
       return tr("Prompt to stage large files");
   }
 }
