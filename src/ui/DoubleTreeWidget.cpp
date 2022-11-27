@@ -385,7 +385,7 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff, const QString &file,
   model->setDiff(diff);
   // do not expand if to many files exist, it takes really long
   // So do it only when there are less than 100
-  if (diff.isValid() && diff.count() < 100)
+  if (diff.isValid() && diff.count() < fileCountExpansionThreshold)
     unstagedFiles->expandAll();
   else
     unstagedFiles->collapseAll();
@@ -408,7 +408,7 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff, const QString &file,
   // the commited files must be shown
   if (!diff.isValid() || diff.isStatusDiff()) {
     mUnstagedCommitedFiles->setText(singleTree ? kAllFiles : kUnstagedFiles);
-    if (diff.isValid() && diff.count() < 100)
+    if (diff.isValid() && diff.count() < fileCountExpansionThreshold)
       stagedFiles->expandAll();
     else
       stagedFiles->collapseAll();
@@ -466,10 +466,9 @@ void DoubleTreeWidget::loadSelection() {
   }
 
   if (!index.isValid() ||
-      (mSelectedFile.stagedModel &&
-       state == git::Index::StagedState::Unstaged) ||
+      (mSelectedFile.stagedModel && state != git::Index::StagedState::Staged) ||
       (!mSelectedFile.stagedModel &&
-       state == git::Index::StagedState::Staged)) {
+       state != git::Index::StagedState::Unstaged)) {
     mSelectedFile.filename = "";
     if (mDiffTreeModel->rowCount() > 0) {
       index = mDiffTreeModel->index(0, 0);
@@ -478,9 +477,6 @@ void DoubleTreeWidget::loadSelection() {
       mSelectedFile.stagedModel = (s == git::Index::StagedState::Staged);
     }
   }
-
-  // TODO: problem: if file does not exist anymore, the current index cannot be
-  // restored anymore
 
   mIgnoreSelectionChange = true;
   if (mSelectedFile.stagedModel) {

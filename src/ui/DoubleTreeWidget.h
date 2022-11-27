@@ -105,6 +105,8 @@ private:
 
   git::Diff mDiff;
 
+  int fileCountExpansionThreshold{100};
+
   friend class TestTreeView;
 };
 #endif // DOUBLETREEWIDGET_H
