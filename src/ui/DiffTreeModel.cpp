@@ -179,7 +179,21 @@ QVariant DiffTreeModel::data(const QModelIndex &index, int role) const {
         return QVariant();
 
       git::Index index = mDiff.index();
-      return node->stageState(index, Node::ParentStageState::Any);
+      const auto state = node->stageState(index, Node::ParentStageState::Any);
+      switch (state) {
+        case git::Index::StagedState::PartiallyStaged:
+          return Qt::CheckState::PartiallyChecked;
+        case git::Index::StagedState::Staged:
+          return Qt::CheckState::Checked;
+        case git::Index::StagedState::Unstaged:
+          return Qt::CheckState::Unchecked;
+        case git::Index::StagedState::Conflicted:
+        // fall through
+        case git::Index::StagedState::Disabled: // dirty submodules
+          return Qt::CheckState::Unchecked;
+      }
+
+      return Qt::CheckState::Unchecked;
     }
 
     case KindRole: {
