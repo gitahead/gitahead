@@ -214,7 +214,7 @@ void TestTreeView::fileMergeCrash() {
   QAbstractItemModel *stagedModel = stagedTree->model();
 
   // Wait for refresh
-  while (stagedModel->rowCount() < 4)
+  while (stagedModel->rowCount() < 3)
     qWait(300);
 
   QAbstractItemModel *unstagedModel = unstagedTree->model();
