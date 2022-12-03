@@ -2537,7 +2537,7 @@ ConfigDialog *RepoView::configureSettings(ConfigDialog::Index index) {
 
 void RepoView::openTerminal() {
   QString terminalCmd =
-      Settings::instance()->value("terminal/command").toString();
+      Settings::instance()->value(Setting::Id::TerminalCommand).toString();
 
   if (terminalCmd.isEmpty()) {
 #if defined(Q_OS_WIN)

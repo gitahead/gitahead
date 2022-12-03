@@ -45,6 +45,9 @@ public:
     ShowAvatars,
     AutoCollapseAddedFiles,
     AutoCollapseDeletedFiles,
+    TerminalCommand,
+    TerminalName,
+    TerminalPath,
   };
   Q_ENUM(Id)
 

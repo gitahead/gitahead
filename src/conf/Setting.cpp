@@ -21,6 +21,9 @@ void Setting::initialize(QMap<Id, QString> &keys) {
   keys[Id::ShowAvatars] = "window/view/avatarsVisible";
   keys[Id::AutoCollapseAddedFiles] = "collapse/added";
   keys[Id::AutoCollapseDeletedFiles] = "collapse/deleted";
+  keys[Id::TerminalCommand] = "terminal/command";
+  keys[Id::TerminalName] = "terminal/name";
+  keys[Id::TerminalPath] = "terminal/path";
 }
 
 void Prompt::initialize(QMap<Kind, QString> &keys) {

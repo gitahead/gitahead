@@ -259,10 +259,10 @@ public:
     QLineEdit *mTerminalCommand = new QLineEdit(this);
     layout->addRow(tr("Terminal emulator command:"), mTerminalCommand);
     mTerminalCommand->setText(
-        Settings::instance()->value("terminal/command").toString());
+        Settings::instance()->value(Setting::Id::TerminalCommand).toString());
 
     connect(mTerminalCommand, &QLineEdit::textChanged, [](const QString &text) {
-      Settings::instance()->setValue("terminal/command", text);
+      Settings::instance()->setValue(Setting::Id::TerminalCommand, text);
     });
 
     QLineEdit *mFileManagerCommand = new QLineEdit(this);
@@ -699,21 +699,19 @@ class TerminalPanel : public QWidget {
 public:
   TerminalPanel(QWidget *parent = nullptr) : QWidget(parent) {
     Settings *settings = Settings::instance();
-    settings->beginGroup("terminal");
 
-    mNameBox = new QLineEdit(settings->value("name").toString(), this);
+    mNameBox = new QLineEdit(settings->value(Setting::Id::TerminalName).toString(), this);
     connect(mNameBox, &QLineEdit::textChanged, [this](const QString &text) {
-      Settings::instance()->setValue("terminal/name", text);
+      Settings::instance()->setValue(Setting::Id::TerminalName, text);
       updateInstallButton();
     });
 
-    mPathBox = new QLineEdit(settings->value("path").toString(), this);
+    mPathBox = new QLineEdit(settings->value(Setting::Id::TerminalPath).toString(), this);
     connect(mPathBox, &QLineEdit::textChanged, [this](const QString &text) {
-      Settings::instance()->setValue("terminal/path", text);
+      Settings::instance()->setValue(Setting::Id::TerminalPath, text);
       updateInstallButton();
     });
 
-    settings->endGroup();
 
     mInstallButton = new QPushButton(tr("Install"), this);
     connect(mInstallButton, &QPushButton::clicked, [this] {
