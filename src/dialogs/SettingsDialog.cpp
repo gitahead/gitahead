@@ -326,7 +326,6 @@ class WindowPanel : public QWidget {
 public:
   WindowPanel(QWidget *parent = nullptr) : QWidget(parent) {
     Settings *settings = Settings::instance();
-    settings->beginGroup("window");
 
     QComboBox *comboBox = new QComboBox(this);
 
@@ -362,7 +361,7 @@ public:
 
     comboBox->insertSeparator(comboBox->count());
 
-    int index = comboBox->findText(settings->value("theme").toString());
+    int index = comboBox->findText(settings->value(Setting::Id::ColorTheme).toString());
 
     // add theme
     comboBox->addItem(tr("Add New Theme"));
@@ -429,7 +428,7 @@ public:
       }
 
       // Save theme
-      Settings::instance()->setValue("window/theme", comboBox->currentText());
+      Settings::instance()->setValue(Setting::Id::ColorTheme, comboBox->currentText());
 
       QMessageBox mb(QMessageBox::Information, tr("Restart?"),
                      tr("The application must be restarted for "
@@ -456,39 +455,34 @@ public:
     });
 
     QCheckBox *fullPath = new QCheckBox(tr("Show full repository path"));
-    fullPath->setChecked(settings->value("path/full").toBool());
+    fullPath->setChecked(settings->value(Setting::Id::ShowFullRepoPath).toBool());
     connect(fullPath, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setValue("window/path/full", checked);
+      Settings::instance()->setValue(Setting::Id::ShowFullRepoPath, checked);
     });
 
     QCheckBox *hideLog = new QCheckBox(tr("Hide automatically"));
-    hideLog->setChecked(settings->value("log/hide").toBool());
+    hideLog->setChecked(settings->value(Setting::Id::HideLogAutomatically).toBool());
     connect(hideLog, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setValue("window/log/hide", checked);
+      Settings::instance()->setValue(Setting::Id::HideLogAutomatically, checked);
     });
 
-    settings->beginGroup("tabs");
     QCheckBox *smTabs = new QCheckBox(tr("Open submodules in tabs"));
-    smTabs->setChecked(settings->value("submodule").toBool());
+    smTabs->setChecked(settings->value(Setting::Id::OpenSubmodulesInTabs).toBool());
     connect(smTabs, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setValue("window/tabs/submodule", checked);
+      Settings::instance()->setValue(Setting::Id::OpenSubmodulesInTabs, checked);
     });
 
     QCheckBox *repoTabs = new QCheckBox(tr("Open all repositories in tabs"));
-    repoTabs->setChecked(settings->value("repository").toBool());
+    repoTabs->setChecked(settings->value(Setting::Id::OpenAllReposInTabs).toBool());
     connect(repoTabs, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setValue("window/tabs/repository", checked);
+      Settings::instance()->setValue(Setting::Id::OpenAllReposInTabs, checked);
     });
-    settings->endGroup(); // tabs
 
-    settings->beginGroup("view");
     QCheckBox *hideMenuBar = new QCheckBox(tr("Hide Menubar"));
-    hideMenuBar->setChecked(settings->value("menuBarHidden").toBool());
+    hideMenuBar->setChecked(settings->value(Setting::Id::HideMenuBar).toBool());
     connect(hideMenuBar, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setValue("window/view/menuBarHidden", checked);
+      Settings::instance()->setValue(Setting::Id::HideMenuBar, checked);
     });
-    settings->endGroup(); // view
-    settings->endGroup(); // window
     QCheckBox *showAvatars = new QCheckBox(tr("Show Avatars"));
     showAvatars->setChecked(settings->value(Setting::Id::ShowAvatars).toBool());
     connect(showAvatars, &QCheckBox::toggled, [](bool checked) {

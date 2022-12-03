@@ -36,6 +36,12 @@ public:
     IndentWidth,
     TabWidth,
     ShowHeatmapInBlameMargin,
+    ColorTheme,
+    ShowFullRepoPath,
+    HideLogAutomatically,
+    OpenSubmodulesInTabs,
+    OpenAllReposInTabs,
+    HideMenuBar,
     ShowAvatars,
   };
   Q_ENUM(Id)

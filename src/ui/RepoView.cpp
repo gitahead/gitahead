@@ -2523,7 +2523,7 @@ bool RepoView::openSubmodule(const git::Submodule &submodule) {
     return false;
   }
 
-  if (Settings::instance()->value("window/tabs/submodule").toBool())
+  if (Settings::instance()->value(Setting::Id::OpenSubmodulesInTabs).toBool())
     return static_cast<MainWindow *>(window())->addTab(repo);
 
   return MainWindow::open(repo);
@@ -2861,7 +2861,7 @@ void RepoView::startLogTimer() {
   setLogVisible(true);
 
   // Check the hide setting.
-  if (!Settings::instance()->value("window/log/hide").toBool())
+  if (!Settings::instance()->value(Setting::Id::HideLogAutomatically).toBool())
     return;
 
   resumeLogTimer();
