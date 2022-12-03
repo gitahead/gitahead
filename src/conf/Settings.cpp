@@ -68,16 +68,6 @@ Settings::Settings(QObject *parent) : QObject(parent) {
 
 QString Settings::group() const { return mGroup.join("/"); }
 
-void Settings::beginGroup(const QString &prefix) {
-  mGroup.append(prefix);
-  mCurrentMap = lookup(mDefaults, group()).toMap();
-}
-
-void Settings::endGroup() {
-  mGroup.removeLast();
-  mCurrentMap = lookup(mDefaults, group()).toMap();
-}
-
 QVariant Settings::value(const QString &key) const {
   return value(key, defaultValue(key));
 }

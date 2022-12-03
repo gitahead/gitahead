@@ -21,8 +21,6 @@ class Settings : public QObject {
 
 public:
   QString group() const;
-  void beginGroup(const QString &prefix);
-  void endGroup();
 
   QVariant value(const QString &key) const;
   QVariant value(const QString &key, const QVariant &defaultValue) const;
