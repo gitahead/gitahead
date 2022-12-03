@@ -20,14 +20,6 @@ class Settings : public QObject {
   Q_OBJECT
 
 public:
-  QString group() const;
-
-  QVariant value(const QString &key) const;
-  QVariant value(const QString &key, const QVariant &defaultValue) const;
-  QVariant defaultValue(const QString &key) const;
-  void setValue(const QString &key, const QVariant &value,
-                bool refresh = false);
-
   QVariant value(Setting::Id id) const;
   QVariant value(Setting::Id id, const QVariant &defaultValue) const;
   void setValue(Setting::Id id, const QVariant &value);
@@ -73,6 +65,14 @@ signals:
 
 private:
   Settings(QObject *parent = nullptr);
+
+  QString group() const;
+
+  QVariant value(const QString &key) const;
+  QVariant value(const QString &key, const QVariant &defaultValue) const;
+  QVariant defaultValue(const QString &key) const;
+  void setValue(const QString &key, const QVariant &value,
+                bool refresh = false);
 
   QStringList mGroup;
   QVariantMap mDefaults;
