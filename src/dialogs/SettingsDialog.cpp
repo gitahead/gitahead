@@ -174,16 +174,16 @@ public:
     });
 
     connect(mNoTranslation, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setValue("translation/disable", checked);
+      Settings::instance()->setValue(Setting::Id::DontTranslate, checked);
     });
 
     connect(mStoreCredentials, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setValue("credential/store", checked);
+      Settings::instance()->setValue(Setting::Id::StoreCredentials, checked);
       delete CredentialHelper::instance();
     });
 
     connect(mSingleInstance, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setValue("singleInstance", checked);
+      Settings::instance()->setValue(Setting::Id::AllowSingleInstanceOnly, checked);
     });
   }
 
@@ -200,10 +200,10 @@ public:
     mPullUpdate->setChecked(settings->value(Setting::Id::UpdateSubmodulesAfterPullAndClone).toBool());
     mAutoPrune->setChecked(settings->value(Setting::Id::PruneAfterFetch).toBool());
 
-    mNoTranslation->setChecked(settings->value("translation/disable").toBool());
-    mStoreCredentials->setChecked(settings->value("credential/store").toBool());
+    mNoTranslation->setChecked(settings->value(Setting::Id::DontTranslate).toBool());
+    mStoreCredentials->setChecked(settings->value(Setting::Id::StoreCredentials).toBool());
 
-    mSingleInstance->setChecked(settings->value("singleInstance").toBool());
+    mSingleInstance->setChecked(settings->value(Setting::Id::AllowSingleInstanceOnly).toBool());
   }
 
 private:
@@ -273,10 +273,10 @@ public:
 
     connect(mFileManagerCommand, &QLineEdit::textChanged,
             [](const QString &text) {
-              Settings::instance()->setValue("filemanager/command", text);
+              Settings::instance()->setValue(Setting::Id::FilemanagerCommand, text);
             });
     mFileManagerCommand->setText(
-        Settings::instance()->value("filemanager/command").toString());
+        Settings::instance()->value(Setting::Id::FilemanagerCommand).toString());
   }
 
 private:

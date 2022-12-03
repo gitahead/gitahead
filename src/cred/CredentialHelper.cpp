@@ -21,14 +21,13 @@
 namespace {
 
 const QString kLogKey = "credential/log";
-const QString kStoreKey = "credential/store";
 
 } // namespace
 
 CredentialHelper *CredentialHelper::instance() {
   static QPointer<CredentialHelper> instance;
   if (!instance) {
-    if (Settings::instance()->value(kStoreKey).toBool()) {
+    if (Settings::instance()->value(Setting::Id::StoreCredentials).toBool()) {
 #if defined(Q_OS_MAC)
       instance = new GitCredential("osxkeychain");
 #elif defined(Q_OS_WIN)

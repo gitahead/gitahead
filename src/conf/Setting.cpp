@@ -21,14 +21,20 @@ void Setting::initialize(QMap<Id, QString> &keys) {
   keys[Id::ShowAvatars] = "window/view/avatarsVisible";
   keys[Id::AutoCollapseAddedFiles] = "collapse/added";
   keys[Id::AutoCollapseDeletedFiles] = "collapse/deleted";
+  keys[Id::FilemanagerCommand] = "filemanager/command";
   keys[Id::TerminalCommand] = "terminal/command";
   keys[Id::TerminalName] = "terminal/name";
   keys[Id::TerminalPath] = "terminal/path";
+  keys[Id::DontTranslate] = "translation/disable";
+  keys[Id::StoreCredentials] = "credential/store";
+  keys[Id::AllowSingleInstanceOnly] = "singleInstance";
   keys[Id::CheckForUpdatesAutomatically] = "update/check";
   keys[Id::InstallUpdatesAutomatically] = "update/download";
   keys[Id::SkippedUpdates] = "update/skip";
   keys[Id::SshConfigFilePath] = "ssh/configFilePath";
   keys[Id::SshKeyFilePath] = "ssh/keyFilePath";
+  keys[Id::CommitMergeImmediately] = "merge/commit";
+  keys[Id::ShowCommitsInCompactMode] = "commit/compact";
   keys[Id::ShowChangedFilesAsList] = "doubletreeview/listview";
   keys[Id::ShowChangedFilesInSingleView] = "doubletreeview/single";
 }

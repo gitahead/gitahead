@@ -608,7 +608,7 @@ public:
     QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
 
-    bool compact = Settings::instance()->value("commit/compact").toBool();
+    bool compact = Settings::instance()->value(Setting::Id::ShowCommitsInCompactMode).toBool();
     LayoutConstants constants = layoutConstants(compact);
 
     // Draw background.
@@ -962,7 +962,7 @@ public:
 
   QSize sizeHint(const QStyleOptionViewItem &option,
                  const QModelIndex &index) const override {
-    bool compact = Settings::instance()->value("commit/compact").toBool();
+    bool compact = Settings::instance()->value(Setting::Id::ShowCommitsInCompactMode).toBool();
     LayoutConstants constants = layoutConstants(compact);
 
     int lineHeight = constants.lineSpacing + constants.vMargin;
@@ -981,7 +981,7 @@ public:
 
   QRect starRect(const QStyleOptionViewItem &option,
                  const QModelIndex &index) const {
-    bool compact = Settings::instance()->value("commit/compact").toBool();
+    bool compact = Settings::instance()->value(Setting::Id::ShowCommitsInCompactMode).toBool();
     LayoutConstants constants = layoutConstants(compact);
 
     QRect rect = option.rect;

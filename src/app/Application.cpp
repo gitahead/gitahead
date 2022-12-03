@@ -155,7 +155,7 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
 
   // Read translation settings.
   QSettings settings;
-  if ((!settings.value("translation/disable", false).toBool()) &&
+  if ((!settings.value(Setting::key(Setting::Id::DontTranslate), false).toBool()) &&
       (!parser.isSet("no-translation"))) {
     // Load translation files.
     QLocale locale;
@@ -368,7 +368,7 @@ protected:
 #endif
 
 bool Application::runSingleInstance() {
-  if (Settings::instance()->value("singleInstance").toBool()) {
+  if (Settings::instance()->value(Setting::Id::AllowSingleInstanceOnly).toBool()) {
 #if defined(Q_OS_LINUX)
     QDBusConnection bus = QDBusConnection::sessionBus();
 

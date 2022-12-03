@@ -26,7 +26,7 @@
 
 bool ShowTool::openFileManager(QString path) {
   QString fileManagerCmd =
-      Settings::instance()->value("filemanager/command").toString();
+      Settings::instance()->value(Setting::Id::FilemanagerCommand).toString();
 
   if (fileManagerCmd.isEmpty()) {
 #if defined(Q_OS_WIN)
