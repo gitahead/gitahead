@@ -117,6 +117,10 @@ QVariant Settings::value(Setting::Id id) const {
   return value(Setting::key(id));
 }
 
+QVariant Settings::value(Setting::Id id, const QVariant& defaultValue) const {
+  return value(Setting::key(id), defaultValue);
+}
+
 void Settings::setValue(Setting::Id id, const QVariant &value) {
   setValue(Setting::key(id), value);
 }

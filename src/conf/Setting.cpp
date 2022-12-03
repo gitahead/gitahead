@@ -29,6 +29,8 @@ void Setting::initialize(QMap<Id, QString> &keys) {
   keys[Id::SkippedUpdates] = "update/skip";
   keys[Id::SshConfigFilePath] = "ssh/configFilePath";
   keys[Id::SshKeyFilePath] = "ssh/keyFilePath";
+  keys[Id::ShowChangedFilesAsList] = "doubletreeview/listview";
+  keys[Id::ShowChangedFilesInSingleView] = "doubletreeview/single";
 }
 
 void Prompt::initialize(QMap<Kind, QString> &keys) {

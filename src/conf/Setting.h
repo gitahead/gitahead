@@ -53,6 +53,8 @@ public:
     SkippedUpdates,
     SshConfigFilePath,
     SshKeyFilePath,
+    ShowChangedFilesAsList,
+    ShowChangedFilesInSingleView,
   };
   Q_ENUM(Id)
 

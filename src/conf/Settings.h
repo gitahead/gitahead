@@ -31,6 +31,7 @@ public:
                 bool refresh = false);
 
   QVariant value(Setting::Id id) const;
+  QVariant value(Setting::Id id, const QVariant &defaultValue) const;
   void setValue(Setting::Id id, const QVariant &value);
 
   // Look up lexer name by file name.
