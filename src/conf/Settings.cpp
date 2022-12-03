@@ -196,6 +196,14 @@ QString Settings::promptDescription(Prompt::Kind kind) const {
   }
 }
 
+void Settings::setHotkey(const QString& action, const QString& hotkey) {
+  setValue("hotkeys/"+action, hotkey);
+}
+
+QString Settings::hotkey(const QString& action) const {
+  return value("hotkeys/"+action, "").toString();
+}
+
 bool Settings::isWhitespaceIgnored() const {
   return value(kIgnoreWsKey).toBool();
 }

@@ -159,15 +159,11 @@ HotkeyManager::HotkeyManager(Settings *settings)
   if (!mSettings)
     mSettings = Settings::instance();
 
-  mSettings->beginGroup("hotkeys");
-
   for (HotkeyManagerHandle *i = hotkeyRegistry; i; i = i->next) {
     mHandles[i->index] = i;
     mKeys[i->index] =
-        getKeys(mSettings->value(i->configPath, "").toString(), i);
+        getKeys(mSettings->hotkey(i->configPath), i);
   }
-
-  mSettings->endGroup();
 }
 
 QVector<Hotkey> HotkeyManager::knownHotkeys() const {
@@ -186,7 +182,7 @@ QKeySequence HotkeyManager::keys(const HotkeyManagerHandle *handle) const {
 void HotkeyManager::setKeys(const HotkeyManagerHandle *handle,
                             const QKeySequence &keys) {
   mKeys[handle->index] = keys;
-  mSettings->setValue("hotkeys/" + QString(handle->configPath),
+  mSettings->setHotkey(handle->configPath,
                       keys.toString());
 
   emit changed(handle);

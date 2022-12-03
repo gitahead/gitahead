@@ -43,6 +43,9 @@ public:
   void setPrompt(Prompt::Kind kind, bool prompt);
   QString promptDescription(Prompt::Kind kind) const;
 
+  void setHotkey(const QString& action, const QString& hotkey);
+  QString hotkey(const QString& action) const;
+
   // ignore whitespace
   bool isWhitespaceIgnored() const;
   void setWhitespaceIgnored(bool ignored);
