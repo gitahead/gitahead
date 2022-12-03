@@ -43,6 +43,8 @@ public:
     OpenAllReposInTabs,
     HideMenuBar,
     ShowAvatars,
+    AutoCollapseAddedFiles,
+    AutoCollapseDeletedFiles,
   };
   Q_ENUM(Id)
 
