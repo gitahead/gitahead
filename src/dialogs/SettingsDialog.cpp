@@ -631,13 +631,12 @@ class UpdatePanel : public QWidget {
 public:
   UpdatePanel(QWidget *parent = nullptr) : QWidget(parent) {
     Settings *settings = Settings::instance();
-    settings->beginGroup("update");
 
     QString checkText = tr("Check for updates automatically");
     QCheckBox *check = new QCheckBox(checkText, this);
-    check->setChecked(settings->value("check").toBool());
+    check->setChecked(settings->value(Setting::Id::CheckForUpdatesAutomatically).toBool());
     connect(check, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setValue("update/check", checked);
+      Settings::instance()->setValue(Setting::Id::CheckForUpdatesAutomatically, checked);
     });
 
 #if !defined(Q_OS_LINUX) || defined(FLATPAK)
@@ -645,9 +644,9 @@ public:
     // no manual download is needed
     QString downloadText = tr("Automatically download and install updates");
     QCheckBox *download = new QCheckBox(downloadText, this);
-    download->setChecked(settings->value("download").toBool());
+    download->setChecked(settings->value(Setting::Id::InstallUpdatesAutomatically).toBool());
     connect(download, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setValue("update/download", checked);
+      Settings::instance()->setValue(Setting::Id::InstallUpdatesAutomatically, checked);
     });
 #endif
 
@@ -662,7 +661,6 @@ public:
 #endif
     layout->addRow(QString(), button);
 
-    settings->endGroup();
   }
 };
 

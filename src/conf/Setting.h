@@ -48,6 +48,9 @@ public:
     TerminalCommand,
     TerminalName,
     TerminalPath,
+    CheckForUpdatesAutomatically,
+    InstallUpdatesAutomatically,
+    SkippedUpdates,
   };
   Q_ENUM(Id)
 

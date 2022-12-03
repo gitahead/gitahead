@@ -24,6 +24,9 @@ void Setting::initialize(QMap<Id, QString> &keys) {
   keys[Id::TerminalCommand] = "terminal/command";
   keys[Id::TerminalName] = "terminal/name";
   keys[Id::TerminalPath] = "terminal/path";
+  keys[Id::CheckForUpdatesAutomatically] = "update/check";
+  keys[Id::InstallUpdatesAutomatically] = "update/download";
+  keys[Id::SkippedUpdates] = "update/skip";
 }
 
 void Prompt::initialize(QMap<Kind, QString> &keys) {

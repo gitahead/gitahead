@@ -230,7 +230,7 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
 
 void Application::autoUpdate() {
   // Check for updates.
-  if (Settings::instance()->value("update/check").toBool()) {
+  if (Settings::instance()->value(Setting::Id::CheckForUpdatesAutomatically).toBool()) {
     // Check now.
     Updater::instance()->update(true);
 
