@@ -25,6 +25,12 @@ class Setting : public SettingsTempl<Setting> {
 
 public:
   enum class Id {
+    FontFamily,
+    FontSize,
+    UseTabsForIndent,
+    IndentWidth,
+    TabWidth,
+    ShowHeatmapInBlameMargin,
     ShowAvatars,
   };
   Q_ENUM(Id)

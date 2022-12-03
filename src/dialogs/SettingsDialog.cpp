@@ -581,56 +581,49 @@ public:
     auto combo = QOverload<int>::of(&QComboBox::currentIndexChanged);
 
     Settings *settings = Settings::instance();
-    settings->beginGroup("editor");
 
-    settings->beginGroup("font");
     QFontComboBox *font = new QFontComboBox(this);
     font->setEditable(false);
     font->setFontFilters(QFontComboBox::MonospacedFonts);
-    font->setCurrentText(settings->value("family").toString());
+    font->setCurrentText(settings->value(Setting::Id::FontFamily).toString());
     connect(font, &QFontComboBox::currentTextChanged, [](const QString &text) {
-      Settings::instance()->setValue("editor/font/family", text);
+      Settings::instance()->setValue(Setting::Id::FontFamily, text);
     });
 
     QSpinBox *fontSize = new QSpinBox(this);
     fontSize->setRange(2, 32);
-    fontSize->setValue(settings->value("size").toInt());
+    fontSize->setValue(settings->value(Setting::Id::FontSize).toInt());
     connect(fontSize, spin, [](int i) {
-      Settings::instance()->setValue("editor/font/size", i);
+      Settings::instance()->setValue(Setting::Id::FontSize, i);
     });
-    settings->endGroup(); // font
 
-    settings->beginGroup("indent");
     QComboBox *indent = new QComboBox(this);
     indent->addItem(tr("Tabs"));
     indent->addItem(tr("Spaces"));
-    indent->setCurrentIndex(settings->value("tabs").toBool() ? 0 : 1);
+    indent->setCurrentIndex(settings->value(Setting::Id::UseTabsForIndent).toBool() ? 0 : 1);
     connect(indent, combo, [](int i) {
-      Settings::instance()->setValue("editor/indent/tabs", i == 0);
+      Settings::instance()->setValue(Setting::Id::UseTabsForIndent, i == 0);
     });
 
     QSpinBox *indentWidth = new QSpinBox(this);
     indentWidth->setRange(1, 32);
-    indentWidth->setValue(settings->value("width").toInt());
+    indentWidth->setValue(settings->value(Setting::Id::IndentWidth).toInt());
     connect(indentWidth, spin, [](int i) {
-      Settings::instance()->setValue("editor/indent/width", i);
+      Settings::instance()->setValue(Setting::Id::IndentWidth, i);
     });
 
     QSpinBox *tabWidth = new QSpinBox(this);
     tabWidth->setRange(1, 32);
-    tabWidth->setValue(settings->value("tabwidth").toInt());
+    tabWidth->setValue(settings->value(Setting::Id::TabWidth).toInt());
     connect(tabWidth, spin, [](int i) {
-      Settings::instance()->setValue("editor/indent/tabwidth", i);
+      Settings::instance()->setValue(Setting::Id::TabWidth, i);
     });
-    settings->endGroup(); // indent
 
     QCheckBox *blameHeatMap = new QCheckBox(tr("Show heat map"), this);
-    blameHeatMap->setChecked(settings->value("blame/heatmap").toBool());
+    blameHeatMap->setChecked(settings->value(Setting::Id::ShowHeatmapInBlameMargin).toBool());
     connect(blameHeatMap, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setValue("editor/blame/heatmap", checked);
+      Settings::instance()->setValue(Setting::Id::ShowHeatmapInBlameMargin, checked);
     });
-
-    settings->endGroup(); // editor
 
     QFormLayout *layout = new QFormLayout(this);
     layout->addRow(tr("Font:"), font);
