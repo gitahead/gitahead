@@ -51,6 +51,8 @@ public:
     CheckForUpdatesAutomatically,
     InstallUpdatesAutomatically,
     SkippedUpdates,
+    SshConfigFilePath,
+    SshKeyFilePath,
   };
   Q_ENUM(Id)
 

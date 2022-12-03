@@ -27,6 +27,8 @@ void Setting::initialize(QMap<Id, QString> &keys) {
   keys[Id::CheckForUpdatesAutomatically] = "update/check";
   keys[Id::InstallUpdatesAutomatically] = "update/download";
   keys[Id::SkippedUpdates] = "update/skip";
+  keys[Id::SshConfigFilePath] = "ssh/configFilePath";
+  keys[Id::SshKeyFilePath] = "ssh/keyFilePath";
 }
 
 void Prompt::initialize(QMap<Kind, QString> &keys) {

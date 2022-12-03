@@ -253,11 +253,11 @@ bool RemoteCallbacks::negotiation(
 }
 
 QString RemoteCallbacks::keyFilePath() const {
-  return Settings::instance()->value("ssh/keyFilePath").toString();
+  return Settings::instance()->value(Setting::Id::SshKeyFilePath).toString();
 }
 
 QString RemoteCallbacks::configFilePath() const {
-  return Settings::instance()->value("ssh/configFilePath").toString();
+  return Settings::instance()->value(Setting::Id::SshConfigFilePath).toString();
 }
 
 bool RemoteCallbacks::connectToAgent() const {

@@ -672,15 +672,15 @@ public:
     Settings *settings = Settings::instance();
 
     QLineEdit *sshConfigPathBox =
-        new QLineEdit(settings->value("ssh/configFilePath").toString(), this);
+        new QLineEdit(settings->value(Setting::Id::SshConfigFilePath).toString(), this);
     connect(sshConfigPathBox, &QLineEdit::textChanged, [](const QString &text) {
-      Settings::instance()->setValue("ssh/configFilePath", text);
+      Settings::instance()->setValue(Setting::Id::SshConfigFilePath, text);
     });
 
     QLineEdit *sshKeyPathBox =
-        new QLineEdit(settings->value("ssh/keyFilePath").toString(), this);
+        new QLineEdit(settings->value(Setting::Id::SshKeyFilePath).toString(), this);
     connect(sshKeyPathBox, &QLineEdit::textChanged, [](const QString &text) {
-      Settings::instance()->setValue("ssh/keyFilePath", text);
+      Settings::instance()->setValue(Setting::Id::SshKeyFilePath, text);
     });
 
     QFormLayout *layout = new QFormLayout(this);
