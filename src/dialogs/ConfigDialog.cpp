@@ -145,16 +145,12 @@ public:
 
     // Read defaults from global settings.
     Settings *settings = Settings::instance();
-    settings->beginGroup("global");
-    settings->beginGroup("autofetch");
-    bool fetch = settings->value("enable").toBool();
-    int minutes = settings->value("minutes").toInt();
-    settings->endGroup();
+    bool fetch = settings->value(Setting::Id::FetchAutomatically).toBool();
+    int minutes = settings->value(Setting::Id::AutomaticFetchPeriodInMinutes).toInt();
 
-    bool push = settings->value("autopush/enable").toBool();
-    bool update = settings->value("autoupdate/enable").toBool();
-    bool prune = settings->value("autoprune/enable").toBool();
-    settings->endGroup();
+    bool push = settings->value(Setting::Id::PushAfterEachCommit).toBool();
+    bool update = settings->value(Setting::Id::UpdateSubmodulesAfterPullAndClone).toBool();
+    bool prune = settings->value(Setting::Id::PruneAfterFetch).toBool();
 
     git::Config app = mRepo.appConfig();
     mFetch->setChecked(app.value<bool>("autofetch.enable", fetch));

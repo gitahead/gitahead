@@ -923,16 +923,14 @@ void RepoView::startFetchTimer() {
 
   // Read defaults from global settings.
   Settings *settings = Settings::instance();
-  settings->beginGroup("global/autofetch");
-  bool enable = settings->value("enable").toBool();
-  int minutes = settings->value("minutes").toInt();
-  settings->endGroup();
+  bool enable = settings->value(Setting::Id::FetchAutomatically).toBool();
+  int minutes = settings->value(Setting::Id::AutomaticFetchPeriodInMinutes).toInt();
 
   git::Config config = mRepo.appConfig();
   if (!config.value<bool>("autofetch.enable", enable))
     return;
 
-  bool prune = settings->value("global/autoprune/enable").toBool();
+  bool prune = settings->value(Setting::Id::PruneAfterFetch).toBool();
   fetch(git::Remote(), false, false, nullptr, nullptr,
         config.value<bool>("autoprune.enable", prune));
 
@@ -959,7 +957,7 @@ void RepoView::fetchAll() {
 QFuture<git::Result> RepoView::fetch(const git::Remote &rmt, bool tags,
                                      bool interactive, LogEntry *parent,
                                      QStringList *submodules) {
-  bool prune = Settings::instance()->value("global/autoprune/enable").toBool();
+  bool prune = Settings::instance()->value(Setting::Id::PruneAfterFetch).toBool();
   return fetch(rmt, tags, interactive, parent, submodules,
                mRepo.appConfig().value<bool>("autoprune.enable", prune));
 }
@@ -1082,7 +1080,7 @@ void RepoView::pull(MergeFlags flags, const git::Remote &rmt, bool tags,
   // Read submodule setting.
   QStringList *submodules = nullptr;
   Settings *settings = Settings::instance();
-  bool enable = settings->value("global/autoupdate/enable").toBool();
+  bool enable = settings->value(Setting::Id::UpdateSubmodulesAfterPullAndClone).toBool();
   if (mRepo.appConfig().value<bool>("autoupdate.enable", enable))
     submodules = new QStringList;
 
@@ -1869,7 +1867,7 @@ bool RepoView::commit(const git::Signature &author,
   }
 
   // Automatically push if enabled.
-  bool enable = Settings::instance()->value("global/autopush/enable").toBool();
+  bool enable = Settings::instance()->value(Setting::Id::PushAfterEachCommit).toBool();
   if (mRepo.appConfig().value<bool>("autopush.enable", enable))
     push(); // FIXME: Check for upstream before pushing?
 

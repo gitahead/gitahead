@@ -149,7 +149,7 @@ public:
     });
 
     connect(mFetch, &QCheckBox::toggled, this, [](bool checked) {
-      Settings::instance()->setValue("global/autofetch/enable", checked);
+      Settings::instance()->setValue(Setting::Id::FetchAutomatically, checked);
       foreach (MainWindow *window, MainWindow::windows()) {
         for (int i = 0; i < window->count(); ++i)
           window->view(i)->startFetchTimer();
@@ -158,19 +158,19 @@ public:
 
     auto signal = QOverload<int>::of(&QSpinBox::valueChanged);
     connect(mFetchMinutes, signal, [](int value) {
-      Settings::instance()->setValue("global/autofetch/minutes", value);
+      Settings::instance()->setValue(Setting::Id::AutomaticFetchPeriodInMinutes, value);
     });
 
     connect(mPushCommit, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setValue("global/autopush/enable", checked);
+      Settings::instance()->setValue(Setting::Id::PushAfterEachCommit, checked);
     });
 
     connect(mPullUpdate, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setValue("global/autoupdate/enable", checked);
+      Settings::instance()->setValue(Setting::Id::UpdateSubmodulesAfterPullAndClone, checked);
     });
 
     connect(mAutoPrune, &QCheckBox::toggled, [](bool checked) {
-      Settings::instance()->setValue("global/autoprune/enable", checked);
+      Settings::instance()->setValue(Setting::Id::PruneAfterFetch, checked);
     });
 
     connect(mNoTranslation, &QCheckBox::toggled, [](bool checked) {
@@ -193,16 +193,12 @@ public:
     mEmail->setText(config.value<QString>("user.email"));
 
     Settings *settings = Settings::instance();
-    settings->beginGroup("global");
-    settings->beginGroup("autofetch");
-    mFetch->setChecked(settings->value("enable").toBool());
-    mFetchMinutes->setValue(settings->value("minutes").toInt());
-    settings->endGroup();
+    mFetch->setChecked(settings->value(Setting::Id::FetchAutomatically).toBool());
+    mFetchMinutes->setValue(settings->value(Setting::Id::AutomaticFetchPeriodInMinutes).toInt());
 
-    mPushCommit->setChecked(settings->value("autopush/enable").toBool());
-    mPullUpdate->setChecked(settings->value("autoupdate/enable").toBool());
-    mAutoPrune->setChecked(settings->value("autoprune/enable").toBool());
-    settings->endGroup();
+    mPushCommit->setChecked(settings->value(Setting::Id::PushAfterEachCommit).toBool());
+    mPullUpdate->setChecked(settings->value(Setting::Id::UpdateSubmodulesAfterPullAndClone).toBool());
+    mAutoPrune->setChecked(settings->value(Setting::Id::PruneAfterFetch).toBool());
 
     mNoTranslation->setChecked(settings->value("translation/disable").toBool());
     mStoreCredentials->setChecked(settings->value("credential/store").toBool());

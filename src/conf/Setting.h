@@ -25,6 +25,11 @@ class Setting : public SettingsTempl<Setting> {
 
 public:
   enum class Id {
+    FetchAutomatically,
+    AutomaticFetchPeriodInMinutes,
+    PushAfterEachCommit,
+    UpdateSubmodulesAfterPullAndClone,
+    PruneAfterFetch,
     FontFamily,
     FontSize,
     UseTabsForIndent,

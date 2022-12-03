@@ -253,7 +253,7 @@ RepoView *MainWindow::addTab(const git::Repository &repo) {
   tabs->setCurrentIndex(tabs->addTab(view, dir.dirName()));
 
   Settings *settings = Settings::instance();
-  bool enable = settings->value("global/autoupdate/enable").toBool();
+  bool enable = settings->value(Setting::Id::UpdateSubmodulesAfterPullAndClone).toBool();
   if (repo.appConfig().value<bool>("autoupdate.enable", enable)) {
     // update submodules
     view->updateSubmodules(repo.submodules(), true, true, false, nullptr);
