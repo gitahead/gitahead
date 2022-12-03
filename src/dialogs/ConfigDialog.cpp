@@ -146,10 +146,13 @@ public:
     // Read defaults from global settings.
     Settings *settings = Settings::instance();
     bool fetch = settings->value(Setting::Id::FetchAutomatically).toBool();
-    int minutes = settings->value(Setting::Id::AutomaticFetchPeriodInMinutes).toInt();
+    int minutes =
+        settings->value(Setting::Id::AutomaticFetchPeriodInMinutes).toInt();
 
     bool push = settings->value(Setting::Id::PushAfterEachCommit).toBool();
-    bool update = settings->value(Setting::Id::UpdateSubmodulesAfterPullAndClone).toBool();
+    bool update =
+        settings->value(Setting::Id::UpdateSubmodulesAfterPullAndClone)
+            .toBool();
     bool prune = settings->value(Setting::Id::PruneAfterFetch).toBool();
 
     git::Config app = mRepo.appConfig();

@@ -74,14 +74,7 @@ class Prompt : public SettingsTempl<Prompt> {
   Q_GADGET
 
 public:
-  enum class Kind {
-    Stash,
-    Merge,
-    Revert,
-    CherryPick,
-    Directories,
-    LargeFiles
-  };
+  enum class Kind { Stash, Merge, Revert, CherryPick, Directories, LargeFiles };
   Q_ENUM(Kind)
 
   static void initialize(QMap<Kind, QString> &keys);

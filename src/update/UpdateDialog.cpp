@@ -85,9 +85,12 @@ UpdateDialog::UpdateDialog(const QString &platform, const QString &version,
 #if !defined(Q_OS_LINUX) || defined(FLATPAK) || defined(DEBUG_FLATPAK)
   QCheckBox *download =
       new QCheckBox(tr("Automatically download and install updates"), this);
-  download->setChecked(Settings::instance()->value(Setting::Id::InstallUpdatesAutomatically).toBool());
+  download->setChecked(Settings::instance()
+                           ->value(Setting::Id::InstallUpdatesAutomatically)
+                           .toBool());
   connect(download, &QCheckBox::toggled, [](bool checked) {
-    Settings::instance()->setValue(Setting::Id::InstallUpdatesAutomatically, checked);
+    Settings::instance()->setValue(Setting::Id::InstallUpdatesAutomatically,
+                                   checked);
   });
 #endif
 
@@ -104,7 +107,8 @@ UpdateDialog::UpdateDialog(const QString &platform, const QString &version,
 
   connect(skip, &QPushButton::clicked, [this, version] {
     Settings *settings = Settings::instance();
-    QStringList skipped = settings->value(Setting::Id::SkippedUpdates).toStringList();
+    QStringList skipped =
+        settings->value(Setting::Id::SkippedUpdates).toStringList();
     if (!skipped.contains(version))
       settings->setValue(Setting::Id::SkippedUpdates, skipped << version);
     reject();

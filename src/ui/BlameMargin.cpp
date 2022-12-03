@@ -62,7 +62,9 @@ void BlameMargin::startBlame(const QString &name) {
 
 void BlameMargin::setBlame(const git::Repository &repo,
                            const git::Blame &blame) {
-  if (Settings::instance()->value(Setting::Id::ShowHeatmapInBlameMargin).toBool()) {
+  if (Settings::instance()
+          ->value(Setting::Id::ShowHeatmapInBlameMargin)
+          .toBool()) {
     git::Commit first = repo.walker(GIT_SORT_TIME | GIT_SORT_REVERSE).next();
     git::Commit last = repo.walker(GIT_SORT_TIME).next();
     mMinTime = first ? first.committer().date().toTime_t() : -1;

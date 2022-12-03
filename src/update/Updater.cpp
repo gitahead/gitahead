@@ -77,7 +77,9 @@ Updater::Updater(QObject *parent) : QObject(parent) {
                 QCoreApplication::applicationVersion());
             QVersionNumber newVersion = QVersionNumber::fromString(version);
 
-            if (Settings::instance()->value(Setting::Id::InstallUpdatesAutomatically).toBool()) {
+            if (Settings::instance()
+                    ->value(Setting::Id::InstallUpdatesAutomatically)
+                    .toBool()) {
               // Skip the update dialog and just start downloading.
               if (Updater::DownloadRef download = this->download(link)) {
                 DownloadDialog *dialog = new DownloadDialog(download);

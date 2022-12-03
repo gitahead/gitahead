@@ -166,9 +166,12 @@ CommitToolBar::CommitToolBar(QWidget *parent) : QToolBar(parent) {
 
   QAction *compact = menu->addAction(tr("Compact Mode"));
   compact->setCheckable(true);
-  compact->setChecked(Settings::instance()->value(Setting::Id::ShowCommitsInCompactMode).toBool());
+  compact->setChecked(Settings::instance()
+                          ->value(Setting::Id::ShowCommitsInCompactMode)
+                          .toBool());
   connect(compact, &QAction::triggered, [this](bool checked) {
-    Settings::instance()->setValue(Setting::Id::ShowCommitsInCompactMode, checked);
+    Settings::instance()->setValue(Setting::Id::ShowCommitsInCompactMode,
+                                   checked);
     emit settingsChanged();
   });
 }

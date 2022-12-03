@@ -155,7 +155,8 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
 
   // Read translation settings.
   QSettings settings;
-  if ((!settings.value(Setting::key(Setting::Id::DontTranslate), false).toBool()) &&
+  if ((!settings.value(Setting::key(Setting::Id::DontTranslate), false)
+            .toBool()) &&
       (!parser.isSet("no-translation"))) {
     // Load translation files.
     QLocale locale;
@@ -230,7 +231,9 @@ Application::Application(int &argc, char **argv, bool haltOnParseError)
 
 void Application::autoUpdate() {
   // Check for updates.
-  if (Settings::instance()->value(Setting::Id::CheckForUpdatesAutomatically).toBool()) {
+  if (Settings::instance()
+          ->value(Setting::Id::CheckForUpdatesAutomatically)
+          .toBool()) {
     // Check now.
     Updater::instance()->update(true);
 
@@ -368,7 +371,9 @@ protected:
 #endif
 
 bool Application::runSingleInstance() {
-  if (Settings::instance()->value(Setting::Id::AllowSingleInstanceOnly).toBool()) {
+  if (Settings::instance()
+          ->value(Setting::Id::AllowSingleInstanceOnly)
+          .toBool()) {
 #if defined(Q_OS_LINUX)
     QDBusConnection bus = QDBusConnection::sessionBus();
 

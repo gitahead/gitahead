@@ -107,7 +107,7 @@ QVariant Settings::value(Setting::Id id) const {
   return value(Setting::key(id));
 }
 
-QVariant Settings::value(Setting::Id id, const QVariant& defaultValue) const {
+QVariant Settings::value(Setting::Id id, const QVariant &defaultValue) const {
   return value(Setting::key(id), defaultValue);
 }
 
@@ -186,12 +186,12 @@ QString Settings::promptDescription(Prompt::Kind kind) const {
   }
 }
 
-void Settings::setHotkey(const QString& action, const QString& hotkey) {
-  setValue("hotkeys/"+action, hotkey);
+void Settings::setHotkey(const QString &action, const QString &hotkey) {
+  setValue("hotkeys/" + action, hotkey);
 }
 
-QString Settings::hotkey(const QString& action) const {
-  return value("hotkeys/"+action, "").toString();
+QString Settings::hotkey(const QString &action) const {
+  return value("hotkeys/" + action, "").toString();
 }
 
 bool Settings::isWhitespaceIgnored() const {

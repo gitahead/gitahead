@@ -32,16 +32,13 @@ private:
 };
 
 void TestCommitAuthorCommitter::initTestCase() {
-  promptCherryPick =
-      Settings::instance()->prompt(Prompt::Kind::CherryPick);
+  promptCherryPick = Settings::instance()->prompt(Prompt::Kind::CherryPick);
   promptRevert = Settings::instance()->prompt(Prompt::Kind::Revert);
 }
 
 void TestCommitAuthorCommitter::cleanupTestCase() {
-  Settings::instance()->setPrompt(Prompt::Kind::CherryPick,
-                                  promptCherryPick);
-  Settings::instance()->setPrompt(Prompt::Kind::Revert,
-                                  promptRevert);
+  Settings::instance()->setPrompt(Prompt::Kind::CherryPick, promptCherryPick);
+  Settings::instance()->setPrompt(Prompt::Kind::Revert, promptRevert);
 }
 
 /*!

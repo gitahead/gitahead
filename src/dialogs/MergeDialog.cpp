@@ -49,9 +49,12 @@ MergeDialog::MergeDialog(RepoView::MergeFlags flags,
   QLabel *label = new QLabel(labelText(), this);
 
   QCheckBox *noCommit = new QCheckBox(tr("No commit"), this);
-  noCommit->setChecked(!Settings::instance()->value(Setting::Id::CommitMergeImmediately).toBool());
+  noCommit->setChecked(!Settings::instance()
+                            ->value(Setting::Id::CommitMergeImmediately)
+                            .toBool());
   connect(noCommit, &QCheckBox::toggled, [](bool checked) {
-    Settings::instance()->setValue(Setting::Id::CommitMergeImmediately, !checked);
+    Settings::instance()->setValue(Setting::Id::CommitMergeImmediately,
+                                   !checked);
   });
 
   noCommit->setVisible(flags & RepoView::Merge);
@@ -96,7 +99,9 @@ git::Reference MergeDialog::reference() const {
 RepoView::MergeFlags MergeDialog::flags() const {
   int action = mAction->itemData(mAction->currentIndex()).toInt();
   RepoView::MergeFlags flags = static_cast<RepoView::MergeFlags>(action);
-  if (!Settings::instance()->value(Setting::Id::CommitMergeImmediately).toBool())
+  if (!Settings::instance()
+           ->value(Setting::Id::CommitMergeImmediately)
+           .toBool())
     flags |= RepoView::NoCommit;
   return flags;
 }
