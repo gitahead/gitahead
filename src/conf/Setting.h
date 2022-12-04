@@ -36,6 +36,7 @@ private:
 };
 
 class Prompt : public SettingsTempl<Prompt> {
+  Q_GADGET
 
 public:
   enum class Kind {
@@ -46,6 +47,7 @@ public:
     Directories,
     LargeFiles
   };
+  Q_ENUM(Kind)
 
   static void initialize(QMap<Kind, QString> &keys);
 };
