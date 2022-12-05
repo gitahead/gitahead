@@ -367,16 +367,25 @@ void Patch::apply(QList<QList<QByteArray>> &image, int hidx,
                          hidx)) // returns hunk_idx hunk
     return;
 
-  assert(hunk->new_start - 1 + hunk->new_lines <= image.length());
+  int start = hunk->new_start;
+  int numberLines = hunk->new_lines;
+  if (start == 0 && numberLines == 0) {
+    // Complete content of the file was deleted
+    start = hunk->old_start;
+    numberLines = hunk->old_lines;
+  }
+
+  assert(start > 0);
+  assert(start - 1 + numberLines <= image.length());
 
   // delete old data
-  for (int i = hunk->new_start - 1;
-       i < qMin(hunk->new_start - 1 + hunk->new_lines, image.length()); i++) {
+  for (int i = start - 1; i < qMin(start - 1 + numberLines, image.length());
+       i++) {
     image[i].clear();
   }
   // the length of image is not changed, so the function can be applied for
   // multiple hunks
-  image[hunk->new_start - 1].append(
+  image[start - 1].append(
       hunkData); // at least the line for the old_start must be available
 }
 

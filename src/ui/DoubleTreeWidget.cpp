@@ -457,18 +457,17 @@ void DoubleTreeWidget::storeSelection() {
 
 void DoubleTreeWidget::loadSelection() {
   QModelIndex index;
-  git::Index::StagedState state;
+  Qt::CheckState state;
 
   if (mSelectedFile.filename != "") {
     index = mDiffTreeModel->index(mSelectedFile.filename);
-    state = static_cast<git::Index::StagedState>(
+    state = static_cast<Qt::CheckState>(
         mDiffTreeModel->data(index, Qt::CheckStateRole).toInt());
   }
 
   if (!index.isValid() ||
-      (mSelectedFile.stagedModel && state != git::Index::StagedState::Staged) ||
-      (!mSelectedFile.stagedModel &&
-       state != git::Index::StagedState::Unstaged)) {
+      (mSelectedFile.stagedModel && state != Qt::CheckState::Checked) ||
+      (!mSelectedFile.stagedModel && state != Qt::CheckState::Unchecked)) {
     mSelectedFile.filename = "";
     if (mDiffTreeModel->rowCount() > 0) {
       index = mDiffTreeModel->index(0, 0);

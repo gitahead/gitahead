@@ -99,7 +99,7 @@ void TestTreeView::discardFiles() {
   INIT_REPO("TestRepository.zip", false);
 
   git::Commit commit =
-      repo.lookupCommit("51198ba9b2b2b2c25ea6576cf7ca3e9f2a7c3fc7");
+      repo.lookupCommit("5c61b24e236310ad4a8a64f7cd1ccc968f1eec20");
   QVERIFY(commit);
 
   // modifying all files
@@ -214,7 +214,7 @@ void TestTreeView::fileMergeCrash() {
   QAbstractItemModel *stagedModel = stagedTree->model();
 
   // Wait for refresh
-  while (stagedModel->rowCount() < 4)
+  while (stagedModel->rowCount() < 3)
     qWait(300);
 
   QAbstractItemModel *unstagedModel = unstagedTree->model();

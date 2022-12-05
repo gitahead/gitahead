@@ -2,7 +2,7 @@
 macro(test)
   cmake_parse_arguments(ARG "NO_WIN32_OFFSCREEN" "NAME" "" ${ARGN})
 
-  add_executable(test_${ARG_NAME} EXCLUDE_FROM_ALL ${ARG_NAME}.cpp)
+  add_executable(test_${ARG_NAME} ${ARG_NAME}.cpp)
   target_link_libraries(test_${ARG_NAME} testlib)
 
   set_target_properties(test_${ARG_NAME} PROPERTIES OUTPUT_NAME ${ARG_NAME}
