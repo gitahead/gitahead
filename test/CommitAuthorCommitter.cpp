@@ -32,16 +32,13 @@ private:
 };
 
 void TestCommitAuthorCommitter::initTestCase() {
-  promptCherryPick =
-      Settings::instance()->prompt(Prompt::PromptKind::PromptCherryPick);
-  promptRevert = Settings::instance()->prompt(Prompt::PromptKind::PromptRevert);
+  promptCherryPick = Settings::instance()->prompt(Prompt::Kind::CherryPick);
+  promptRevert = Settings::instance()->prompt(Prompt::Kind::Revert);
 }
 
 void TestCommitAuthorCommitter::cleanupTestCase() {
-  Settings::instance()->setPrompt(Prompt::PromptKind::PromptCherryPick,
-                                  promptCherryPick);
-  Settings::instance()->setPrompt(Prompt::PromptKind::PromptRevert,
-                                  promptRevert);
+  Settings::instance()->setPrompt(Prompt::Kind::CherryPick, promptCherryPick);
+  Settings::instance()->setPrompt(Prompt::Kind::Revert, promptRevert);
 }
 
 /*!
@@ -59,7 +56,7 @@ void TestCommitAuthorCommitter::testCherryPickAuthorEmailPreservance() {
   RepoView *view = window->currentView();
 
   // Commit directly
-  Settings::instance()->setPrompt(Prompt::PromptKind::PromptCherryPick, false);
+  Settings::instance()->setPrompt(Prompt::Kind::CherryPick, false);
   view->cherryPick(commit);
 
   git::Reference master = repo.lookupRef(QString("refs/heads/master"));
@@ -100,7 +97,7 @@ void TestCommitAuthorCommitter::testRevertAuthorEmailPreservance() {
   QCOMPARE(c.author().name(), "TestAuthor");
 
   // Commit directly
-  Settings::instance()->setPrompt(Prompt::PromptKind::PromptRevert, false);
+  Settings::instance()->setPrompt(Prompt::Kind::Revert, false);
   view->revert(commit);
 
   // This lookup is important, because otherwise it is not up to date

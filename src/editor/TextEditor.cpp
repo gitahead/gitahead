@@ -171,19 +171,13 @@ void TextEditor::contextMenuEvent(QContextMenuEvent *event) {
 void TextEditor::applySettings() {
   // Set default font and size.
   Settings *settings = Settings::instance();
-  settings->beginGroup("editor");
-  settings->beginGroup("font");
-  QString family = settings->value("family").toString();
-  int pointSize = settings->value("size").toInt();
+  QString family = settings->value(Setting::Id::FontFamily).toString();
+  int pointSize = settings->value(Setting::Id::FontSize).toInt();
   styleSetFont(STYLE_DEFAULT, QFont(family, pointSize));
-  settings->endGroup(); // font
 
-  settings->beginGroup("indent");
-  setUseTabs(settings->value("tabs").toBool());
-  setIndent(settings->value("width").toInt());
-  setTabWidth(settings->value("tabwidth").toInt());
-  settings->endGroup(); // indent
-  settings->endGroup(); // editor
+  setUseTabs(settings->value(Setting::Id::UseTabsForIndent).toBool());
+  setIndent(settings->value(Setting::Id::IndentWidth).toInt());
+  setTabWidth(settings->value(Setting::Id::TabWidth).toInt());
 
   // Initialize markers.
   QColor background = palette().color(QPalette::Base);

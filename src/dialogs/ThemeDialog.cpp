@@ -57,13 +57,13 @@ public:
     connect(this, &QPushButton::clicked, [this] {
       switch (mTheme) {
         case Theme::System:
-          Settings::instance()->setValue("window/theme", "System");
+          Settings::instance()->setValue(Setting::Id::ColorTheme, "System");
           break;
         case Theme::Dark:
-          Settings::instance()->setValue("window/theme", "Dark");
+          Settings::instance()->setValue(Setting::Id::ColorTheme, "Dark");
           break;
         default:
-          Settings::instance()->setValue("window/theme", "Default");
+          Settings::instance()->setValue(Setting::Id::ColorTheme, "Default");
           break;
       }
 

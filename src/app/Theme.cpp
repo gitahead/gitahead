@@ -236,17 +236,17 @@ QColor Theme::star() { return QPalette().color(QPalette::Highlight); }
 Theme *Theme::create(const QString &defaultName) {
   // Upgrade theme key to capital case.
   Settings *settings = Settings::instance();
-  QString key = settings->value("window/theme").toString();
+  QString key = settings->value(Setting::Id::ColorTheme).toString();
   if (key == "default" || key == "dark" || key == "system") {
     key[0] = key.at(0).toUpper();
-    settings->setValue("window/theme", key);
+    settings->setValue(Setting::Id::ColorTheme, key);
   }
 
   QString name = !defaultName.isEmpty() ? defaultName : key;
   if (name.isEmpty() && !Application::isInTest()) {
     ThemeDialog dialog;
     dialog.exec();
-    name = settings->value("window/theme").toString();
+    name = settings->value(Setting::Id::ColorTheme).toString();
   }
 
   // Load custom theme.

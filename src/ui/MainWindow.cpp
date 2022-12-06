@@ -95,17 +95,19 @@ MainWindow::MainWindow(const git::Repository &repo, QWidget *parent,
           });
 
   // Update title and refresh when settings change.
-  mFullPath = Settings::instance()->value("window/path/full").toBool();
+  mFullPath =
+      Settings::instance()->value(Setting::Id::ShowFullRepoPath).toBool();
   connect(Settings::instance(), &Settings::settingsChanged, this,
           [this](bool refresh) {
             Settings *settings = Settings::instance();
 
             bool menuBarHidden =
-                settings->value("window/view/menuBarHidden").toBool();
+                settings->value(Setting::Id::HideMenuBar).toBool();
             if (mMenuBar->isHidden() != menuBarHidden)
               mMenuBar->setHidden(menuBarHidden);
 
-            bool fullPath = settings->value("window/path/full").toBool();
+            bool fullPath =
+                settings->value(Setting::Id::ShowFullRepoPath).toBool();
             if (mFullPath != fullPath) {
               mFullPath = fullPath;
               updateWindowTitle();
@@ -253,7 +255,8 @@ RepoView *MainWindow::addTab(const git::Repository &repo) {
   tabs->setCurrentIndex(tabs->addTab(view, dir.dirName()));
 
   Settings *settings = Settings::instance();
-  bool enable = settings->value("global/autoupdate/enable").toBool();
+  bool enable =
+      settings->value(Setting::Id::UpdateSubmodulesAfterPullAndClone).toBool();
   if (repo.appConfig().value<bool>("autoupdate.enable", enable)) {
     // update submodules
     view->updateSubmodules(repo.submodules(), true, true, false, nullptr);
@@ -365,7 +368,7 @@ MainWindow *MainWindow::open(const QString &path, bool warnOnInvalid) {
     return nullptr;
   }
 
-  if (Settings::instance()->value("window/tabs/repository").toBool()) {
+  if (Settings::instance()->value(Setting::Id::OpenAllReposInTabs).toBool()) {
     if (MainWindow *win = activeWindow()) {
       win->addTab(repo);
       return win;

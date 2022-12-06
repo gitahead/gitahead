@@ -100,7 +100,7 @@ RemoteDialog::RemoteDialog(Kind kind, RepoView *parent) : QDialog(parent) {
 
   } else {
     bool autoPrune =
-        Settings::instance()->value("global/autoprune/enable").toBool();
+        Settings::instance()->value(Setting::Id::PruneAfterFetch).toBool();
     git::Config config = repo.appConfig();
 
     prune = new QCheckBox(tr("Prune references"), this);

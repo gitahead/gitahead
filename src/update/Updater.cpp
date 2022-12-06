@@ -77,7 +77,9 @@ Updater::Updater(QObject *parent) : QObject(parent) {
                 QCoreApplication::applicationVersion());
             QVersionNumber newVersion = QVersionNumber::fromString(version);
 
-            if (Settings::instance()->value("update/download").toBool()) {
+            if (Settings::instance()
+                    ->value(Setting::Id::InstallUpdatesAutomatically)
+                    .toBool()) {
               // Skip the update dialog and just start downloading.
               if (Updater::DownloadRef download = this->download(link)) {
                 DownloadDialog *dialog = new DownloadDialog(download);
@@ -141,7 +143,7 @@ void Updater::update(bool spontaneous) {
 
     // Check for skipped version.
     QString version = versions.first();
-    QVariant skipped = Settings::instance()->value("update/skip");
+    QVariant skipped = Settings::instance()->value(Setting::Id::SkippedUpdates);
     if (spontaneous && skipped.toStringList().contains(version))
       return;
 

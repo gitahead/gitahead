@@ -26,7 +26,6 @@ const QString kRefsKey = "commit.refs.all";
 const QString kSortKey = "commit.sort.date";
 const QString kGraphKey = "commit.graph.visible";
 const QString kStatusKey = "commit.status.clean";
-const QString kCompactKey = "commit/compact";
 const QString kStyleSheet = "QToolBar {"
                             "  border: none"
                             "}"
@@ -167,9 +166,12 @@ CommitToolBar::CommitToolBar(QWidget *parent) : QToolBar(parent) {
 
   QAction *compact = menu->addAction(tr("Compact Mode"));
   compact->setCheckable(true);
-  compact->setChecked(Settings::instance()->value(kCompactKey).toBool());
+  compact->setChecked(Settings::instance()
+                          ->value(Setting::Id::ShowCommitsInCompactMode)
+                          .toBool());
   connect(compact, &QAction::triggered, [this](bool checked) {
-    Settings::instance()->setValue(kCompactKey, checked);
+    Settings::instance()->setValue(Setting::Id::ShowCommitsInCompactMode,
+                                   checked);
     emit settingsChanged();
   });
 }

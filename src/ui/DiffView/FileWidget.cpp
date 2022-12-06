@@ -433,11 +433,15 @@ FileWidget::FileWidget(DiffView *view, const git::Diff &diff,
   // Start hidden when the file is checked.
   bool expand = (mHeader->check()->checkState() == Qt::Unchecked);
 
-  if (Settings::instance()->value("collapse/added").toBool() == true &&
+  if (Settings::instance()
+              ->value(Setting::Id::AutoCollapseAddedFiles)
+              .toBool() == true &&
       patch.status() == GIT_DELTA_ADDED)
     expand = false;
 
-  if (Settings::instance()->value("collapse/deleted").toBool() == true &&
+  if (Settings::instance()
+              ->value(Setting::Id::AutoCollapseDeletedFiles)
+              .toBool() == true &&
       patch.status() == GIT_DELTA_DELETED)
     expand = false;
 

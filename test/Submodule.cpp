@@ -56,7 +56,7 @@ void TestSubmodule::updateSubmoduleClone() {
   QCOMPARE(remote.isEmpty(), false);
 
   Settings *settings = Settings::instance();
-  settings->setValue("global/autoupdate/enable", true);
+  settings->setValue(Setting::Id::UpdateSubmodulesAfterPullAndClone, true);
   CloneDialog *d = new CloneDialog(CloneDialog::Kind::Clone);
 
   RepoView *view = nullptr;
@@ -97,7 +97,7 @@ void TestSubmodule::noUpdateSubmoduleClone() {
   QCOMPARE(remote.isEmpty(), false);
 
   Settings *settings = Settings::instance();
-  settings->setValue("global/autoupdate/enable", false);
+  settings->setValue(Setting::Id::UpdateSubmodulesAfterPullAndClone, false);
   CloneDialog *d = new CloneDialog(CloneDialog::Kind::Clone);
 
   RepoView *view = nullptr;

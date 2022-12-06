@@ -25,7 +25,42 @@ class Setting : public SettingsTempl<Setting> {
 
 public:
   enum class Id {
+    FetchAutomatically,
+    AutomaticFetchPeriodInMinutes,
+    PushAfterEachCommit,
+    UpdateSubmodulesAfterPullAndClone,
+    PruneAfterFetch,
+    FontFamily,
+    FontSize,
+    UseTabsForIndent,
+    IndentWidth,
+    TabWidth,
+    ShowHeatmapInBlameMargin,
+    ColorTheme,
+    ShowFullRepoPath,
+    HideLogAutomatically,
+    OpenSubmodulesInTabs,
+    OpenAllReposInTabs,
+    HideMenuBar,
     ShowAvatars,
+    AutoCollapseAddedFiles,
+    AutoCollapseDeletedFiles,
+    FilemanagerCommand,
+    TerminalCommand,
+    TerminalName,
+    TerminalPath,
+    DontTranslate,
+    StoreCredentials,
+    AllowSingleInstanceOnly,
+    CheckForUpdatesAutomatically,
+    InstallUpdatesAutomatically,
+    SkippedUpdates,
+    SshConfigFilePath,
+    SshKeyFilePath,
+    CommitMergeImmediately,
+    ShowCommitsInCompactMode,
+    ShowChangedFilesAsList,
+    ShowChangedFilesInSingleView,
   };
   Q_ENUM(Id)
 
@@ -36,18 +71,13 @@ private:
 };
 
 class Prompt : public SettingsTempl<Prompt> {
+  Q_GADGET
 
 public:
-  enum class PromptKind {
-    PromptStash,
-    PromptMerge,
-    PromptRevert,
-    PromptCherryPick,
-    PromptDirectories,
-    PromptLargeFiles
-  };
+  enum class Kind { Stash, Merge, Revert, CherryPick, Directories, LargeFiles };
+  Q_ENUM(Kind)
 
-  static void initialize(QMap<PromptKind, QString> &keys);
+  static void initialize(QMap<Kind, QString> &keys);
 };
 
 #endif

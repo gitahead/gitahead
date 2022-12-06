@@ -249,7 +249,7 @@ MenuBar::MenuBar(QWidget *parent) : QMenuBar(parent) {
 
   Settings *settings = Settings::instance();
 
-  setHidden(settings->value("window/view/menuBarHidden").toBool());
+  setHidden(settings->value(Setting::Id::HideMenuBar).toBool());
 
   // File
   QMenu *file = addMenu(tr("File"));
@@ -526,7 +526,7 @@ MenuBar::MenuBar(QWidget *parent) : QMenuBar(parent) {
   toggleMenuBarHotkey.use(mToggleMenuBar);
   connect(mToggleMenuBar, &QAction::triggered, [this] {
     setHidden(!isHidden());
-    Settings::instance()->setValue("window/view/menuBarHidden", isHidden());
+    Settings::instance()->setValue(Setting::Id::HideMenuBar, isHidden());
   });
 
   // Repository

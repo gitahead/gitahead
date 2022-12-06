@@ -83,17 +83,22 @@ DoubleTreeWidget::DoubleTreeWidget(const git::Repository &repo, QWidget *parent)
   QAction *singleTree = new QAction(tr("Single Tree View"));
   singleTree->setCheckable(true);
   singleTree->setChecked(
-      Settings::instance()->value("doubletreeview/single", false).toBool());
+      Settings::instance()
+          ->value(Setting::Id::ShowChangedFilesInSingleView, false)
+          .toBool());
   connect(singleTree, &QAction::triggered, this, [this](bool checked) {
-    Settings::instance()->setValue("doubletreeview/single", checked);
+    Settings::instance()->setValue(Setting::Id::ShowChangedFilesInSingleView,
+                                   checked);
     RepoView::parentView(this)->refresh();
   });
   QAction *listView = new QAction(tr("List View"));
   listView->setCheckable(true);
-  listView->setChecked(
-      Settings::instance()->value("doubletreeview/listview", false).toBool());
+  listView->setChecked(Settings::instance()
+                           ->value(Setting::Id::ShowChangedFilesAsList, false)
+                           .toBool());
   connect(listView, &QAction::triggered, this, [this](bool checked) {
-    Settings::instance()->setValue("doubletreeview/listview", checked);
+    Settings::instance()->setValue(Setting::Id::ShowChangedFilesAsList,
+                                   checked);
     RepoView::parentView(this)->refresh();
   });
   contextMenu->addAction(singleTree);
@@ -392,9 +397,12 @@ void DoubleTreeWidget::setDiff(const git::Diff &diff, const QString &file,
 
   // Single tree & list view.
   bool singleTree =
-      Settings::instance()->value("doubletreeview/single", false).toBool();
-  bool listView =
-      Settings::instance()->value("doubletreeview/listview", false).toBool();
+      Settings::instance()
+          ->value(Setting::Id::ShowChangedFilesInSingleView, false)
+          .toBool();
+  bool listView = Settings::instance()
+                      ->value(Setting::Id::ShowChangedFilesAsList, false)
+                      .toBool();
 
   // Widget modifications.
   model->enableListView(listView);

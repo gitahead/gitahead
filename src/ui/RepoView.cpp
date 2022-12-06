@@ -308,8 +308,7 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
           &RepoView::refresh, Qt::QueuedConnection);
   connect(notifier, &git::RepositoryNotifier::directoryAboutToBeStaged, this,
           [this](const QString &dir, int count, bool &allow) {
-            if (!Settings::instance()->prompt(
-                    Prompt::PromptKind::PromptDirectories))
+            if (!Settings::instance()->prompt(Prompt::Kind::Directories))
               return;
 
             QString title = tr("Stage Directory?");
@@ -330,48 +329,45 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
             dialog.exec();
             allow = (dialog.clickedButton() == button);
             if (cb->isChecked())
-              Settings::instance()->setPrompt(
-                  Prompt::PromptKind::PromptDirectories, false);
+              Settings::instance()->setPrompt(Prompt::Kind::Directories, false);
           });
 
   // large file size warning
-  connect(
-      notifier, &git::RepositoryNotifier::largeFileAboutToBeStaged, this,
-      [this](const QString &file, int size, bool &allow) {
-        if (!Settings::instance()->prompt(Prompt::PromptKind::PromptLargeFiles))
-          return;
+  connect(notifier, &git::RepositoryNotifier::largeFileAboutToBeStaged, this,
+          [this](const QString &file, int size, bool &allow) {
+            if (!Settings::instance()->prompt(Prompt::Kind::LargeFiles))
+              return;
 
-        QString title = tr("Stage Large File?");
-        QString fmt =
-            tr("Are you sure you want to stage '%1' with a size of %2?");
-        QString text = fmt.arg(file, locale().formattedDataSize(size));
-        QMessageBox dialog(QMessageBox::Question, title, text,
-                           QMessageBox::Cancel, this);
-        QPushButton *stage =
-            dialog.addButton(tr("Stage"), QMessageBox::AcceptRole);
+            QString title = tr("Stage Large File?");
+            QString fmt =
+                tr("Are you sure you want to stage '%1' with a size of %2?");
+            QString text = fmt.arg(file, locale().formattedDataSize(size));
+            QMessageBox dialog(QMessageBox::Question, title, text,
+                               QMessageBox::Cancel, this);
+            QPushButton *stage =
+                dialog.addButton(tr("Stage"), QMessageBox::AcceptRole);
 
-        QPushButton *track = nullptr;
-        if (this->repo().lfsIsInitialized()) {
-          track =
-              dialog.addButton(tr("Track with LFS"), QMessageBox::RejectRole);
-          dialog.setInformativeText(
-              tr("This repository has LFS enabled. Do you "
-                 "want to track the file with LFS instead?"));
-        }
+            QPushButton *track = nullptr;
+            if (this->repo().lfsIsInitialized()) {
+              track = dialog.addButton(tr("Track with LFS"),
+                                       QMessageBox::RejectRole);
+              dialog.setInformativeText(
+                  tr("This repository has LFS enabled. Do you "
+                     "want to track the file with LFS instead?"));
+            }
 
-        QString cbText = tr("Stop prompting to stage large files");
-        QCheckBox *cb = new QCheckBox(cbText, &dialog);
-        dialog.setCheckBox(cb);
+            QString cbText = tr("Stop prompting to stage large files");
+            QCheckBox *cb = new QCheckBox(cbText, &dialog);
+            dialog.setCheckBox(cb);
 
-        dialog.exec();
-        allow = (dialog.clickedButton() == stage);
-        if (cb->isChecked())
-          Settings::instance()->setPrompt(Prompt::PromptKind::PromptLargeFiles,
-                                          false);
+            dialog.exec();
+            allow = (dialog.clickedButton() == stage);
+            if (cb->isChecked())
+              Settings::instance()->setPrompt(Prompt::Kind::LargeFiles, false);
 
-        if (dialog.clickedButton() == track)
-          configureSettings(ConfigDialog::Lfs);
-      });
+            if (dialog.clickedButton() == track)
+              configureSettings(ConfigDialog::Lfs);
+          });
 
   // Refresh when the workdir changes.
   RepositoryWatcher *watcher = new RepositoryWatcher(repo, this);
@@ -923,16 +919,15 @@ void RepoView::startFetchTimer() {
 
   // Read defaults from global settings.
   Settings *settings = Settings::instance();
-  settings->beginGroup("global/autofetch");
-  bool enable = settings->value("enable").toBool();
-  int minutes = settings->value("minutes").toInt();
-  settings->endGroup();
+  bool enable = settings->value(Setting::Id::FetchAutomatically).toBool();
+  int minutes =
+      settings->value(Setting::Id::AutomaticFetchPeriodInMinutes).toInt();
 
   git::Config config = mRepo.appConfig();
   if (!config.value<bool>("autofetch.enable", enable))
     return;
 
-  bool prune = settings->value("global/autoprune/enable").toBool();
+  bool prune = settings->value(Setting::Id::PruneAfterFetch).toBool();
   fetch(git::Remote(), false, false, nullptr, nullptr,
         config.value<bool>("autoprune.enable", prune));
 
@@ -959,7 +954,8 @@ void RepoView::fetchAll() {
 QFuture<git::Result> RepoView::fetch(const git::Remote &rmt, bool tags,
                                      bool interactive, LogEntry *parent,
                                      QStringList *submodules) {
-  bool prune = Settings::instance()->value("global/autoprune/enable").toBool();
+  bool prune =
+      Settings::instance()->value(Setting::Id::PruneAfterFetch).toBool();
   return fetch(rmt, tags, interactive, parent, submodules,
                mRepo.appConfig().value<bool>("autoprune.enable", prune));
 }
@@ -1082,7 +1078,8 @@ void RepoView::pull(MergeFlags flags, const git::Remote &rmt, bool tags,
   // Read submodule setting.
   QStringList *submodules = nullptr;
   Settings *settings = Settings::instance();
-  bool enable = settings->value("global/autoupdate/enable").toBool();
+  bool enable =
+      settings->value(Setting::Id::UpdateSubmodulesAfterPullAndClone).toBool();
   if (mRepo.appConfig().value<bool>("autoupdate.enable", enable))
     submodules = new QStringList;
 
@@ -1311,11 +1308,10 @@ void RepoView::merge(MergeFlags flags, const git::AnnotatedCommit &upstream,
 
   // Read default message.
   QString msg = mRepo.message();
-  if (Settings::instance()->prompt(Prompt::PromptKind::PromptMerge)) {
+  if (Settings::instance()->prompt(Prompt::Kind::Merge)) {
     // Prompt to edit message.
     bool suspended = suspendLogTimer();
-    CommitDialog *dialog =
-        new CommitDialog(msg, Prompt::PromptKind::PromptMerge, this);
+    CommitDialog *dialog = new CommitDialog(msg, Prompt::Kind::Merge, this);
     connect(dialog, &QDialog::rejected, this, [this, parent, suspended] {
       resumeLogTimer(suspended);
       mergeAbort(parent);
@@ -1540,11 +1536,10 @@ void RepoView::revert(const git::Commit &commit) {
   QString id = commit.id().toString();
   QString summary = commit.summary();
   QString msg = tr("Revert \"%1\"\n\nThis reverts commit %2.").arg(summary, id);
-  if (Settings::instance()->prompt(Prompt::PromptKind::PromptRevert)) {
+  if (Settings::instance()->prompt(Prompt::Kind::Revert)) {
     // Prompt to edit message.
     bool suspended = suspendLogTimer();
-    CommitDialog *dialog =
-        new CommitDialog(msg, Prompt::PromptKind::PromptRevert, this);
+    CommitDialog *dialog = new CommitDialog(msg, Prompt::Kind::Revert, this);
     connect(dialog, &QDialog::rejected, this, [this, parent, suspended] {
       resumeLogTimer(suspended);
       mergeAbort(parent);
@@ -1589,11 +1584,11 @@ void RepoView::cherryPick(const git::Commit &commit) {
       nullptr, mDetails->overrideUser(), mDetails->overrideEmail());
 
   QString msg = commit.message();
-  if (Settings::instance()->prompt(Prompt::PromptKind::PromptCherryPick)) {
+  if (Settings::instance()->prompt(Prompt::Kind::CherryPick)) {
     // Prompt to edit message.
     bool suspended = suspendLogTimer();
     CommitDialog *dialog =
-        new CommitDialog(msg, Prompt::PromptKind::PromptCherryPick, this);
+        new CommitDialog(msg, Prompt::Kind::CherryPick, this);
     connect(dialog, &QDialog::rejected, this, [this, parent, suspended] {
       resumeLogTimer(suspended);
       mergeAbort(parent);
@@ -1869,7 +1864,8 @@ bool RepoView::commit(const git::Signature &author,
   }
 
   // Automatically push if enabled.
-  bool enable = Settings::instance()->value("global/autopush/enable").toBool();
+  bool enable =
+      Settings::instance()->value(Setting::Id::PushAfterEachCommit).toBool();
   if (mRepo.appConfig().value<bool>("autopush.enable", enable))
     push(); // FIXME: Check for upstream before pushing?
 
@@ -2046,7 +2042,7 @@ void RepoView::promptToDeleteBranch(const git::Reference &ref) {
 
 void RepoView::promptToStash() {
   // Prompt to edit stash commit message.
-  if (!Settings::instance()->prompt(Prompt::PromptKind::PromptStash)) {
+  if (!Settings::instance()->prompt(Prompt::Kind::Stash)) {
     stash();
     return;
   }
@@ -2057,8 +2053,7 @@ void RepoView::promptToStash() {
   QString id = commit.shortId();
   QString ref = head.isBranch() ? head.name() : tr("(no branch)");
   QString msg = tr("WIP on %1: %2 %3").arg(ref, id, commit.summary());
-  CommitDialog *dialog =
-      new CommitDialog(msg, Prompt::PromptKind::PromptStash, this);
+  CommitDialog *dialog = new CommitDialog(msg, Prompt::Kind::Stash, this);
   connect(dialog, &QDialog::accepted, this, [this, msg, dialog] {
     QString userMsg = dialog->message();
     stash(msg != userMsg ? userMsg : QString());
@@ -2525,7 +2520,7 @@ bool RepoView::openSubmodule(const git::Submodule &submodule) {
     return false;
   }
 
-  if (Settings::instance()->value("window/tabs/submodule").toBool())
+  if (Settings::instance()->value(Setting::Id::OpenSubmodulesInTabs).toBool())
     return static_cast<MainWindow *>(window())->addTab(repo);
 
   return MainWindow::open(repo);
@@ -2539,7 +2534,7 @@ ConfigDialog *RepoView::configureSettings(ConfigDialog::Index index) {
 
 void RepoView::openTerminal() {
   QString terminalCmd =
-      Settings::instance()->value("terminal/command").toString();
+      Settings::instance()->value(Setting::Id::TerminalCommand).toString();
 
   if (terminalCmd.isEmpty()) {
 #if defined(Q_OS_WIN)
@@ -2863,7 +2858,7 @@ void RepoView::startLogTimer() {
   setLogVisible(true);
 
   // Check the hide setting.
-  if (!Settings::instance()->value("window/log/hide").toBool())
+  if (!Settings::instance()->value(Setting::Id::HideLogAutomatically).toBool())
     return;
 
   resumeLogTimer();

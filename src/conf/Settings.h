@@ -20,17 +20,8 @@ class Settings : public QObject {
   Q_OBJECT
 
 public:
-  QString group() const;
-  void beginGroup(const QString &prefix);
-  void endGroup();
-
-  QVariant value(const QString &key) const;
-  QVariant value(const QString &key, const QVariant &defaultValue) const;
-  QVariant defaultValue(const QString &key) const;
-  void setValue(const QString &key, const QVariant &value,
-                bool refresh = false);
-
   QVariant value(Setting::Id id) const;
+  QVariant value(Setting::Id id, const QVariant &defaultValue) const;
   void setValue(Setting::Id id, const QVariant &value);
 
   // Look up lexer name by file name.
@@ -38,9 +29,12 @@ public:
   QString kind(const QString &filename);
 
   // prompt dialogs
-  bool prompt(Prompt::PromptKind kind) const;
-  void setPrompt(Prompt::PromptKind kind, bool prompt);
-  QString promptDescription(Prompt::PromptKind kind) const;
+  bool prompt(Prompt::Kind kind) const;
+  void setPrompt(Prompt::Kind kind, bool prompt);
+  QString promptDescription(Prompt::Kind kind) const;
+
+  void setHotkey(const QString &action, const QString &hotkey);
+  QString hotkey(const QString &action) const;
 
   // ignore whitespace
   bool isWhitespaceIgnored() const;
@@ -71,6 +65,14 @@ signals:
 
 private:
   Settings(QObject *parent = nullptr);
+
+  QString group() const;
+
+  QVariant value(const QString &key) const;
+  QVariant value(const QString &key, const QVariant &defaultValue) const;
+  QVariant defaultValue(const QString &key) const;
+  void setValue(const QString &key, const QVariant &value,
+                bool refresh = false);
 
   QStringList mGroup;
   QVariantMap mDefaults;
