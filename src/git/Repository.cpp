@@ -656,6 +656,25 @@ void Repository::setCommitStarred(const Id &commit, bool starred)
   file.commit();
 }
 
+Submodule Repository::addSubmoduleSetup(const QString &path, const QString &url)
+{
+  git_submodule *submodule = nullptr;
+  git_submodule_add_setup(&submodule, d->repo, url.toUtf8(), path.toUtf8(), 1);
+  return Submodule(submodule);
+}
+
+void Repository::addSubmoduleFinalize(const Submodule &submodule)
+{
+  Q_ASSERT(submodule.isValid());
+
+  emit d->notifier->submoduleAboutToBeAdded(submodule.name());
+
+  git_submodule_add_finalize(submodule);
+  invalidateSubmoduleCache();
+
+  emit d->notifier->submoduleAdded(submodule);
+}
+
 void Repository::invalidateSubmoduleCache()
 {
   git_repository_submodule_cache_clear(d->repo);

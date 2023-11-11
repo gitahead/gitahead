@@ -9,8 +9,8 @@
 
 #include "CloneDialog.h"
 #include "git/Remote.h"
-#include "git/Repository.h"
 #include "git/Result.h"
+#include "git/Submodule.h"
 #include "log/LogEntry.h"
 #include "log/LogView.h"
 #include "ui/ExpandButton.h"
@@ -132,15 +132,18 @@ class LocationPage : public QWizardPage
   Q_OBJECT
 
 public:
-  LocationPage(bool init, QWidget *parent = nullptr)
-    : QWizardPage(parent), mInit(init)
+  LocationPage(
+    CloneDialog::Kind kind,
+    QWidget *parent = nullptr,
+    const QString &parentPath = QString())
+    : QWizardPage(parent), mInit(kind == CloneDialog::Init), mParentPath(parentPath)
   {
     setTitle(tr("Repository Location"));
     setSubTitle(
       tr("Choose the name and location of the new repository. A new "
          "directory will be created if it doesn't already exist."));
-    setButtonText(init ? QWizard::FinishButton : QWizard::NextButton,
-                  init ? tr("Initialize") : tr("Clone"));
+    setButtonText(mInit ? QWizard::FinishButton : QWizard::NextButton,
+                  mInit ? tr("Initialize") : tr("Clone"));
 
     mName = new QLineEdit(this);
     mName->setMinimumWidth(mName->sizeHint().width() * 2);
@@ -170,7 +173,11 @@ public:
     pathLayout->addWidget(mPath);
     pathLayout->addWidget(browse);
 
+    // Disable advanced (bare repo) setting in Submodule mode.
+    bool enableAdvanced = (kind != CloneDialog::Submodule);
+
     ExpandButton *expand = new ExpandButton(this);
+    expand->setVisible(enableAdvanced);
     QWidget *advanced = new QWidget(this);
     advanced->setVisible(false);
 
@@ -178,7 +185,7 @@ public:
     form->setFormAlignment(Qt::AlignLeft);
     form->addRow(tr("Name:"), mName);
     form->addRow(tr("Directory:"), path);
-    form->addRow(tr("Advanced:"), expand);
+    form->addRow(enableAdvanced ? tr("Advanced:") : QString(), expand);
 
     QCheckBox *bare = new QCheckBox(tr("Create a bare repository"));
 
@@ -209,7 +216,8 @@ public:
   bool isComplete() const override
   {
     QString path = mPath->text();
-    return (!mName->text().isEmpty() && !path.isEmpty() && QDir(path).exists());
+    return (!mName->text().isEmpty() && !path.isEmpty() &&
+             verifyPath(path) && QDir(path).exists());
   }
 
   int nextId() const override
@@ -222,7 +230,7 @@ public:
     QUrl url(field("url").toString());
     QString name = QFileInfo(url.path()).fileName();
     mName->setText(name.endsWith(".git") ? name.chopped(4) : name);
-    mPath->setText(QSettings().value(kPathKey, QDir::homePath()).toString());
+    mPath->setText(defaultPath());
   }
 
 private:
@@ -235,12 +243,28 @@ private:
     QString name = mName->text();
     QString path = mPath->text();
     mLabel->setText(fmt.arg(QDir(path).filePath(name)));
-    mLabel->setVisible(!path.isEmpty() && !name.isEmpty());
+    mLabel->setVisible(!name.isEmpty() && !path.isEmpty() && verifyPath(path));
 
     emit completeChanged();
   }
 
+  QString defaultPath() const
+  {
+    if (!mParentPath.isEmpty())
+      return mParentPath;
+    else
+      return QSettings().value(kPathKey, QDir::homePath()).toString();
+  }
+
+  bool verifyPath(const QString &path) const
+  {
+    // For submodules, its submodule repository must be cloned into the
+    // subdirectory under the parent repository.
+    return (mParentPath.isEmpty() || path.startsWith(mParentPath));
+  }
+
   bool mInit;
+  QString mParentPath;
   QLineEdit *mName;
   QLineEdit *mPath;
   QLabel *mLabel;
@@ -303,8 +327,7 @@ public:
       RemoteCallbacks::Receive, entry, url, "origin", mWatcher);
 
     entry->setBusy(true);
-    mWatcher->setFuture(
-      QtConcurrent::run(&git::Remote::clone, mCallbacks, url, path, bare));
+    mWatcher->setFuture(clone_run(mCallbacks, url, path, bare));
   }
 
   void cleanupPage() override
@@ -313,6 +336,15 @@ public:
   }
 
 private:
+  virtual QFuture<git::Result> clone_run(
+    RemoteCallbacks *callbacks,
+    const QString &url,
+    const QString &path,
+    bool bare)
+  {
+    return QtConcurrent::run(&git::Remote::clone, callbacks, url, path, bare);
+  }
+
   void cancel()
   {
     // Signal the asynchronous transfer to cancel itself.
@@ -341,32 +373,83 @@ private:
   QFutureWatcher<git::Result> *mWatcher = nullptr;
 };
 
+class CloneSubmodulePage : public ClonePage
+{
+  Q_OBJECT
+
+public:
+  CloneSubmodulePage(const git::Repository &repo, QWidget *parent = nullptr)
+    : ClonePage(parent), mRepo(repo)
+  {
+    Q_ASSERT(repo.isValid());
+    setSubTitle(tr("The new submodule will be added after the clone finishes."));
+
+    connect(this, &CloneSubmodulePage::completeChanged, [this] {
+      if (isComplete() && mSubmodule.isValid())
+        mRepo.addSubmoduleFinalize(mSubmodule);
+    });
+  }
+
+private:
+  virtual QFuture<git::Result> clone_run(
+    RemoteCallbacks *callbacks,
+    const QString &url,
+    const QString &path,
+    bool bare) override
+  {
+    if (!mSubmodule.isValid())
+      mSubmodule = mRepo.addSubmoduleSetup(path, url);
+
+    return QtConcurrent::run(&git::Remote::clone, callbacks, mSubmodule);
+  }
+
+  git::Repository mRepo;
+  git::Submodule mSubmodule = git::Submodule();
+};
+
 } // anon. namespace
 
-CloneDialog::CloneDialog(Kind kind, QWidget *parent, Repository *repo)
-  : QWizard(parent)
+CloneDialog::CloneDialog(
+  Kind kind,
+  QWidget *parent,
+  Repository *repo,
+  const git::Repository &parentRepo)
+  : QWizard(parent), mKind(kind)
 {
-  bool init = (kind == Init);
   setAttribute(Qt::WA_DeleteOnClose);
-  setWindowTitle(init ? tr("Initialize Repository") : tr("Clone Repository"));
+  setWindowTitle(windowTitle());
   setOptions(QWizard::NoBackButtonOnStartPage | QWizard::CancelButtonOnLeft);
   setWizardStyle(QWizard::ModernStyle);
 
-  addPage(new RemotePage(repo, this));
-  int location = addPage(new LocationPage(init, this));
-  int clone = addPage(new ClonePage(this));
+  QString parentPath = parentRepo.isValid() ?
+    parentRepo.workdir().absolutePath() : QString();
 
-  connect(page(clone), &ClonePage::completeChanged, [this, clone] {
-    if (page(clone)->isComplete())
+  ClonePage *clonePage;
+  if (kind == Submodule)
+    clonePage = new CloneSubmodulePage(parentRepo, parent);
+  else
+    clonePage = new ClonePage(parent);
+
+  addPage(new RemotePage(repo, this));
+  int location = addPage(new LocationPage(kind, this, parentPath));
+  int clone = addPage(clonePage);
+
+  connect(clonePage, &ClonePage::completeChanged, [this, clonePage] {
+    if (clonePage->isComplete())
       accept();
   });
 
-  if (init)
+  if (kind == Init)
     setStartId(location);
 }
 
 void CloneDialog::accept()
 {
+  if (mKind == Submodule) {
+    QDialog::accept();
+    return;
+  }
+
   QString path = this->path();
   bool bare = field("bare").toBool();
   if (git::Repository::open(path).isValid() ||
@@ -395,6 +478,16 @@ QString CloneDialog::messageTitle() const
 {
   QString url = field("url").toString();
   return url.isEmpty() ? tr("Initialize") : tr("Clone");
+}
+
+QString CloneDialog::windowTitle() const
+{
+  if (mKind == Init)
+    return tr("Initialize Repository");
+  else if (mKind == Clone)
+    return tr("Clone Repository");
+  else
+    return tr("Add Submodule");
 }
 
 #include "CloneDialog.moc"

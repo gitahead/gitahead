@@ -17,7 +17,15 @@ SubmoduleTableModel::SubmoduleTableModel(
   const git::Repository &repo,
   QObject *parent)
   : QAbstractTableModel(parent), mSubmodules(repo.submodules()), mRepo(repo)
-{}
+{
+  git::RepositoryNotifier *notifier = repo.notifier();
+  connect(notifier, &git::RepositoryNotifier::submoduleAboutToBeAdded,
+          this, &SubmoduleTableModel::beginResetModel);
+  connect(notifier, &git::RepositoryNotifier::submoduleAdded, this, [this] {
+    mSubmodules = mRepo.submodules();
+    endResetModel();
+  });
+}
 
 int SubmoduleTableModel::rowCount(const QModelIndex &parent) const
 {

@@ -26,6 +26,7 @@ namespace git {
 
 class Id;
 class Reference;
+class Submodule;
 
 class Remote
 {
@@ -213,6 +214,9 @@ public:
     const QString &url,
     const QString &path,
     bool bare = false);
+  static Result clone(
+    Callbacks *callbacks,
+    const Submodule &submodule);
 
   static QByteArray proxyUrl(const QString &url, git_proxy_t &type);
 

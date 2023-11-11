@@ -10,6 +10,7 @@
 #ifndef CLONEDIALOG_H
 #define CLONEDIALOG_H
 
+#include "git/Repository.h"
 #include "host/Repository.h"
 #include <QFutureWatcher>
 #include <QWizard>
@@ -33,19 +34,26 @@ public:
   enum Kind
   {
     Init,
-    Clone
+    Clone,
+    Submodule
   };
 
   CloneDialog(
     Kind kind,
     QWidget *parent = nullptr,
-    Repository *repo = nullptr);
+    Repository *repo = nullptr,
+    const git::Repository &parentRepo = git::Repository());
 
   void accept() override;
 
   QString path() const;
   QString message() const;
   QString messageTitle() const;
+
+private:
+  QString windowTitle() const;
+
+  Kind mKind;
 };
 
 #endif

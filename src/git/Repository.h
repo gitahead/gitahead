@@ -163,6 +163,8 @@ public:
   void setCommitStarred(const Id &commit, bool starred);
 
   // submodule
+  Submodule addSubmoduleSetup(const QString &path, const QString &url);
+  void addSubmoduleFinalize(const Submodule &submodule);
   void invalidateSubmoduleCache();
   QList<Submodule> submodules() const;
   Submodule lookupSubmodule(const QString &path) const;
@@ -312,6 +314,9 @@ signals:
   void remoteAdded(const Remote &remote);
   void remoteAboutToBeRemoved(const Remote &remote);
   void remoteRemoved(const QString &name);
+
+  void submoduleAboutToBeAdded(const QString &name);
+  void submoduleAdded(const Submodule &submodule);
 
   void stateChanged();
   void workdirChanged();
