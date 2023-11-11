@@ -505,7 +505,7 @@ void ReferenceView::contextMenuEvent(QContextMenuEvent *event)
     rename->setEnabled(!ref.isHead());
   }
 
-  if (ref.isTag() || ref.isLocalBranch()) {
+  if (ref.isTag() || ref.isBranch()) {
     QAction *remove = menu.addAction(tr("Delete"), [this, ref] {
       if (ref.isTag()) {
         DeleteTagDialog *dialog = new DeleteTagDialog(ref, this);

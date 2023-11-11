@@ -230,6 +230,8 @@ public:
     bool force = false,
     bool tags = false);
 
+  void deleteRemoteBranch(const git::Branch &branch);
+
   // commit
   bool commit(
     const QString &message,

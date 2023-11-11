@@ -1825,6 +1825,43 @@ void RepoView::push(
     remote, &git::Remote::push, mCallbacks, ref, dst, force, tags));
 }
 
+void RepoView::deleteRemoteBranch(const git::Branch &branch)
+{
+  Q_ASSERT(branch.isRemoteBranch());
+
+  QString name = branch.name().section('/', 1);
+  git::Remote remote = branch.remote();
+  QString remoteName = remote.name();
+
+  QString text = tr("delete '%1' from '%2'").arg(name, remoteName);
+  LogEntry *entry = addLogEntry(text, tr("Push"));
+  QFutureWatcher<git::Result> *watcher = new QFutureWatcher<git::Result>(this);
+  RemoteCallbacks *callbacks = new RemoteCallbacks(
+    RemoteCallbacks::Send, entry, remote.url(), remoteName, watcher, mRepo);
+  connect(callbacks, &RemoteCallbacks::referenceUpdated,
+          this, &RepoView::notifyReferenceUpdated);
+
+  entry->setBusy(true);
+  QStringList refspecs(QString(":refs/heads/%1").arg(name));
+  watcher->setFuture(
+    QtConcurrent::run(remote, &git::Remote::push, callbacks, refspecs));
+
+  connect(watcher, &QFutureWatcher<git::Result>::finished, watcher,
+  [entry, watcher, callbacks, remoteName] {
+    entry->setBusy(false);
+    git::Result result = watcher->result();
+    if (callbacks->isCanceled()) {
+      entry->addEntry(LogEntry::Error, tr("Push canceled."));
+    } else if (!result) {
+      QString err = result.errorString();
+      QString fmt = tr("Unable to push to %1 - %2");
+      entry->addEntry(LogEntry::Error, fmt.arg(remoteName, err));
+    }
+
+    watcher->deleteLater();
+  });
+}
+
 bool RepoView::commit(
   const QString &message,
   const git::AnnotatedCommit &upstream,
