@@ -2162,11 +2162,17 @@ void DiffView::setDiff(const git::Diff &diff)
     }
   }
 
-  if (canFetchMore())
+  // Fetch more until the view becomes scrollable.
+  QScrollBar *scrollBar = verticalScrollBar();
+  while (canFetchMore()) {
     fetchMore();
 
+    QCoreApplication::processEvents();
+    if (scrollBar->maximum() > 0)
+      break;
+  }
+
   // Load patches on demand.
-  QScrollBar *scrollBar = verticalScrollBar();
   mConnections.append(
     connect(scrollBar, &QScrollBar::valueChanged, [this](int value) {
       if (value > verticalScrollBar()->maximum() / 2 && canFetchMore())
