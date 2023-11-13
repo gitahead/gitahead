@@ -1,6 +1,3 @@
-[![Actions Status](https://github.com/gitahead/gitahead/workflows/GitAhead%20%28master%29/badge.svg)](https://github.com/gitahead/gitahead/actions) [![Actions Status](https://github.com/gitahead/gitahead/workflows/GitAhead%20%28stage%29/badge.svg)](https://github.com/gitahead/gitahead/actions)
-
-
 Please Note!
 ============
 GitAhead is no longer under active development. Low-level maintenance and bug
