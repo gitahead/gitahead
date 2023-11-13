@@ -420,7 +420,7 @@ public:
     int count = 0;
     QList<git::Commit> commits;
     git::Commit commit = mWalker.next();
-    QList<git::Id> ids = mIndex.ids();
+    QList<git::Id> &ids = mIndex.ids();
     QSet<git::Id> set(ids.constBegin(), ids.constEnd());
     while (commit.isValid() && count < 8192) {
       // Don't index merge commits.
