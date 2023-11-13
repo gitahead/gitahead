@@ -17,20 +17,15 @@
 #include "update/Updater.h"
 #include <QCloseEvent>
 #include <QCommandLineParser>
-#include <QDesktopServices>
 #include <QDir>
 #include <QFileInfo>
 #include <QFontDatabase>
 #include <QMessageBox>
-#include <QNetworkAccessManager>
 #include <QNetworkProxyFactory>
 #include <QNetworkReply>
-#include <QOperatingSystemVersion>
 #include <QSettings>
 #include <QTimer>
 #include <QTranslator>
-#include <QUrlQuery>
-#include <QUuid>
 
 #if defined(Q_OS_MAC)
 #include <unistd.h>
@@ -83,30 +78,6 @@ static LONG WINAPI exceptionFilter(PEXCEPTION_POINTERS info)
   return defaultFilter ? defaultFilter(info) : EXCEPTION_CONTINUE_SEARCH;
 }
 #endif
-
-namespace {
-
-const QString kUserAgentFmt = "%1/%2 (%3)";
-
-QString userAgentSystem()
-{
-#if defined(Q_OS_WIN)
-  QOperatingSystemVersion current = QOperatingSystemVersion::current();
-  if (current < QOperatingSystemVersion::Windows8) {
-    return "Windows NT 6.1";
-  } else if (current < QOperatingSystemVersion::Windows10) {
-    return "Windows NT 6.2";
-  } else {
-    return "Windows NT 10.0";
-  }
-#elif defined(Q_OS_MAC)
-  return "Macintosh";
-#else
-  return "Linux";
-#endif
-}
-
-} // anon. namespace
 
 Application::Application(
   int &argc,
@@ -235,27 +206,6 @@ Application::Application(
     sendPostedEvents(nullptr, QEvent::DeferredDelete);
     git::Repository::shutdown();
   });
-
-  // Read tracking settings.
-  settings.beginGroup("tracking");
-  QByteArray tid(GITAHEAD_TRACKING_ID);
-  if (!tid.isEmpty() && settings.value("enabled", true).toBool()) {
-    // Get or create persistent client ID.
-    mClientId = settings.value("id").toString();
-    if (mClientId.isEmpty()) {
-      mClientId = QUuid::createUuid().toString();
-      settings.setValue("id", mClientId);
-    }
-
-    // Fire and forget, except to free the reply.
-    mTrackingMgr = new QNetworkAccessManager(this);
-    connect(mTrackingMgr, &QNetworkAccessManager::finished,
-    [](QNetworkReply *reply) {
-      reply->deleteLater();
-    });
-  }
-
-  settings.endGroup();
 }
 
 void Application::autoUpdate()
@@ -323,65 +273,12 @@ Theme *Application::theme()
   return static_cast<Application *>(instance())->mTheme.data();
 }
 
-void Application::track(const QString &screen)
-{
-  QUrlQuery query;
-  query.addQueryItem("t", "screenview");
-  query.addQueryItem("cd", screen);
-
-  static_cast<Application *>(instance())->track(query);
-}
-
-void Application::track(
-  const QString &category,
-  const QString &action,
-  const QString &label,
-  int value)
-{
-  QUrlQuery query;
-  query.addQueryItem("t", "event");
-  query.addQueryItem("ec", category);
-  query.addQueryItem("ea", action);
-  if (!label.isEmpty())
-    query.addQueryItem("el", label);
-  if (value >= 0)
-    query.addQueryItem("ev", QString::number(value));
-
-  static_cast<Application *>(instance())->track(query);
-}
-
 bool Application::event(QEvent *event)
 {
   if (event->type() == QEvent::FileOpen)
     MainWindow::open(static_cast<QFileOpenEvent *>(event)->file());
 
   return QApplication::event(event);
-}
-
-void Application::track(const QUrlQuery &query)
-{
-  if (!mTrackingMgr)
-    return;
-
-  QString sys = userAgentSystem();
-  QString language = QLocale().uiLanguages().first();
-  QString userAgent = kUserAgentFmt.arg(GITAHEAD_NAME, GITAHEAD_VERSION, sys);
-
-  QUrlQuery tmp = query;
-  tmp.addQueryItem("v", "1");
-  tmp.addQueryItem("ds", "app");
-  tmp.addQueryItem("ul", language);
-  tmp.addQueryItem("ua", userAgent);
-  tmp.addQueryItem("an", GITAHEAD_NAME);
-  tmp.addQueryItem("av", GITAHEAD_VERSION);
-  tmp.addQueryItem("tid", GITAHEAD_TRACKING_ID);
-  tmp.addQueryItem("cid", mClientId);
-
-  QString header = "application/x-www-form-urlencoded";
-  QNetworkRequest request(QUrl("http://google-analytics.com/collect"));
-  request.setHeader(QNetworkRequest::ContentTypeHeader, header);
-
-  mTrackingMgr->post(request, tmp.query().toUtf8());
 }
 
 void Application::handleSslErrors(

@@ -13,13 +13,13 @@
 #include "ProgressIndicator.h"
 #include "RepoView.h"
 #include "TabWidget.h"
-#include "app/Application.h"
 #include "conf/RecentRepositories.h"
 #include "conf/RecentRepository.h"
 #include "dialogs/AccountDialog.h"
 #include "dialogs/CloneDialog.h"
 #include "host/Accounts.h"
 #include <QAbstractItemModel>
+#include <QApplication>
 #include <QFileDialog>
 #include <QMenu>
 #include <QMessageBox>

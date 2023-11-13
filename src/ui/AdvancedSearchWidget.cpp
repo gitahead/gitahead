@@ -9,10 +9,8 @@
 
 #include "AdvancedSearchWidget.h"
 #include "IndexCompleter.h"
-#include "app/Application.h"
 #include "index/Index.h"
 #include "index/Query.h"
-#include <QApplication>
 #include <QGuiApplication>
 #include <QScreen>
 #include <QCalendarWidget>
@@ -194,7 +192,6 @@ void AdvancedSearchWidget::accept()
   }
 
   emit accepted(fields.join(' '));
-  Application::track("search", "search", "advanced", fields.size());
 
   hide();
 }

@@ -18,7 +18,6 @@
 #include "RemoteTableModel.h"
 #include "SubmoduleDelegate.h"
 #include "SubmoduleTableModel.h"
-#include "app/Application.h"
 #include "conf/Settings.h"
 #include "git/Config.h"
 #include "git/Reference.h"
@@ -728,8 +727,6 @@ public:
 ConfigDialog::ConfigDialog(RepoView *view, Index index)
   : QDialog(view)
 {
-  Application::track("ConfigDialog");
-
   setMinimumWidth(500);
   setAttribute(Qt::WA_DeleteOnClose);
   setContextMenuPolicy(Qt::NoContextMenu);

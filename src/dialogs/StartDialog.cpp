@@ -11,7 +11,6 @@
 #include "AccountDialog.h"
 #include "CloneDialog.h"
 #include "IconLabel.h"
-#include "app/Application.h"
 #include "conf/RecentRepositories.h"
 #include "conf/RecentRepository.h"
 #include "host/Accounts.h"
@@ -671,8 +670,6 @@ void StartDialog::accept()
 
 StartDialog *StartDialog::openSharedInstance()
 {
-  Application::track("StartDialog");
-
   static QPointer<StartDialog> dialog;
   if (dialog) {
     dialog->show();

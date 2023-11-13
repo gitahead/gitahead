@@ -19,19 +19,10 @@ class AboutDialog : public QDialog
   Q_OBJECT
 
 public:
-  enum Index
-  {
-    Changelog,
-    Acknowledgments,
-    Privacy
-  };
-
-  AboutDialog(QWidget *parent = nullptr);
-
-  static void openSharedInstance(Index index = Changelog);
+  static void openSharedInstance();
 
 private:
-  void setCurrentIndex(Index index);
+  AboutDialog(QWidget *parent = nullptr);
 
   QTabBar *mTabs;
 };

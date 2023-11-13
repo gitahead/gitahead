@@ -10,7 +10,6 @@
 #include "TabWidget.h"
 #include "MenuBar.h"
 #include "TabBar.h"
-#include "app/Application.h"
 #include "dialogs/AccountDialog.h"
 #include "dialogs/CloneDialog.h"
 #include "host/Account.h"

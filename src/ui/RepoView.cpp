@@ -21,7 +21,6 @@
 #include "RemoteCallbacks.h"
 #include "SearchField.h"
 #include "ToolBar.h"
-#include "app/Application.h"
 #include "conf/Settings.h"
 #include "dialogs/CheckoutDialog.h"
 #include "dialogs/CommitDialog.h"
@@ -154,8 +153,6 @@ private:
 RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   : QSplitter(Qt::Vertical, parent), mRepo(repo)
 {
-  Application::track("RepoView");
-
   setHandleWidth(0);
   setAttribute(Qt::WA_DeleteOnClose);
 

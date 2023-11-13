@@ -34,27 +34,16 @@ public:
 
   static Theme *theme();
 
-  static void track(const QString &screen);
-  static void track(
-    const QString &category,
-    const QString &action,
-    const QString &label = QString(),
-    int value = -1);
-
 protected:
   bool event(QEvent *event) override;
 
 private:
   void registerService();
-  void track(const QUrlQuery &query);
   void handleSslErrors(QNetworkReply *reply, const QList<QSslError> &errors);
 
   QString mPathspec = QString();
   QScopedPointer<Theme> mTheme;
   QStringList mPositionalArguments;
-
-  QString mClientId;
-  QNetworkAccessManager *mTrackingMgr = nullptr;
 };
 
 #endif

@@ -16,7 +16,6 @@
 #include "MainWindow.h"
 #include "RepoView.h"
 #include "TabWidget.h"
-#include "app/Application.h"
 #include "conf/RecentRepositories.h"
 #include "conf/RecentRepository.h"
 #include "conf/Settings.h"
@@ -657,9 +656,7 @@ MenuBar::MenuBar(QWidget *parent)
   QString name = QCoreApplication::applicationName();
   QAction *about = help->addAction(tr("About %1").arg(name));
   about->setMenuRole(QAction::AboutRole);
-  connect(about, &QAction::triggered, [] {
-    AboutDialog::openSharedInstance();
-  });
+  connect(about, &QAction::triggered, &AboutDialog::openSharedInstance);
 
   QAction *update = help->addAction(tr("Check For Updates..."));
   update->setMenuRole(QAction::ApplicationSpecificRole);
