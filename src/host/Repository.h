@@ -12,6 +12,7 @@
 
 #include <QMap>
 #include <QMetaType>
+#include <QObject>
 #include <QSharedPointer>
 #include <QString>
 

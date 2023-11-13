@@ -36,7 +36,7 @@ enable_testing()
 
 # Add test library.
 add_library(testlib Test.cpp)
-target_link_libraries(testlib app git ui Qt5::Test)
+target_link_libraries(testlib app git ui Qt6::Test)
 target_include_directories(testlib PRIVATE ${CMAKE_SOURCE_DIR}/src)
 
 # Add tests.

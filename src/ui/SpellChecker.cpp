@@ -3,8 +3,9 @@
 #include "hunspell.hxx"
 #include "SpellChecker.h"
 #include <QFile>
-#include <QTextStream>
+#include <QRegularExpression>
 #include <QTextCodec>
+#include <QTextStream>
 
 SpellChecker::SpellChecker(const QString &dictionaryPath,
                            const QString &userDictionary)
@@ -26,11 +27,14 @@ SpellChecker::SpellChecker(const QString &dictionaryPath,
     QFile affixFile(affixFileName);
     if (affixFile.open(QIODevice::ReadOnly)) {
       QTextStream stream(&affixFile);
-      QRegExp enc_detector("^\\s*SET\\s+([A-Z0-9\\-]+)\\s*", Qt::CaseInsensitive);
+      QRegularExpression re(
+        "^\\s*SET\\s+([A-Z0-9\\-]+)\\s*",
+        QRegularExpression::CaseInsensitiveOption);
       QString line = stream.readLine();
       while (!line.isEmpty()) {
-        if (enc_detector.indexIn(line) >= 0) {
-          encoding = enc_detector.cap(1);
+        QRegularExpressionMatch match = re.match(line);
+        if (match.hasMatch()) {
+          encoding = match.captured(1);
           break;
         }
         line = stream.readLine();

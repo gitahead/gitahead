@@ -956,6 +956,11 @@ QTextCodec *Repository::codec() const
   return codec ? codec : QTextCodec::codecForLocale();
 }
 
+QByteArray Repository::encode(const QString &text) const
+{
+  return codec()->fromUnicode(text);
+}
+
 QString Repository::decode(const QByteArray &text) const
 {
   return codec()->toUnicode(text);
@@ -991,7 +996,7 @@ QStringList Repository::lfsEnvironment()
 QStringList Repository::lfsTracked()
 {
   QString output = lfsExecute({"track"});
-  QStringList lines = output.split('\n', QString::SkipEmptyParts);
+  QStringList lines = output.split('\n', Qt::SkipEmptyParts);
   if (!lines.isEmpty())
     lines.removeFirst();
 

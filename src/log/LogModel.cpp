@@ -81,10 +81,11 @@ QVariant LogModel::data(const QModelIndex &index, int role) const
             text = kTitleFmt.arg(title, text);
 
             if (!index.parent().isValid()) {
+              QLocale locale;
               QDateTime date = entry->timestamp();
               QString timestamp = (date.date() == QDate::currentDate()) ?
-                date.time().toString(Qt::DefaultLocaleShortDate) :
-                date.toString(Qt::DefaultLocaleShortDate);
+                locale.toString(date.time(), QLocale::ShortFormat) :
+                locale.toString(date, QLocale::ShortFormat);
               text = kTimeFmt.arg(timestamp, text);
             }
           }

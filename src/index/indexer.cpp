@@ -108,7 +108,7 @@ void log(QFile *out, const QString &text)
     return;
 
   QString time = QTime::currentTime().toString(Qt::ISODateWithMs);
-  QTextStream(out) << time << " - " << text << endl;
+  QTextStream(out) << time << " - " << text << Qt::endl;
 }
 
 void log(QFile *out, const QString &fmt, const git::Id &id)
@@ -420,10 +420,11 @@ public:
     int count = 0;
     QList<git::Commit> commits;
     git::Commit commit = mWalker.next();
-    QSet<git::Id> ids = QSet<git::Id>::fromList(mIndex.ids());
+    QList<git::Id> ids = mIndex.ids();
+    QSet<git::Id> set(ids.constBegin(), ids.constEnd());
     while (commit.isValid() && count < 8192) {
       // Don't index merge commits.
-      if (!commit.isMerge() && !ids.contains(commit.id())) {
+      if (!commit.isMerge() && !set.contains(commit.id())) {
         commits.append(commit);
         ++count;
       }
@@ -438,10 +439,11 @@ public:
     }
 
     // Start map-reduce.
+    git::Repository repo = mIndex.repo();
     using CommitList = QList<git::Commit>;
     mWatcher.setFuture(
       QtConcurrent::mappedReduced<Index::PostingMap,CommitList,Map,Reduce>(
-      commits, Map(mIndex.repo(), mLexers, mOut), Reduce(mIndex.ids(), mOut)));
+      std::move(commits), Map(repo, mLexers, mOut), Reduce(ids, mOut)));
     return true;
   }
 
@@ -455,7 +457,7 @@ public:
       // Write to disk.
       log(mOut, "start write");
       if (mIndex.write(mWatcher.result()) && mNotify)
-        QTextStream(stdout) << "write" << endl;
+        QTextStream(stdout) << "write" << Qt::endl;
       log(mOut, "end write");
 
       // Restart.
@@ -466,7 +468,7 @@ public:
   bool nativeEventFilter(
     const QByteArray &type,
     void *message,
-    long *result) override
+    qintptr *result) override
   {
 #ifdef Q_OS_WIN
     MSG *msg = static_cast<MSG *>(message);

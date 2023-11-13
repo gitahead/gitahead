@@ -331,11 +331,12 @@ QSize FileList::sizeHint() const
 
 QRect FileList::checkRect(const QModelIndex &index)
 {
-  QStyleOptionViewItem options = viewOptions();
-  options.rect = visualRect(index);
+  QStyleOptionViewItem option;
+  initViewItemOption(&option);
+  option.rect = visualRect(index);
 
   FileDelegate *delegate = static_cast<FileDelegate *>(itemDelegate());
-  return delegate->checkRect(options, index);
+  return delegate->checkRect(option, index);
 }
 
 void FileList::setFileRows(int rows)

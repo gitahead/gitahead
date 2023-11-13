@@ -11,9 +11,9 @@ add_library(host
 target_link_libraries(host
   conf
   cred
-  Qt5::Core
-  Qt5::Gui
-  Qt5::Network
+  Qt6::Core
+  Qt6::Gui
+  Qt6::Network
 )
 
 target_compile_definitions(host PRIVATE

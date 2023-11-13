@@ -25,7 +25,6 @@
 #include <QGuiApplication>
 #include <QScreen>
 #include <QCryptographicHash>
-#include <QDesktopWidget>
 #include <QMessageBox>
 #include <QMimeData>
 #include <QSettings>
@@ -194,7 +193,7 @@ void MainWindow::setSideBarVisible(bool visible)
 
   QTimeLine *timeline = new QTimeLine(250, this);
   timeline->setDirection(visible ? QTimeLine::Forward : QTimeLine::Backward);
-  timeline->setCurveShape(QTimeLine::LinearCurve);
+  timeline->setEasingCurve(QEasingCurve::Linear);
   timeline->setUpdateInterval(20);
 
   connect(timeline, &QTimeLine::valueChanged, [this, pos](qreal value) {

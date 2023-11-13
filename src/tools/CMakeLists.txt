@@ -9,7 +9,7 @@ add_library(tools
 target_link_libraries(tools
   conf
   git
-  Qt5::Gui
+  Qt6::Gui
 )
 
 set_target_properties(tools PROPERTIES

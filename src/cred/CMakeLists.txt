@@ -11,7 +11,7 @@ add_library(cred
 
 target_link_libraries(cred
   conf
-  Qt5::Core
+  Qt6::Core
 )
 
 set_target_properties(cred PROPERTIES

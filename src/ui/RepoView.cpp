@@ -896,7 +896,7 @@ void RepoView::setLogVisible(bool visible)
 
   QTimeLine *timeline = new QTimeLine(250, this);
   timeline->setDirection(visible ? QTimeLine::Forward : QTimeLine::Backward);
-  timeline->setCurveShape(QTimeLine::LinearCurve);
+  timeline->setEasingCurve(QEasingCurve::Linear);
   timeline->setUpdateInterval(20);
 
   connect(timeline, &QTimeLine::valueChanged, [this, pos](qreal value) {
@@ -930,7 +930,7 @@ LogEntry *RepoView::error(
     tr("Unable to %1 - %2").arg(action, detail) :
     tr("Unable to %1 '%2' - %3").arg(action, name, detail);
 
-  QStringList items = text.split("\\n", QString::KeepEmptyParts);
+  QStringList items = text.split("\\n", Qt::KeepEmptyParts);
   if (items.last() == "\n")
     items.removeLast();
 
@@ -1822,7 +1822,7 @@ void RepoView::push(
 
   entry->setBusy(true);
   mWatcher->setFuture(QtConcurrent::run(
-    remote, &git::Remote::push, mCallbacks, ref, dst, force, tags));
+    &git::Remote::pushRef, remote, mCallbacks, ref, dst, force, tags));
 }
 
 bool RepoView::commit(
@@ -2403,7 +2403,7 @@ void RepoView::updateSubmodulesAsync(
 
   entry->setBusy(true);
   mWatcher->setFuture(QtConcurrent::run(
-    submodule, &git::Submodule::update, mCallbacks, init));
+    &git::Submodule::update, submodule, mCallbacks, init));
 }
 
 bool RepoView::openSubmodule(const git::Submodule &submodule)
@@ -2441,7 +2441,7 @@ void RepoView::ignore(const QString &name)
   if (!file.open(QFile::Append | QFile::Text))
     return;
 
-  QTextStream(&file) << name << endl;
+  QTextStream(&file) << name << Qt::endl;
   file.close();
 
   refresh();

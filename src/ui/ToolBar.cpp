@@ -22,6 +22,7 @@
 #include <QMenu>
 #include <QPainter>
 #include <QPainterPath>
+#include <QRegularExpression>
 #include <QStyleOptionToolButton>
 #include <QToolButton>
 #include <QWindow>
@@ -902,10 +903,10 @@ ToolBar::ToolBar(MainWindow *parent)
 
   addWidget(mode);
 
-  using Signal = void (QButtonGroup::*)(int);
-  auto signal = static_cast<Signal>(&QButtonGroup::buttonClicked);
-  connect(mModeGroup, signal, [this](int index) {
-    currentView()->setViewMode(static_cast<RepoView::ViewMode>(index));
+  connect(mModeGroup, &QButtonGroup::buttonClicked,
+  [this](QAbstractButton *button) {
+    int id = mModeGroup->id(button);
+    currentView()->setViewMode(static_cast<RepoView::ViewMode>(id));
   });
 
   addWidget(new Spacer(4, this));
@@ -931,7 +932,7 @@ ToolBar::ToolBar(MainWindow *parent)
 
   // Hook up star button to search field.
   connect(mStarButton, &QToolButton::toggled, [this](bool checked) {
-    QStringList terms = mSearchField->text().split(QRegExp("\\s+"));
+    QStringList terms = mSearchField->text().split(QRegularExpression("\\s+"));
     if (checked) {
       terms.append(kStarredQuery);
     } else {
@@ -945,7 +946,7 @@ ToolBar::ToolBar(MainWindow *parent)
     QSignalBlocker blocker(mStarButton);
     (void) blocker;
 
-    QStringList terms = mSearchField->text().split(QRegExp("\\s+"));
+    QStringList terms = mSearchField->text().split(QRegularExpression("\\s+"));
     mStarButton->setChecked(terms.contains(kStarredQuery));
   });
 }

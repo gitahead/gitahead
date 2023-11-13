@@ -200,16 +200,17 @@ void ScintillaQt::paintEvent(QPaintEvent *event)
 
 void ScintillaQt::wheelEvent(QWheelEvent *event)
 {
-  if (event->orientation() == Qt::Horizontal) {
-    if (horizontalScrollBarPolicy() == Qt::ScrollBarAlwaysOff)
+  if (event->angleDelta().x() != 0) {
+    if (horizontalScrollBarPolicy() == Qt::ScrollBarAlwaysOff) {
       event->ignore();
-    else
+    } else {
       QAbstractScrollArea::wheelEvent(event);
+    }
   } else {
     if (QApplication::keyboardModifiers() & Qt::ControlModifier) {
       // Zoom! We play with the font sizes in the styles.
       // Number of steps/line is ignored, we just care if sizing up or down
-      if (event->delta() > 0) {
+      if (event->angleDelta().y() > 0) {
         KeyCommand(SCI_ZOOMIN);
       } else {
         KeyCommand(SCI_ZOOMOUT);
@@ -336,7 +337,7 @@ void ScintillaQt::mousePressEvent(QMouseEvent *event)
 {
   Point pos = PointFromQPoint(event->pos());
 
-  if (event->button() == Qt::MidButton &&
+  if (event->button() == Qt::MiddleButton &&
       QApplication::clipboard()->supportsSelection()) {
     SelectionPosition selPos = SPositionFromLocation(
       pos, false, false, UserVirtualSpace());
@@ -416,7 +417,7 @@ void ScintillaQt::dragEnterEvent(QDragEnterEvent *event)
   if (event->mimeData()->hasText()) {
     event->acceptProposedAction();
 
-    Point point = PointFromQPoint(event->pos());
+    Point point = PointFromQPoint(event->position());
     SetDragPosition(SPositionFromLocation(point, false, false, UserVirtualSpace()));
   } else {
     event->ignore();
@@ -433,7 +434,7 @@ void ScintillaQt::dragMoveEvent(QDragMoveEvent *event)
   if (event->mimeData()->hasText()) {
     event->acceptProposedAction();
 
-    Point point = PointFromQPoint(event->pos());
+    Point point = PointFromQPoint(event->position());
     SetDragPosition(SPositionFromLocation(point, false, false, UserVirtualSpace()));
   } else {
     event->ignore();
@@ -446,7 +447,7 @@ void ScintillaQt::dropEvent(QDropEvent *event)
     event->acceptProposedAction();
 
     const QMimeData *data = event->mimeData();
-    Point point = PointFromQPoint(event->pos());
+    Point point = PointFromQPoint(event->position());
     bool move = (event->source() == this &&
                  event->proposedAction() == Qt::MoveAction);
 
@@ -490,13 +491,13 @@ void ScintillaQt::inputMethodEvent(QInputMethodEvent *event)
   // Copy & paste by johnsonj with a lot of helps of Neil
   // Great thanks for my forerunners, jiniya and BLUEnLIVE
 
-	bool initialCompose = false;
+  bool initialCompose = false;
   if (pdoc->TentativeActive()) {
     pdoc->TentativeUndo();
   } else {
     // No tentative undo means start of this composition so
     // Fill in any virtual spaces.
-		initialCompose = true;
+    initialCompose = true;
   }
 
   view.imeCaretBlockOverride = false;
@@ -523,8 +524,8 @@ void ScintillaQt::inputMethodEvent(QInputMethodEvent *event)
       return;
     }
 
-		if (initialCompose)
-			ClearBeforeTentativeStart();
+    if (initialCompose)
+      ClearBeforeTentativeStart();
     pdoc->TentativeStart(); // TentativeActive() from now on.
 
     // Mark segments and get ime caret position.
@@ -617,7 +618,7 @@ void ScintillaQt::inputMethodEvent(QInputMethodEvent *event)
       MoveImeCarets(- imeCharPos[preeditStrLen] + imeCharPos[imeCaretPos]);
     }
 
-    // Set candidate box position for Qt::ImMicroFocus.
+    // Set candidate box position for Qt::ImCursorRectangle.
     preeditPos = CurrentPosition();
     EnsureCaretVisible();
     updateMicroFocus();
@@ -631,7 +632,7 @@ QVariant ScintillaQt::inputMethodQuery(Qt::InputMethodQuery query) const
   int line = send(SCI_LINEFROMPOSITION, pos);
 
   switch (query) {
-    case Qt::ImMicroFocus: {
+    case Qt::ImCursorRectangle: {
       int startPos = (preeditPos >= 0) ? preeditPos : pos;
       Point pt = const_cast<ScintillaQt *>(this)->LocationFromPosition(startPos);
       int width = send(SCI_GETCARETWIDTH);
@@ -1023,7 +1024,7 @@ bool ScintillaQt::SetIdle(bool on)
       idler.state = false;
       QTimer *timer = static_cast<QTimer *>(idler.idlerID);
       timer->stop();
-      disconnect(timer, &QTimer::timeout, 0, 0);
+      disconnect(timer, &QTimer::timeout, nullptr, nullptr);
       delete timer;
       idler.idlerID = nullptr;
     }

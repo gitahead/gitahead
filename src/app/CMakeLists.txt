@@ -19,7 +19,7 @@ file(GLOB SCINTILLUA_LEXERS ${SCINTILLUA_LEXERS_DIR}/*.lua)
 file(GLOB LUA_PLUGINS ${CONF_DIR}/plugins/*.lua ${CONF_DIR}/plugins/*.txt)
 
 # Build resources.
-qt5_add_resources(RESOURCES ${RSRC_DIR}/resources.qrc)
+qt_add_resources(RESOURCES ${RSRC_DIR}/resources.qrc)
 
 # Generate acknowledgments.
 set(DOC_SOURCE_DIR ${CMAKE_SOURCE_DIR}/doc)
@@ -66,7 +66,7 @@ target_link_libraries(app
   git
   ui
   update
-  Qt5::Widgets
+  Qt6::Widgets
 )
 
 set_target_properties(app PROPERTIES
@@ -149,7 +149,7 @@ install(TARGETS gitahead
 )
 
 if(APPLE)
-  get_target_property(QT_LIBRARY Qt5::Core LOCATION)
+  get_target_property(QT_LIBRARY Qt6::Core LOCATION)
   get_filename_component(QT_FRAMEWORK ${QT_LIBRARY} DIRECTORY)
   get_filename_component(RPATH ${QT_FRAMEWORK} DIRECTORY)
 

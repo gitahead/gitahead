@@ -10,6 +10,7 @@
 #include "IconLabel.h"
 #include <QPainter>
 #include <QStyle>
+#include <QWindow>
 
 IconLabel::IconLabel(
   const QIcon &icon,
@@ -34,8 +35,9 @@ QSize IconLabel::minimumSizeHint() const
 void IconLabel::paintEvent(QPaintEvent *event)
 {
   QSize size = sizeHint();
-  QWidget *win = window();
+  QWidget *widget = window();
+  QWindow *window = widget ? widget->windowHandle() : nullptr;
   QPainter(this).drawPixmap(
     QStyle::alignedRect(Qt::LeftToRight, Qt::AlignHCenter, size, rect()),
-    mIcon.pixmap(win ? win->windowHandle() : nullptr, size));
+    mIcon.pixmap(size, window ? window->devicePixelRatio() : 1.0));
 }

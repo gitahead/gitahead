@@ -26,9 +26,9 @@ endforeach()
 
 if(UPDATE_TRANSLATIONS)
   # FIXME: Clean removes the .ts files.
-  qt5_create_translation(QM_FILES ${SOURCE_FILES} ${TS_FILES})
+  qt_create_translation(QM_FILES ${SOURCE_FILES} ${TS_FILES})
 else()
-  qt5_add_translation(QM_FILES ${TS_FILES})
+  qt_add_translation(QM_FILES ${TS_FILES})
 endif()
 
 add_custom_target(translations DEPENDS ${QM_FILES})

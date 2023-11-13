@@ -29,6 +29,7 @@
 
 struct git_repository;
 class QProcess;
+class QTextCodec;
 
 namespace git {
 
@@ -213,6 +214,7 @@ public:
 
   // encoding
   QTextCodec *codec() const;
+  QByteArray encode(const QString &text) const;
   QString decode(const QByteArray &text) const;
 
   // clean

@@ -88,7 +88,7 @@ void LogDelegate::paint(
     return;
 
   QRect rect = decorationRect(option, index);
-  if (static_cast<QMetaType::Type>(variant.type()) == QMetaType::QChar) {
+  if (variant.typeId() == QMetaType::QChar) {
     Badge::paint(painter, {Badge::Label(variant.toChar())}, rect, &opt);
   } else if (variant.canConvert<int>()) {
     int progress = variant.toInt();
@@ -143,7 +143,7 @@ void LogDelegate::initStyleOption(
 {
   QStyledItemDelegate::initStyleOption(option, index);
   QVariant variant = index.data(Qt::DecorationRole);
-  if (static_cast<QMetaType::Type>(variant.type()) == QMetaType::QChar) {
+  if (variant.typeId() == QMetaType::QChar) {
     option->decorationSize = Badge::size(option->font) - ADJUSTMENT_SIZE;
   } else if (variant.canConvert<int>()) {
     option->decorationSize = ProgressIndicator::size();

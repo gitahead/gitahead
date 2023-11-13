@@ -11,6 +11,6 @@ add_library(cli
 )
 
 target_link_libraries(cli
-  Qt5::Core
+  Qt6::Core
   ${INSTALLER_IMPL_LIBS}
 )

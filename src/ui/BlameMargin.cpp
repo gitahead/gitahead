@@ -70,8 +70,8 @@ void BlameMargin::setBlame(
   if (Settings::instance()->value("editor/blame/heatmap").toBool()) {
     git::Commit first = repo.walker(GIT_SORT_TIME | GIT_SORT_REVERSE).next();
     git::Commit last = repo.walker(GIT_SORT_TIME).next();
-    mMinTime = first ? first.committer().date().toTime_t() : -1;
-    mMaxTime = last ? last.committer().date().toTime_t() : -1;
+    mMinTime = first ? first.committer().date().toSecsSinceEpoch() : -1;
+    mMaxTime = last ? last.committer().date().toSecsSinceEpoch() : -1;
   }
 
   mTimer.stop();
@@ -118,7 +118,7 @@ bool BlameMargin::event(QEvent *event)
     git::Signature signature = mBlame.signature(index);
     if (signature.isValid()) {
       email = QString("&lt;%1&gt;").arg(signature.email());
-      date = signature.date().toString(Qt::DefaultLocaleLongDate);
+      date = QLocale().toString(signature.date(), QLocale::LongFormat);
     }
 
     if (!name.isEmpty())
@@ -145,12 +145,13 @@ bool BlameMargin::event(QEvent *event)
 
 void BlameMargin::mousePressEvent(QMouseEvent *event)
 {
-  mIndex = mBlame.isValid() ? index(event->y()) : -1;
+  mIndex = mBlame.isValid() ? index(event->position().y()) : -1;
 }
 
 void BlameMargin::mouseReleaseEvent(QMouseEvent *event)
 {
-  if (mBlame.isValid() && mIndex >= 0 && mIndex == index(event->y())) {
+  if (mBlame.isValid() && mIndex >= 0 &&
+      mIndex == index(event->position().y())) {
     // Update selection.
     git::Id id = mBlame.id(mIndex);
     mSelection = (mSelection != id) ? id : git::Id();
@@ -165,7 +166,7 @@ void BlameMargin::mouseDoubleClickEvent(QMouseEvent *event)
   if (!mBlame.isValid())
     return;
 
-  int index = this->index(event->y());
+  int index = this->index(event->position().y());
   if (index < 0)
     return;
 
@@ -184,7 +185,7 @@ void BlameMargin::paintEvent(QPaintEvent *event)
 {
   // Draw background.
   QStyleOption opt;
-  opt.init(this);
+  opt.initFrom(this);
   QPainter painter(this);
   style()->drawPrimitive(QStyle::PE_Widget, &opt, &painter, this);
 
@@ -233,11 +234,12 @@ void BlameMargin::paintEvent(QPaintEvent *event)
     int time = -1;
     git::Signature signature = mBlame.signature(index);
     if (signature.isValid()) {
+      QLocale locale;
       QDateTime dateTime = signature.date();
       date = (dateTime.date() == today) ?
-        dateTime.time().toString(Qt::DefaultLocaleShortDate) :
-        dateTime.date().toString(Qt::DefaultLocaleShortDate);
-      time = dateTime.toTime_t();
+        locale.toString(dateTime.time(), QLocale::ShortFormat) :
+        locale.toString(dateTime.date(), QLocale::ShortFormat);
+      time = dateTime.toSecsSinceEpoch();
     }
 
     // Draw background.
@@ -293,10 +295,11 @@ void BlameMargin::paintEvent(QPaintEvent *event)
     // Draw date.
     if (signature.isValid()) {
       // Get long date.
+      QLocale locale;
       QDateTime dateTime = signature.date();
       QString longDate = (dateTime.date() == today) ?
-                         dateTime.time().toString(Qt::DefaultLocaleLongDate) :
-                         dateTime.date().toString(Qt::DefaultLocaleLongDate);
+        locale.toString(dateTime.time(), QLocale::LongFormat) :
+        locale.toString(dateTime.date(), QLocale::LongFormat);
 
       QRectF dateRect = regularMetrics.boundingRect(longDate);
       if (nameRect.width() + dateRect.width() + 4 <= rect.width())

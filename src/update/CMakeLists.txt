@@ -16,8 +16,8 @@ add_library(update
 target_link_libraries(update
   conf
   ${LIBCMARK_LIBRARIES}
-  Qt5::Network
-  Qt5::Widgets
+  Qt6::Network
+  Qt6::Widgets
   ${UPDATER_IMPL_LIBS}
 )
 
@@ -26,7 +26,7 @@ set_target_properties(update PROPERTIES
 )
 
 add_executable(relauncher relauncher.cpp)
-target_link_libraries(relauncher Qt5::Core)
+target_link_libraries(relauncher Qt6::Core)
 
 set_target_properties(relauncher PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY $<TARGET_FILE_DIR:gitahead>

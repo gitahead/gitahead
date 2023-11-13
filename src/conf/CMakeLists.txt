@@ -7,7 +7,7 @@ add_library(conf
 
 target_link_libraries(conf
   lua
-  Qt5::Core
+  Qt6::Core
 )
 
 target_compile_definitions(conf PRIVATE

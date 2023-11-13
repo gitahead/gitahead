@@ -21,7 +21,7 @@ namespace git {
 class Signature
 {
 public:
-  bool isValid() const { return d; }
+  bool isValid() const { return !d.isNull(); }
   explicit operator bool() const { return isValid(); }
 
   QString name() const;

@@ -275,8 +275,9 @@ int Remote::Callbacks::credentials(
           continue;
 
         foreach (const QString &pattern, host.patterns) {
-          QRegExp re(pattern, Qt::CaseSensitive, QRegExp::Wildcard);
-          if (re.exactMatch(name)) {
+          QRegularExpression re(
+            QRegularExpression::wildcardToRegularExpression(pattern));
+          if (re.match(name).hasMatch()) {
             key = host.file;
             break;
           }
@@ -430,8 +431,9 @@ int Remote::Callbacks::url(
 
         QString replacement;
         foreach (const QString &pattern, host.patterns) {
-          QRegExp re(pattern, Qt::CaseSensitive, QRegExp::Wildcard);
-          if (re.exactMatch(hostName)) {
+          QRegularExpression re(
+            QRegularExpression::wildcardToRegularExpression(pattern));
+          if (re.match(hostName).hasMatch()) {
             replacement = host.hostName;
             break;
           }
@@ -559,7 +561,7 @@ Result Remote::push(Callbacks *callbacks, const QStringList &refspecs)
   return git_remote_push(d.data(), &array, &opts);
 }
 
-Result Remote::push(
+Result Remote::pushRef(
   Callbacks *callbacks,
   const Reference &src,
   const QString &dst,
@@ -661,7 +663,7 @@ void Remote::log(const QString &text)
     return;
 
   QString time = QTime::currentTime().toString(Qt::ISODateWithMs);
-  QTextStream(&file) << time << " - " << text << endl;
+  QTextStream(&file) << time << " - " << text << Qt::endl;
 }
 
 } // namespace git

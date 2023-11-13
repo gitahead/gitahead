@@ -6,7 +6,7 @@ add_library(loglib
 )
 
 target_link_libraries(loglib
-  Qt5::Widgets
+  Qt6::Widgets
 )
 
 set_target_properties(loglib PROPERTIES

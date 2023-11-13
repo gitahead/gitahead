@@ -53,7 +53,7 @@ public:
 
   Diff();
 
-  bool isValid() const { return d; }
+  bool isValid() const { return !d.isNull(); }
   explicit operator bool() const { return isValid(); }
 
   bool isConflicted() const;

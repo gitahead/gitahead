@@ -11,8 +11,8 @@
 #include "GenericLexer.h"
 #include <QDate>
 #include <QMap>
+#include <QRegularExpression>
 #include <QSet>
-#include <QRegExp>
 
 namespace {
 
@@ -109,9 +109,11 @@ public:
 
   QList<git::Commit> commits(const Index *index) const override
   {
-    QRegExp re(mTerm.text, Qt::CaseInsensitive, QRegExp::Wildcard);
+    QRegularExpression re(
+      QRegularExpression::wildcardToRegularExpression(mTerm.text),
+      QRegularExpression::CaseInsensitiveOption);
     Index::Predicate pred = [re](const QByteArray &word) {
-      return re.exactMatch(word);
+      return re.match(word).hasMatch();
     };
 
     return index->commits(index->postings(pred, mTerm.field));
@@ -219,7 +221,7 @@ public:
     QList<git::Commit> commits = mLhs->commits(index);
     if (mKind == And) {
       // Remove commits that don't match the right hand side.
-      QSet<git::Commit> set = QSet<git::Commit>::fromList(rhs);
+      QSet<git::Commit> set(rhs.constBegin(), rhs.constEnd());
       QMutableListIterator<git::Commit> it(commits);
       while (it.hasNext()) {
         if (!set.contains(it.next()))
@@ -227,7 +229,7 @@ public:
       }
     } else {
       // Add commits that aren't already in the result set.
-      QSet<git::Commit> set = QSet<git::Commit>::fromList(commits);
+      QSet<git::Commit> set(commits.constBegin(), commits.constEnd());
       foreach (const git::Commit &commit, rhs) {
         if (!set.contains(commit))
           commits.append(commit);
@@ -254,9 +256,11 @@ public:
   {
     QByteArray term = mTerm.text.toUtf8();
     QByteArray prefix = term.endsWith('/') ? term : term + '/';
-    QRegExp re(mTerm.text, Qt::CaseInsensitive, QRegExp::Wildcard);
+    QRegularExpression re(
+      QRegularExpression::wildcardToRegularExpression(mTerm.text),
+      QRegularExpression::CaseInsensitiveOption);
     Index::Predicate pred = [prefix, re](const QByteArray &word) {
-      return word.startsWith(prefix) || re.exactMatch(word);
+      return word.startsWith(prefix) || re.match(word).hasMatch();
     };
 
     return index->commits(index->postings(pred, Index::Path));

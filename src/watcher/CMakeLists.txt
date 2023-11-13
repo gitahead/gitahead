@@ -18,7 +18,7 @@ target_include_directories(watcher PRIVATE
 
 target_link_libraries(watcher
   git
-  Qt5::Core
+  Qt6::Core
   ${WATCHER_IMPL_LIBS}
 )
 

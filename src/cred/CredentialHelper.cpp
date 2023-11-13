@@ -74,5 +74,5 @@ void CredentialHelper::log(const QString &text)
     return;
 
   QString time = QTime::currentTime().toString(Qt::ISODateWithMs);
-  QTextStream(&file) << time << " - " << text << endl;
+  QTextStream(&file) << time << " - " << text << Qt::endl;
 }

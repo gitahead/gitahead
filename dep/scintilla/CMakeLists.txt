@@ -57,7 +57,7 @@ target_include_directories(scintilla
 )
 
 target_link_libraries(scintilla
-  Qt5::Widgets
+  Qt6::Widgets
 )
 
 set_target_properties(scintilla PROPERTIES

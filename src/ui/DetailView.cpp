@@ -25,6 +25,7 @@
 #include "git/Signature.h"
 #include "git/TagRef.h"
 #include <QAbstractTextDocumentLayout>
+#include <QActionGroup>
 #include <QApplication>
 #include <QClipboard>
 #include <QCryptographicHash>
@@ -135,7 +136,9 @@ public:
     mDate = new QLabel(this);
     mDate->setTextInteractionFlags(kTextFlags);
 
-    mSpacing = style()->pixelMetric(QStyle::PM_DefaultLayoutSpacing);
+    QStyle *style = this->style();
+    mVerticalSpacing = style->pixelMetric(QStyle::PM_LayoutVerticalSpacing);
+    mHorizontalSpacing = style->pixelMetric(QStyle::PM_LayoutHorizontalSpacing);
   }
 
   void moveEvent(QMoveEvent *event) override
@@ -152,7 +155,7 @@ public:
   {
     QSize date = mDate->sizeHint();
     QSize author = mAuthor->sizeHint();
-    int width = author.width() + date.width() + mSpacing;
+    int width = author.width() + date.width() + mHorizontalSpacing;
     return QSize(width, qMax(author.height(), date.height()));
   }
 
@@ -171,7 +174,7 @@ public:
     int date = mDate->sizeHint().height();
     int author = mAuthor->sizeHint().height();
     bool wrapped = (width < sizeHint().width());
-    return wrapped ? (author + date + mSpacing) : qMax(author, date);
+    return wrapped ? (author + date + mHorizontalSpacing) : qMax(author, date);
   }
 
   void setAuthor(const QString &author)
@@ -195,14 +198,15 @@ private:
 
     bool wrapped = (width() < sizeHint().width());
     int x = wrapped ? 0 : width() - mDate->width();
-    int y = wrapped ? mAuthor->height() + mSpacing : 0;
+    int y = wrapped ? mAuthor->height() + mVerticalSpacing : 0;
     mDate->move(x, y);
   }
 
   QLabel *mAuthor;
   QLabel *mDate;
 
-  int mSpacing;
+  int mVerticalSpacing;
+  int mHorizontalSpacing;
 };
 
 class CommitDetail : public QFrame
@@ -303,7 +307,7 @@ public:
     // Compute description asynchronously.
     if (commits.size() == 1)
       mWatcher.setFuture(
-        QtConcurrent::run(commits.first(), &git::Commit::description));
+        QtConcurrent::run(&git::Commit::description, commits.first()));
   }
 
   void setCommits(const QList<git::Commit> &commits)
@@ -341,10 +345,11 @@ public:
       mAuthorDate->setAuthor(list.join(", "));
 
       // Set date range.
+      QLocale locale;
       QDate lastDate = last.committer().date().date();
       QDate firstDate = first.committer().date().date();
-      QString lastDateStr = lastDate.toString(Qt::DefaultLocaleShortDate);
-      QString firstDateStr = firstDate.toString(Qt::DefaultLocaleShortDate);
+      QString lastDateStr = locale.toString(lastDate, QLocale::ShortFormat);
+      QString firstDateStr = locale.toString(firstDate, QLocale::ShortFormat);
       QString dateStr = (lastDate == firstDate) ? lastDateStr :
         kDateRangeFmt.arg(lastDateStr, firstDateStr);
       mAuthorDate->setDate(brightText(dateStr));
@@ -378,8 +383,9 @@ public:
     git::Commit commit = commits.first();
     git::Signature author = commit.author();
     QDateTime date = commit.committer().date();
+    QString dateStr = QLocale().toString(date, QLocale::LongFormat);
     mHash->setText(brightText(tr("Id:")) + " " + commit.shortId());
-    mAuthorDate->setDate(brightText(date.toString(Qt::DefaultLocaleLongDate)));
+    mAuthorDate->setDate(brightText(dateStr));
     mAuthorDate->setAuthor(kAuthorFmt.arg(author.name(), author.email()));
 
     QStringList parents;
@@ -731,24 +737,23 @@ public:
       userDict.close();
     }
 
-    // Find installed Dictionaries.
+    // Find installed dictionaries.
     QDir dictDir = Settings::dictionariesDir();
-    QStringList dictNameList = dictDir.entryList({"*.dic"},
-                                                 QDir::Files,
-                                                 QDir::Name);
+    QStringList dictNameList =
+      dictDir.entryList({"*.dic"}, QDir::Files, QDir::Name);
     dictNameList.replaceInStrings(".dic", "");
 
     // Spell check language menu actions.
     bool selected = false;
-    QList<QAction*> actionList;
+    QList<QAction *> actionList;
     foreach (const QString &dict, dictNameList) {
       QLocale locale(dict);
 
       // Convert language_COUNTRY format from dictionary filename to string
       QString language = QLocale::languageToString(locale.language());
-      QString country = QLocale::countryToString(locale.country());
-      QString text;
+      QString country = QLocale::territoryToString(locale.territory());
 
+      QString text;
       if (language != "C") {
         text = language;
         if (country != "Default")

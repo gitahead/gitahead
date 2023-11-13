@@ -29,7 +29,7 @@ inline QColor QColorFromCA(ColourDesired ca)
 
 inline QColor QColorFromCA(ColourAlpha ca)
 {
-	return QColor(ca.GetRed(), ca.GetGreen(), ca.GetBlue(), ca.GetAlpha());
+  return QColor(ca.GetRed(), ca.GetGreen(), ca.GetBlue(), ca.GetAlpha());
 }
 
 inline QRect QRectFromPRect(PRectangle pr)
@@ -47,7 +47,7 @@ inline PRectangle PRectFromQRect(QRect qr)
   return PRectangle(qr.x(), qr.y(), qr.x() + qr.width(), qr.y() + qr.height());
 }
 
-inline Point PointFromQPoint(QPoint qp)
+inline Point PointFromQPoint(QPointF qp)
 {
   return Point(qp.x(), qp.y());
 }
@@ -85,7 +85,7 @@ public:
     ColourDesired back) override;
   void AlphaRectangle(PRectangle rc, int corner, ColourDesired fill,
     int alphaFill, ColourDesired outline, int alphaOutline, int flags) override;
-	void GradientRectangle(PRectangle rc,
+  void GradientRectangle(PRectangle rc,
     const std::vector<ColourStop> &stops, GradientOptions options) override;
   void DrawRGBAImage(PRectangle rc, int width, int height,
     const unsigned char *pixelsImage) override;

@@ -85,7 +85,7 @@ AboutDialog::AboutDialog(QWidget *parent)
 
   QString revision = GITAHEAD_BUILD_REVISION;
   QDateTime dateTime = QDateTime::fromString(GITAHEAD_BUILD_DATE, Qt::ISODate);
-  QString date = dateTime.date().toString(Qt::DefaultLocaleLongDate);
+  QString date = QLocale().toString(dateTime.date(), QLocale::LongFormat);
   QString text = kTextFmt.arg(name, version, date, revision, kUrl, kEmail);
   QLabel *label = new QLabel(text, this);
   label->setWordWrap(true);

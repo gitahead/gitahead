@@ -11,13 +11,14 @@
 #include "ConfFile.h"
 #include <QCoreApplication>
 #include <QDir>
+#include <QRegularExpression>
 #include <QSettings>
 #include <QStandardPaths>
 
 #ifdef Q_OS_WIN
-#define CS Qt::CaseInsensitive
+#define CS QRegularExpression::CaseInsensitiveOption
 #else
-#define CS Qt::CaseSensitive
+#define CS QRegularExpression::NoPatternOption
 #endif
 
 namespace {
@@ -28,7 +29,7 @@ const QString kLastPathKey = "lastpath";
 // Look up variant at key relative to root.
 QVariant lookup(const QVariantMap &root, const QString &key)
 {
-  QStringList list = key.split("/", QString::SkipEmptyParts);
+  QStringList list = key.split("/", Qt::SkipEmptyParts);
   if (list.isEmpty())
     return root;
 
@@ -161,8 +162,9 @@ QString Settings::lexer(const QString &filename)
     QVariantMap map = lexers.value(key).toMap();
     if (map.contains("patterns")) {
       foreach (QString pattern, map.value("patterns").toString().split(",")) {
-        QRegExp regExp(pattern, CS, QRegExp::Wildcard);
-        if (regExp.exactMatch(name))
+        QRegularExpression re(
+          QRegularExpression::wildcardToRegularExpression(pattern), CS);
+        if (re.match(name).hasMatch())
           return key;
       }
     }

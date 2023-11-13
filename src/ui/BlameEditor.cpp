@@ -25,7 +25,6 @@
 #include <QSaveFile>
 #include <QShortcut>
 #include <QSplitter>
-#include <QTextStream>
 #include <QVBoxLayout>
 #include <QtConcurrent>
 
@@ -168,7 +167,7 @@ bool BlameEditor::load(
   if (mRepo.isValid() && !content.isEmpty()) {
     mMargin->startBlame(name);
     mBlame.setFuture(QtConcurrent::run(
-      mRepo, &git::Repository::blame, name, commit, mCallbacks.data()));
+      &git::Repository::blame, mRepo, name, commit, mCallbacks.data()));
   }
 
   return true;
@@ -202,11 +201,8 @@ void BlameEditor::save()
   if (!file.open(QFile::WriteOnly))
     return;
 
-  QTextStream out(&file);
-  if (mRepo.isValid())
-    out.setCodec(mRepo.codec());
-
-  out << mEditor->text();
+  QString text = mEditor->text();
+  file.write(mRepo.isValid() ? mRepo.encode(text) : text.toUtf8());
   file.commit();
 
   mEditor->setSavePoint();

@@ -201,7 +201,7 @@ public:
 
   Result fetch(Callbacks *callbacks, bool tags = false, bool prune = false);
   Result push(Callbacks *callbacks, const QStringList &refspecs);
-  Result push(
+  Result pushRef(
     Callbacks *callbacks,
     const Reference &src,
     const QString &dst = QString(),

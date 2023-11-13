@@ -30,6 +30,7 @@
 #include "ui/MainWindow.h"
 #include "ui/RepoView.h"
 #include <QAction>
+#include <QActionGroup>
 #include <QCheckBox>
 #include <QDialogButtonBox>
 #include <QFormLayout>
@@ -517,7 +518,7 @@ public:
       watcher->deleteLater();
     });
 
-    watcher->setFuture(QtConcurrent::run(repo, &git::Repository::lfsTracked));
+    watcher->setFuture(QtConcurrent::run(&git::Repository::lfsTracked, repo));
 
     Footer *footer = new Footer(list);
     connect(footer, &Footer::plusClicked, [this, repo, model] {

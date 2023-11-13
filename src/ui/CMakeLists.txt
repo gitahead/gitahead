@@ -61,9 +61,11 @@ target_link_libraries(ui
   tools
   update
   watcher
-  Qt5::Concurrent
-  Qt5::Network
-  Qt5::Widgets
+  Qt6::Concurrent
+  Qt6::Core
+  Qt6::Core5Compat
+  Qt6::Network
+  Qt6::Widgets
 )
 
 set_target_properties(ui PROPERTIES

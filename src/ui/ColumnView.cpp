@@ -17,6 +17,7 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QVBoxLayout>
+#include <QWindow>
 
 #ifdef Q_OS_WIN
 #define ICON_SIZE 48
@@ -83,8 +84,9 @@ public:
     }
 
     QWindow *win = window()->windowHandle();
+    qreal dpr = win ? win->devicePixelRatio() : 1.0;
     QIcon icon = index.data(Qt::DecorationRole).value<QIcon>();
-    mIcon->setPixmap(icon.pixmap(win, QSize(ICON_SIZE, ICON_SIZE)));
+    mIcon->setPixmap(icon.pixmap(QSize(ICON_SIZE, ICON_SIZE), dpr));
 
     mName->setText(kNameFmt.arg(index.data(Qt::DisplayRole).toString()));
 
@@ -175,7 +177,7 @@ public:
       // Add extra space.
       opt.rect.adjust(0, 0, -3, 0);
 
-      for (int i = 0; i < status.count(); ++i) {
+      for (int i = 0; i < status.length(); ++i) {
         int x = opt.rect.x() + opt.rect.width();
         int y = opt.rect.y() + (opt.rect.height() / 2);
         QRect rect(x - width, y - (height / 2), width, height);
@@ -223,8 +225,8 @@ bool ColumnView::eventFilter(QObject *obj, QEvent *event)
 {
   if (event->type() == QEvent::MouseButtonPress) {
     QWidget *columnViewport = static_cast<QWidget *>(obj);
-    QPoint globalPos = static_cast<QMouseEvent *>(event)->globalPos();
-    QModelIndex index = indexAt(viewport()->mapFromGlobal(globalPos));
+    QPointF pos = static_cast<QMouseEvent *>(event)->globalPosition();
+    QModelIndex index = indexAt(viewport()->mapFromGlobal(pos).toPoint());
     if (!columnViewport->hasFocus() && index.row() < 0) {
       columnViewport->setFocus();
       selectionModel()->clearSelection();

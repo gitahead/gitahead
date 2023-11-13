@@ -377,7 +377,7 @@ public:
 
         return QVariant(Qt::AlignHCenter | Qt::AlignVCenter);
 
-      case Qt::BackgroundColorRole:
+      case Qt::BackgroundRole:
         if (!status) {
           if (row.commit.id() == mOursId)
             return QColor(Application::theme()->diff(Theme::Diff::Ours));
@@ -843,10 +843,11 @@ public:
       const QFontMetrics &fm = opt.fontMetrics;
       QRect star = rect;
 
+      QLocale locale;
       QDateTime date = commit.committer().date().toLocalTime();
       QString timestamp = (date.date() == QDate::currentDate()) ?
-        date.time().toString(Qt::DefaultLocaleShortDate) :
-        date.date().toString(Qt::DefaultLocaleShortDate);
+        locale.toString(date.time(), QLocale::ShortFormat) :
+        locale.toString(date.date(), QLocale::ShortFormat);
       int timestampWidth = fm.horizontalAdvance(timestamp);
 
       if (compact) {
@@ -1827,10 +1828,12 @@ bool CommitList::isDecoration(const QModelIndex &index, const QPoint &pos)
   if (!index.isValid())
     return false;
 
+  QStyleOptionViewItem option;
+  initViewItemOption(&option);
+  option.rect = visualRect(index);
+
   CommitDelegate *delegate = static_cast<CommitDelegate *>(itemDelegate());
-  QStyleOptionViewItem options = viewOptions();
-  options.rect = visualRect(index);
-  return delegate->decorationRect(options, index).contains(pos);
+  return delegate->decorationRect(option, index).contains(pos);
 }
 
 bool CommitList::isStar(const QModelIndex &index, const QPoint &pos)
@@ -1838,10 +1841,12 @@ bool CommitList::isStar(const QModelIndex &index, const QPoint &pos)
   if (!index.isValid() || !index.data(CommitRole).isValid())
     return false;
 
+  QStyleOptionViewItem option;
+  initViewItemOption(&option);
+  option.rect = visualRect(index);
+
   CommitDelegate *delegate = static_cast<CommitDelegate *>(itemDelegate());
-  QStyleOptionViewItem options = viewOptions();
-  options.rect = visualRect(index);
-  return delegate->starRect(options, index).contains(pos);
+  return delegate->starRect(option, index).contains(pos);
 }
 
 void CommitList::saveDiff(const QString &path) const

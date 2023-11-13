@@ -18,6 +18,7 @@
 #include <QHeaderView>
 #include <QMimeData>
 #include <QMouseEvent>
+#include <QRegularExpression>
 
 namespace {
 
@@ -101,8 +102,9 @@ void LogView::copy()
     if (this->model()->hasChildren(index))
       prefix += isExpanded(index) ? "[-]" : "[+]";
 
+    QRegularExpression re("<[^>]*>");
     QString text = index.data().toString();
-    plainText += QString("%1 %2\n").arg(prefix, text.remove(QRegExp("<[^>]*>")));
+    plainText += QString("%1 %2\n").arg(prefix, text.remove(re));
     richText += QString("%1 %2<br>").arg(prefix, text);
   }
 
@@ -181,10 +183,12 @@ QString LogView::linkAt(const QModelIndex &index, const QPoint &pos)
   if (!index.isValid())
     return QString();
 
+  QStyleOptionViewItem option;
+  initViewItemOption(&option);
+  option.rect = visualRect(index);
+
   LogDelegate *delegate = static_cast<LogDelegate *>(itemDelegate());
-  QStyleOptionViewItem options = viewOptions();
-  options.rect = visualRect(index);
-  QPoint docPos = pos - delegate->documentPosition(options, index);
+  QPoint docPos = pos - delegate->documentPosition(option, index);
   return delegate->document(index)->documentLayout()->anchorAt(docPos);
 }
 
@@ -193,8 +197,10 @@ bool LogView::isDecoration(const QModelIndex &index, const QPoint &pos)
   if (!index.isValid())
     return false;
 
+  QStyleOptionViewItem option;
+  initViewItemOption(&option);
+  option.rect = visualRect(index);
+
   LogDelegate *delegate = static_cast<LogDelegate *>(itemDelegate());
-  QStyleOptionViewItem options = viewOptions();
-  options.rect = visualRect(index);
-  return delegate->decorationRect(options, index).contains(pos);
+  return delegate->decorationRect(option, index).contains(pos);
 }

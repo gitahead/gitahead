@@ -6,7 +6,7 @@ target_link_libraries(plugins
   editor
   git
   lua
-  Qt5::Core
+  Qt6::Core
 )
 
 set_target_properties(plugins PROPERTIES

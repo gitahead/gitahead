@@ -35,7 +35,7 @@ QString Signature::email() const
 QDateTime Signature::date() const
 {
   int offset = d->when.offset * 60; // Convert from minutes to seconds.
-  return QDateTime::fromTime_t(d->when.time, Qt::OffsetFromUTC, offset);
+  return QDateTime::fromSecsSinceEpoch(d->when.time, Qt::OffsetFromUTC, offset);
 }
 
 QString Signature::initials() const

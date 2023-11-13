@@ -557,7 +557,7 @@ Plugin::Plugin(
 
   // Print error messages to the console.
   connect(this, &Plugin::error, [](const QString &msg) {
-    QTextStream(stderr) << "plugin error: " << msg << endl;
+    QTextStream(stderr) << "plugin error: " << msg << Qt::endl;
   });
 
   // Load libraries.

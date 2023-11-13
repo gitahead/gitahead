@@ -55,9 +55,9 @@
 #include <QTableWidget>
 #include <QTextEdit>
 #include <QTextLayout>
-#include <QTextStream>
 #include <QToolButton>
 #include <QVBoxLayout>
+#include <QWindow>
 #include <QtMath>
 
 namespace {
@@ -166,7 +166,7 @@ public:
     QTextCharFormat timestamp;
     timestamp.setForeground(theme->remoteComment(Theme::Comment::Timestamp));
     cursor.setCharFormat(timestamp);
-    cursor.insertText(date.toString(Qt::DefaultLocaleLongDate));
+    cursor.insertText(QLocale().toString(date, QLocale::LongFormat));
 
     QTextBlockFormat indent;
     indent.setLeftMargin(fontMetrics().horizontalAdvance(' ') * kIndent);
@@ -585,7 +585,9 @@ private:
     QFileIconProvider provider;
     QString path = mPatch.repo().workdir().filePath(mPatch.name());
     QIcon icon = provider.icon(QFileInfo(path));
-    return icon.pixmap(windowHandle(), QSize(64, 64));
+
+    QWindow *window = windowHandle();
+    return icon.pixmap({64, 64}, window ? window->devicePixelRatio() : 1.0);
   }
 
   QVBoxLayout *imageLayout(const QPixmap pixmap, int size)
@@ -869,9 +871,7 @@ public:
         if (!file.open(QFile::WriteOnly))
           return;
 
-        QTextStream out(&file);
-        out.setCodec(repo.codec());
-        out << editor.text();
+        file.write(repo.encode(editor.text()));
         file.commit();
 
         mPatch.setConflictResolution(mIndex, git::Patch::Unresolved);
@@ -990,9 +990,7 @@ public:
           if (!file.open(QFile::WriteOnly))
             return;
 
-          QTextStream out(&file);
-          out.setCodec(repo.codec());
-          out << editor.text();
+          file.write(repo.encode(editor.text()));
           file.commit();
 
           table->hide();
@@ -1215,6 +1213,7 @@ private:
         int margin = QFontMetrics(font).horizontalAdvance(' ') * kIndent * 2;
         int width = mEditor->textRectangle().width() - margin - 50;
 
+        QLocale locale;
         foreach (const QDateTime &key, it->keys()) {
           QStringList paragraphs;
           Account::Comment comment = it->value(key);
@@ -1243,7 +1242,7 @@ private:
           }
 
           QString author = comment.author;
-          QString time = key.toString(Qt::DefaultLocaleLongDate);
+          QString time = locale.toString(key, QLocale::LongFormat);
           QString body = paragraphs.join('\n');
           QString text = author + ' ' + time + '\n' + body;
           QByteArray styles =
@@ -2212,7 +2211,7 @@ bool DiffView::scrollToFile(int index)
 void DiffView::setFilter(const QStringList &paths)
 {
   fetchAll();
-  QSet<QString> set = QSet<QString>::fromList(paths);
+  QSet<QString> set(paths.constBegin(), paths.constEnd());
   foreach (QWidget *widget, mFiles) {
     FileWidget *file = static_cast<FileWidget *>(widget);
     file->setVisible(set.isEmpty() || set.contains(file->name()));
