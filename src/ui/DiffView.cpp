@@ -2165,6 +2165,8 @@ void DiffView::setDiff(const git::Diff &diff)
   if (canFetchMore())
     fetchMore();
 
+  QTimer::singleShot(0, this, &DiffView::checkFetchNeeded);
+
   // Load patches on demand.
   QScrollBar *scrollBar = verticalScrollBar();
   mConnections.append(
@@ -2329,6 +2331,14 @@ void DiffView::fetchAll(int index)
   // Load all patches up to and including index.
   while ((index < 0 || mFiles.size() <= index) && canFetchMore())
     fetchMore();
+}
+
+void DiffView::checkFetchNeeded()
+{
+  if (canFetchMore() && verticalScrollBar()->maximum() == 0) {
+    fetchMore();
+    QTimer::singleShot(0, this, &DiffView::checkFetchNeeded);
+  }
 }
 
 #include "DiffView.moc"

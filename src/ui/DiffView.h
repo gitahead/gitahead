@@ -55,6 +55,7 @@ private:
   bool canFetchMore();
   void fetchMore();
   void fetchAll(int index = -1);
+  void checkFetchNeeded();
 
   git::Diff mDiff;
   QMap<QString,git::Patch> mStagedPatches;
