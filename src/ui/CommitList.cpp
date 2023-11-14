@@ -205,8 +205,9 @@ public:
     // Reset state.
     mParents.clear();
     mRows.clear();
-    mOursId = 0;
-    mTheirsId = 0;
+
+    mOursId = git::Id();
+    mTheirsId = git::Id();
 
     // Update status row.
     bool head = (!mRef.isValid() || mRef.isHead());
@@ -274,12 +275,12 @@ public:
       resetWalker();
   }
 
-  bool canFetchMore(const QModelIndex &parent) const
+  bool canFetchMore(const QModelIndex &parent) const override
   {
     return mWalker.isValid();
   }
 
-  void fetchMore(const QModelIndex &parent)
+  void fetchMore(const QModelIndex &parent) override
   {
     // Load commits.
     int i = 0;
@@ -345,12 +346,14 @@ public:
       mWalker = git::RevWalk();
   }
 
-  int rowCount(const QModelIndex &parent = QModelIndex()) const
+  int rowCount(const QModelIndex &parent = QModelIndex()) const override
   {
     return mRows.size();
   }
 
-  QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const
+  QVariant data(
+    const QModelIndex &index,
+    int role = Qt::DisplayRole) const override
   {
     const Row &row = mRows.at(index.row());
     bool status = !row.commit.isValid();
