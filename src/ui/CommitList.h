@@ -69,6 +69,10 @@ protected:
   void mouseReleaseEvent(QMouseEvent *event) override;
   void leaveEvent(QEvent *) override;
 
+  QItemSelectionModel::SelectionFlags selectionCommand(
+    const QModelIndex &index,
+    const QEvent *event = nullptr) const override;
+
 private:
   void storeSelection();
   void restoreSelection();

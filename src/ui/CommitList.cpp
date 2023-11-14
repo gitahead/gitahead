@@ -1145,28 +1145,6 @@ private:
   mutable int mMaxShortIdWidth = -1;
 };
 
-class SelectionModel : public QItemSelectionModel
-{
-public:
-  SelectionModel(QAbstractItemModel *model)
-    : QItemSelectionModel(model)
-  {}
-
-  void select(
-    const QItemSelection &selection,
-    QItemSelectionModel::SelectionFlags command)
-  {
-    if ((command == QItemSelectionModel::Select ||
-         command == QItemSelectionModel::SelectCurrent ||
-         command == (QItemSelectionModel::Current |
-                     QItemSelectionModel::ClearAndSelect)) &&
-        (selectedIndexes().size() >= 2 || selection.indexes().size() > 1))
-          return;
-
-    QItemSelectionModel::select(selection, command);
-  }
-};
-
 } // anon. namespace
 
 CommitList::CommitList(Index *index, QWidget *parent)
@@ -1182,7 +1160,7 @@ CommitList::CommitList(Index *index, QWidget *parent)
   setMouseTracking(true);
   setUniformItemSizes(true);
   setAttribute(Qt::WA_MacShowFocusRect, false);
-  setSelectionMode(QAbstractItemView::ExtendedSelection);
+  setSelectionMode(QAbstractItemView::SingleSelection);
 
   setModel(mModel);
   setItemDelegate(new CommitDelegate(repo, this));
@@ -1417,16 +1395,11 @@ void CommitList::setModel(QAbstractItemModel *model)
 
   storeSelection();
 
-  // Destroy the previous selection model.
-  delete selectionModel();
-
+  QItemSelectionModel *sm = selectionModel();
   QListView::setModel(model);
+  delete sm;
 
-  // Destroy the selection model created by Qt.
-  delete selectionModel();
-
-  SelectionModel *selectionModel = new SelectionModel(model);
-  connect(selectionModel, &QItemSelectionModel::selectionChanged,
+  connect(selectionModel(), &QItemSelectionModel::selectionChanged,
   [this](const QItemSelection &selected, const QItemSelection &deselected) {
     // Update the index before each selected/deselected range.
     foreach (const QItemSelectionRange &range, selected + deselected) {
@@ -1436,8 +1409,6 @@ void CommitList::setModel(QAbstractItemModel *model)
 
     notifySelectionChanged();
   });
-
-  setSelectionModel(selectionModel);
 
   restoreSelection();
 }
@@ -1717,6 +1688,45 @@ void CommitList::leaveEvent(QEvent *event)
 {
   viewport()->update();
   QListView::leaveEvent(event);
+}
+
+QItemSelectionModel::SelectionFlags CommitList::selectionCommand(
+  const QModelIndex &index,
+  const QEvent *event) const
+{
+  if (event) {
+    switch (event->type()) {
+      case QEvent::MouseMove:
+      case QEvent::MouseButtonRelease:
+        return QItemSelectionModel::NoUpdate;
+
+      case QEvent::MouseButtonPress: {
+        Qt::KeyboardModifiers modifiers =
+          static_cast<const QInputEvent *>(event)->modifiers();
+        if (modifiers & Qt::ControlModifier) {
+          int count = selectedIndexes().count();
+          if (selectionModel()->isSelected(index)) {
+            if (count == 1)
+              return QItemSelectionModel::NoUpdate;
+            if (count == 2)
+              return QItemSelectionModel::Toggle;
+          } else {
+            if (count == 1)
+              return QItemSelectionModel::Toggle;
+            if (count == 2)
+              return QItemSelectionModel::NoUpdate;
+          }
+        }
+
+        break;
+      }
+
+      default:
+        break;
+    }
+  }
+
+  return QListView::selectionCommand(index, event);
 }
 
 void CommitList::storeSelection()
