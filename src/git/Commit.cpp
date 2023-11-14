@@ -26,7 +26,6 @@
 #include <QJsonObject>
 #include <QRegularExpression>
 #include <QTextCodec>
-#include <QVector>
 
 namespace git {
 
@@ -265,8 +264,8 @@ bool Commit::revert() const
 
 bool Commit::reset(git_reset_t type, const QStringList &paths) const
 {
-  QVector<char *> rawPaths;
-  QVector<QByteArray> storage;
+  QList<char *> rawPaths;
+  QList<QByteArray> storage;
   git_checkout_options opts = GIT_CHECKOUT_OPTIONS_INIT;
   if (!paths.isEmpty()) {
     // Paths are assumed to be exact matches.

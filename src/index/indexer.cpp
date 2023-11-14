@@ -121,7 +121,7 @@ void log(QFile *out, const QString &fmt, const git::Id &id)
 
 struct Intermediate
 {
-  using TermMap = QHash<QByteArray,QVector<quint32>>;
+  using TermMap = QHash<QByteArray,QList<quint32>>;
   using FieldMap = QMap<quint8,TermMap>;
 
   git::Id id;

@@ -213,7 +213,7 @@ public:
     bool head = (!mRef.isValid() || mRef.isHead());
     bool valid = (mCleanStatus || !mStatus.isFinished() || status().isValid());
     if (head && valid && mPathspec.isEmpty()) {
-      QVector<Column> row;
+      QList<Column> row;
       if (mGraphVisible && mRef.isValid() && mStatus.isFinished()) {
         row.append({Segment(Bottom, kTaintedColor), Segment(Dot, QColor())});
         mParents.append(Parent(mRef.target(), nextColor(), true));
@@ -319,7 +319,7 @@ public:
       }
 
       // Add graph row.
-      QVector<Column> row;
+      QList<Column> row;
       if (mGraphVisible && mPathspec.isEmpty())
         row = columns(commit, parents, root);
 
@@ -473,12 +473,12 @@ private:
 
   struct Row
   {
-    Row(const git::Commit &commit, const QVector<Column> &columns)
+    Row(const git::Commit &commit, const QList<Column> &columns)
       : commit(commit), columns(columns)
     {}
 
     git::Commit commit;
-    QVector<Column> columns;
+    QList<Column> columns;
   };
 
   int indexOf(const git::Commit &commit) const
@@ -509,13 +509,13 @@ private:
 
   // The commit and parents parameters represent the current row.
   // The mParents member represents the next row after this one.
-  QVector<Column> columns(
+  QList<Column> columns(
     const git::Commit &commit,
     const QList<Parent> &parents,
     bool root)
   {
     int count = parents.size();
-    QVector<Column> columns(count);
+    QList<Column> columns(count);
 
     // Add incoming paths.
     int incoming = root ? count - 1 : count;

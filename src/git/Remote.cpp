@@ -25,7 +25,6 @@
 #include <QTextStream>
 #include <QTime>
 #include <QUrl>
-#include <QVector>
 
 namespace git {
 
@@ -548,8 +547,8 @@ Result Remote::push(Callbacks *callbacks, const QStringList &refspecs)
   QByteArray proxy = proxyUrl(url(), opts.proxy_opts.type);
   opts.proxy_opts.url = proxy;
 
-  QVector<char *> raw;
-  QVector<QByteArray> storage;
+  QList<char *> raw;
+  QList<QByteArray> storage;
   foreach (const QString &refspec, refspecs) {
     storage.append(refspec.toUtf8());
     raw.append(storage.last().data());

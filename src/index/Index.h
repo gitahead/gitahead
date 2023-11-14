@@ -14,7 +14,6 @@
 #include "git/Repository.h"
 #include <QList>
 #include <QObject>
-#include <QVector>
 #include <functional>
 
 namespace git {
@@ -83,12 +82,12 @@ public:
   {
     quint32 id;
     quint8 field;
-    QVector<quint32> positions;
+    QList<quint32> positions;
   };
 
   using IdList = QList<git::Id>;
   using Dictionary = QList<Word>;
-  using PostingMap = QMap<QByteArray,QVector<Index::Posting>>;
+  using PostingMap = QMap<QByteArray,QList<Index::Posting>>;
   using Predicate = std::function<bool(const QByteArray &)>;
 
   Index(const git::Repository &repo, QObject *parent = nullptr);
@@ -129,8 +128,8 @@ public:
   static void writeVInt(QDataStream &out, quint32 arg);
 
   // positions
-  static void readPositions(QDataStream &in, QVector<quint32> &positions);
-  static void writePositions(QDataStream &out, const QVector<quint32> &positions);
+  static void readPositions(QDataStream &in, QList<quint32> &positions);
+  static void writePositions(QDataStream &out, const QList<quint32> &positions);
 
   // Enable logging. The log is written to the index dir.
   static bool isLoggingEnabled();

@@ -50,7 +50,6 @@
 #include <QSaveFile>
 #include <QStandardPaths>
 #include <QTextCodec>
-#include <QVector>
 
 #ifdef Q_OS_UNIX
 #include <pwd.h>
@@ -583,7 +582,7 @@ Commit Repository::commit(
     return Commit();
 
   // Lookup the parent commit.
-  QVector<const git_commit *> parents;
+  QList<const git_commit *> parents;
   if (Reference ref = head()) {
     if (Commit commit = ref.target())
       parents.append(commit);
@@ -914,8 +913,8 @@ bool Repository::checkout(
     opts.progress_payload = callbacks;
   }
 
-  QVector<char *> rawPaths;
-  QVector<QByteArray> storage;
+  QList<char *> rawPaths;
+  QList<QByteArray> storage;
   if (!paths.isEmpty()) {
     // Paths are assumed to be exact matches.
     opts.checkout_strategy |= GIT_CHECKOUT_DISABLE_PATHSPEC_MATCH;

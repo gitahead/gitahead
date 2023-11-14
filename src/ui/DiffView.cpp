@@ -1847,7 +1847,6 @@ public:
 
     DisclosureButton *disclosureButton = mHeader->disclosureButton();
     connect(disclosureButton, &DisclosureButton::toggled, [this](bool visible) {
-
       if (mHeader->lfsButton() && !visible) {
         mHunks.first()->setVisible(false);
         if (!mImages.isEmpty())

@@ -178,7 +178,7 @@ bool Index::write(PostingMap map)
   Dictionary::const_iterator it = dict.begin();
   while (newIt != newEnd || it != end) {
     QByteArray key;
-    QVector<Posting> postings;
+    QList<Posting> postings;
     if (it == end || (newIt != newEnd && newIt.key() < it->key)) {
       // Add new entry.
       key = newIt.key();
@@ -511,7 +511,7 @@ void Index::writeVInt(QDataStream &out, quint32 arg)
 }
 
 // Write deltas to minimize bytes per position.
-void Index::readPositions(QDataStream &in, QVector<quint32> &positions)
+void Index::readPositions(QDataStream &in, QList<quint32> &positions)
 {
   quint32 prev = 0;
   quint32 count = readVInt(in);
@@ -524,7 +524,7 @@ void Index::readPositions(QDataStream &in, QVector<quint32> &positions)
   }
 }
 
-void Index::writePositions(QDataStream &out, const QVector<quint32> &positions)
+void Index::writePositions(QDataStream &out, const QList<quint32> &positions)
 {
   quint32 prev = 0;
   writeVInt(out, positions.size());
