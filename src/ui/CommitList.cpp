@@ -1732,6 +1732,9 @@ QItemSelectionModel::SelectionFlags CommitList::selectionCommand(
 void CommitList::storeSelection()
 {
   mSelectedRange = selectedRange();
+
+  if (QItemSelectionModel *sm = selectionModel())
+    sm->clear();
 }
 
 void CommitList::restoreSelection()
