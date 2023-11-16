@@ -298,6 +298,7 @@ public:
       foreach (git::Branch branch, branches) {
         Q_ASSERT(!branch.isHead());
         DeleteBranchDialog dialog(branch, this);
+        dialog.setAttribute(Qt::WA_DeleteOnClose, false);
         dialog.exec();
       }
     });

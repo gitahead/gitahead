@@ -30,6 +30,8 @@ DeleteBranchDialog::DeleteBranchDialog(
   QWidget *parent)
   : QMessageBox(parent)
 {
+  setAttribute(Qt::WA_DeleteOnClose);
+
   QString text = tr("Are you sure you want to delete local branch '%1'?");
   setWindowTitle(tr("Delete Branch?"));
   setText(text.arg(branch.name()));
@@ -92,4 +94,11 @@ DeleteBranchDialog::DeleteBranchDialog(
          "it may cause some commits to be lost."));
     setDefaultButton(QMessageBox::Cancel);
   }
+}
+
+void DeleteBranchDialog::open(const git::Branch &branch, QWidget *parent)
+{
+  Q_ASSERT(parent);
+  DeleteBranchDialog *dialog = new DeleteBranchDialog(branch, parent->window());
+  dialog->QDialog::open();
 }

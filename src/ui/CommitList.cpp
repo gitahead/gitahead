@@ -15,6 +15,8 @@
 #include "RepoView.h"
 #include "app/Application.h"
 #include "conf/Settings.h"
+#include "dialogs/DeleteBranchDialog.h"
+#include "dialogs/DeleteTagDialog.h"
 #include "dialogs/DiffFileDialog.h"
 #include "dialogs/MergeDialog.h"
 #include "git/Branch.h"
@@ -1513,17 +1515,17 @@ void CommitList::contextMenuEvent(QContextMenuEvent *event)
             separator = false;
           }
           menu.addAction(tr("Delete Tag %1").arg(ref.name()), [view, ref] {
-            view->promptToDeleteTag(ref);
+            DeleteTagDialog::open(ref, view);
           });
         }
         if (ref.isLocalBranch() &&
-           (view->repo().head().name() != ref.name())) {
+            (view->repo().head().name() != ref.name())) {
           if (separator) {
             menu.addSeparator();
             separator = false;
           }
           menu.addAction(tr("Delete Branch %1").arg(ref.name()), [view, ref] {
-            view->promptToDeleteBranch(ref);
+            DeleteBranchDialog::open(ref, view);
           });
         }
       }

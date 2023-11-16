@@ -21,7 +21,9 @@ class DeleteTagDialog : public QMessageBox
   Q_OBJECT
 
 public:
-  DeleteTagDialog(const git::TagRef &tag, QWidget *parent = nullptr);
+  DeleteTagDialog(const git::TagRef &tag, QWidget *parent);
+
+  static void open(const git::TagRef &tag, QWidget *parent);
 };
 
 #endif

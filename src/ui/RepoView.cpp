@@ -2093,13 +2093,6 @@ git::Branch RepoView::createBranch(
   return branch;
 }
 
-void RepoView::promptToDeleteBranch(const git::Reference &ref)
-{
-  DeleteBranchDialog *dialog = new DeleteBranchDialog(ref, this);
-  dialog->setAttribute(Qt::WA_DeleteOnClose);
-  dialog->open();
-}
-
 void RepoView::promptToStash()
 {
   // Prompt to edit stash commit message.
@@ -2201,13 +2194,6 @@ void RepoView::promptToAddTag(const git::Commit &commit)
       push(remote, tag);
   });
 
-  dialog->open();
-}
-
-void RepoView::promptToDeleteTag(const git::Reference &ref)
-{
-  DeleteTagDialog *dialog = new DeleteTagDialog(ref, this);
-  dialog->setAttribute(Qt::WA_DeleteOnClose);
   dialog->open();
 }
 

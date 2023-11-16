@@ -24,6 +24,8 @@ DeleteTagDialog::DeleteTagDialog(
   QWidget *parent)
   : QMessageBox(parent)
 {
+  setAttribute(Qt::WA_DeleteOnClose);
+
   QString text = tr("Are you sure you want to delete tag '%1'?");
   setWindowTitle(tr("Delete Tag?"));
   setText(text.arg(tag.name()));
@@ -82,4 +84,11 @@ DeleteTagDialog::DeleteTagDialog(
   });
 
   remove->setFocus();
+}
+
+void DeleteTagDialog::open(const git::TagRef &tag, QWidget *parent)
+{
+  Q_ASSERT(parent);
+  DeleteTagDialog *dialog = new DeleteTagDialog(tag, parent->window());
+  dialog->QDialog::open();
 }

@@ -512,19 +512,13 @@ void ReferenceView::contextMenuEvent(QContextMenuEvent *event)
   if (ref.isTag() || ref.isLocalBranch()) {
     QAction *remove = menu.addAction(tr("Delete"), [this, ref] {
       if (ref.isTag()) {
-        DeleteTagDialog *dialog = new DeleteTagDialog(ref, this);
-        dialog->setAttribute(Qt::WA_DeleteOnClose);
-        dialog->open();
-
+        DeleteTagDialog::open(ref, this);
       } else {
-        DeleteBranchDialog *dialog = new DeleteBranchDialog(ref, this);
-        dialog->setAttribute(Qt::WA_DeleteOnClose);
-        dialog->open();
+        DeleteBranchDialog::open(ref, this);
       }
     });
 
     remove->setEnabled(ref.isTag() || !ref.isHead());
-
   }
 
   if (ref.isTag()) {
