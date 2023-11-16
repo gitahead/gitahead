@@ -1158,7 +1158,11 @@ private:
       int oldLine = mPatch.lineNumber(mIndex, lidx, git::Diff::OldFile);
       int newLine = mPatch.lineNumber(mIndex, lidx, git::Diff::NewFile);
       lines << Line(origin, oldLine, newLine);
-      content += mPatch.lineContent(mIndex, lidx);
+
+      // FIXME: Allow user to load long lines?
+      QByteArray lineContent = mPatch.lineContent(mIndex, lidx);
+      lineContent.truncate(1024);
+      content += lineContent;
     }
 
     // Trim final line end.
@@ -1181,7 +1185,8 @@ private:
     }
 
     // Get comments for this file.
-    Account::FileComments comments = mView->comments().files.value(mPatch.name());
+    Account::FileComments comments =
+      mView->comments().files.value(mPatch.name());
 
     // Add markers and line numbers.
     int additions = 0;
@@ -1722,11 +1727,11 @@ public:
       }
 
       mDisclosureButton = new DisclosureButton(this);
-      mDisclosureButton->setToolTip(
-        mDisclosureButton->isChecked() ? FileWidget::tr("Collapse File") : FileWidget::tr("Expand File"));
+      mDisclosureButton->setToolTip(mDisclosureButton->isChecked() ?
+        FileWidget::tr("Collapse File") : FileWidget::tr("Expand File"));
       connect(mDisclosureButton, &DisclosureButton::toggled, [this] {
-        mDisclosureButton->setToolTip(
-          mDisclosureButton->isChecked() ? FileWidget::tr("Collapse File") : FileWidget::tr("Expand File"));
+        mDisclosureButton->setToolTip(mDisclosureButton->isChecked() ?
+          FileWidget::tr("Collapse File") : FileWidget::tr("Expand File"));
       });
       buttons->addWidget(mDisclosureButton);
 
@@ -1921,22 +1926,24 @@ public:
     }
 
     // Start hidden when the file is checked.
-    bool expand = (mHeader->check()->checkState() == Qt::Unchecked);
+    bool expanded = (mHeader->check()->checkState() == Qt::Unchecked);
+    bool enabled = true;
 
     if (Settings::instance()->value("collapse/added").toBool() == true &&
         patch.status() == GIT_DELTA_ADDED)
-      expand = false;
+      expanded = false;
 
     if (Settings::instance()->value("collapse/deleted").toBool() == true &&
         patch.status() == GIT_DELTA_DELETED)
-      expand = false;
+      expanded = false;
 
-    disclosureButton->setChecked(expand);
-  }
+    if (mHunks.isEmpty() && mImages.isEmpty()) {
+      expanded = false;
+      enabled = false;
+    }
 
-  bool isEmpty()
-  {
-    return (mHunks.isEmpty() && mImages.isEmpty());
+    disclosureButton->setChecked(expanded);
+    disclosureButton->setEnabled(enabled);
   }
 
   Header *header() const { return mHeader; }
@@ -2299,12 +2306,6 @@ void DiffView::fetchMore()
     layout->addWidget(file);
 
     mFiles.append(file);
-
-    if (file->isEmpty()) {
-      DisclosureButton *button = file->header()->disclosureButton();
-      button->setChecked(false);
-      button->setEnabled(false);
-    }
 
     // Respond to diagnostic signal.
     connect(file, &FileWidget::diagnosticAdded,
