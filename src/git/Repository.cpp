@@ -198,7 +198,7 @@ Id Repository::workdirId(const QString &path) const
 
 QString Repository::message() const
 {
-  git_buf buf = GIT_BUF_INIT_CONST(nullptr, 0);
+  git_buf buf = GIT_BUF_INIT;
   git_repository_message(&buf, d->repo);
   return QString::fromUtf8(buf.ptr, buf.size);
 }
@@ -595,7 +595,7 @@ Commit Repository::commit(
   // Create the commit.
   git_oid id;
   if (git_commit_create(
-        &id, d->repo, "HEAD", signature, signature, 0,
+        &id, d->repo, "HEAD", signature, signature, nullptr,
         message.toUtf8(), tree, parents.size(), parents.data()))
     return Commit();
 

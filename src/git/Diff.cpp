@@ -171,7 +171,7 @@ void Diff::setAllStaged(bool staged, bool yieldFocus)
 
 QByteArray Diff::toBuffer(git_diff_format_t format) const
 {
-  git_buf buf = GIT_BUF_INIT_CONST(nullptr, 0);
+  git_buf buf = GIT_BUF_INIT;
   if (git_diff_to_buf(&buf, d->diff, format))
     return QByteArray();
 

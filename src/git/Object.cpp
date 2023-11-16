@@ -44,7 +44,7 @@ Id Object::id() const
 
 QString Object::shortId() const
 {
-  git_buf buf = GIT_BUF_INIT_CONST(0,0);
+  git_buf buf = GIT_BUF_INIT;
   git_object_short_id(&buf, d.data());
   QByteArray result(buf.ptr, buf.size);
   git_buf_dispose(&buf);

@@ -24,11 +24,12 @@ public:
   bool isBinary() const;
   QByteArray content() const;
 
+  static bool isBinary(const QByteArray &data);
+
 private:
   Blob(git_blob *blob);
   operator git_blob *() const;
 
-  friend class Diff;
   friend class Patch;
   friend class Repository;
 };

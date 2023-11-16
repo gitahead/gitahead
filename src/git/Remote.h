@@ -17,7 +17,6 @@
 #include <QSet>
 #include <QSharedPointer>
 
-struct git_cred;
 struct git_oid;
 struct git_remote;
 struct git_indexer_progress;
@@ -171,9 +170,8 @@ public:
       const git_oid *b,
       void *payload);
 
-    static int url(
-      git_buf *out,
-      const char *url,
+    static int ready(
+      git_remote *remote,
       int direction,
       void *payload);
 

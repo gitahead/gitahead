@@ -19,7 +19,6 @@
 #include "git/Blame.h"
 #include "git/Blob.h"
 #include "git/Branch.h"
-#include "git/Buffer.h"
 #include "git/Commit.h"
 #include "git/FilterList.h"
 #include "git/Index.h"
@@ -1832,12 +1831,9 @@ public:
 
     bool binary = patch.isBinary();
     if (patch.isUntracked()) {
-      QFile dev(path);
-      if (dev.open(QFile::ReadOnly)) {
-        QByteArray content = dev.readAll();
-        git::Buffer buffer(content.constData(), content.length());
-        binary = buffer.isBinary();
-      }
+      QFile file(path);
+      if (file.open(QFile::ReadOnly))
+        binary = git::Blob::isBinary(file.readAll());
     }
 
     bool lfs = patch.isLfsPointer();

@@ -42,4 +42,9 @@ QByteArray Blob::content() const
   return QByteArray(content, git_blob_rawsize(*this));
 }
 
+bool Blob::isBinary(const QByteArray &data)
+{
+  return git_blob_data_is_binary(data.constData(), data.length());
+}
+
 } // namespace git

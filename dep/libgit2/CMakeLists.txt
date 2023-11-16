@@ -20,6 +20,6 @@ if(WIN32)
 endif()
 
 add_subdirectory(libgit2)
-target_include_directories(git2 INTERFACE
+target_include_directories(libgit2package INTERFACE
   ${CMAKE_CURRENT_SOURCE_DIR}/libgit2/include
 )

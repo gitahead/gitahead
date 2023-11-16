@@ -115,7 +115,10 @@ Id Submodule::workdirId() const
 int Submodule::status() const
 {
   unsigned int status = 0;
-  if (git_submodule_status(&status, d.data(), GIT_SUBMODULE_IGNORE_UNSPECIFIED))
+  const char *name = git_submodule_name(d.data());
+  git_repository *repo = git_submodule_owner(d.data());
+  if (git_submodule_status(
+        &status, repo, name, GIT_SUBMODULE_IGNORE_UNSPECIFIED))
     return -1;
 
   return status;
@@ -124,14 +127,12 @@ int Submodule::status() const
 Result Submodule::update(Remote::Callbacks *callbacks, bool init)
 {
   git_submodule_update_options opts = GIT_SUBMODULE_UPDATE_OPTIONS_INIT;
-  opts.fetch_opts.callbacks.connect = &Remote::Callbacks::connect;
-  opts.fetch_opts.callbacks.disconnect = &Remote::Callbacks::disconnect;
   opts.fetch_opts.callbacks.sideband_progress = &Remote::Callbacks::sideband;
   opts.fetch_opts.callbacks.credentials = &Remote::Callbacks::credentials;
   opts.fetch_opts.callbacks.certificate_check = &Remote::Callbacks::certificate;
   opts.fetch_opts.callbacks.transfer_progress = &Remote::Callbacks::transfer;
   opts.fetch_opts.callbacks.update_tips = &Remote::Callbacks::update;
-  opts.fetch_opts.callbacks.resolve_url = &Remote::Callbacks::url;
+  opts.fetch_opts.callbacks.remote_ready = &Remote::Callbacks::ready;
   opts.fetch_opts.callbacks.payload = callbacks;
 
   // Use a fake URL. Submodule update doesn't have a way to

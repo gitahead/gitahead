@@ -10,6 +10,7 @@
 #include "Filter.h"
 #include "Command.h"
 #include "Config.h"
+#include "git2/deprecated.h"
 #include "git2/errors.h"
 #include "git2/filter.h"
 #include "git2/repository.h"

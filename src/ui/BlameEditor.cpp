@@ -15,7 +15,6 @@
 #include "editor/TextEditor.h"
 #include "git/Blame.h"
 #include "git/Blob.h"
-#include "git/Buffer.h"
 #include "git/Commit.h"
 #include "git/Index.h"
 #include "git/Repository.h"
@@ -151,8 +150,7 @@ bool BlameEditor::load(
       return false;
 
     content = file.readAll();
-    git::Buffer buffer(content.constData(), content.length());
-    if (buffer.isBinary())
+    if (git::Blob::isBinary(content))
       return false;
   }
 
