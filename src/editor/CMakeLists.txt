@@ -10,6 +10,7 @@ target_link_libraries(editor
   lpeg
   lua
   scintilla
+  Qt6::Widgets
 )
 
 set_target_properties(editor PROPERTIES

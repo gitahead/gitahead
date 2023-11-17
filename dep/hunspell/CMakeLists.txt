@@ -22,7 +22,3 @@ target_include_directories(hunspell
   PUBLIC
     ${HUNSPELL_DIR}/src/hunspell
 )
-
-set_target_properties(hunspell PROPERTIES
-  AUTOMOC ON
-)

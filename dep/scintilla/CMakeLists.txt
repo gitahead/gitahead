@@ -56,12 +56,4 @@ target_include_directories(scintilla
     ${SCINTILLA_DIR}/src
 )
 
-target_link_libraries(scintilla
-  Qt6::Widgets
-)
-
-set_target_properties(scintilla PROPERTIES
-  AUTOMOC ON
-)
-
 set(SCINTILLUA_LEXERS_DIR ${SCINTILLA_DIR}/lexlua CACHE INTERNAL "")
