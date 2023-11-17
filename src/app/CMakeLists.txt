@@ -97,7 +97,7 @@ if(WIN32)
   target_link_libraries(app Dbghelp.lib)
 elseif(APPLE)
   set_target_properties(gitahead PROPERTIES
-    INSTALL_RPATH "/usr/local/qt;@loader_path/../Frameworks"
+    INSTALL_RPATH "@loader_path/../Frameworks"
     MACOSX_BUNDLE_INFO_PLIST ${RSRC_DIR}/Info.plist.in
     MACOSX_BUNDLE_ICON_FILE ${GITAHEAD_NAME}
     MACOSX_BUNDLE_BUNDLE_NAME ${GITAHEAD_NAME}
@@ -147,16 +147,14 @@ if(APPLE)
   get_target_property(QT_LIBRARY Qt6::Core LOCATION)
   get_filename_component(QT_FRAMEWORK ${QT_LIBRARY} DIRECTORY)
   get_filename_component(RPATH ${QT_FRAMEWORK} DIRECTORY)
+  get_filename_component(RPATH ${RPATH} DIRECTORY)
+  get_filename_component(RPATH ${RPATH} DIRECTORY)
 
   # Fixup relauncher RPATH.
   set(RELAUNCHER ${GITAHEAD_NAME}.app/Contents/MacOS/relauncher)
   install(CODE
     "execute_process(COMMAND
       ${CMAKE_INSTALL_NAME_TOOL} -delete_rpath \"${RPATH}\"
-        \"\${CMAKE_INSTALL_PREFIX}/${RELAUNCHER}\"
-    )
-    execute_process(COMMAND
-      ${CMAKE_INSTALL_NAME_TOOL} -add_rpath \"/usr/local/qt\"
         \"\${CMAKE_INSTALL_PREFIX}/${RELAUNCHER}\"
     )
     execute_process(COMMAND
@@ -171,10 +169,6 @@ if(APPLE)
   install(CODE
     "execute_process(COMMAND
       ${CMAKE_INSTALL_NAME_TOOL} -delete_rpath \"${RPATH}\"
-        \"\${CMAKE_INSTALL_PREFIX}/${INDEXER}\"
-    )
-    execute_process(COMMAND
-      ${CMAKE_INSTALL_NAME_TOOL} -add_rpath \"/usr/local/qt\"
         \"\${CMAKE_INSTALL_PREFIX}/${INDEXER}\"
     )
     execute_process(COMMAND

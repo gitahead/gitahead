@@ -34,7 +34,7 @@ set_target_properties(relauncher PROPERTIES
 
 if(APPLE)
   set_target_properties(relauncher PROPERTIES
-    INSTALL_RPATH "/usr/local/qt;@loader_path/../Frameworks"
+    INSTALL_RPATH "@loader_path/../Frameworks"
   )
 elseif(UNIX)
   set_target_properties(relauncher PROPERTIES

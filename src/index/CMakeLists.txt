@@ -36,7 +36,7 @@ set_target_properties(indexer PROPERTIES
 
 if(APPLE)
   set_target_properties(indexer PROPERTIES
-    INSTALL_RPATH "/usr/local/qt;@loader_path/../Frameworks"
+    INSTALL_RPATH "@loader_path/../Frameworks"
   )
 else()
   if(WIN32)
