@@ -56,10 +56,6 @@ set(QT_MODULES
   Test
 )
 
-if(APPLE)
-  set(QT_MODULES ${QT_MODULES} DBus)
-endif()
-
 find_package(Qt6 COMPONENTS ${QT_MODULES} LinguistTools REQUIRED)
 
 set(QT_TRANSLATIONS_DIR "${Qt6_DIR}/../../../translations")
