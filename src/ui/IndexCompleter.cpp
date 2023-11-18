@@ -117,7 +117,7 @@ public:
 
     int height = mButton->sizeHint().height();
     int y = sizeHintForRow(0) * qMin(maxVisibleItems, model()->rowCount()) + 4;
-    mButton->setGeometry(0, y, width(), height);
+    mButton->setGeometry(0, y, sizeHint().width(), height);
     setMinimumHeight(y + height);
   }
 
