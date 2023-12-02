@@ -82,6 +82,8 @@ foreach(QT_MODULE ${QT_MODULES})
 
   if(APPLE)
     get_filename_component(QT_FRAMEWORK ${QT_LIBRARY} DIRECTORY)
+    get_filename_component(QT_FRAMEWORK ${QT_FRAMEWORK} DIRECTORY)
+    get_filename_component(QT_FRAMEWORK ${QT_FRAMEWORK} DIRECTORY)
     set(DEST_DIR ${CONTENTS_DIR}/Frameworks)
     install(DIRECTORY ${QT_FRAMEWORK}
       DESTINATION ${DEST_DIR}
