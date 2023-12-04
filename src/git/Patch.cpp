@@ -189,7 +189,7 @@ QByteArray Patch::header(int index) const
 
   const git_diff_hunk *hunk = nullptr;
   int result = git_patch_get_hunk(&hunk, nullptr, d.data(), index);
-  return !result ? hunk->header : QByteArray();
+  return !result ? QByteArray(hunk->header) : QByteArray();
 }
 
 int Patch::lineCount(int index) const
