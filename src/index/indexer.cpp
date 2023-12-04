@@ -53,22 +53,22 @@ static LONG WINAPI exceptionFilter(PEXCEPTION_POINTERS info)
   SYSTEMTIME localTime;
   GetLocalTime(&localTime);
 
-  char temp[MAX_PATH];
-  GetTempPath(MAX_PATH, temp);
+  wchar_t temp[MAX_PATH];
+  GetTempPathW(MAX_PATH, temp);
 
-  char dir[MAX_PATH];
-  StringCchPrintf(dir, MAX_PATH, "%sGitAhead", temp);
-  CreateDirectory(dir, NULL);
+  wchar_t dir[MAX_PATH];
+  StringCchPrintfW(dir, MAX_PATH, L"%sGitAhead", temp);
+  CreateDirectoryW(dir, NULL);
 
-  char fileName[MAX_PATH];
-  StringCchPrintf(fileName, MAX_PATH,
-    "%s\\%s-%s-%04d%02d%02d-%02d%02d%02d-%ld-%ld.dmp",
+  wchar_t fileName[MAX_PATH];
+  StringCchPrintfW(fileName, MAX_PATH,
+    L"%s\\%s-%s-%04d%02d%02d-%02d%02d%02d-%ld-%ld.dmp",
     dir, "indexer", GITAHEAD_VERSION,
     localTime.wYear, localTime.wMonth, localTime.wDay,
     localTime.wHour, localTime.wMinute, localTime.wSecond,
     GetCurrentProcessId(), GetCurrentThreadId());
 
-  HANDLE dumpFile = CreateFile(fileName, GENERIC_READ|GENERIC_WRITE,
+  HANDLE dumpFile = CreateFileW(fileName, GENERIC_READ|GENERIC_WRITE,
     FILE_SHARE_WRITE|FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0);
 
   MINIDUMP_EXCEPTION_INFORMATION expParam;

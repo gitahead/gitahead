@@ -10,6 +10,7 @@
 #include "WinCred.h"
 #include <QStringList>
 #include <QUrl>
+#include <QVarLengthArray>
 #include <windows.h>
 #include <wincred.h>
 
@@ -49,9 +50,11 @@ bool WinCred::get(
 {
   log(QString("get: %1 %2").arg(url, username));
 
-  PCREDENTIAL cred;
+  PCREDENTIALW cred;
   QString target = buildTarget(host(url), username);
-  if (!CredRead(target.toUtf8(), CRED_TYPE_GENERIC, 0, &cred)) {
+  QVarLengthArray<wchar_t,1024> targetBuffer(target.length() + 1);
+  targetBuffer[target.toWCharArray(targetBuffer.data())] = L'\0';
+  if (!CredReadW(targetBuffer.data(), CRED_TYPE_GENERIC, 0, &cred)) {
     switch (DWORD error = GetLastError()) {
       case ERROR_NOT_FOUND:
         log(QString("get: credential not found for '%1'").arg(target));
@@ -73,7 +76,7 @@ bool WinCred::get(
     return false;
   }
 
-  username = cred->UserName;
+  username = QString::fromWCharArray(cred->UserName);
   int size = cred->CredentialBlobSize / sizeof(ushort);
   password = QString::fromUtf16((ushort *) cred->CredentialBlob, size);
 
@@ -90,24 +93,26 @@ bool WinCred::store(
   log(QString("store: %1 %2").arg(url, username));
 
   bool result = false;
-  QByteArray name = username.toUtf8();
-  QStringList names = {QString(), username};
-  foreach (const QString &tmp, names) {
-    QByteArray target = buildTarget(host(url), tmp).toUtf8();
+  QVarLengthArray<wchar_t,1024> nameBuffer(username.length() + 1);
+  nameBuffer[username.toWCharArray(nameBuffer.data())] = L'\0';
+  foreach (const QString &name, QStringList({QString(), username})) {
+    QString target = buildTarget(host(url), name);
+    QVarLengthArray<wchar_t,1024> targetBuffer(target.length() + 1);
+    targetBuffer[target.toWCharArray(targetBuffer.data())] = L'\0';
 
-    CREDENTIAL cred;
+    CREDENTIALW cred;
     cred.Flags = 0;
     cred.Type = CRED_TYPE_GENERIC;
-    cred.TargetName = target.data();
-    cred.Comment = "Written by GitAhead";
+    cred.TargetName = targetBuffer.data();
+    cred.Comment = const_cast<LPWSTR>(L"Written by GitAhead");
     cred.CredentialBlobSize = password.length() * sizeof(ushort);
     cred.CredentialBlob = (LPBYTE) password.utf16();
     cred.Persist = CRED_PERSIST_LOCAL_MACHINE;
     cred.AttributeCount = 0;
     cred.Attributes = nullptr;
     cred.TargetAlias = nullptr;
-    cred.UserName = name.data();
-    if (CredWrite(&cred, 0)) {
+    cred.UserName = nameBuffer.data();
+    if (CredWriteW(&cred, 0)) {
       result = true;
     } else {
       switch (DWORD error = GetLastError()) {
