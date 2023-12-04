@@ -275,7 +275,7 @@ public:
 
     // Draw badge.
     if (mBadge > 0) {
-#ifdef Q_OS_LINUX
+#ifndef Q_OS_MACOS
       QFont font = painter.font();
       font.setPointSize(font.pointSize() - 2);
       painter.setFont(font);
