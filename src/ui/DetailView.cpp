@@ -182,6 +182,7 @@ public:
     mAuthor->setText(author);
     mAuthor->adjustSize();
     updateGeometry();
+    updateLayout();
   }
 
   void setDate(const QString &date)
@@ -189,6 +190,7 @@ public:
     mDate->setText(date);
     mDate->adjustSize();
     updateGeometry();
+    updateLayout();
   }
 
 private:
