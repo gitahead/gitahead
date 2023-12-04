@@ -15,7 +15,7 @@
 #include <QProcess>
 #include <QUrl>
 
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MACOS)
 #define NAME QT_TRANSLATE_NOOP("ShowTool", "Finder")
 #elif defined(Q_OS_WIN)
 #define NAME QT_TRANSLATE_NOOP("ShowTool", "Explorer")
@@ -39,7 +39,7 @@ QString ShowTool::name() const
 
 bool ShowTool::start()
 {
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MACOS)
   return QProcess::startDetached("/usr/bin/osascript", {
     "-e", "tell application \"Finder\"",
     "-e", QString("reveal POSIX file \"%1\"").arg(mFile),

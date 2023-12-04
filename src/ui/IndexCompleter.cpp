@@ -27,7 +27,7 @@ const QString kButtonStyle =
   "  text-align: left;"
   "  padding: 3px 3px 3px 3px;"
   "  background: palette(base);"
-#ifndef Q_OS_MAC
+#ifndef Q_OS_MACOS
   "  border: 1px solid palette(mid);"
 #endif
   "  border-top: 1px solid palette(dark)"

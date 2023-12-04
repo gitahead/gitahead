@@ -1216,7 +1216,7 @@ CommitList::CommitList(Index *index, QWidget *parent)
     }
   });
 
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MACOS
   QFont font = this->font();
   font.setPointSize(13);
   setFont(font);

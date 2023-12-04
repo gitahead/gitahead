@@ -80,7 +80,7 @@ QDir rootDir()
 {
   QDir dir(QCoreApplication::applicationDirPath());
 
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MACOS
   dir.cdUp(); // Contents
 #endif
 
@@ -248,7 +248,7 @@ QDir Settings::appDir()
 {
   QDir dir(QCoreApplication::applicationDirPath());
 
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MACOS
   dir.cdUp(); // Contents
   dir.cdUp(); // bundle
   dir.cdUp(); // bundle dir

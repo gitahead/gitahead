@@ -35,7 +35,7 @@ const QString kRemoteExpandedGroup = "remote/expanded";
 
 const QString kStyleSheet =
   "QTreeView {"
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MACOS
   "  background: palette(midlight);"
 #endif
   "  border: none"

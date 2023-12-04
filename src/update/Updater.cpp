@@ -28,7 +28,7 @@
 #include <QUrlQuery>
 #include <QVersionNumber>
 
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MACOS)
 #define PLATFORM "mac"
 #elif defined(Q_OS_WIN)
 #if defined(Q_OS_WIN64)
@@ -255,7 +255,7 @@ Updater *Updater::instance()
   return instance;
 }
 
-#if !defined(Q_OS_MAC) && !defined(Q_OS_WIN)
+#if !defined(Q_OS_MACOS) && !defined(Q_OS_WIN)
 bool Updater::install(const DownloadRef &download, QString &error)
 {
   QString path = download->file()->fileName();

@@ -486,7 +486,7 @@ QColor CustomTheme::star()
   return mMap.value("star").toMap().value("fill").value<QColor>();
 }
 
-#ifndef Q_OS_MAC
+#ifndef Q_OS_MACOS
 void CustomTheme::polishWindow(QWindow *window) const
 {
   // FIXME: Change title bar color?

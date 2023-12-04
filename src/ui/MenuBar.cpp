@@ -157,7 +157,7 @@ MenuBar::MenuBar(QWidget *parent)
 
   file->addSeparator();
 
-#ifndef Q_OS_MAC
+#ifndef Q_OS_MACOS
   QAction *quit = file->addAction(tr("Exit"));
   quit->setMenuRole(QAction::QuitRole);
   quit->setShortcut(QKeySequence::Quit);
@@ -987,7 +987,7 @@ void MenuBar::setDebugMenuVisible(bool visible)
 
 MenuBar *MenuBar::instance(QWidget *widget)
 {
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MACOS
   static MenuBar *instance = nullptr;
   if (!instance)
     instance = new MenuBar;

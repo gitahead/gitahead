@@ -16,7 +16,7 @@ extern "C" {
 #include "lualib.h"
 }
 
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MACOS)
 #define PLATFORM "mac"
 #elif defined(Q_OS_WIN)
 #define PLATFORM "win"

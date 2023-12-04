@@ -21,7 +21,7 @@
 #include <QTextBrowser>
 #include <QVBoxLayout>
 
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MACOS
 #define TAB_BAR_ALIGNMENT Qt::AlignCenter
 #else
 #define TAB_BAR_ALIGNMENT Qt::Alignment()

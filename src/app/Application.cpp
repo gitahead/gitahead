@@ -27,7 +27,7 @@
 #include <QTimer>
 #include <QTranslator>
 
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MACOS)
 #include <unistd.h>
 
 #elif defined(Q_OS_WIN)
@@ -166,7 +166,7 @@ Application::Application(
   QNetworkProxyFactory::setUseSystemConfiguration(true);
 
   // Do platform-specific initialization.
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MACOS)
   // Register service on Mac.
   registerService();
 
@@ -227,7 +227,7 @@ void Application::autoUpdate()
 
 bool Application::restoreWindows()
 {
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MACOS
   // Check for connection to a terminal.
   if (!isatty(fileno(stdin)))
     QDir::setCurrent(Settings::appDir().path());

@@ -83,7 +83,7 @@ public:
       setText(action->text());
     });
 
-#ifdef Q_OS_MAC
+#ifdef Q_OS_MACOS
     QFont font = this->font();
     font.setPointSize(11);
     setFont(font);

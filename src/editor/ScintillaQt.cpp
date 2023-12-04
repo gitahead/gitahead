@@ -36,7 +36,7 @@ namespace {
 const QString sMSDEVColumnSelect = "MSDEVColumnSelect";
 const QString sWrappedMSDEVColumnSelect =
   "application/x-qt-windows-mime;value=\"MSDEVColumnSelect\"";
-#elif defined(Q_OS_MAC)
+#elif defined(Q_OS_MACOS)
 const QString sScintillaRecMimeType =
   "text/x-scintilla.utf16-plain-text.rectangular";
 #else // Linux
@@ -48,7 +48,7 @@ void AddRectangularToMime(QMimeData *mimeData, QString su)
 #if defined(Q_OS_WIN)
   // Add an empty marker
   mimeData->setData(sMSDEVColumnSelect, QByteArray());
-#elif defined(Q_OS_MAC)
+#elif defined(Q_OS_MACOS)
   // OS X gets marker + data to work with other implementations.
   // Don't understand how this works but it does - the
   // clipboard format is supposed to be UTF-16, not UTF-8.
@@ -73,7 +73,7 @@ bool IsRectangularInMime(const QMimeData *mimeData)
     // Otherwise see wrapped name.
     if (formats[i] == sWrappedMSDEVColumnSelect)
       return true;
-#elif defined(Q_OS_MAC)
+#elif defined(Q_OS_MACOS)
     if (formats[i] == sScintillaRecMimeType)
       return true;
 #else
@@ -301,7 +301,7 @@ void ScintillaQt::keyPressEvent(QKeyEvent *event)
     // Additionally, on non-mac platforms, don't insert text
     // if the alt key was pressed unless control is also present.
     // On mac alt can be used to insert special characters.
-#ifndef Q_OS_MAC
+#ifndef Q_OS_MACOS
     input &= (!alt || ctrl);
 #endif
 
