@@ -149,7 +149,7 @@ if(NOT APPLE)
   if(WIN32)
     set(SSL_LIB_SUFFIX "-3-x64.dll")
   else()
-    set(SSL_LIB_SUFFIX ".so.1.1")
+    set(SSL_LIB_SUFFIX ".so.3")
   endif()
 
   foreach(SSL_LIB_NAME ssl crypto)
