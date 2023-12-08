@@ -22,7 +22,7 @@ Build Environment
   * Linux - GCC >= 6.2 recommended
   * macOS - Xcode >= 10.1 recommended
 * CMake >= 3.3.1
-* Ninja (optional)
+* Ninja
 
 Dependencies
 ------------
@@ -44,6 +44,10 @@ submodules are optional or may also be satisfied by system libraries.
 * openssl (needed by `libssh2` and `libgit2` on some platforms)
 
 Note that building `OpenSSL` on Windows requires `Perl` and `NASM`.
+
+On Ubuntu this would install all dependencies:
+
+    apt install gcc git cmark libssh2-1 openssl ninja-build
 
 How to Build
 ------------
