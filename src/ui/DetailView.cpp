@@ -405,7 +405,8 @@ public:
     QString msg = commit.message(git::Commit::SubstituteEmoji).trimmed();
     mMessage->setPlainText(msg);
 
-    int size = kSize * window()->windowHandle()->devicePixelRatio();
+    QWindow *window = this->window()->windowHandle();
+    int size = kSize * (window ? window->devicePixelRatio() : 1.0);
     QByteArray email = commit.author().email().trimmed().toLower().toUtf8();
     QByteArray hash = QCryptographicHash::hash(email, QCryptographicHash::Md5);
 
