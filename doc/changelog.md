@@ -1,3 +1,12 @@
+### v2.7.1 - 2023-12-20
+
+#### Fixed
+
+* (Mac) Fixed large discard warning dialogs.
+* (Win) Fixed crash when restoring some recent repositories.
+
+---
+
 ### v2.7.0 - 2023-12-06
 
 #### <span style="color:gold">WARNING</span>
