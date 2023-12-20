@@ -177,9 +177,7 @@ RepoView::RepoView(const git::Repository &repo, MainWindow *parent)
   connect(&mIndexer, &QProcess::started, [searchField] {
     searchField->setPlaceholderText(tr("Indexing..."));
   });
-  using Signal = void (QProcess::*)(int,QProcess::ExitStatus);
-  auto signal = static_cast<Signal>(&QProcess::finished);
-  connect(&mIndexer, signal,
+  connect(&mIndexer, &QProcess::finished,
   [this, searchField](int code, QProcess::ExitStatus status) {
     searchField->setPlaceholderText(tr("Search"));
     if (status == QProcess::CrashExit) {

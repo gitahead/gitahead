@@ -329,7 +329,7 @@ bool MainWindow::restoreWindows()
     if (paths.isEmpty())
       continue;
 
-    // Open a window new for the first valid repo.
+    // Open a new window for the first valid repo.
     MainWindow *window = open(paths.takeFirst());
     while (!window && !paths.isEmpty())
       window = open(paths.takeFirst());

@@ -158,8 +158,7 @@ PathspecWidget::PathspecWidget(const git::Repository &repo, QWidget *parent)
   // Set the completer after the view creates the model.
   mField->setCompleter(new Completer(mView->model(), mView));
 
-  using Signal = void(QCompleter::*)(const QModelIndex &);
-  auto signal = static_cast<Signal>(&QCompleter::highlighted);
+  auto signal = qOverload<const QModelIndex &>(&QCompleter::highlighted);
   connect(mField->completer(), signal, [this](const QModelIndex &index) {
     QAbstractItemModel *model = mField->completer()->completionModel();
     QAbstractProxyModel *proxy = qobject_cast<QAbstractProxyModel *>(model);

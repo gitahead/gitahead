@@ -121,9 +121,7 @@ public:
       view->startFetchTimer();
     });
 
-    using Signal = void (QSpinBox::*)(int);
-    auto signal = static_cast<Signal>(&QSpinBox::valueChanged);
-    connect(mFetchMinutes, signal, [this](int value) {
+    connect(mFetchMinutes, &QSpinBox::valueChanged, [this](int value) {
       mRepo.appConfig().setValue("autofetch.minutes", value);
     });
 
@@ -391,9 +389,6 @@ public:
   SearchPanel(RepoView *view, QWidget *parent = nullptr)
     : QWidget(parent)
   {
-    using Signal = void (QSpinBox::*)(int);
-    auto signal = static_cast<Signal>(&QSpinBox::valueChanged);
-
     git::Config config = view->repo().appConfig();
     Q_ASSERT(config.isValid());
 
@@ -418,7 +413,7 @@ public:
     terms->setMaximum(99999999);
     terms->setSingleStep(100000);
     terms->setValue(config.value<int>("index.termlimit", 1000000));
-    connect(terms, signal, [view](int value) {
+    connect(terms, &QSpinBox::valueChanged, [view](int value) {
       view->repo().appConfig().setValue("index.termlimit", value);
     });
 
@@ -431,7 +426,7 @@ public:
     QSpinBox *context = new QSpinBox(this);
     QLabel *contextLabel = new QLabel(tr("lines"), this);
     context->setValue(config.value<int>("index.contextlines", 3));
-    connect(context, signal, [view](int value) {
+    connect(context, &QSpinBox::valueChanged, [view](int value) {
       view->repo().appConfig().setValue("index.contextlines", value);
     });
 

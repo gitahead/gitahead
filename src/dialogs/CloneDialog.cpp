@@ -52,9 +52,7 @@ public:
       mProtocol->addItem("SSH", Repository::Ssh);
 
       // Reset URL when the protocol changes.
-      using Signal = void (QComboBox::*)(int);
-      auto signal = static_cast<Signal>(&QComboBox::activated);
-      connect(mProtocol, signal, [this, repo] {
+      connect(mProtocol, &QComboBox::activated, [this, repo] {
         int protocol = mProtocol->currentData().toInt();
         mUrl->setText(repo->url(static_cast<Repository::Protocol>(protocol)));
       });

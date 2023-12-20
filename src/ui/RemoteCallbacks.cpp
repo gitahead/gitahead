@@ -229,9 +229,7 @@ bool RemoteCallbacks::negotiation(
   QEventLoop loop;
   QProcess process;
   process.setWorkingDirectory(mRepo.workdir().path());
-  using Signal = void (QProcess::*)(int, QProcess::ExitStatus);
-  auto signal = static_cast<Signal>(&QProcess::finished);
-  QObject::connect(&process, signal, &loop, &QEventLoop::exit);
+  QObject::connect(&process, &QProcess::finished, &loop, &QEventLoop::exit);
 
   // Print hook output with the same semantics as sideband.
   QObject::connect(&process, &QProcess::readyReadStandardOutput, [this, &process] {
