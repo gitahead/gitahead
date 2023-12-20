@@ -178,7 +178,6 @@ FileContextMenu::FileContextMenu(
         QMessageBox::Cancel, view);
       dialog->setAttribute(Qt::WA_DeleteOnClose);
       dialog->setInformativeText(tr("This action cannot be undone."));
-      dialog->setDetailedText(modified.join('\n'));
 
       QString text = tr("Discard Changes");
       QPushButton *discard = dialog->addButton(text, QMessageBox::AcceptRole);

@@ -460,7 +460,6 @@ void RepoView::clean(const QStringList &untracked)
                  tr("Remove %1 %2?").arg(
                    QString::number(untracked.count()), phrase));
   mb.setInformativeText(tr("This action cannot be undone."));
-  mb.setDetailedText(untracked.join('\n'));
 
   QPushButton *remove = mb.addButton(tr("Remove"), QMessageBox::AcceptRole);
   mb.addButton(QMessageBox::Cancel);
