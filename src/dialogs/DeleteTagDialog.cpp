@@ -89,6 +89,7 @@ DeleteTagDialog::DeleteTagDialog(
 void DeleteTagDialog::open(const git::TagRef &tag, QWidget *parent)
 {
   Q_ASSERT(parent);
-  DeleteTagDialog *dialog = new DeleteTagDialog(tag, parent->window());
+  RepoView *view = RepoView::parentView(parent);
+  DeleteTagDialog *dialog = new DeleteTagDialog(tag, view);
   dialog->QDialog::open();
 }

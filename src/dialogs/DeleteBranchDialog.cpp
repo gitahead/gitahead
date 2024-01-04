@@ -99,6 +99,7 @@ DeleteBranchDialog::DeleteBranchDialog(
 void DeleteBranchDialog::open(const git::Branch &branch, QWidget *parent)
 {
   Q_ASSERT(parent);
-  DeleteBranchDialog *dialog = new DeleteBranchDialog(branch, parent->window());
+  RepoView *view = RepoView::parentView(parent);
+  DeleteBranchDialog *dialog = new DeleteBranchDialog(branch, view);
   dialog->QDialog::open();
 }
