@@ -1900,11 +1900,69 @@ public:
 
     // Add diff hunks.
     int hunkCount = patch.count();
-    for (int hidx = 0; hidx < hunkCount; ++hidx) {
-      HunkWidget *hunk = addHunk(diff, patch, hidx, lfs, submodule);
-      int startLine = patch.lineNumber(hidx, 0, git::Diff::OldFile);
-      hunk->header()->check()->setChecked(stagedHunks.contains(startLine));
-      layout->addWidget(hunk);
+    int hunkLimit = Settings::instance()->value("diff/hunklimit").toInt();
+    auto addHunks = [=](int startIdx, int maxHunks) {
+      git::Index::StagedState state = git::Index::Disabled;
+      if (diff.isStatusDiff())
+        state = diff.index().isStaged(patch.name());
+      for (int hidx = startIdx; hidx < hunkCount; ++hidx) {
+        if (hidx == maxHunks) {
+          foreach (HunkWidget *hunk, mHunks) {
+            // Currently, we disable hunk staging functionally until
+            // they're all shown (i.e. by clicking the 'Show all' button)
+            // because the FileWidget::stageHunks() assumes all hunks are
+            // loaded into this->mHunks already.
+            QCheckBox *checkBox = hunk->header()->check();
+            checkBox->setEnabled(false);
+            checkBox->setToolTip(
+              tr("Click the 'Show all' button below to stage/unstage this hunk"));
+          }
+          return false; // Hunk limit exceeded.
+        }
+        HunkWidget *hunk = addHunk(diff, patch, hidx, lfs, submodule);
+        // Stage All or Unstage All action might be performed before
+        // the user clicks 'Show all'. So we have to look for the current index state.
+        bool checked = false;
+        switch (state) {
+          case git::Index::Disabled:
+          case git::Index::Unstaged:
+            break;
+          case git::Index::Staged:
+            checked = true;
+            break;
+          default:
+            int startLine = patch.lineNumber(hidx, 0, git::Diff::OldFile);
+            checked = stagedHunks.contains(startLine);
+            break;
+        }
+        hunk->header()->check()->setChecked(checked);
+        layout->addWidget(hunk);
+      }
+      return true; // All hunks added.
+    };
+
+    if (!addHunks(0, hunkLimit)) {
+      QString msg =
+        tr("<h4><i>%1 of %2 hunks are shown (<a href='show-all'>Show all</a>)</i></h4>")
+          .arg(hunkLimit)
+          .arg(hunkCount);
+      QLabel *label = new QLabel(msg, this);
+      label->setAlignment(Qt::AlignHCenter);
+      label->setMargin(4);
+      connect(label, &QLabel::linkActivated, [this, label, addHunks, hunkLimit] {
+        label->setEnabled(false);
+        label->setVisible(false);
+        foreach (HunkWidget *hunk, mHunks) {
+          QCheckBox *checkBox = hunk->header()->check();
+          checkBox->setEnabled(true);
+          checkBox->setToolTip(QString());
+        }
+        addHunks(hunkLimit, INT_MAX);
+      });
+      connect(disclosureButton, &DisclosureButton::toggled, [label](bool visible) {
+        label->setVisible(label->isEnabled() && visible);
+      });
+      layout->addWidget(label);
     }
 
     // LFS
