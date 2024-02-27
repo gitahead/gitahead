@@ -14,18 +14,21 @@ if(APPLE)
     ${QT_PLUGINS}
     QCocoaIntegrationPlugin
     QMacStylePlugin
+    QSecureTransportBackendPlugin
   )
 elseif(WIN32)
   set(QT_PLUGINS
     ${QT_PLUGINS}
+    QTlsBackendOpenSSLPlugin
     QWindowsIntegrationPlugin
     QWindowsVistaStylePlugin
   )
 else()
   set(QT_PLUGINS
     ${QT_PLUGINS}
-    QXcbIntegrationPlugin
     QComposePlatformInputContextPlugin
+    QTlsBackendOpenSSLPlugin
+    QXcbIntegrationPlugin
   )
 endif()
 
