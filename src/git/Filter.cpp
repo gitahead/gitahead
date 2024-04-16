@@ -11,9 +11,9 @@
 #include "Command.h"
 #include "Config.h"
 #include "git2/deprecated.h"
-#include "git2/errors.h"
 #include "git2/filter.h"
 #include "git2/repository.h"
+#include "git2/sys/errors.h"
 #include "git2/sys/filter.h"
 #include <QMap>
 #include <QProcess>

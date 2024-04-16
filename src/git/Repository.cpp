@@ -41,6 +41,7 @@
 #include "git2/signature.h"
 #include "git2/stash.h"
 #include "git2/tag.h"
+#include "git2/sys/errors.h"
 #include "git2/sys/repository.h"
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -582,7 +583,7 @@ Commit Repository::commit(
     return Commit();
 
   // Lookup the parent commit.
-  QList<const git_commit *> parents;
+  QList<git_commit *> parents;
   if (Reference ref = head()) {
     if (Commit commit = ref.target())
       parents.append(commit);
