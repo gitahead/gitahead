@@ -1,5 +1,3 @@
-find_package(PkgConfig)
-
 add_subdirectory(openssl)
 add_subdirectory(libssh2)
 add_subdirectory(libgit2)
