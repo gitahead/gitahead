@@ -41,6 +41,7 @@
 #include "git2/signature.h"
 #include "git2/stash.h"
 #include "git2/tag.h"
+#include "git2/sys/errors.h"
 #include "git2/sys/repository.h"
 #include <QJsonArray>
 #include <QJsonDocument>

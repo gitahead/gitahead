@@ -61,6 +61,7 @@ target_link_libraries(ui
   tools
   update
   watcher
+  libssh2_static
   Qt6::Concurrent
   Qt6::Core
   Qt6::Core5Compat

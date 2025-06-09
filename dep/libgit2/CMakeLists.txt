@@ -2,9 +2,7 @@
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 set(BUILD_CLAR OFF CACHE BOOL "" FORCE)
 set(STATIC_CRT OFF CACHE BOOL "" FORCE)
-
-# Enabled manually. Don't search for it.
-set(USE_SSH OFF CACHE BOOL "" FORCE)
+set(USE_SSH libssh2 CACHE BOOL "" FORCE)
 
 if(WIN32)
   # Set variables manually.

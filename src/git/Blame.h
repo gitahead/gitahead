@@ -10,6 +10,7 @@
 #ifndef BLAME_H
 #define BLAME_H
 
+#include "git2/signature.h"
 #include "git2/blame.h"
 #include <QSharedPointer>
 
