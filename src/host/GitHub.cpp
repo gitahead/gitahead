@@ -280,7 +280,7 @@ void GitHub::createPullRequest(
 
   QUrl url(QString("https://api.github.com/repos/%1/pulls").arg(ownerRepo));
   rest(url, doc, [this, title](const QJsonObject &obj) {
-    foreach (const QJsonValue &error, obj.value("errors").toArray())
+    for (const QJsonValue &error : obj.value("errors").toArray())
       emit pullRequestError(title, error.toObject().value("message").toString());
   });
 }
@@ -319,7 +319,7 @@ void GitHub::requestComments(Repository *repo, const QString &oid)
       return;
 
     CommitComments comments;
-    foreach(const QJsonValue &value, nodes) {
+    for (const QJsonValue &value : nodes) {
       QJsonObject obj = value.toObject();
       QString path = obj.value("path").toString();
       int position = obj.value("position").toInt() - 1;
