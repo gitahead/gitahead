@@ -10,6 +10,7 @@
 #include "Signature.h"
 #include "git2/signature.h"
 #include <QDateTime>
+#include <QTimeZone>
 
 namespace git {
 
@@ -35,7 +36,7 @@ QString Signature::email() const
 QDateTime Signature::date() const
 {
   int offset = d->when.offset * 60; // Convert from minutes to seconds.
-  return QDateTime::fromSecsSinceEpoch(d->when.time, Qt::OffsetFromUTC, offset);
+  return QDateTime::fromSecsSinceEpoch(d->when.time, QTimeZone(offset));
 }
 
 QString Signature::initials() const

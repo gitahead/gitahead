@@ -1869,7 +1869,8 @@ public:
 
     if (diff.isStatusDiff()) {
       // Collapse on check.
-      connect(mHeader->check(), &QCheckBox::stateChanged, [this](int state) {
+      connect(mHeader->check(), &QCheckBox::checkStateChanged,
+      [this](Qt::CheckState state) {
         mHeader->disclosureButton()->setChecked(state != Qt::Checked);
         if (state != Qt::PartiallyChecked) {
           foreach (HunkWidget *hunk, mHunks)

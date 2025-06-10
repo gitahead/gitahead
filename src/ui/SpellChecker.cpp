@@ -7,8 +7,9 @@
 #include <QTextCodec>
 #include <QTextStream>
 
-SpellChecker::SpellChecker(const QString &dictionaryPath,
-                           const QString &userDictionary)
+SpellChecker::SpellChecker(
+  const QString &dictionaryPath,
+  const QString &userDictionary)
   : mUserDictionary(userDictionary)
 {
   QString dictFileName = dictionaryPath + ".dic";
@@ -19,44 +20,45 @@ SpellChecker::SpellChecker(const QString &dictionaryPath,
   mValid = false;
 
   QFile dictFile(dictFileName);
-  if (dictFile.exists()) {
-    mHunspell = new Hunspell(affixFilePath.constData(), dictFilePath.constData());
+  if (!dictFile.exists())
+    return;
 
-    // Detect encoding analyzing the SET option in the affix file.
-    QString encoding = "ISO8859-15";
-    QFile affixFile(affixFileName);
-    if (affixFile.open(QIODevice::ReadOnly)) {
-      QTextStream stream(&affixFile);
-      QRegularExpression re(
-        "^\\s*SET\\s+([A-Z0-9\\-]+)\\s*",
-        QRegularExpression::CaseInsensitiveOption);
+  mHunspell = new Hunspell(affixFilePath.constData(), dictFilePath.constData());
+
+  // Detect encoding analyzing the SET option in the affix file.
+  QString encoding = "ISO8859-15";
+  QFile affixFile(affixFileName);
+  if (affixFile.open(QIODevice::ReadOnly)) {
+    QTextStream stream(&affixFile);
+    QRegularExpression re(
+      "^\\s*SET\\s+([A-Z0-9\\-]+)\\s*",
+      QRegularExpression::CaseInsensitiveOption);
+    QString line = stream.readLine();
+    while (!line.isEmpty()) {
+      QRegularExpressionMatch match = re.match(line);
+      if (match.hasMatch()) {
+        encoding = match.captured(1);
+        break;
+      }
+      line = stream.readLine();
+    }
+    affixFile.close();
+    mValid = true;
+  }
+
+  mCodec = QTextCodec::codecForName(encoding.toLatin1().constData());
+
+  // Add user dictionary words to spell checker.
+  if (!mUserDictionary.isEmpty()) {
+    QFile userDictonaryFile(mUserDictionary);
+    if (userDictonaryFile.open(QIODevice::ReadOnly)) {
+      QTextStream stream(&userDictonaryFile);
       QString line = stream.readLine();
       while (!line.isEmpty()) {
-        QRegularExpressionMatch match = re.match(line);
-        if (match.hasMatch()) {
-          encoding = match.captured(1);
-          break;
-        }
+        mHunspell->add(mCodec->fromUnicode(line).constData());
         line = stream.readLine();
       }
-      affixFile.close();
-      mValid = true;
-    }
-
-    mCodec = QTextCodec::codecForName(encoding.toLatin1().constData());
-
-    // Add user dictionary words to spell checker.
-    if (!mUserDictionary.isEmpty()) {
-      QFile userDictonaryFile(mUserDictionary);
-      if (userDictonaryFile.open(QIODevice::ReadOnly)) {
-        QTextStream stream(&userDictonaryFile);
-        QString line = stream.readLine();
-        while (!line.isEmpty()) {
-          mHunspell->add(mCodec->fromUnicode(line).constData());
-          line = stream.readLine();
-        }
-        userDictonaryFile.close();
-      }
+      userDictonaryFile.close();
     }
   }
 }
@@ -77,10 +79,11 @@ QStringList SpellChecker::suggest(const QString &word)
   QStringList suggestions;
 
   // Retrive suggestions for word.
-  std::vector<std::string> suggestion = mHunspell->suggest(mCodec->fromUnicode(word).toStdString());
+  std::vector<std::string> suggestion =
+    mHunspell->suggest(mCodec->fromUnicode(word).toStdString());
 
   // Decode from the encoding used by current dictionary to Unicode.
-  foreach (const std::string &str, suggestion)
+  for (const std::string &str : suggestion)
     suggestions.append(mCodec->toUnicode(str.data()));
 
   return suggestions;

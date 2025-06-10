@@ -11,7 +11,9 @@ class QTextCodec;
 class SpellChecker
 {
 public:
-  SpellChecker(const QString &dictionaryPath, const QString &userDictionary);
+  SpellChecker(
+    const QString &dictionaryPath,
+    const QString &userDictionary);
   ~SpellChecker();
 
   bool spell(const QString &word);
@@ -21,7 +23,7 @@ public:
   void addToUserDict(const QString &word);
   void removeUserDict(void);
 
-  bool isValid(void) const { return mValid; }
+  bool isValid() const { return mValid; }
 
 private:
   Hunspell *mHunspell = nullptr;
