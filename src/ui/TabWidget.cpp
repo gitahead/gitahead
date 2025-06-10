@@ -155,7 +155,6 @@ TabWidget::TabWidget(QWidget *parent)
 
   // Handle tab close.
   connect(this, &TabWidget::tabCloseRequested, [this](int index) {
-    emit tabAboutToBeRemoved();
     widget(index)->close();
   });
 }
@@ -173,6 +172,7 @@ void TabWidget::resizeEvent(QResizeEvent *event)
 
 void TabWidget::tabInserted(int index)
 {
+  emit tabAboutToBeInserted();
   QTabWidget::tabInserted(index);
   MenuBar::instance(this)->updateWindow();
   emit tabInserted();
@@ -182,6 +182,7 @@ void TabWidget::tabInserted(int index)
 
 void TabWidget::tabRemoved(int index)
 {
+  emit tabAboutToBeRemoved();
   QTabWidget::tabRemoved(index);
   MenuBar::instance(this)->updateWindow();
   emit tabRemoved();

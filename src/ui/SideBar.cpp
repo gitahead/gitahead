@@ -117,10 +117,10 @@ public:
   {
     connect(tabs, &TabWidget::tabAboutToBeInserted,
             this, &RepoModel::beginResetModel);
-    connect(tabs, &TabWidget::tabAboutToBeRemoved,
-            this, &RepoModel::beginResetModel);
     connect(tabs, QOverload<>::of(&TabWidget::tabInserted),
             this, &RepoModel::endResetModel);
+    connect(tabs, &TabWidget::tabAboutToBeRemoved,
+            this, &RepoModel::beginResetModel);
     connect(tabs, QOverload<>::of(&TabWidget::tabRemoved),
             this, &RepoModel::endResetModel);
     connect(tabs->tabBar(), &QTabBar::tabMoved, [this] {

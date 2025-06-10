@@ -260,7 +260,6 @@ RepoView *MainWindow::addTab(const git::Repository &repo)
     updateWindowTitle();
   });
 
-  emit tabs->tabAboutToBeInserted();
   tabs->setCurrentIndex(tabs->addTab(view, dir.dirName()));
 
   // Start status diff.
