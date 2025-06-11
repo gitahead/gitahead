@@ -176,11 +176,7 @@ void TestMerge::resolve()
   RepoView *view = mWindow->currentView();
   DiffView *diffView = view->findChild<DiffView *>();
 
-  QToolButton *theirs = nullptr;
-  while (theirs == nullptr) {
-    theirs = diffView->findChild<QToolButton *>("ConflictTheirs");
-    qWait(100);
-  }
+  QToolButton *theirs = diffView->findChild<QToolButton *>("ConflictTheirs");
   mouseClick(theirs, Qt::LeftButton, Qt::KeyboardModifiers(), QPoint(), inputDelay);
 
   QToolButton *undo = diffView->widget()->findChild<QToolButton *>("ConflictUndo");

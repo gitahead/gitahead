@@ -28,7 +28,7 @@ private slots:
 
 private:
   int closeDelay = 0;
-  
+
   ScratchRepository mRepo;
   QMainWindow *mWindow = nullptr;
 };
@@ -48,21 +48,20 @@ void TestNewBranchDialog::verifyName()
   QVERIFY(nameField && buttons);
 
   // Find the button with the accept role.
-  auto end = buttons->buttons().end();
-  auto begin = buttons->buttons().begin();
-  auto it = std::find_if(begin, end, [buttons](QAbstractButton *button) {
-    return buttons->buttonRole(button) == QDialogButtonBox::AcceptRole;
-  });
+  QAbstractButton *accept = nullptr;
+  foreach (QAbstractButton *button, buttons->buttons()) {
+    if (buttons->buttonRole(button) == QDialogButtonBox::AcceptRole)
+      accept = button;
+  }
 
-  QVERIFY(it != end);
-  QAbstractButton *accept = *it;
+  QVERIFY(accept);
 
   keyClicks(nameField, "valid");
   QVERIFY(accept->isEnabled());
-  
+
   keyClick(nameField, 'a', Qt::ControlModifier);
   keyClick(nameField, Qt::Key_Delete);
-  
+
   keyClicks(nameField, "Invalid Name");
   QVERIFY(!accept->isEnabled());
 }
