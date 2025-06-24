@@ -1281,13 +1281,15 @@ void RepoView::fastForward(
     QUrl url("action:fast-forward");
     url.setQuery(query);
 
-    // Add stash hint.
-    QString stash =
-      tr("You may be able to reconcile your changes with the conflicting "
-         "files by <a href='action:stash'>stashing</a> before you "
-         "<a href='%1'>fast-forward</a>. Then "
-         "<a href='action:unstash'>unstash</a> to restore your changes.");
-    err->addEntry(LogEntry::Hint, stash.arg(url.toString()));
+    // Add stash hint if available.
+    if (canStash()) {
+      QString stash =
+        tr("You may be able to reconcile your changes with the conflicting "
+           "files by <a href='action:stash'>stashing</a> before you "
+           "<a href='%1'>fast-forward</a>. Then "
+           "<a href='action:unstash'>unstash</a> to restore your changes.");
+      err->addEntry(LogEntry::Hint, stash.arg(url.toString()));
+    }
 
     query.addQueryItem("no-ff", "true");
     url.setPath("merge");
@@ -1324,7 +1326,7 @@ void RepoView::merge(
     // Add stash hint if the failure was because of uncommitted changes.
     QString msg = git::Repository::lastError();
     int kind = git::Repository::lastErrorKind();
-    if (kind == GIT_ERROR_MERGE && msg.contains("overwritten by merge")) {
+    if (kind == GIT_ERROR_MERGE && msg.contains("overwritten by merge") && canStash()) {
       QString text =
         tr("You may be able to rebase by <a href='action:stash'>stashing</a> "
            "before trying to <a href='action:merge'>merge</a>. Then "
@@ -1454,7 +1456,7 @@ void RepoView::rebase(
     // Add stash hint if the failure was because of uncommitted changes.
     QString msg = git::Repository::lastError();
     int kind = git::Repository::lastErrorKind();
-    if (kind == GIT_ERROR_REBASE && msg.contains("changes exist")) {
+    if (kind == GIT_ERROR_REBASE && msg.contains("changes exist") && canStash()) {
       QString text =
         tr("You may be able to rebase by <a href='action:stash'>stashing</a> "
            "before trying to <a href='action:rebase'>rebase</a>. Then "
@@ -1517,7 +1519,7 @@ void RepoView::squash(
     // Add stash hint if the failure was because of uncommitted changes.
     QString msg = git::Repository::lastError();
     int kind = git::Repository::lastErrorKind();
-    if (kind == GIT_ERROR_MERGE && msg.contains("overwritten by merge")) {
+    if (kind == GIT_ERROR_MERGE && msg.contains("overwritten by merge") && canStash()) {
       QString text =
         tr("You may be able to rebase by <a href='action:stash'>stashing</a> "
            "before trying to <a href='action:merge'>merge</a>. Then "
@@ -2039,13 +2041,15 @@ void RepoView::checkout(
       if (detach)
         query.addQueryItem("detach", "true");
 
-      // Add stash hint.
-      QString text =
-        tr("You may be able to reconcile your changes with the conflicting "
-           "files by <a href='action:stash'>stashing</a> before you "
-           "<a href='action:checkout?%1'>checkout '%2'</a>. Then "
-           "<a href='action:unstash'>unstash</a> to restore your changes.");
-      err->addEntry(LogEntry::Hint, text.arg(query.toString(), ref.name()));
+      // Add stash hint if available.
+      if (canStash()) {
+        QString text =
+          tr("You may be able to reconcile your changes with the conflicting "
+             "files by <a href='action:stash'>stashing</a> before you "
+             "<a href='action:checkout?%1'>checkout '%2'</a>. Then "
+             "<a href='action:unstash'>unstash</a> to restore your changes.");
+        err->addEntry(LogEntry::Hint, text.arg(query.toString(), ref.name()));
+      }
     }
 
     return;
@@ -2092,6 +2096,9 @@ git::Branch RepoView::createBranch(
 
 void RepoView::promptToStash()
 {
+  if (!canStash())
+    return;
+
   // Prompt to edit stash commit message.
   if (!Settings::instance()->prompt(Settings::PromptStash)) {
     stash();
@@ -2167,6 +2174,11 @@ void RepoView::popStash(int index)
   }
 
   refresh();
+}
+
+bool RepoView::canStash() const
+{
+  return !mRepo.isHeadUnborn() && isWorkingDirectoryDirty();
 }
 
 void RepoView::promptToAddTag(const git::Commit &commit)

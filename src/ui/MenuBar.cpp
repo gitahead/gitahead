@@ -950,7 +950,7 @@ void MenuBar::updateStash()
   RepoView *view = win ? win->currentView() : nullptr;
   bool stash = view && view->repo().stashRef().isValid();
   mShowStashes->setEnabled(stash);
-  mStash->setEnabled(view && view->isWorkingDirectoryDirty());
+  mStash->setEnabled(view && view->canStash());
   mStashPop->setEnabled(stash);
 }
 
