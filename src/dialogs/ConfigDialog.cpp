@@ -201,9 +201,15 @@ public:
     });
 
     connect(footer, &Footer::minusClicked, this, [this, table] {
+      // Get all selected remotes before removing any.
+      QList<QString> names;
       QModelIndexList indexes = table->selectionModel()->selectedRows();
-      foreach (const QModelIndex &index, indexes) {
-        QString name = index.data().toString();
+      foreach (const QModelIndex &index, indexes)
+        names.append(index.data().toString());
+
+      // Remove them all.
+      foreach (const QString &name, names)
+      {
         QString title = tr("Delete Remote?");
         QString text = tr("Are you sure you want to delete '%1'?");
         QMessageBox msg(QMessageBox::Warning, title, text.arg(name),
