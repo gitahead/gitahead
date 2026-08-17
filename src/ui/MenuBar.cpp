@@ -396,7 +396,7 @@ MenuBar::MenuBar(QWidget *parent)
   remote->addSeparator();
 
   mFetch = remote->addAction(tr("Fetch"));
-  mFetch->setShortcut(tr("Ctrl+Shift+Alt+F"));
+  mFetch->setShortcut(tr("Ctrl+Shift+F"));
   connect(mFetch, &QAction::triggered, [this] {
     view()->fetch();
   });
@@ -408,7 +408,7 @@ MenuBar::MenuBar(QWidget *parent)
   });
 
   mFetchFrom = remote->addAction(tr("Fetch From..."));
-  mFetchFrom->setShortcut(tr("Ctrl+Shift+F"));
+  mFetchFrom->setShortcut(tr("Ctrl+Shift+Alt+F"));
   connect(mFetchFrom, &QAction::triggered, [this] {
     RemoteDialog *dialog = new RemoteDialog(RemoteDialog::Fetch, view());
     dialog->open();
@@ -417,13 +417,13 @@ MenuBar::MenuBar(QWidget *parent)
   remote->addSeparator();
 
   mPull = remote->addAction(tr("Pull"));
-  mPull->setShortcut(tr("Ctrl+Shift+Alt+L"));
+  mPull->setShortcut(tr("Ctrl+Shift+L"));
   connect(mPull, &QAction::triggered, [this] {
     view()->pull();
   });
 
   mPullFrom = remote->addAction(tr("Pull From..."));
-  mPullFrom->setShortcut(tr("Ctrl+Shift+L"));
+  mPullFrom->setShortcut(tr("Ctrl+Shift+Alt+L"));
   connect(mPullFrom, &QAction::triggered, [this] {
     RemoteDialog *dialog = new RemoteDialog(RemoteDialog::Pull, view());
     dialog->open();
@@ -432,13 +432,13 @@ MenuBar::MenuBar(QWidget *parent)
   remote->addSeparator();
 
   mPush = remote->addAction(tr("Push"));
-  mPush->setShortcut(tr("Ctrl+Shift+Alt+P"));
+  mPush->setShortcut(tr("Ctrl+Shift+P"));
   connect(mPush, &QAction::triggered, [this] {
     view()->push();
   });
 
   mPushTo = remote->addAction(tr("Push To..."));
-  mPushTo->setShortcut(tr("Ctrl+Shift+P"));
+  mPushTo->setShortcut(tr("Ctrl+Shift+Alt+P"));
   connect(mPushTo, &QAction::triggered, [this] {
     RemoteDialog *dialog = new RemoteDialog(RemoteDialog::Push, view());
     dialog->open();
@@ -454,6 +454,7 @@ MenuBar::MenuBar(QWidget *parent)
   });
 
   mNewBranch = branch->addAction(tr("New Branch..."));
+  mNewBranch->setShortcut(tr("Ctrl+Shift+B"));
   connect(mNewBranch, &QAction::triggered, [this] {
     view()->promptToCreateBranch();
   });
@@ -461,7 +462,7 @@ MenuBar::MenuBar(QWidget *parent)
   branch->addSeparator();
 
   mCheckoutCurrent = branch->addAction(tr("Checkout Current"));
-  mCheckoutCurrent->setShortcut(tr("Ctrl+Shift+Alt+H"));
+  mCheckoutCurrent->setShortcut(tr("Ctrl+Shift+H"));
   connect(mCheckoutCurrent, &QAction::triggered, [this] {
     RepoView *view = this->view();
     git::Reference ref = view->reference();
@@ -472,7 +473,7 @@ MenuBar::MenuBar(QWidget *parent)
   });
 
   mCheckout = branch->addAction(tr("Checkout..."));
-  mCheckout->setShortcut(tr("Ctrl+Shift+H"));
+  mCheckout->setShortcut(tr("Ctrl+Shift+Alt+H"));
   connect(mCheckout, &QAction::triggered, [this] {
     view()->promptToCheckout();
   });
@@ -538,13 +539,13 @@ MenuBar::MenuBar(QWidget *parent)
   submodule->addSeparator();
 
   mUpdateSubmodules = submodule->addAction(tr("Update All"));
-  mUpdateSubmodules->setShortcut(tr("Ctrl+Shift+Alt+U"));
+  mUpdateSubmodules->setShortcut(tr("Ctrl+Shift+U"));
   connect(mUpdateSubmodules, &QAction::triggered, [this] {
     view()->updateSubmodules();
   });
 
   mInitSubmodules = submodule->addAction(tr("Update..."));
-  mInitSubmodules->setShortcut(tr("Ctrl+Shift+U"));
+  mInitSubmodules->setShortcut(tr("Ctrl+Shift+Alt+U"));
   connect(mInitSubmodules, &QAction::triggered, [this] {
     RepoView *view = this->view();
     git::Repository repo = view->repo();
