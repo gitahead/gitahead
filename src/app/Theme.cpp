@@ -36,15 +36,24 @@ public:
         Theme::drawCloseButton(option, painter);
         break;
 
+#ifdef Q_OS_MAC
+      case PE_IndicatorItemViewItemCheck:
+        painter->save();
+        painter->translate(option->rect.topLeft());
+        QProxyStyle::drawPrimitive(elem, option, painter, widget);
+        painter->restore();
+        break;
+#endif
+
       default:
-        baseStyle()->drawPrimitive(elem, option, painter, widget);
+        QProxyStyle::drawPrimitive(elem, option, painter, widget);
         break;
     }
   }
 
   void polish(QPalette &palette) override
   {
-    baseStyle()->polish(palette);
+    QProxyStyle::polish(palette);
     mTheme->polish(palette);
   }
 
